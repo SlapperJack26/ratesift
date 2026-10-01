@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Ratesift Demo | Interactive Excel Shipping Rate Quoting Calculator</title>
+  <meta name="title" content="Ratesift Demo | Interactive Excel Shipping Rate Quoting Calculator">
+  <meta name="description" content="Try Ratesift's interactive public demo. Test instant batch shipping rate calculation from sample Excel spreadsheets (.xlsx, .xls) with multi-carrier price comparisons and zero tracking clutter.">
+  <meta name="keywords" content="Ratesift demo, interactive shipping quote demo, Excel rate calculator simulator, batch freight quote preview, test shipping rates online, spreadsheet rate estimator, parcel rate calculation">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="Ratesift Technologies">
+  <link rel="canonical" href="https://ratesift.io/demo">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ratesift.io/demo">
+  <meta property="og:site_name" content="Ratesift">
+  <meta property="og:title" content="Ratesift Demo | Interactive Excel Shipping Rate Quoting">
+  <meta property="og:description" content="Experience instant batch rate quoting from Excel spreadsheets. Live interactive calculator and sample spreadsheet simulation with zero booking friction.">
+  <meta property="og:image" content="https://ratesift.io/assets/og-demo.jpg">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ratesift.io/demo">
+  <meta name="twitter:title" content="Ratesift Demo | Interactive Excel Shipping Rate Quoting">
+  <meta name="twitter:description" content="Test drive Ratesift's Excel shipping rate quoting engine directly in your browser. Live spreadsheet parser and multi-carrier quote simulation.">
+  <meta name="twitter:image" content="https://ratesift.io/assets/twitter-demo.jpg">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD Structured Data: SoftwareApplication, BreadcrumbList & HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "Ratesift Interactive Demo",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "url": "https://ratesift.io/demo",
+        "description": "Interactive web demonstration of Ratesift's Excel spreadsheet batch shipping rate quotation engine.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ratesift.io/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Interactive Demo",
+            "item": "https://ratesift.io/demo"
+          }
+        ]
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to Calculate Batch Shipping Quotes from Excel with Ratesift",
+        "description": "Step-by-step demonstration of uploading an Excel spreadsheet and receiving automated multi-carrier rate quotes.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Select or Drop Spreadsheet",
+            "text": "Upload an Excel file (.xlsx or .xls) with recipient addresses and postal codes."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Auto-Detect Columns",
+            "text": "Ratesift automatically maps origin, destination area codes, and weight tiers."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Process and Export Rates",
+            "text": "Instant calculation generates comparative rates linked to exact spreadsheet row and column coordinates."
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Semantic Navigation Bar (Identical to Landing Page) -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative z-20 m-0">
+      <!-- Left: Brand Identity -->
+      <a href="/" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Ratesift Home">
+        <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-8 md:h-9 w-auto object-contain" />
+      </a>
+
+      <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
+      <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
+        <a href="/" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Home</a>
+        <a href="/demo" aria-current="page" class="pub-tab text-red-600 font-semibold border-b-2 border-red-600 py-1 transition-all">Demo</a>
+        <a href="/pricing" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Pricing</a>
+      </nav>
+
+      <!-- Right: User Conversion CTAs -->
+      <div class="flex items-center gap-3 z-10">
+        <a href="/login" class="text-xs font-semibold text-[var(--foreground)] hover:text-red-600 transition-colors px-2 py-1" title="Log in to your Ratesift account">
+          Log in
+        </a>
+        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Create a free Ratesift account">
+          Get Started
+        </a>
+        <!-- Mobile Menu Toggle Button (Phone Only) -->
+        <button type="button" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" class="md:hidden p-1.5 rounded-lg border border-[var(--border)] text-slate-600 hover:bg-black/5 focus:outline-hidden transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Collapsible Mobile Navigation Drawer for Phones (< 768px) -->
+    <nav id="mobile-nav-drawer" aria-label="Mobile Navigation" class="hidden md:hidden border-b border-[var(--border)] bg-slate-50/95 px-4 py-3 space-y-1.5 text-xs font-medium transition-all">
+      <a href="/" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Home</a>
+      <a href="/demo" class="block px-3 py-2 rounded-lg text-red-600 font-bold bg-red-50/80">Demo</a>
+      <a href="/pricing" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Pricing</a>
+      <div class="pt-2 mt-2 border-t border-[var(--border)] flex items-center justify-between">
+        <a href="/login" class="text-xs font-semibold px-2 py-1 rounded text-slate-700 hover:text-red-600">Log in</a>
+        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs ">Get Started</a>
+      </div>
+    </nav>
+
+    <!-- Main Content Area: Accessible Landmark -->
+    <main id="main-content" role="main" class="flex-1 p-6 md:p-8 space-y-10">
+      
+      <!-- 1. Hero Section -->
+      <section aria-labelledby="demo-heading" class="max-w-3xl mx-auto text-center space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+          <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse" aria-hidden="true"></span>
+          <span>Live Interactive Sandbox • No Account or Credit Card Needed</span>
+        </div>
+        <h1 id="demo-heading" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--foreground)] leading-tight">
+          Test Batch Excel Quoting in Real-Time
+        </h1>
+        <p class="text-sm text-[var(--muted-foreground)] max-w-2xl mx-auto leading-relaxed">
+          See how Ratesift ingests spreadsheet rows, automatically extracts postal area codes, and calculates comparative carrier rates in milliseconds. Zero carrier bookings, zero tracking clutter—pure rate intelligence.
+        </p>
+      </section>
+
+      <!-- 2. Interactive Spreadsheet Ingestion & Batch Simulation Sandbox -->
+      <section aria-labelledby="sandbox-heading" class="border border-[var(--border)] rounded-2xl bg-[var(--background)] p-5 md:p-6 shadow-2xs space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
+          <div>
+            <h2 id="sandbox-heading" class="text-lg font-bold text-[var(--foreground)] tracking-tight">
+              1. Spreadsheet Batch Rate Simulator
+            </h2>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Choose a pre-loaded business dataset below or inspect how column headers are automatically identified.
+            </p>
+          </div>
+
+          <!-- Dataset Switcher -->
+          <div class="inline-flex rounded-lg border border-[var(--border)] p-1 bg-[var(--card)] gap-1 text-xs" role="tablist" aria-label="Sample Datasets">
+            <button id="ds-ecom" role="tab" aria-selected="true" onclick="switchDataset('ecom')" class="ds-tab px-3 py-1.5 rounded-md font-medium bg-red-600 text-white shadow-2xs transition-all">
+              E-Commerce Parcels (42 rows)
+            </button>
+            <button id="ds-ltl" role="tab" aria-selected="false" onclick="switchDataset('ltl')" class="ds-tab px-3 py-1.5 rounded-md font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all">
+              Wholesale Pallets & LTL (18 rows)
+            </button>
+            <button id="ds-express" role="tab" aria-selected="false" onclick="switchDataset('express')" class="ds-tab px-3 py-1.5 rounded-md font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all">
+              Medical Supplies Priority (25 rows)
+            </button>
+          </div>
+        </div>
+
+        <!-- Simulated Excel Dropzone & Header Auto-Detection Status -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Dropzone Card -->
+          <div class="border-2 border-dashed border-red-200 bg-red-50/40 rounded-xl p-4 flex flex-col justify-between items-center text-center space-y-2">
+            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-lg" aria-hidden="true">
+              📁
+            </div>
+            <div>
+              <div id="loaded-filename" class="font-bold text-xs text-[var(--foreground)]">Ecommerce_Orders_Batch_50.xlsx</div>
+              <div id="loaded-filesize" class="text-[11px] text-[var(--muted-foreground)]">Sheet 1 • 42 data rows loaded</div>
+            </div>
+            <div class="text-[10px] text-red-700 font-medium bg-red-100/70 px-2.5 py-0.5 rounded-full">
+              ✓ Ready to Process
+            </div>
+          </div>
+
+          <!-- Column Mapping Auto-Detection -->
+          <div class="md:col-span-2 border border-[var(--border)] rounded-xl bg-[var(--card)] p-4 space-y-3">
+            <div class="flex items-center justify-between text-xs pb-1 border-b border-[var(--border)]">
+              <span class="font-bold text-[var(--foreground)]">Automated Spreadsheet Column Identification</span>
+              <span class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 4 of 4 Columns Verified
+              </span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div class="p-2 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+                <div class="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium">Recipient</div>
+                <div id="col-recipient" class="font-semibold text-[var(--foreground)] mt-0.5 truncate">Col A: "Customer Name"</div>
+              </div>
+              <div class="p-2 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+                <div class="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium">Destination</div>
+                <div id="col-address" class="font-semibold text-[var(--foreground)] mt-0.5 truncate">Col B: "Street Address"</div>
+              </div>
+              <div class="p-2 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+                <div class="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium">Postal / Area Code</div>
+                <div id="col-zip" class="font-semibold text-[var(--foreground)] mt-0.5 truncate">Col C: "Dest Zip"</div>
+              </div>
+              <div class="p-2 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+                <div class="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium">Weight</div>
+                <div id="col-weight" class="font-semibold text-[var(--foreground)] mt-0.5 truncate">Col D: "Lbs"</div>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-[var(--muted-foreground)]">
+              <span>Default Quoting Origin: <strong class="text-[var(--foreground)]">1200 Market St, San Francisco, CA (94103)</strong></span>
+              <span>Calculation Markup: <strong class="text-[var(--foreground)]">+10% Rule Active</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Bar: Process Button & Stats -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div class="flex items-center gap-3">
+            <button id="btn-process-demo" onclick="runBatchSimulation()" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-5 py-2.5 rounded-lg shadow-sm transition-all flex items-center gap-2">
+              <span id="btn-process-text">Process Batch Rate Quotes →</span>
+              <span id="btn-spinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            </button>
+            <span id="process-status" class="text-xs text-[var(--muted-foreground)]">
+              Click to run rate calculation engine across all rows.
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-[var(--muted-foreground)]">View format:</span>
+            <span class="font-semibold text-[var(--foreground)]">Multi-Carrier Quoting Grid</span>
+          </div>
+        </div>
+
+        <!-- Quoting Results Table (Strict adherence: bold headers, unbolded cells, no highlight badges) -->
+        <div class="border border-[var(--border)] rounded-xl overflow-hidden bg-[var(--card)] shadow-2xs">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-[var(--border)] flex items-center justify-between">
+            <h3 class="font-bold text-xs text-slate-800">
+              Calculated Rate Estimates (<span id="results-count">5 Sample Rows Displayed</span>)
+            </h3>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="text-slate-500">Sorted by:</span>
+              <span class="font-semibold text-slate-700">Lowest Quoted Rate ⇅</span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse" aria-label="Spreadsheet Rate Quote Results">
+              <thead>
+                <tr class="bg-slate-50 border-b border-[var(--border)]">
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Quote ID ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Recipient ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Destination Area ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Excel Reference ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Weight ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Carrier Service ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-right text-slate-700">Quoted Rate ⇅</th>
+                </tr>
+              </thead>
+              <tbody id="demo-table-body" class="divide-y divide-slate-100">
+                <!-- Row 1 -->
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">QT-80211</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">Apex Hardware Supply</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">Austin, TX (78701)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">Sheet 1 • Row 2, Col D</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">14.2 lbs</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">FedEx Ground Economy</td>
+                  <td class="py-2.5 px-3 font-normal text-right text-slate-600">$18.45</td>
+                </tr>
+                <!-- Row 2 -->
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">QT-80212</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">BlueSky Retail Distribution</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">Denver, CO (80202)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">Sheet 1 • Row 3, Col D</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">8.5 lbs</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">UPS Ground Residential</td>
+                  <td class="py-2.5 px-3 font-normal text-right text-slate-600">$14.20</td>
+                </tr>
+                <!-- Row 3 -->
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">QT-80213</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">Cascade Direct Fulfilment</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">Seattle, WA (98101)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">Sheet 1 • Row 4, Col D</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">22.0 lbs</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">USPS Priority Freight</td>
+                  <td class="py-2.5 px-3 font-normal text-right text-slate-600">$27.80</td>
+                </tr>
+                <!-- Row 4 -->
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">QT-80214</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">Delta Medical Packaging</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">Atlanta, GA (30303)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">Sheet 1 • Row 5, Col D</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">5.0 lbs</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">DHL Express Next Day</td>
+                  <td class="py-2.5 px-3 font-normal text-right text-slate-600">$31.50</td>
+                </tr>
+                <!-- Row 5 -->
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">QT-80215</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">Empire State Wholesale</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">New York, NY (10001)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">Sheet 1 • Row 6, Col D</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">35.4 lbs</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600">FedEx Regional Ground</td>
+                  <td class="py-2.5 px-3 font-normal text-right text-slate-600">$39.10</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Bottom Summary Bar -->
+          <div class="px-4 py-3 bg-slate-50 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="text-slate-600">
+              Batch Estimate Total: <strong id="batch-total" class="text-slate-800 font-bold">$131.05</strong> 
+              <span class="text-slate-400 mx-1.5">•</span>
+              Average Per-Piece: <strong id="batch-avg" class="text-slate-800 font-bold">$26.21</strong>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="simulateExport()" class="px-3 py-1 rounded-md border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-medium transition-colors">
+                Export to Excel (.xlsx) ⤓
+              </button>
+              <a href="/console/new-quote" class="px-3 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors">
+                Save to History (Log In) →
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Single Shipment Quick Quote Calculator (Live Interactive Sandbox) -->
+      <section aria-labelledby="quick-calc-heading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="space-y-2">
+          <h2 id="quick-calc-heading" class="text-lg font-bold text-[var(--foreground)] tracking-tight">
+            2. Single Shipment Live Calculator
+          </h2>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+            Need to quote a one-off item? Adjust the origin ZIP, destination ZIP, or parcel weight below to see real-time rate comparisons across standard carrier tiers.
+          </p>
+          <div class="pt-2 text-xs text-red-700 bg-red-50 border border-red-100 rounded-lg p-2.5">
+            💡 <strong>Did you know?</strong> Ratesift quotes rates without requiring carrier API accounts or booking credentials.
+          </div>
+        </div>
+
+        <!-- Calculator Form & Output -->
+        <div class="md:col-span-2 border border-[var(--border)] rounded-xl bg-[var(--background)] p-4 space-y-4">
+          <form id="single-quote-form" onsubmit="calculateSingleQuote(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="calc-origin" class="block text-[11px] font-bold text-[var(--foreground)] mb-1">Origin Area Code (ZIP)</label>
+              <input type="text" id="calc-origin" value="94103" maxlength="5" required class="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-mono">
+            </div>
+            <div>
+              <label for="calc-dest" class="block text-[11px] font-bold text-[var(--foreground)] mb-1">Destination Area Code</label>
+              <input type="text" id="calc-dest" value="60601" maxlength="5" required class="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-mono">
+            </div>
+            <div>
+              <label for="calc-weight" class="block text-[11px] font-bold text-[var(--foreground)] mb-1">Package Weight (lbs)</label>
+              <div class="flex gap-2">
+                <input type="number" id="calc-weight" value="12" min="1" max="150" step="0.5" required class="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-mono">
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+                  Update
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Live Carrier Comparative Output -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[var(--border)]" id="single-quote-cards">
+            <!-- FedEx -->
+            <div class="border border-[var(--border)] rounded-lg p-2.5 bg-[var(--card)] text-center space-y-1">
+              <div class="text-[10px] text-[var(--muted-foreground)] font-bold">FedEx Ground</div>
+              <div id="rate-fedex" class="text-base font-normal text-[var(--foreground)] font-mono">$18.90</div>
+              <div class="text-[9px] text-[var(--muted-foreground)]">3 Business Days</div>
+            </div>
+            <!-- UPS -->
+            <div class="border border-[var(--border)] rounded-lg p-2.5 bg-[var(--card)] text-center space-y-1">
+              <div class="text-[10px] text-[var(--muted-foreground)] font-bold">UPS Ground</div>
+              <div id="rate-ups" class="text-base font-normal text-[var(--foreground)] font-mono">$17.85</div>
+              <div class="text-[9px] text-[var(--muted-foreground)]">3 Business Days</div>
+            </div>
+            <!-- USPS -->
+            <div class="border border-[var(--border)] rounded-lg p-2.5 bg-[var(--card)] text-center space-y-1">
+              <div class="text-[10px] text-[var(--muted-foreground)] font-bold">USPS Priority</div>
+              <div id="rate-usps" class="text-base font-normal text-[var(--foreground)] font-mono">$21.40</div>
+              <div class="text-[9px] text-[var(--muted-foreground)]">2 Business Days</div>
+            </div>
+            <!-- DHL Express -->
+            <div class="border border-[var(--border)] rounded-lg p-2.5 bg-[var(--card)] text-center space-y-1">
+              <div class="text-[10px] text-[var(--muted-foreground)] font-bold">DHL Express</div>
+              <div id="rate-dhl" class="text-base font-normal text-[var(--foreground)] font-mono">$34.10</div>
+              <div class="text-[9px] text-[var(--muted-foreground)]">Next Day Air</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Why Teams Prefer Pure Quoting Over Booking Platforms -->
+      <section aria-labelledby="features-heading" class="space-y-4 pt-4 border-t border-[var(--border)]">
+        <h2 id="features-heading" class="text-base font-bold text-[var(--foreground)] tracking-tight text-center">
+          Engineered Strictly for Rate Intelligence
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-1.5">
+            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
+              📊
+            </div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Direct Excel Cell Coordinates</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              Every rate quote stores the exact sheet name, row index, and column identifier, allowing seamless back-referencing into your billing files.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-1.5">
+            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
+              🚫
+            </div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Zero Label or Booking Baggage</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              No tracking API limits, label printing queues, or carrier courier accounts. Calculate rates as often as you want without operational overhead.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-1.5">
+            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
+              ⚙️
+            </div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Custom Margin & Markup Rules</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              Define global profit margins (e.g. +10%) or round-up rules that automatically apply to every estimated rate line item before export.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Conversion Call to Action -->
+      <section aria-labelledby="cta-heading" class="p-6 rounded-2xl bg-gradient-to-r from-red-600 to-indigo-600 text-white text-center space-y-3 shadow-sm">
+        <h2 id="cta-heading" class="text-xl sm:text-2xl font-bold tracking-tight">
+          Ready to Calculate Rates for Your Spreadsheets?
+        </h2>
+        <p class="text-xs text-red-100 max-w-lg mx-auto leading-relaxed">
+          Create an account to upload your custom rate sheets, save historical calculations with cell-level traceability, and customize your origin defaults.
+        </p>
+        <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+          <a href="/console/new-quote" class="px-5 py-2.5 bg-white text-red-600 font-bold text-xs rounded-lg shadow-sm hover:bg-red-50 transition-colors">
+            Get Started Free →
+          </a>
+          <a href="/pricing" class="px-4 py-2.5 bg-red-700/60 hover:bg-red-700 text-white font-semibold text-xs rounded-lg transition-colors border border-white/20">
+            View Pricing Plans
+          </a>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Semantic Footer (Identical to Landing Page) -->
+    <footer role="contentinfo" class="mt-12 px-6 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-4 bg-[var(--card)]">
+      <!-- Left: Logo & Crawlable Navigation Links -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <!-- Crawlable Footer Links -->
+        <nav aria-label="Footer Legal and Support Navigation" class="flex items-center gap-4 text-xs font-medium text-[var(--muted-foreground)]">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Copyright & Current Date -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        September 28, 2026
+      </div>
+    </footer>
+  </div>
+
+  <!-- Interactive JavaScript Simulator Logic -->
+  <script>
+    // Sample Datasets for interactive batch simulator
+    const datasets = {
+      ecom: {
+        filename: "Ecommerce_Orders_Batch_50.xlsx",
+        filesize: "Sheet 1 • 42 data rows loaded",
+        recipient: "Col A: \"Customer Name\"",
+        address: "Col B: \"Street Address\"",
+        zip: "Col C: \"Dest Zip\"",
+        weight: "Col D: \"Lbs\"",
+        rows: [
+          { id: "QT-80211", name: "Apex Hardware Supply", dest: "Austin, TX (78701)", ref: "Sheet 1 • Row 2, Col D", wt: "14.2 lbs", svc: "FedEx Ground Economy", rate: "$18.45" },
+          { id: "QT-80212", name: "BlueSky Retail Distribution", dest: "Denver, CO (80202)", ref: "Sheet 1 • Row 3, Col D", wt: "8.5 lbs", svc: "UPS Ground Residential", rate: "$14.20" },
+          { id: "QT-80213", name: "Cascade Direct Fulfilment", dest: "Seattle, WA (98101)", ref: "Sheet 1 • Row 4, Col D", wt: "22.0 lbs", svc: "USPS Priority Freight", rate: "$27.80" },
+          { id: "QT-80214", name: "Delta Medical Packaging", dest: "Atlanta, GA (30303)", ref: "Sheet 1 • Row 5, Col D", wt: "5.0 lbs", svc: "DHL Express Next Day", rate: "$31.50" },
+          { id: "QT-80215", name: "Empire State Wholesale", dest: "New York, NY (10001)", ref: "Sheet 1 • Row 6, Col D", wt: "35.4 lbs", svc: "FedEx Regional Ground", rate: "$39.10" }
+        ],
+        total: "$131.05",
+        avg: "$26.21",
+        count: "5 of 42 Sample Rows Displayed"
+      },
+      ltl: {
+        filename: "Wholesale_Pallets_LTL_Batch.xlsx",
+        filesize: "Sheet 1 • 18 freight rows loaded",
+        recipient: "Col A: \"Consignee Facility\"",
+        address: "Col B: \"Dock Address\"",
+        zip: "Col C: \"Receiving ZIP\"",
+        weight: "Col D: \"CWT / Gross Wt\"",
+        rows: [
+          { id: "QT-90101", name: "Midwest Logistics Terminal", dest: "Chicago, IL (60609)", ref: "Sheet 1 • Row 2, Col C", wt: "650 lbs", svc: "Estes Regional LTL", rate: "$245.00" },
+          { id: "QT-90102", name: "Keystone Distribution Hub", dest: "Harrisburg, PA (17101)", ref: "Sheet 1 • Row 3, Col C", wt: "1,200 lbs", svc: "Old Dominion Freight", rate: "$412.50" },
+          { id: "QT-90103", name: "Southwest Depots Inc", dest: "Dallas, TX (75201)", ref: "Sheet 1 • Row 4, Col C", wt: "820 lbs", svc: "R+L Carriers Standard", rate: "$310.00" },
+          { id: "QT-90104", name: "Great Lakes Storage Co", dest: "Detroit, MI (48201)", ref: "Sheet 1 • Row 5, Col C", wt: "450 lbs", svc: "FedEx Freight Economy", rate: "$195.80" }
+        ],
+        total: "$1,163.30",
+        avg: "$290.82",
+        count: "4 of 18 Sample Rows Displayed"
+      },
+      express: {
+        filename: "Medical_Supplies_Priority_Batch.xlsx",
+        filesize: "Sheet 1 • 25 urgent priority rows",
+        recipient: "Col A: \"Hospital / Clinic\"",
+        address: "Col B: \"Receiving Bay\"",
+        zip: "Col C: \"Destination Postal\"",
+        weight: "Col D: \"Gross Weight (lbs)\"",
+        rows: [
+          { id: "QT-70301", name: "St. Jude Clinic Bay", dest: "Memphis, TN (38105)", ref: "Sheet 1 • Row 2, Col D", wt: "3.2 lbs", svc: "FedEx Priority Overnight", rate: "$48.20" },
+          { id: "QT-70302", name: "Mayo Diagnostic Unit", dest: "Rochester, MN (55905)", ref: "Sheet 1 • Row 3, Col D", wt: "4.8 lbs", svc: "UPS Next Day Early AM", rate: "$55.40" },
+          { id: "QT-70303", name: "Johns Hopkins Pharma Lab", dest: "Baltimore, MD (21287)", ref: "Sheet 1 • Row 4, Col D", wt: "2.1 lbs", svc: "USPS Priority Express", rate: "$39.75" }
+        ],
+        total: "$143.35",
+        avg: "$47.78",
+        count: "3 of 25 Sample Rows Displayed"
+      }
+    };
+
+    let currentDataset = 'ecom';
+
+    function switchDataset(key) {
+      currentDataset = key;
+      document.querySelectorAll('.ds-tab').forEach(b => {
+        b.classList.remove('bg-red-600', 'text-white', 'shadow-2xs');
+        b.classList.add('text-[var(--muted-foreground)]');
+        b.setAttribute('aria-selected', 'false');
+      });
+
+      const activeBtn = document.getElementById('ds-' + key);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-red-600', 'text-white', 'shadow-2xs');
+        activeBtn.classList.remove('text-[var(--muted-foreground)]');
+        activeBtn.setAttribute('aria-selected', 'true');
+      }
+
+      const data = datasets[key];
+      document.getElementById('loaded-filename').textContent = data.filename;
+      document.getElementById('loaded-filesize').textContent = data.filesize;
+      document.getElementById('col-recipient').textContent = data.recipient;
+      document.getElementById('col-address').textContent = data.address;
+      document.getElementById('col-zip').textContent = data.zip;
+      document.getElementById('col-weight').textContent = data.weight;
+      document.getElementById('results-count').textContent = data.count;
+      document.getElementById('batch-total').textContent = data.total;
+      document.getElementById('batch-avg').textContent = data.avg;
+
+      renderTable(data.rows);
+    }
+
+    function renderTable(rows) {
+      const tbody = document.getElementById('demo-table-body');
+      tbody.innerHTML = '';
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/50 transition-colors";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">${r.id}</td>
+          <td class="py-2.5 px-3 font-normal text-slate-600">${r.name}</td>
+          <td class="py-2.5 px-3 font-normal text-slate-600">${r.dest}</td>
+          <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">${r.ref}</td>
+          <td class="py-2.5 px-3 font-normal text-slate-600">${r.wt}</td>
+          <td class="py-2.5 px-3 font-normal text-slate-600">${r.svc}</td>
+          <td class="py-2.5 px-3 font-normal text-right text-slate-600">${r.rate}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function runBatchSimulation() {
+      const spinner = document.getElementById('btn-spinner');
+      const text = document.getElementById('btn-process-text');
+      const status = document.getElementById('process-status');
+
+      spinner.classList.remove('hidden');
+      text.textContent = 'Calculating Rates...';
+      status.textContent = 'Simulating multi-carrier matrix evaluation across destination area codes...';
+
+      setTimeout(() => {
+        spinner.classList.add('hidden');
+        text.textContent = 'Process Batch Rate Quotes →';
+        status.innerHTML = '<span class="text-emerald-600 font-semibold">✓ Rates calculated in 142ms! Direct cell coordinates saved.</span>';
+      }, 500);
+    }
+
+    function simulateExport() {
+      alert("Simulated Action: Downloading " + datasets[currentDataset].filename.replace('.xlsx', '_Quoted_Rates.xlsx') + " with all cell coordinates mapped.");
+    }
+
+    function calculateSingleQuote(e) {
+      e.preventDefault();
+      const origin = document.getElementById('calc-origin').value;
+      const dest = document.getElementById('calc-dest').value;
+      const weight = parseFloat(document.getElementById('calc-weight').value) || 10;
+
+      // Base rate calculation simulation
+      const baseDistance = Math.abs(parseInt(dest || "10000") - parseInt(origin || "90000")) / 1000;
+      const factor = Math.max(1, baseDistance * 0.18);
+
+      const fedex = (12.50 + weight * 0.45 * factor).toFixed(2);
+      const ups = (11.80 + weight * 0.48 * factor).toFixed(2);
+      const usps = (14.20 + weight * 0.38 * factor).toFixed(2);
+      const dhl = (25.00 + weight * 0.75 * factor).toFixed(2);
+
+      document.getElementById('rate-fedex').textContent = "$" + fedex;
+      document.getElementById('rate-ups').textContent = "$" + ups;
+      document.getElementById('rate-usps').textContent = "$" + usps;
+      document.getElementById('rate-dhl').textContent = "$" + dhl;
+    }
+  
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+      }
+    }</script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Ratesift | Quotes History & Spreadsheet Rate Archives</title>
+  <meta name="title" content="Ratesift | Quotes History & Spreadsheet Rate Archives">
+  <meta name="description" content="Access archived shipping rate quotes calculated from Excel spreadsheets (.xlsx, .xls) with exact sheet, row, and column references. Search and sort rate histories in Ratesift.">
+  <meta name="keywords" content="quotes history, shipping rate archive, excel quote reference, spreadsheet rate log, freight rate history">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ratesift.io/history">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ratesift.io/history">
+  <meta property="og:site_name" content="Ratesift">
+  <meta property="og:title" content="Ratesift | Quotes History & Spreadsheet Rate Archives">
+  <meta property="og:description" content="View historical shipping quotes with exact spreadsheet row and column tracking.">
+  <meta property="og:image" content="https://ratesift.io/assets/og-history.jpg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ratesift.io/history">
+  <meta name="twitter:title" content="Ratesift | Quotes History & Spreadsheet Rate Archives">
+  <meta name="twitter:description" content="Search and sort previous shipping quotes mapped to your Excel sheets.">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD: WebPage & Breadcrumb -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Quotes History - Ratesift",
+    "description": "Historical quotes storage and spreadsheet coordinate archive.",
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ratesift.io/" },
+        { "@type": "ListItem", "position": 2, "name": "History", "item": "https://ratesift.io/history" }
+      ]
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Navigation Bar (Semantic Header) -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative z-20 m-0">
+      <!-- Left: Logo -->
+      <a href="/console/new-quote" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Ratesift Console">
+        <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-8 md:h-9 w-auto object-contain" />
+      </a>
+
+      <!-- Center: Navigation Tabs (New Quote, History) -->
+      <nav role="navigation" aria-label="Main Navigation" class="hidden xs:flex sm:flex absolute inset-x-0 mx-auto items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm font-medium">
+        <a href="/console/new-quote" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">New Quote</a>
+        <a href="#" aria-current="page" class="text-red-600 font-semibold border-b-2 border-red-600 py-1">History</a>
+      </nav>
+
+      <!-- Right: Account Dropdown -->
+      <div class="relative z-20">
+        <button id="account-menu-btn" onclick="toggleAccountMenu()" aria-haspopup="true" aria-expanded="false" aria-label="User Account Menu" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-black/5 transition-all text-xs font-medium text-[var(--foreground)] focus:outline-hidden">
+          <div class="w-6 h-6 rounded-full bg-slate-200 border border-[var(--border)] overflow-hidden flex items-center justify-center text-[10px] font-semibold text-slate-700" aria-hidden="true">
+            AR
+          </div>
+          <span>Alex R.</span>
+          <svg class="w-3 h-3 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+
+        <!-- Dropdown Menu (Account, Settings, Sign out) -->
+        <div id="account-dropdown" role="menu" class="hidden absolute right-0 mt-1.5 w-40 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg py-1.5 z-50 text-xs">
+          <a href="/console/account" role="menuitem" class="flex items-center gap-2 px-3 py-1.5 hover:bg-black/5 text-[var(--foreground)] transition-colors">
+            <svg class="w-3.5 h-3.5 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span>Account</span>
+          </a>
+          <a href="/console/settings" role="menuitem" class="flex items-center gap-2 px-3 py-1.5 hover:bg-black/5 text-[var(--foreground)] transition-colors">
+            <svg class="w-3.5 h-3.5 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span>Settings</span>
+          </a>
+          <div class="my-1 border-t border-[var(--border)]"></div>
+          <a href="/api/auth/logout" role="menuitem" class="flex items-center gap-2 px-3 py-1.5 hover:bg-red-50/60 text-red-600 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            <span>Sign out</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area (Semantic Main) -->
+    <main id="main-content" role="main" class="p-6 flex-1">
+      <div class="mb-4">
+        <!-- Semantic H1 -->
+        <h1 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Quotes</h1>
+      </div>
+
+      <!-- Main Storage Card -->
+      <section aria-labelledby="archive-heading" class="border border-[var(--border)] rounded-xl bg-[var(--card)] shadow-xs overflow-hidden">
+        <h2 id="archive-heading" class="sr-only">Archived Spreadsheet Quotes List</h2>
+
+        <!-- Filter Toolbar -->
+        <div role="search" aria-label="Filter and Sort Quotes" class="p-3 border-b border-[var(--border)] bg-[var(--background)] flex flex-wrap items-center justify-between gap-2.5">
+          <!-- Search Box -->
+          <div class="relative flex-1 min-w-[190px] max-w-xs">
+            <svg class="w-3.5 h-3.5 absolute left-3 top-2.5 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input id="search-input" oninput="filterQuotes()" type="text" aria-label="Search quote ID" placeholder="Search quote ID" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+          </div>
+
+          <!-- Centered Options & Dropboxes -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Date Filter (09/28/2026) -->
+            <div class="flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)]" aria-label="Current Date Filter: 09/28/2026">
+              <span>09/28/2026</span>
+              <svg class="w-3.5 h-3.5 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+
+            <!-- Recipient Filter -->
+            <div class="relative">
+              <button aria-haspopup="listbox" aria-label="Filter by Recipient" class="flex items-center gap-1.5 bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] hover:bg-black/5 transition-colors">
+                <span>Recipient</span>
+                <svg class="w-3 h-3 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+
+            <!-- General Sort Dropdown -->
+            <div class="relative">
+              <button aria-haspopup="listbox" aria-label="Sort Quotes" class="flex items-center gap-1.5 bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] hover:bg-black/5 transition-colors">
+                <span>Sort</span>
+                <svg class="w-3 h-3 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+
+            <!-- Dedicated Rate Sort Dropdown -->
+            <div class="relative">
+              <button id="rate-sort-btn" onclick="toggleRateMenu()" aria-haspopup="true" aria-expanded="false" aria-label="Sort Quotes by Rate" class="flex items-center gap-1.5 bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] hover:bg-black/5 transition-colors">
+                <span id="rate-sort-label">Sort by Rate</span>
+                <svg class="w-3 h-3 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+
+              <!-- Rate Dropdown Menu -->
+              <div id="rate-dropdown" role="menu" class="hidden absolute right-0 mt-1 w-44 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg py-1 z-30 text-xs">
+                <button onclick="sortQuotesByRate('desc')" role="menuitem" class="w-full text-left px-3 py-1.5 hover:bg-black/5 flex items-center justify-between text-[var(--foreground)]">
+                  <span>Highest to Lowest</span>
+                </button>
+                <button onclick="sortQuotesByRate('asc')" role="menuitem" class="w-full text-left px-3 py-1.5 hover:bg-black/5 flex items-center justify-between text-[var(--foreground)]">
+                  <span>Lowest to Highest</span>
+                </button>
+                <button onclick="resetSort()" role="menuitem" class="w-full text-left px-3 py-1 border-t border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                  Reset Default
+                </button>
+              </div>
+            </div>
+
+            <!-- Export to Excel Button -->
+            <a href="/api/quotes/export" download="rAtesift_Quotes_Export.xlsx" class="flex items-center gap-1.5 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors shadow-2xs">
+              <span>Export (.xlsx)</span>
+              <span aria-hidden="true">↓</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Data Table (Semantic Table with Scope and Caption) -->
+        <div class="overflow-x-auto" style="-webkit-overflow-scrolling: touch;">
+          <table class="w-full text-left text-xs" aria-label="Historical shipping rates table">
+            <caption class="sr-only">Archived quotes calculated from Excel spreadsheets with sheet, row, and column references</caption>
+            <thead>
+              <tr class="border-b border-[var(--border)] bg-slate-50/60 text-[var(--foreground)] font-bold select-none">
+                <th scope="col" onclick="toggleSort('id')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
+                  Quote ID <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                </th>
+                <th scope="col" onclick="toggleSort('carrier')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
+                  Carrier & Service <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                </th>
+                <th scope="col" class="py-2.5 px-3.5">
+                  Route & Weight (Lbs)
+                </th>
+                <th scope="col" class="py-2.5 px-3.5">
+                  Excel Reference (Sheet, Row/Col)
+                </th>
+                <th scope="col" onclick="toggleSort('date')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
+                  Date <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                </th>
+                <th scope="col" onclick="toggleSort('rate')" class="py-2.5 px-3.5 text-right cursor-pointer hover:text-red-600 transition-colors">
+                  Quoted Rate <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="quotes-table-body" class="divide-y divide-[var(--border)]">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Semantic Footer -->
+    <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
+      <!-- Left: Logo & Links Directly Beside It -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <!-- Links beside the logo -->
+        <nav aria-label="Footer Navigation" class="flex items-center gap-4 text-xs font-medium">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Date at Bottom Right -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        September 28, 2026
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    let allQuotes = [];
+    let currentQuotes = [];
+    let sortDirection = {};
+
+    function renderTable(quotes) {
+      const tbody = document.getElementById('quotes-table-body');
+      if (!quotes.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-xs text-slate-400">No quotes match your filter or search query.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = quotes.map(q => `
+        <tr class="hover:bg-slate-50/50 transition-colors font-normal">
+          <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--foreground)]">${q.id}</td>
+          <td class="py-2.5 px-3.5 font-normal text-[var(--foreground)]">${q.carrier}</td>
+          <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--muted-foreground)]">${q.route}</td>
+          <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--muted-foreground)]">${q.sheet}</td>
+          <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--muted-foreground)]">${q.date}</td>
+          <td class="py-2.5 px-3.5 text-right font-normal font-mono text-slate-900 font-semibold">$${Number(q.rate).toFixed(2)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function loadQuotes() {
+      fetch('/api/quotes/history')
+        .then(r => r.json())
+        .then(data => {
+          allQuotes = (data.quotes || []).map(q => ({
+            id: q.id,
+            carrier: `${q.carrier} (${q.service})`,
+            route: `${q.origin_zip} → ${q.dest_zip} • ${q.weight_lbs} lbs`,
+            sheet: q.coordinate,
+            date: q.created_at ? q.created_at.split('T')[0] : '2026-09-28',
+            rate: q.final_rate
+          }));
+          currentQuotes = [...allQuotes];
+          renderTable(currentQuotes);
+        })
+        .catch(err => {
+          console.error("Error fetching quotes:", err);
+        });
+    }
+
+    function toggleAccountMenu() {
+      const menu = document.getElementById('account-dropdown');
+      const btn = document.getElementById('account-menu-btn');
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !isExpanded);
+      menu.classList.toggle('hidden');
+    }
+
+    function toggleRateMenu() {
+      const menu = document.getElementById('rate-dropdown');
+      const btn = document.getElementById('rate-sort-btn');
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !isExpanded);
+      menu.classList.toggle('hidden');
+    }
+
+    function sortQuotesByRate(direction) {
+      const menu = document.getElementById('rate-dropdown');
+      menu.classList.add('hidden');
+      document.getElementById('rate-sort-btn').setAttribute('aria-expanded', 'false');
+      const label = document.getElementById('rate-sort-label');
+      
+      if (direction === 'desc') {
+        currentQuotes.sort((a, b) => b.rate - a.rate);
+        label.textContent = "Rate: High to Low";
+      } else {
+        currentQuotes.sort((a, b) => a.rate - b.rate);
+        label.textContent = "Rate: Low to High";
+      }
+      renderTable(currentQuotes);
+    }
+
+    function resetSort() {
+      document.getElementById('rate-dropdown').classList.add('hidden');
+      document.getElementById('rate-sort-btn').setAttribute('aria-expanded', 'false');
+      document.getElementById('rate-sort-label').textContent = "Sort by Rate";
+      currentQuotes = [...allQuotes];
+      renderTable(currentQuotes);
+    }
+
+    function toggleSort(field) {
+      sortDirection[field] = !sortDirection[field];
+      currentQuotes.sort((a, b) => {
+        let valA = a[field];
+        let valB = b[field];
+        if (typeof valA === 'string') {
+          return sortDirection[field] ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        return sortDirection[field] ? valA - valB : valB - valA;
+      });
+      renderTable(currentQuotes);
+    }
+
+    function filterQuotes() {
+      const query = document.getElementById('search-input').value.toLowerCase().trim();
+      if (!query) {
+        currentQuotes = [...allQuotes];
+      } else {
+        currentQuotes = allQuotes.filter(q => 
+          q.id.toLowerCase().includes(query) || 
+          q.carrier.toLowerCase().includes(query) || 
+          q.route.toLowerCase().includes(query) ||
+          q.sheet.toLowerCase().includes(query)
+        );
+      }
+      renderTable(currentQuotes);
+    }
+
+    window.addEventListener('click', function(e) {
+      const btn = document.getElementById('rate-sort-btn');
+      const menu = document.getElementById('rate-dropdown');
+      if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+
+      const accBtn = document.getElementById('account-menu-btn');
+      const accMenu = document.getElementById('account-dropdown');
+      if (accBtn && accMenu && !accBtn.contains(e.target) && !accMenu.contains(e.target)) {
+        accMenu.classList.add('hidden');
+        accBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    loadQuotes();
+  </script>
+</body>
+</html>

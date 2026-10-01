@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment and keys
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Large archives and backups
+*.zip
+*.tar.gz
+ratesift_project_backup_*.zip
+
+# Tunnel and temporary files
+tunnel_url.txt
+bore.exe
+*.log
+
+# Snapshots and test scratch
+.website_snapshots/
+scratch/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+shipflow.db

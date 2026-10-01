@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Ratesift Demo | Interactive Excel Shipping Rate Quoting Calculator</title>
+  <meta name="title" content="Ratesift Demo | Interactive Excel Shipping Rate Quoting Calculator">
+  <meta name="description" content="Try Ratesift's interactive public demo. Test instant batch shipping rate calculation from sample Excel spreadsheets (.xlsx, .xls) with multi-carrier price comparisons and zero tracking clutter.">
+  <meta name="keywords" content="Ratesift demo, interactive shipping quote demo, Excel rate calculator simulator, batch freight quote preview, test shipping rates online, spreadsheet rate estimator, parcel rate calculation">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="Ratesift Technologies">
+  <link rel="canonical" href="https://ratesift.io/demo">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ratesift.io/demo">
+  <meta property="og:site_name" content="Ratesift">
+  <meta property="og:title" content="Ratesift Demo | Interactive Excel Shipping Rate Quoting">
+  <meta property="og:description" content="Experience instant batch rate quoting from Excel spreadsheets. Live interactive calculator and sample spreadsheet simulation with zero booking friction.">
+  <meta property="og:image" content="https://ratesift.io/assets/og-demo.jpg">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ratesift.io/demo">
+  <meta name="twitter:title" content="Ratesift Demo | Interactive Excel Shipping Rate Quoting">
+  <meta name="twitter:description" content="Test drive Ratesift's Excel shipping rate quoting engine directly in your browser. Live spreadsheet parser and multi-carrier quote simulation.">
+  <meta name="twitter:image" content="https://ratesift.io/assets/twitter-demo.jpg">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD Structured Data: SoftwareApplication, BreadcrumbList & HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "RateSift Interactive Demo",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "url": "https://ratesift.io/demo",
+        "description": "Interactive web demonstration of RateSift's Canadian freight rate comparison engine ingesting Excel carrier spreadsheets.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CAD"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ratesift.io/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Interactive Demo",
+            "item": "https://ratesift.io/demo"
+          }
+        ]
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to Calculate Batch Shipping Quotes from Excel with Ratesift",
+        "description": "Step-by-step demonstration of uploading an Excel spreadsheet and receiving automated multi-carrier rate quotes.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Select or Drop Spreadsheet",
+            "text": "Upload an Excel file (.xlsx or .xls) with recipient addresses and postal codes."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Auto-Detect Columns",
+            "text": "Ratesift automatically maps origin, destination area codes, and weight tiers."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Process and Export Rates",
+            "text": "Instant calculation generates comparative rates linked to exact spreadsheet row and column coordinates."
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Semantic Navigation Bar (Identical to Landing Page) -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative z-20 m-0">
+      <!-- Left: Brand Identity -->
+      <a href="/" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Ratesift Home">
+        <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-8 md:h-9 w-auto object-contain" />
+      </a>
+
+      <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
+      <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
+        <a href="/" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Home</a>
+        <a href="/demo" aria-current="page" class="pub-tab text-red-600 font-semibold border-b-2 border-red-600 py-1 transition-all">Demo</a>
+        <a href="/pricing" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Pricing</a>
+      </nav>
+
+      <!-- Right: User Conversion CTAs -->
+      <div class="flex items-center gap-3 z-10">
+        <a href="/login" class="text-xs font-semibold text-[var(--foreground)] hover:text-red-600 transition-colors px-2 py-1" title="Log in to your Ratesift account">
+          Log in
+        </a>
+        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Create a free Ratesift account">
+          Get Started
+        </a>
+        <!-- Mobile Menu Toggle Button (Phone Only) -->
+        <button type="button" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" class="md:hidden p-1.5 rounded-lg border border-[var(--border)] text-slate-600 hover:bg-black/5 focus:outline-hidden transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Collapsible Mobile Navigation Drawer for Phones (< 768px) -->
+    <nav id="mobile-nav-drawer" aria-label="Mobile Navigation" class="hidden md:hidden border-b border-[var(--border)] bg-slate-50/95 px-4 py-3 space-y-1.5 text-xs font-medium transition-all">
+      <a href="/" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Home</a>
+      <a href="/demo" class="block px-3 py-2 rounded-lg text-red-600 font-bold bg-red-50/80">Demo</a>
+      <a href="/pricing" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Pricing</a>
+      <div class="pt-2 mt-2 border-t border-[var(--border)] flex items-center justify-between">
+        <a href="/login" class="text-xs font-semibold px-2 py-1 rounded text-slate-700 hover:text-red-600">Log in</a>
+        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs ">Get Started</a>
+      </div>
+    </nav>
+
+    <!-- Main Content Area: Accessible Landmark -->
+    <main id="main-content" role="main" class="flex-1 p-6 md:p-8 space-y-10">
+      
+      <!-- 1. Hero Section -->
+      <section aria-labelledby="demo-heading" class="max-w-3xl mx-auto text-center space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+          <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse" aria-hidden="true"></span>
+          <span>Live Interactive Sandbox • No Account or Credit Card Needed</span>
+        </div>
+        <h1 id="demo-heading" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--foreground)] leading-tight">
+          Test Canadian Carrier Rate Comparison in Real-Time
+        </h1>
+        <p class="text-sm text-[var(--muted-foreground)] max-w-2xl mx-auto leading-relaxed">
+          See how RateSift normalizes Excel carrier rate cards, resolves Canadian postal FSA zones, and ranks competing freight carriers (Day & Ross, Manitoulin, Midland, Kindersley) side-by-side with itemized base rates, fuel surcharges, and accessorials.
+        </p>
+      </section>
+
+      <!-- 2. Interactive Spreadsheet Ingestion & Batch Simulation Sandbox -->
+      <section aria-labelledby="sandbox-heading" class="border border-[var(--border)] rounded-2xl bg-[var(--background)] p-5 md:p-6 shadow-2xs space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
+          <div>
+            <h2 id="sandbox-heading" class="text-lg font-bold text-[var(--foreground)] tracking-tight">
+              1. Multi-Carrier Spreadsheet Rate Simulator
+            </h2>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Choose a Canadian regional freight dataset below to inspect automated tariff mapping and side-by-side carrier price ranking.
+            </p>
+          </div>
+
+          <!-- Dataset Switcher -->
+          <div class="inline-flex rounded-lg border border-[var(--border)] p-1 bg-[var(--card)] gap-1 text-xs" role="tablist" aria-label="Sample Datasets">
+            <button id="ds-ecom" role="tab" aria-selected="true" onclick="switchDataset('ecom')" class="ds-tab px-3 py-1.5 rounded-md font-medium bg-red-600 text-white shadow-2xs transition-all">
+              Ontario / Quebec LTL (35 shipments)
+            </button>
+            <button id="ds-ltl" role="tab" aria-selected="false" onclick="switchDataset('ltl')" class="ds-tab px-3 py-1.5 rounded-md font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all">
+              Western Canada Corridor (18 loads)
+            </button>
+            <button id="ds-express" role="tab" aria-selected="false" onclick="switchDataset('express')" class="ds-tab px-3 py-1.5 rounded-md font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all">
+              Cross-Border PARS/PAPS (22 loads)
+            </button>
+          </div>
+        </div>
+
+        <!-- Simulated Excel Dropzone & Header Auto-Detection Status -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Dropzone Card -->
+          <div class="border-2 border-dashed border-red-200 bg-red-50/40 rounded-xl p-4 flex flex-col justify-between items-center text-center space-y-2">
+            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-lg" aria-hidden="true">
+              🍁
+            </div>
+            <div>
+              <div id="loaded-filename" class="font-bold text-xs text-[var(--foreground)]">Ontario_Quebec_LTL_Manifest.xlsx</div>
+              <div id="loaded-filesize" class="text-[11px] text-[var(--muted-foreground)]">Sheet 1 • 35 Canadian freight rows loaded</div>
+            </div>
+            <div class="text-[10px] text-red-700 font-medium bg-red-100/70 px-2.5 py-0.5 rounded-full">
+              ✓ 3 Confirmed Carrier Tariffs Active
+            </div>
+          </div>
+
+          <!-- Column Mapping Auto-Detection -->
+          <div class="md:col-span-2 border border-[var(--border)] rounded-xl bg-[var(--card)] p-4 space-y-3">
+            <div class="flex items-center justify-between text-xs pb-1 border-b border-[var(--border)]">
+              <span class="font-bold text-[var(--foreground)]">Automated Tariff Column & Postal FSA Identification</span>
+              <span class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Canadian FSA & CWT Rules Verified
+              </span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div class="p-2 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+                <div class="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium">Consignee</div>
+                <div id="col-recipient" class="font-semibold text-[var(--foreground)] mt-0.5 truncate">Col A: "Consignee Hub"</div>
+              </div>
+              <div class="p-2 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+                <div class="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium">Destination</div>
+                <div id="col-address" class="font-semibold text-[var(--foreground)] mt-0.5 truncate">Col B: "City & Province"</div>
+              </div>
+              <div class="p-2 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+                <div class="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium">Postal FSA</div>
+                <div id="col-zip" class="font-semibold text-[var(--foreground)] mt-0.5 truncate">Col C: "Postal Code"</div>
+              </div>
+              <div class="p-2 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+                <div class="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium">Weight / Pallets</div>
+                <div id="col-weight" class="font-semibold text-[var(--foreground)] mt-0.5 truncate">Col D: "Lbs (CWT)"</div>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-[var(--muted-foreground)]">
+              <span>Default Quoting Origin: <strong class="text-[var(--foreground)]">Toronto Dispatch Hub, ON (M5V 2T6)</strong></span>
+              <span>Calculation Currency: <strong class="text-red-700">CAD ($) • +10% Broker Margin</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Bar: Process Button & Stats -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div class="flex items-center gap-3">
+            <button id="btn-process-demo" onclick="runBatchSimulation()" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-5 py-2.5 rounded-lg shadow-sm transition-all flex items-center gap-2">
+              <span id="btn-process-text">Process Batch Rate Quotes →</span>
+              <span id="btn-spinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            </button>
+            <span id="process-status" class="text-xs text-[var(--muted-foreground)]">
+              Click to run rate calculation engine across all rows.
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-[var(--muted-foreground)]">View format:</span>
+            <span class="font-semibold text-[var(--foreground)]">Multi-Carrier Quoting Grid</span>
+          </div>
+        </div>
+
+        <!-- Quoting Results Table (Strict adherence: bold headers, unbolded cells, no highlight badges) -->
+        <div class="border border-[var(--border)] rounded-xl overflow-hidden bg-[var(--card)] shadow-2xs">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-[var(--border)] flex items-center justify-between">
+            <h3 class="font-bold text-xs text-slate-800">
+              Calculated Rate Estimates (<span id="results-count">5 Sample Rows Displayed</span>)
+            </h3>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="text-slate-500">Sorted by:</span>
+              <span class="font-semibold text-slate-700">Lowest Quoted Rate ⇅</span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse" aria-label="Canadian Multi-Carrier Rate Quote Results">
+              <thead>
+                <tr class="bg-slate-50 border-b border-[var(--border)]">
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Quote ID ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Lane & Consignee ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Weight / Pallet ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Excel Reference ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-slate-700">Ranked Carrier Rates (CAD) ⇅</th>
+                  <th scope="col" class="py-2.5 px-3 font-bold text-right text-slate-700">Cheapest Rate (CAD) ⇅</th>
+                </tr>
+              </thead>
+              <tbody id="demo-table-body" class="divide-y divide-slate-100">
+                <!-- Dynamically populated by switchDataset() -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Bottom Summary Bar -->
+          <div class="px-4 py-3 bg-slate-50 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="text-slate-600">
+              Batch Estimate Total: <strong id="batch-total" class="text-slate-800 font-bold">$1,486.20 CAD</strong> 
+              <span class="text-slate-400 mx-1.5">•</span>
+              Average Per Load: <strong id="batch-avg" class="text-slate-800 font-bold">$297.24 CAD</strong>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="simulateExport()" class="px-3 py-1 rounded-md border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-medium transition-colors">
+                Export to Excel (.xlsx) ⤓
+              </button>
+              <a href="/console/new-quote" class="px-3 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors">
+                Save to History (Log In) →
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Single Shipment Quick Quote Calculator (Live Interactive Sandbox) -->
+      <section aria-labelledby="quick-calc-heading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="space-y-2">
+          <h2 id="quick-calc-heading" class="text-lg font-bold text-[var(--foreground)] tracking-tight">
+            2. Single Shipment Live Calculator
+          </h2>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+            Need to quote a one-off item? Adjust the origin ZIP, destination ZIP, or parcel weight below to see real-time rate comparisons across standard carrier tiers.
+          </p>
+          <div class="pt-2 text-xs text-red-700 bg-red-50 border border-red-100 rounded-lg p-2.5">
+            💡 <strong>Did you know?</strong> Ratesift quotes rates without requiring carrier API accounts or booking credentials.
+          </div>
+        </div>
+
+        <!-- Calculator Form & Output -->
+        <div class="md:col-span-2 border border-[var(--border)] rounded-xl bg-[var(--background)] p-4 space-y-4">
+          <form id="single-quote-form" onsubmit="calculateSingleQuote(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="calc-origin" class="block text-[11px] font-bold text-[var(--foreground)] mb-1">Origin City / FSA</label>
+              <input type="text" id="calc-origin" value="TORONTO, ON" required class="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-mono">
+            </div>
+            <div>
+              <label for="calc-dest" class="block text-[11px] font-bold text-[var(--foreground)] mb-1">Destination City / FSA</label>
+              <input type="text" id="calc-dest" value="MONTREAL, QC" required class="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-mono">
+            </div>
+            <div>
+              <label for="calc-weight" class="block text-[11px] font-bold text-[var(--foreground)] mb-1">Shipment Weight (lbs)</label>
+              <div class="flex gap-2">
+                <input type="number" id="calc-weight" value="1450" min="50" max="45000" step="50" required class="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-mono">
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+                  Rate
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Live Carrier Comparative Output -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[var(--border)]" id="single-quote-cards">
+            <!-- Day & Ross -->
+            <div class="border-2 border-emerald-500/60 rounded-lg p-2.5 bg-emerald-50/20 text-center space-y-1">
+              <div class="text-[10px] text-emerald-800 font-bold">🥇 Day & Ross LTL</div>
+              <div id="rate-dayross" class="text-base font-bold text-slate-800 font-mono">$312.40</div>
+              <div class="text-[9px] text-emerald-700 font-medium">Cheapest • 2 Days</div>
+            </div>
+            <!-- Manitoulin -->
+            <div class="border border-[var(--border)] rounded-lg p-2.5 bg-[var(--card)] text-center space-y-1">
+              <div class="text-[10px] text-[var(--muted-foreground)] font-bold">🥈 Manitoulin</div>
+              <div id="rate-manitoulin" class="text-base font-normal text-[var(--foreground)] font-mono">$345.00</div>
+              <div class="text-[9px] text-[var(--muted-foreground)]">+$32.60 • 2 Days</div>
+            </div>
+            <!-- Midland -->
+            <div class="border border-[var(--border)] rounded-lg p-2.5 bg-[var(--card)] text-center space-y-1">
+              <div class="text-[10px] text-[var(--muted-foreground)] font-bold">🥉 Midland Transport</div>
+              <div id="rate-midland" class="text-base font-normal text-[var(--foreground)] font-mono">$389.20</div>
+              <div class="text-[9px] text-[var(--muted-foreground)]">+$76.80 • 2 Days</div>
+            </div>
+            <!-- Kindersley -->
+            <div class="border border-[var(--border)] rounded-lg p-2.5 bg-[var(--card)] text-center space-y-1">
+              <div class="text-[10px] text-[var(--muted-foreground)] font-bold">Kindersley Freight</div>
+              <div id="rate-kindersley" class="text-base font-normal text-[var(--foreground)] font-mono">$415.50</div>
+              <div class="text-[9px] text-[var(--muted-foreground)]">+$103.10 • 3 Days</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Why Teams Prefer Pure Quoting Over Booking Platforms -->
+      <section aria-labelledby="features-heading" class="space-y-4 pt-4 border-t border-[var(--border)]">
+        <h2 id="features-heading" class="text-base font-bold text-[var(--foreground)] tracking-tight text-center">
+          Engineered Strictly for Rate Intelligence
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-1.5">
+            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
+              📊
+            </div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Direct Excel Cell Coordinates</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              Every rate quote stores the exact sheet name, row index, and column identifier, allowing seamless back-referencing into your billing files.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-1.5">
+            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
+              🚫
+            </div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Zero Label or Booking Baggage</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              No tracking API limits, label printing queues, or carrier courier accounts. Calculate rates as often as you want without operational overhead.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-1.5">
+            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
+              ⚙️
+            </div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Custom Margin & Markup Rules</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              Define global profit margins (e.g. +10%) or round-up rules that automatically apply to every estimated rate line item before export.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Conversion Call to Action -->
+      <section aria-labelledby="cta-heading" class="p-6 rounded-2xl bg-gradient-to-r from-red-600 to-indigo-600 text-white text-center space-y-3 shadow-sm">
+        <h2 id="cta-heading" class="text-xl sm:text-2xl font-bold tracking-tight">
+          Ready to Calculate Rates for Your Spreadsheets?
+        </h2>
+        <p class="text-xs text-red-100 max-w-lg mx-auto leading-relaxed">
+          Create an account to upload your custom rate sheets, save historical calculations with cell-level traceability, and customize your origin defaults.
+        </p>
+        <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+          <a href="/console/new-quote" class="px-5 py-2.5 bg-white text-red-600 font-bold text-xs rounded-lg shadow-sm hover:bg-red-50 transition-colors">
+            Get Started Free →
+          </a>
+          <a href="/pricing" class="px-4 py-2.5 bg-red-700/60 hover:bg-red-700 text-white font-semibold text-xs rounded-lg transition-colors border border-white/20">
+            View Pricing Plans
+          </a>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Semantic Footer (Identical to Landing Page) -->
+    <footer role="contentinfo" class="mt-12 px-6 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-4 bg-[var(--card)]">
+      <!-- Left: Logo & Crawlable Navigation Links -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <!-- Crawlable Footer Links -->
+        <nav aria-label="Footer Legal and Support Navigation" class="flex items-center gap-4 text-xs font-medium text-[var(--muted-foreground)]">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Copyright & Current Date -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        September 28, 2026
+      </div>
+    </footer>
+  </div>
+
+  <!-- Interactive JavaScript Simulator Logic -->
+  <script>
+    // Sample Datasets for interactive batch simulator
+    // Sample Datasets for interactive Canadian batch simulator
+    const datasets = {
+      ecom: {
+        filename: "Ontario_Quebec_LTL_Manifest.xlsx",
+        filesize: "Sheet 1 • 35 Canadian freight rows loaded",
+        recipient: "Col A: \"Consignee Hub\"",
+        address: "Col B: \"City & Province\"",
+        zip: "Col C: \"Postal Code\"",
+        weight: "Col D: \"Lbs (CWT)\"",
+        rows: [
+          { id: "QT-80211", lane: "Toronto, ON → Montreal, QC (H3B)", consignee: "St-Laurent Logistics Centre", ref: "Sheet 1 • Row 2, Col D", wt: "1,450 lbs (1 Skid)", ranking: "<div class='space-y-0.5 text-[11px]'><div class='text-emerald-700 font-semibold'>🥇 Day & Ross: $312.40 CAD</div><div class='text-slate-600'>🥈 Manitoulin: $345.00 CAD (+$32.60)</div><div class='text-slate-500'>🥉 Midland: $389.20 CAD (+$76.80)</div></div>", rate: "<div class='font-bold text-slate-800'>$312.40 CAD</div><div class='text-[10px] text-emerald-700 font-medium'>Saves $76.80 vs Midland</div>" },
+          { id: "QT-80212", lane: "Toronto, ON → Quebec City, QC (G1K)", consignee: "Champlain Distribution Hub", ref: "Sheet 1 • Row 3, Col D", wt: "2,800 lbs (2 Skids)", ranking: "<div class='space-y-0.5 text-[11px]'><div class='text-emerald-700 font-semibold'>🥇 Manitoulin: $465.00 CAD</div><div class='text-slate-600'>🥈 Day & Ross: $482.10 CAD (+$17.10)</div><div class='text-slate-500'>🥉 Midland: $510.40 CAD (+$45.40)</div></div>", rate: "<div class='font-bold text-slate-800'>$465.00 CAD</div><div class='text-[10px] text-emerald-700 font-medium'>Saves $45.40 vs Midland</div>" },
+          { id: "QT-80213", lane: "Mississauga, ON → Ottawa, ON (K1P)", consignee: "Capital Regional Depot", ref: "Sheet 1 • Row 4, Col D", wt: "850 lbs (1 Pallet)", ranking: "<div class='space-y-0.5 text-[11px]'><div class='text-emerald-700 font-semibold'>🥇 Day & Ross: $215.80 CAD</div><div class='text-slate-600'>🥈 Midland: $228.00 CAD (+$12.20)</div><div class='text-slate-500'>🥉 Manitoulin: $240.50 CAD (+$24.70)</div></div>", rate: "<div class='font-bold text-slate-800'>$215.80 CAD</div><div class='text-[10px] text-emerald-700 font-medium'>Saves $24.70 vs Manitoulin</div>" },
+          { id: "QT-80214", lane: "Hamilton, ON → Lindsay, ON (K9V)", consignee: "Kawartha Central Hub", ref: "Sheet 1 • Row 5, Col D", wt: "1,200 lbs (1 Skid)", ranking: "<div class='space-y-0.5 text-[11px]'><div class='text-emerald-700 font-semibold'>🥇 Day & Ross: $248.00 CAD</div><div class='text-slate-600'>🥈 Kindersley: $275.00 CAD (+$27.00)</div><div class='text-slate-500'>🥉 Manitoulin: $292.00 CAD (+$44.00)</div></div>", rate: "<div class='font-bold text-slate-800'>$248.00 CAD</div><div class='text-[10px] text-emerald-700 font-medium'>Saves $44.00 vs Manitoulin</div>" },
+          { id: "QT-80215", lane: "Brampton, ON → Sherbrooke, QC (J1J)", consignee: "Estrie Freight Terminal", ref: "Sheet 1 • Row 6, Col D", wt: "3,400 lbs (3 Skids)", ranking: "<div class='space-y-0.5 text-[11px]'><div class='text-emerald-700 font-semibold'>🥇 Midland: $545.00 CAD</div><div class='text-slate-600'>🥈 Manitoulin: $562.50 CAD (+$17.50)</div><div class='text-slate-500'>🥉 Day & Ross: $590.20 CAD (+$45.20)</div></div>", rate: "<div class='font-bold text-slate-800'>$545.00 CAD</div><div class='text-[10px] text-emerald-700 font-medium'>Saves $45.20 vs Day & Ross</div>" }
+        ],
+        total: "$1,786.20 CAD",
+        avg: "$357.24 CAD",
+        count: "5 of 35 Sample Rows Displayed"
+      },
+      ltl: {
+        filename: "Western_Canada_LTL_Corridor.xlsx",
+        filesize: "Sheet 1 • 18 freight rows loaded",
+        recipient: "Col A: \"Receiving Terminal\"",
+        address: "Col B: \"Western Lane\"",
+        zip: "Col C: \"Destination FSA\"",
+        weight: "Col D: \"CWT / Gross Wt\"",
+        rows: [
+          { id: "QT-90101", lane: "Calgary, AB → Vancouver, BC (V6B)", consignee: "Pacific Coast Logistics Hub", ref: "Sheet 1 • Row 2, Col C", wt: "2,200 lbs (2 Pallets)", ranking: "<div class='space-y-0.5 text-[11px]'><div class='text-emerald-700 font-semibold'>🥇 Manitoulin: $410.00 CAD</div><div class='text-slate-600'>🥈 Kindersley: $435.50 CAD (+$25.50)</div><div class='text-slate-500'>🥉 Day & Ross: $462.00 CAD (+$52.00)</div></div>", rate: "<div class='font-bold text-slate-800'>$410.00 CAD</div><div class='text-[10px] text-emerald-700 font-medium'>Saves $52.00 vs Day & Ross</div>" },
+          { id: "QT-90102", lane: "Edmonton, AB → Saskatoon, SK (S7K)", consignee: "Prairie Central Terminal", ref: "Sheet 1 • Row 3, Col C", wt: "1,600 lbs (1 Skid)", ranking: "<div class='space-y-0.5 text-[11px]'><div class='text-emerald-700 font-semibold'>🥇 Kindersley: $295.00 CAD</div><div class='text-slate-600'>🥈 Manitoulin: $318.00 CAD (+$23.00)</div><div class='text-slate-500'>🥉 Day & Ross: $342.50 CAD (+$47.50)</div></div>", rate: "<div class='font-bold text-slate-800'>$295.00 CAD</div><div class='text-[10px] text-emerald-700 font-medium'>Saves $47.50 vs Day & Ross</div>" },
+          { id: "QT-90103", lane: "Calgary, AB → Winnipeg, MB (R3C)", consignee: "Red River Freight Depot", ref: "Sheet 1 • Row 4, Col C", wt: "3,100 lbs (3 Skids)", ranking: "<div class='space-y-0.5 text-[11px]'><div class='text-emerald-700 font-semibold'>🥇 Day & Ross: $512.00 CAD</div><div class='text-slate-600'>🥈 Manitoulin: $530.00 CAD (+$18.00)</div><div class='text-slate-500'>🥉 Kindersley: $558.00 CAD (+$46.00)</div></div>", rate: "<div class='font-bold text-slate-800'>$512.00 CAD</div><div class='text-[10px] text-emerald-700 font-medium'>Saves $46.00 vs Kindersley</div>" }
+        ],
+        total: "$1,217.00 CAD",
+        avg: "$405.67 CAD",
+        count: "3 of 18 Sample Rows Displayed"
+      },
+      express: {
+        filename: "Cross_Border_PARS_PAPS_LTL.xlsx",
+        filesize: "Sheet 1 • 22 cross-border loads",
+        recipient: "Col A: \"US Consignee / Customs\"",
+        address: "Col B: \"Cross-Border Lane\"",
+        zip: "Col C: \"Zip / Port of Entry\"",
+        weight: "Col D: \"Gross Weight (lbs)\"",
+        rows: [
+          { id: "QT-70301", lane: "Toronto, ON → Chicago, IL (60609)", consignee: "Midwest Bonded CFS (PAPS)", ref: "Sheet 1 • Row 2, Col D", wt: "1,850 lbs (2 Skids)", ranking: "<div class='space-y-0.5 text-[11px]'><div class='text-emerald-700 font-semibold'>🥇 Polaris Transport: $485.00 CAD</div><div class='text-slate-600'>🥈 Day & Ross: $520.00 CAD (+$35.00)</div><div class='text-slate-500'>🥉 Manitoulin: $565.00 CAD (+$80.00)</div></div>", rate: "<div class='font-bold text-slate-800'>$485.00 CAD</div><div class='text-[10px] text-emerald-700 font-medium'>Saves $80.00 vs Manitoulin</div>" },
+          { id: "QT-70302", lane: "Montreal, QC → Newark, NJ (07114)", consignee: "Port Newark Cargo CFS", ref: "Sheet 1 • Row 3, Col D", wt: "2,400 lbs (2 Skids)", ranking: "<div class='space-y-0.5 text-[11px]'><div class='text-emerald-700 font-semibold'>🥇 Midland Transport: $560.00 CAD</div><div class='text-slate-600'>🥈 Polaris: $585.00 CAD (+$25.00)</div><div class='text-slate-500'>🥉 Day & Ross: $615.00 CAD (+$55.00)</div></div>", rate: "<div class='font-bold text-slate-800'>$560.00 CAD</div><div class='text-[10px] text-emerald-700 font-medium'>Saves $55.00 vs Day & Ross</div>" }
+        ],
+        total: "$1,045.00 CAD",
+        avg: "$522.50 CAD",
+        count: "2 of 22 Sample Rows Displayed"
+      }
+    };
+
+    let currentDataset = 'ecom';
+
+    function switchDataset(key) {
+      currentDataset = key;
+      document.querySelectorAll('.ds-tab').forEach(b => {
+        b.classList.remove('bg-red-600', 'text-white', 'shadow-2xs');
+        b.classList.add('text-[var(--muted-foreground)]');
+        b.setAttribute('aria-selected', 'false');
+      });
+
+      const activeBtn = document.getElementById('ds-' + key);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-red-600', 'text-white', 'shadow-2xs');
+        activeBtn.classList.remove('text-[var(--muted-foreground)]');
+        activeBtn.setAttribute('aria-selected', 'true');
+      }
+
+      const data = datasets[key];
+      document.getElementById('loaded-filename').textContent = data.filename;
+      document.getElementById('loaded-filesize').textContent = data.filesize;
+      document.getElementById('col-recipient').textContent = data.recipient;
+      document.getElementById('col-address').textContent = data.address;
+      document.getElementById('col-zip').textContent = data.zip;
+      document.getElementById('col-weight').textContent = data.weight;
+      document.getElementById('results-count').textContent = data.count;
+      document.getElementById('batch-total').textContent = data.total;
+      document.getElementById('batch-avg').textContent = data.avg;
+
+      renderTable(data.rows);
+    }
+
+    function renderTable(rows) {
+      const tbody = document.getElementById('demo-table-body');
+      tbody.innerHTML = '';
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/50 transition-colors";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">${r.id}</td>
+          <td class="py-2.5 px-3 font-normal text-slate-700">
+            <div class="font-semibold text-slate-900">${r.lane}</div>
+            <div class="text-[11px] text-slate-500">${r.consignee}</div>
+          </td>
+          <td class="py-2.5 px-3 font-normal text-slate-600">${r.wt}</td>
+          <td class="py-2.5 px-3 font-normal text-slate-600 font-mono text-[11px]">${r.ref}</td>
+          <td class="py-2.5 px-3 font-normal">${r.ranking}</td>
+          <td class="py-2.5 px-3 font-normal text-right">${r.rate}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function runBatchSimulation() {
+      const spinner = document.getElementById('btn-spinner');
+      const text = document.getElementById('btn-process-text');
+      const status = document.getElementById('process-status');
+
+      spinner.classList.remove('hidden');
+      text.textContent = 'Calculating Rates...';
+      status.textContent = 'Normalizing CWT breaks, FSA postal zones, and minimum charges across Canadian tariffs...';
+
+      setTimeout(() => {
+        spinner.classList.add('hidden');
+        text.textContent = 'Process Batch Rate Quotes →';
+        status.innerHTML = '<span class="text-emerald-600 font-semibold">✓ 3 Carrier Tariffs evaluated in 118ms! All cell coordinates archived.</span>';
+      }, 400);
+    }
+
+    function simulateExport() {
+      alert("Downloading " + datasets[currentDataset].filename.replace('.xlsx', '_RateSift_Quotes.xlsx') + " with all Canadian carrier rankings & cell coordinates mapped.");
+    }
+
+    function calculateSingleQuote(e) {
+      e.preventDefault();
+      const origin = document.getElementById('calc-origin').value || 'TORONTO, ON';
+      const dest = document.getElementById('calc-dest').value || 'MONTREAL, QC';
+      const weight = parseFloat(document.getElementById('calc-weight').value) || 1450;
+
+      // Realistic Canadian LTL CWT Rating formula with +10% broker markup
+      const cwt = Math.max(1, weight / 100);
+      const isWestern = dest.toUpperCase().includes('BC') || dest.toUpperCase().includes('AB') || dest.toUpperCase().includes('SK') || dest.toUpperCase().includes('MB');
+      const baseCwtRate = isWestern ? 24.50 : 16.20;
+
+      const dayrossTotal = Math.max(185.00, (cwt * baseCwtRate * 1.05) + 38.00).toFixed(2);
+      const manitoulinTotal = Math.max(195.00, (cwt * baseCwtRate * 1.12) + 42.00).toFixed(2);
+      const midlandTotal = Math.max(210.00, (cwt * baseCwtRate * 1.22) + 48.00).toFixed(2);
+      const kindersleyTotal = Math.max(225.00, (cwt * baseCwtRate * 1.30) + 52.00).toFixed(2);
+
+      document.getElementById('rate-dayross').textContent = "$" + dayrossTotal;
+      document.getElementById('rate-manitoulin').textContent = "$" + manitoulinTotal;
+      document.getElementById('rate-midland').textContent = "$" + midlandTotal;
+      document.getElementById('rate-kindersley').textContent = "$" + kindersleyTotal;
+    }
+
+    // Initialize table on load
+    document.addEventListener('DOMContentLoaded', () => {
+      switchDataset('ecom');
+    });
+  
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+      }
+    }</script>
+</body>
+</html>

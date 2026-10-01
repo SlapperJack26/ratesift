@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Ratesift | System & Quoting Calculation Settings</title>
+  <meta name="title" content="Ratesift | System & Quoting Calculation Settings">
+  <meta name="description" content="Configure system-wide quoting calculation rules, currency, imperial/metric measurement units, and Excel batch parser automation settings in Ratesift.">
+  <meta name="keywords" content="shipping settings, quote calculation rules, excel parser settings, batch quote configuration">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ratesift.io/settings">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ratesift.io/settings">
+  <meta property="og:site_name" content="Ratesift">
+  <meta property="og:title" content="Ratesift | System & Quoting Calculation Settings">
+  <meta property="og:description" content="Configure calculation parameters, margin percentages, and spreadsheet ingestion rules.">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ratesift.io/settings">
+  <meta name="twitter:title" content="Ratesift | System & Quoting Calculation Settings">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD: WebPage & Breadcrumb -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "System & Quoting Settings - Ratesift",
+    "description": "System-wide freight and parcel quoting calculation configuration.",
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ratesift.io/" },
+        { "@type": "ListItem", "position": 2, "name": "Settings", "item": "https://ratesift.io/settings" }
+      ]
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Navigation Bar (Semantic Header) -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative z-20 m-0">
+      <!-- Left: Logo -->
+      <a href="/" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Ratesift Home">
+        <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-8 md:h-9 w-auto object-contain" />
+      </a>
+
+      <!-- Center: Navigation Tabs (New Quote, History) -->
+      <nav role="navigation" aria-label="Main Navigation" class="hidden xs:flex sm:flex absolute inset-x-0 mx-auto items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm font-medium">
+        <a href="/console/new-quote" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">New Quote</a>
+        <a href="/console/history" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">History</a>
+      </nav>
+
+      <!-- Right: Account Dropdown -->
+      <div class="relative z-20">
+        <button id="account-menu-btn" onclick="toggleAccountMenu()" aria-haspopup="true" aria-expanded="false" aria-label="User Account Menu" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-black/5 transition-all text-xs font-medium text-[var(--foreground)] focus:outline-hidden">
+          <div class="w-6 h-6 rounded-full bg-slate-200 border border-[var(--border)] overflow-hidden flex items-center justify-center text-[10px] font-semibold text-slate-700" aria-hidden="true">
+            AR
+          </div>
+          <span>Alex R.</span>
+          <svg class="w-3 h-3 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+
+        <!-- Dropdown Menu (Account, Settings, Sign out) -->
+        <div id="account-dropdown" role="menu" class="hidden absolute right-0 mt-1.5 w-40 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg py-1.5 z-50 text-xs">
+          <a href="/console/account" role="menuitem" class="flex items-center gap-2 px-3 py-1.5 hover:bg-black/5 text-[var(--foreground)] transition-colors">
+            <svg class="w-3.5 h-3.5 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span>Account</span>
+          </a>
+          <a href="/console/settings" role="menuitem" class="flex items-center gap-2 px-3 py-1.5 bg-black/5 font-semibold text-[var(--foreground)] transition-colors">
+            <svg class="w-3.5 h-3.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span>Settings</span>
+          </a>
+          <div class="my-1 border-t border-[var(--border)]"></div>
+          <a href="/api/auth/logout" role="menuitem" class="flex items-center gap-2 px-3 py-1.5 hover:bg-red-50/60 text-red-600 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            <span>Sign out</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content (Semantic Main) -->
+    <main id="main-content" role="main" class="p-6 flex-1 max-w-4xl mx-auto w-full">
+      <header class="mb-5">
+        <!-- Semantic H1 -->
+        <h1 class="text-xl font-bold tracking-tight text-[var(--foreground)]">System & Quoting Settings</h1>
+        <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Configure default rate calculations, Excel spreadsheet parser rules, and system behavior.</p>
+      </header>
+
+      <form onsubmit="savePreferences(event);" class="space-y-5">
+        
+        <!-- 1. Quoting Calculation Parameters -->
+        <section aria-labelledby="calc-rules-heading" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs">
+          <div class="flex items-center gap-2 mb-3 pb-2 border-b border-[var(--border)]">
+            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            <h2 id="calc-rules-heading" class="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">Quote Calculation Rules</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="currency-select" class="block text-xs font-bold text-[var(--foreground)] mb-1">Currency</label>
+              <select id="currency-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+                <option selected>USD ($) - United States Dollar</option>
+                <option>CAD ($) - Canadian Dollar</option>
+                <option>EUR (€) - Euro</option>
+                <option>GBP (£) - British Pound</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="unit-select" class="block text-xs font-bold text-[var(--foreground)] mb-1">Measurement System</label>
+              <select id="unit-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+                <option selected>Imperial (lbs, inches)</option>
+                <option>Metric (kg, cm)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="markup-input" class="block text-xs font-bold text-[var(--foreground)] mb-1">Standard Markup / Margin</label>
+              <div class="relative">
+                <input id="markup-input" type="text" value="+ 10.0%" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Excel Parsing & Ingestion Rules -->
+        <section aria-labelledby="excel-parser-heading" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs">
+          <div class="flex items-center gap-2 mb-3 pb-2 border-b border-[var(--border)]">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <h2 id="excel-parser-heading" class="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">Excel Batch Parser Rules</h2>
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex items-center justify-between py-1.5">
+              <div>
+                <label for="auto-header" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Auto-Detect Header Row</label>
+                <p class="text-[11px] text-[var(--muted-foreground)]">Automatically match columns labeled "Address", "ZIP", "Area Code", and "Recipient".</p>
+              </div>
+              <input id="auto-header" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
+            </div>
+
+            <div class="flex items-center justify-between py-1.5 border-t border-[var(--border)]">
+              <div>
+                <label for="skip-empty" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Skip Empty / Malformed Rows</label>
+                <p class="text-[11px] text-[var(--muted-foreground)]">Ignore empty spreadsheet rows without interrupting batch quote generation.</p>
+              </div>
+              <input id="skip-empty" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
+            </div>
+
+            <div class="flex items-center justify-between py-1.5 border-t border-[var(--border)]">
+              <div>
+                <label for="strict-zip" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Strict Area Code Validation</label>
+                <p class="text-[11px] text-[var(--muted-foreground)]">Flag quotes that contain invalid or missing postal codes before finalizing rates.</p>
+              </div>
+              <input id="strict-zip" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
+            </div>
+          </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="alert('Settings reset to default.');" class="px-3 py-1.5 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+            Reset to Defaults
+          </button>
+          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-4 py-1.5 rounded-lg transition-colors shadow-xs">
+            Save Preferences
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <!-- Semantic Footer -->
+    <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
+      <!-- Left: Logo & Links Directly Beside It -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <!-- Links beside the logo -->
+        <nav aria-label="Footer Navigation" class="flex items-center gap-4 text-xs font-medium">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Date at Bottom Right -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        September 28, 2026
+      </div>
+    </footer>
+  </div>
+
+    function loadSettings() {
+      fetch('/api/user/profile')
+        .then(r => r.json())
+        .then(data => {
+          if (data) {
+            document.getElementById('markup-input').value = `+ ${(data.markup_pct || 10.0).toFixed(1)}%`;
+            document.getElementById('auto-header').checked = Boolean(data.auto_detect_headers);
+            document.getElementById('skip-empty').checked = Boolean(data.skip_blank_rows);
+          }
+        })
+        .catch(err => console.error("Error loading settings:", err));
+    }
+
+    function savePreferences(e) {
+      if (e) e.preventDefault();
+      const markupRaw = document.getElementById('markup-input').value;
+      const cleanMarkup = parseFloat(markupRaw.replace(/[^0-9.]/g, '')) || 10.0;
+      const currency = document.getElementById('currency-select').value.includes('USD') ? 'USD' : 'EUR';
+      const units = document.getElementById('unit-select').value.includes('Metric') ? 'kg' : 'lbs';
+      const autoHeader = document.getElementById('auto-header').checked ? 1 : 0;
+      const skipEmpty = document.getElementById('skip-empty').checked ? 1 : 0;
+
+      const formData = new FormData();
+      formData.append('currency', currency);
+      formData.append('units', units);
+      formData.append('markup_pct', cleanMarkup);
+      formData.append('auto_detect_headers', autoHeader);
+      formData.append('skip_blank_rows', skipEmpty);
+
+      fetch('/api/settings/update', {
+        method: 'POST',
+        body: formData
+      })
+      .then(r => r.json())
+      .then(data => {
+        alert("✓ Quoting settings and Excel parser rules saved successfully!");
+      })
+      .catch(err => {
+        alert("Error saving settings. Please try again.");
+      });
+    }
+
+    window.addEventListener('click', function(e) {
+      const accBtn = document.getElementById('account-menu-btn');
+      const accMenu = document.getElementById('account-dropdown');
+      if (accBtn && accMenu && !accBtn.contains(e.target) && !accMenu.contains(e.target)) {
+        accMenu.classList.add('hidden');
+        accBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    loadSettings();
+  </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-2">
+  <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
+    
+    <!-- Top Header -->
+    <header class="w-full px-4 sm:px-6 py-3 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)]">
+      <!-- Left: Logo -->
+      <a href="http://127.0.0.1:8000/" target="_blank" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Ratesift">
+        <img src="ratesift-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="RateSift" class="h-7 sm:h-8 w-auto object-contain" />
+      </a>
+
+      <!-- Center: Interactive Tabs -->
+      <nav class="flex items-center gap-4 text-xs font-semibold">
+        <button id="tab-home" onclick="showTab('home')" class="text-red-600 border-b-2 border-red-600 pb-0.5">Home</button>
+        <button id="tab-demo" onclick="showTab('demo')" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)] pb-0.5 transition-colors">Demo</button>
+        <button id="tab-pricing" onclick="showTab('pricing')" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)] pb-0.5 transition-colors">Pricing</button>
+      </nav>
+
+      <!-- Right: Conversion CTAs -->
+      <div class="flex items-center gap-2">
+        <a href="http://127.0.0.1:8000/login" target="_blank" class="text-xs font-semibold text-[var(--foreground)] hover:text-red-600 px-2 py-1">Log in</a>
+        <a href="http://127.0.0.1:8000/get-started" target="_blank" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3 py-1.5 rounded-lg shadow-xs transition-colors">Get Started</a>
+      </div>
+    </header>
+
+    <!-- Main Content Area (Compact < 500px) -->
+    <main class="p-5 sm:p-6 text-center">
+      
+      <!-- 1. HOME TAB -->
+      <div id="view-home" class="space-y-3">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-red-50 text-red-700 border border-red-200">
+          <span>✨</span>
+          <span>Automated Shipping Quotes From Spreadsheets</span>
+        </div>
+
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-[var(--foreground)] leading-tight">
+          Instant shipping rate quotes<br><span class="text-red-600">directly from your Excel files.</span>
+        </h1>
+
+        <p class="text-xs text-[var(--muted-foreground)] max-w-lg mx-auto leading-relaxed">
+          Upload any standard spreadsheet (.xlsx, .xls) with recipient addresses. Ratesift automatically parses row coordinates and calculates transparent shipping quotes in seconds without booking clutter.
+        </p>
+
+        <!-- Value Pillars -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 max-w-xl mx-auto text-left">
+          <div class="p-2.5 rounded-xl border border-[var(--border)] bg-slate-50/50">
+            <div class="text-xs font-bold text-[var(--foreground)]">⚡ Instant Bulk Quoting</div>
+            <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5">Parse hundreds of freight line items in under 2 seconds.</div>
+          </div>
+          <div class="p-2.5 rounded-xl border border-[var(--border)] bg-slate-50/50">
+            <div class="text-xs font-bold text-[var(--foreground)]">🎯 Coordinate Tracking</div>
+            <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5">Every quote references exact sheet, row, and column.</div>
+          </div>
+          <div class="p-2.5 rounded-xl border border-[var(--border)] bg-slate-50/50">
+            <div class="text-xs font-bold text-[var(--foreground)]">🛡️ Zero Operational Clutter</div>
+            <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5">Strictly quoting engine. No booking or label overhead.</div>
+          </div>
+        </div>
+
+        <!-- Action CTAs -->
+        <div class="flex items-center justify-center gap-2.5 pt-2">
+          <button onclick="showTab('demo')" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-4 py-2 rounded-lg shadow-xs transition-colors flex items-center gap-1">
+            <span>Try Interactive Demo</span>
+            <span>→</span>
+          </button>
+          <button onclick="showTab('pricing')" class="border border-[var(--border)] hover:bg-black/5 text-[var(--foreground)] font-medium text-xs px-3.5 py-2 rounded-lg transition-colors">
+            View Pricing Plans
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. DEMO TAB -->
+      <div id="view-demo" class="hidden space-y-3">
+        <h2 class="text-lg font-bold text-[var(--foreground)]">Interactive Quoting Demo</h2>
+        <p class="text-xs text-[var(--muted-foreground)]">Upload a sample Excel rate sheet to view coordinate mapping in action.</p>
+        <div class="p-4 border-2 border-dashed border-red-300 rounded-xl bg-red-50/30 max-w-md mx-auto text-center cursor-pointer">
+          <div class="text-xl">📁</div>
+          <div class="text-xs font-bold text-slate-800 mt-1">Sample Parcells Sheet (.xlsx)</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">7 row items detected • SF 94103 → Chicago 60601</div>
+        </div>
+        <button onclick="showTab('home')" class="text-xs text-red-600 hover:underline">← Back to Home</button>
+      </div>
+
+      <!-- 3. PRICING TAB -->
+      <div id="view-pricing" class="hidden space-y-3">
+        <h2 class="text-lg font-bold text-[var(--foreground)]">Transparent Pricing Tiers</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-left max-w-xl mx-auto">
+          <div class="p-2 border border-slate-200 rounded-lg">
+            <div class="font-bold text-xs">Free Starter</div>
+            <div class="text-sm font-extrabold text-slate-900 mt-1">$0</div>
+            <div class="text-[10px] text-slate-500">1 sheet / 50 quotes</div>
+          </div>
+          <div class="p-2 border border-red-300 bg-red-50/40 rounded-lg">
+            <div class="font-bold text-xs text-red-900">Broker Pro</div>
+            <div class="text-sm font-extrabold text-red-600 mt-1">$49<span class="text-[10px] text-slate-500">/mo</span></div>
+            <div class="text-[10px] text-slate-600">5 sheets / 1,000 quotes</div>
+          </div>
+          <div class="p-2 border border-slate-200 rounded-lg">
+            <div class="font-bold text-xs">Broker Team</div>
+            <div class="text-sm font-extrabold text-slate-900 mt-1">$149<span class="text-[10px] text-slate-500">/mo</span></div>
+            <div class="text-[10px] text-slate-500">20 sheets / 5,000 quotes</div>
+          </div>
+          <div class="p-2 border border-slate-200 rounded-lg">
+            <div class="font-bold text-xs">Business</div>
+            <div class="text-sm font-extrabold text-slate-900 mt-1">Custom</div>
+            <div class="text-[10px] text-slate-500">Embedded API</div>
+          </div>
+        </div>
+        <button onclick="showTab('home')" class="text-xs text-red-600 hover:underline">← Back to Home</button>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full px-4 sm:px-6 py-2.5 border-t border-[var(--border)] flex items-center justify-between text-[11px] text-[var(--muted-foreground)] bg-slate-50/50">
+      <div class="flex items-center gap-3">
+        <img src="ratesift-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="RateSift" class="h-4.5 w-auto object-contain" />
+        <span class="text-slate-300">•</span>
+        <span>Documentation</span>
+        <span>Support</span>
+        <span>Privacy</span>
+      </div>
+      <div>September 28, 2026</div>
+    </footer>
+
+  </div>
+
+  <script>
+    function showTab(tab) {
+      ['home', 'demo', 'pricing'].forEach(t => {
+        const v = document.getElementById('view-' + t);
+        const b = document.getElementById('tab-' + t);
+        if (t === tab) {
+          v.classList.remove('hidden');
+          b.className = 'text-red-600 border-b-2 border-red-600 pb-0.5';
+        } else {
+          v.classList.add('hidden');
+          b.className = 'text-[var(--muted-foreground)] hover:text-[var(--foreground)] pb-0.5 transition-colors';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

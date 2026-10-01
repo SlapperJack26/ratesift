@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-4 shadow-sm max-w-4xl mx-auto">
+    <!-- Header Controls -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+      <div>
+        <h2 class="text-sm font-semibold tracking-wide flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+          Design Iteration Comparison
+        </h2>
+        <p class="text-xs text-[var(--muted-foreground)]">Compare previous versions with the new enhanced design</p>
+      </div>
+
+      <!-- Segmented Buttons -->
+      <div class="inline-flex rounded-lg border border-[var(--border)] p-1 bg-[var(--background)] gap-1 text-xs">
+        <button id="btn-v3" onclick="setMode('v3')" class="tab-btn px-2.5 py-1 rounded-md font-medium transition-all bg-[var(--card)] text-[var(--foreground)] shadow-xs">
+          v3 (New Enhanced)
+        </button>
+        <button id="btn-v2" onclick="setMode('v2')" class="tab-btn px-2.5 py-1 rounded-md font-medium transition-all text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+          v2 (Spaced)
+        </button>
+        <button id="btn-v1" onclick="setMode('v1')" class="tab-btn px-2.5 py-1 rounded-md font-medium transition-all text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+          v1 (Initial)
+        </button>
+        <button id="btn-split" onclick="setMode('split')" class="tab-btn px-2.5 py-1 rounded-md font-medium transition-all text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+          Side-by-Side
+        </button>
+      </div>
+    </div>
+
+    <!-- Viewer Section -->
+    <div class="mt-3">
+      <!-- Single View -->
+      <div id="single-view" class="relative rounded-xl overflow-hidden border border-[var(--border)] bg-black/5 aspect-video max-h-[300px] flex items-center justify-center">
+        <img id="main-image" src="file:///C:/Users/Dylan/.gemini/antigravity/brain/b5a860ed-1691-4f5a-8f2d-ad2b4e7701e4/shipping_demo_v4_1790570944946.jpg" alt="Design Version" class="w-full h-full object-contain">
+        <div id="image-badge" class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-blue-600/90 text-white backdrop-blur-xs">
+          Version 3: New Enhanced
+        </div>
+      </div>
+
+      <!-- Split View (Hidden by default) -->
+      <div id="split-view" class="hidden grid-cols-2 gap-2 max-h-[300px]">
+        <div class="relative rounded-xl overflow-hidden border border-[var(--border)] bg-black/5 aspect-video flex items-center justify-center">
+          <img src="file:///C:/Users/Dylan/.gemini/antigravity/brain/b5a860ed-1691-4f5a-8f2d-ad2b4e7701e4/shipping_demo_spaced_1790570786622.jpg" alt="Version 2" class="w-full h-full object-contain">
+          <div class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-medium bg-slate-700/80 text-white backdrop-blur-xs">
+            v2: Before (Help Options)
+          </div>
+        </div>
+        <div class="relative rounded-xl overflow-hidden border border-[var(--border)] bg-black/5 aspect-video flex items-center justify-center">
+          <img src="file:///C:/Users/Dylan/.gemini/antigravity/brain/b5a860ed-1691-4f5a-8f2d-ad2b4e7701e4/shipping_demo_v4_1790570944946.jpg" alt="Version 3" class="w-full h-full object-contain">
+          <div class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-medium bg-blue-600/90 text-white backdrop-blur-xs">
+            v3: New (Refined & Clean)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Notes / Change Log -->
+    <div id="notes-container" class="mt-3 pt-2.5 border-t border-[var(--border)] flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+      <div id="notes-content" class="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <span class="text-[var(--foreground)] font-medium">✨ Refinements in v3:</span>
+        <span>• Removed 'Help Options' header</span>
+        <span>• Added 'Batch Excel Mode' badge</span>
+        <span>• Added sample template link</span>
+        <span>• Input field icons</span>
+        <span>• Streamlined horizontal footer</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const versions = {
+      v3: {
+        src: 'file:///C:/Users/Dylan/.gemini/antigravity/brain/b5a860ed-1691-4f5a-8f2d-ad2b4e7701e4/shipping_demo_v4_1790570944946.jpg',
+        badge: 'Version 3: New Enhanced (Clean Footer & Field Polish)',
+        notes: '<span class="text-[var(--foreground)] font-medium">✨ Refinements in v3:</span> <span>• Removed "Help Options" header</span> <span>• Added "Batch Excel Mode" badge</span> <span>• Added template link</span> <span>• Added field icons</span> <span>• Minimal horizontal footer</span>'
+      },
+      v2: {
+        src: 'file:///C:/Users/Dylan/.gemini/antigravity/brain/b5a860ed-1691-4f5a-8f2d-ad2b4e7701e4/shipping_demo_spaced_1790570786622.jpg',
+        badge: 'Version 2: Spaced with Help Options',
+        notes: '<span class="text-[var(--foreground)] font-medium">v2 Details:</span> <span>• Clear whitespace gap above footer</span> <span>• Multi-column footer layout</span> <span>• Contains "Help Options" heading</span>'
+      },
+      v1: {
+        src: 'file:///C:/Users/Dylan/.gemini/antigravity/brain/b5a860ed-1691-4f5a-8f2d-ad2b4e7701e4/shipping_demo_ui_1790570513761.jpg',
+        badge: 'Version 1: Initial Concept',
+        notes: '<span class="text-[var(--foreground)] font-medium">v1 Details:</span> <span>• Original card and drop box layout</span> <span>• No footer section included</span>'
+      }
+    };
+
+    function setMode(mode) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-[var(--card)]', 'text-[var(--foreground)]', 'shadow-xs');
+        btn.classList.add('text-[var(--muted-foreground)]');
+      });
+
+      const activeBtn = document.getElementById('btn-' + mode);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-[var(--card)]', 'text-[var(--foreground)]', 'shadow-xs');
+        activeBtn.classList.remove('text-[var(--muted-foreground)]');
+      }
+
+      const singleView = document.getElementById('single-view');
+      const splitView = document.getElementById('split-view');
+      const mainImg = document.getElementById('main-image');
+      const badge = document.getElementById('image-badge');
+      const notes = document.getElementById('notes-content');
+
+      if (mode === 'split') {
+        singleView.classList.add('hidden');
+        splitView.classList.remove('hidden');
+        splitView.classList.add('grid');
+        notes.innerHTML = '<span class="text-[var(--foreground)] font-medium">Comparison:</span> <span>Left: v2 with previous footer</span> <span>Right: v3 with clean horizontal footer & field enhancements</span>';
+      } else {
+        splitView.classList.add('hidden');
+        splitView.classList.remove('grid');
+        singleView.classList.remove('hidden');
+
+        const v = versions[mode];
+        if (v) {
+          mainImg.src = v.src;
+          badge.textContent = v.badge;
+          notes.innerHTML = v.notes;
+        }
+      }
+    }
+  </script>
+</body>
+</html>

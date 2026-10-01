@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ShipFlow - Instant Excel Shipping Quotes</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Navigation Bar (Logged Out State) -->
+    <header class="px-6 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative">
+      <!-- Left: Logo -->
+      <div class="flex items-center gap-2.5 z-10">
+        <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-xs">
+          SF
+        </div>
+        <span class="font-bold text-base tracking-tight text-[var(--foreground)]">SHIPFLOW</span>
+      </div>
+
+      <!-- Center: Public Menu Options (Home, Demo, Pricing) -->
+      <nav class="absolute inset-x-0 mx-auto flex items-center justify-center gap-8 text-sm font-medium">
+        <button id="nav-home" onclick="setPublicTab('home')" class="pub-tab text-blue-600 font-semibold border-b-2 border-blue-600 py-1 transition-all">Home</button>
+        <button id="nav-demo" onclick="setPublicTab('demo')" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Demo</button>
+        <button id="nav-pricing" onclick="setPublicTab('pricing')" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Pricing</button>
+      </nav>
+
+      <!-- Right: Logged Out Auth Controls -->
+      <div class="flex items-center gap-3 z-10">
+        <a href="shipping_demo_view.html" class="text-xs font-semibold text-[var(--foreground)] hover:text-blue-600 transition-colors px-2 py-1">
+          Log in
+        </a>
+        <a href="shipping_demo_view.html" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs">
+          Get Started
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content Area: Dynamic based on Selected Public Tab -->
+    <main class="flex-1 p-6 flex flex-col justify-center">
+      
+      <!-- 1. HOME VIEW (Active by default) -->
+      <div id="view-home" class="max-w-3xl mx-auto text-center space-y-6 py-4">
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+          <span>✨</span>
+          <span>Automated Shipping Quotes From Spreadsheets</span>
+        </div>
+
+        <!-- Hero Headline & Subhead -->
+        <div class="space-y-3">
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--foreground)] leading-tight">
+            Instant shipping rate quotes<br><span class="text-blue-600">directly from your Excel files.</span>
+          </h1>
+          <p class="text-sm text-[var(--muted-foreground)] max-w-xl mx-auto leading-relaxed">
+            Upload your spreadsheet with addresses, postal codes, and package weights. ShipFlow instantly calculates accurate quotes without requiring manual data entry or handling carrier bookings.
+          </p>
+        </div>
+
+        <!-- CTA Action Buttons -->
+        <div class="flex items-center justify-center gap-3 pt-2">
+          <button onclick="setPublicTab('demo')" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-5 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5">
+            <span>Try Interactive Demo</span>
+            <span>→</span>
+          </button>
+          <button onclick="setPublicTab('pricing')" class="border border-[var(--border)] hover:bg-black/5 text-[var(--foreground)] font-medium text-xs px-4 py-2.5 rounded-xl transition-colors">
+            View Pricing Plans
+          </button>
+        </div>
+
+        <!-- Feature Pillars Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 text-left">
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-slate-50/50 space-y-1.5">
+            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">📊</div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Excel Batch Processing</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">Drag and drop `.xlsx` or `.xls` sheets with auto-detection of destination coordinates.</p>
+          </div>
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-slate-50/50 space-y-1.5">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold">⚡</div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Pure Quoting Engine</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">Calculates and quotes accurate shipping rates with custom markup. No tracking clutter.</p>
+          </div>
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-slate-50/50 space-y-1.5">
+            <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold">📁</div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Cell-Level History</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">Every historical quote is saved with exact spreadsheet row and column tracking.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. DEMO VIEW -->
+      <div id="view-demo" class="hidden max-w-2xl mx-auto w-full my-2">
+        <div class="mb-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs text-blue-800">
+          <div class="flex items-center gap-2">
+            <span>✨</span>
+            <span><strong>Public Preview Mode:</strong> Test how Excel quoting works. <a href="shipping_demo_view.html" class="underline font-semibold">Log in</a> to save history.</span>
+          </div>
+          <a href="shipping_demo_view.html" class="bg-blue-600 text-white text-[11px] px-2.5 py-1 rounded-md font-medium">Log in</a>
+        </div>
+
+        <!-- Embedded Mini Rate Sheet -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-xs">
+          <h2 class="text-base font-bold tracking-tight text-[var(--foreground)] mb-4">New rate sheet</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="border-2 border-dashed border-[var(--border)] rounded-xl p-4 flex flex-col items-center justify-between text-center bg-slate-50/50 min-h-[220px]">
+              <span class="self-end text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-semibold border border-blue-200">Batch Excel Mode</span>
+              <div class="my-auto flex flex-col items-center">
+                <svg class="w-8 h-8 text-slate-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p class="text-xs text-[var(--foreground)] font-medium">Drag & drop Excel files (.xlsx, .xls)</p>
+              </div>
+              <span class="text-[10px] text-blue-600 underline">Download sample template (.xlsx)</span>
+            </div>
+            <div class="space-y-2.5">
+              <div class="font-bold text-xs text-[var(--foreground)] border-b border-[var(--border)] pb-1">Get Quote</div>
+              <input type="text" placeholder="From: Origin address" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs">
+              <input type="text" placeholder="To: Destination recipient" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs">
+              <input type="text" placeholder="Street Address" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs">
+              <input type="text" placeholder="Area Code / Postal Code" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs">
+              <button type="button" onclick="alert('Demo rate calculated: $124.50! Log in to save to History.')" class="w-full bg-blue-600 text-white font-medium text-xs py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Process →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. PRICING VIEW -->
+      <div id="view-pricing" class="hidden max-w-4xl mx-auto w-full py-2">
+        <div class="text-center mb-6 space-y-1">
+          <h2 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Simple, Transparent Pricing</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">Choose the plan that fits your batch shipping quote volume.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Free / Starter -->
+          <div class="border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="font-bold text-sm text-[var(--foreground)]">Starter</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">For testing & occasional quotes</p>
+              <div class="mt-3 text-2xl font-black text-[var(--foreground)]">$0 <span class="text-xs font-normal text-[var(--muted-foreground)]">/ month</span></div>
+              <ul class="mt-4 space-y-2 text-xs text-[var(--muted-foreground)]">
+                <li>✓ 100 quotes per month</li>
+                <li>✓ Single Excel file upload</li>
+                <li>✓ Standard rate calculator</li>
+                <li>✓ 7-day history storage</li>
+              </ul>
+            </div>
+            <a href="shipping_demo_view.html" class="w-full text-center border border-[var(--border)] py-1.5 rounded-lg text-xs font-medium hover:bg-black/5 transition-colors">
+              Get Started Free
+            </a>
+          </div>
+
+          <!-- Professional (Popular) -->
+          <div class="border-2 border-blue-600 rounded-xl p-5 bg-[var(--card)] flex flex-col justify-between space-y-4 relative shadow-sm">
+            <span class="absolute -top-2.5 right-4 bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Most Popular</span>
+            <div>
+              <h3 class="font-bold text-sm text-[var(--foreground)]">Professional</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">For active logistics & sales teams</p>
+              <div class="mt-3 text-2xl font-black text-[var(--foreground)]">$49 <span class="text-xs font-normal text-[var(--muted-foreground)]">/ month</span></div>
+              <ul class="mt-4 space-y-2 text-xs text-[var(--foreground)]">
+                <li>✓ Unlimited batch quotes</li>
+                <li>✓ Multi-sheet Excel parsing</li>
+                <li>✓ Custom markup & margin rules</li>
+                <li>✓ Permanent history & Excel ref export</li>
+                <li>✓ Priority support</li>
+              </ul>
+            </div>
+            <a href="shipping_demo_view.html" class="w-full text-center bg-blue-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors shadow-xs">
+              Start 14-Day Pro Trial
+            </a>
+          </div>
+
+          <!-- Enterprise -->
+          <div class="border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="font-bold text-sm text-[var(--foreground)]">Enterprise</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">Custom volumes & API access</p>
+              <div class="mt-3 text-2xl font-black text-[var(--foreground)]">$149 <span class="text-xs font-normal text-[var(--muted-foreground)]">/ month</span></div>
+              <ul class="mt-4 space-y-2 text-xs text-[var(--muted-foreground)]">
+                <li>✓ Dedicated calculation engine</li>
+                <li>✓ Automated SFTP & API ingestion</li>
+                <li>✓ Multi-user role management</li>
+                <li>✓ SLA guarantee & phone support</li>
+              </ul>
+            </div>
+            <a href="shipping_demo_view.html" class="w-full text-center border border-[var(--border)] py-1.5 rounded-lg text-xs font-medium hover:bg-black/5 transition-colors">
+              Contact Sales
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer Copied from Quotes View (Links beside logo on left, date in bottom right, whitespace above) -->
+    <footer class="mt-8 px-6 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40">
+      <!-- Left: Logo & Links Directly Beside It -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center gap-2">
+          <div class="w-5 h-5 rounded-md bg-blue-600 flex items-center justify-center text-white font-bold text-[10px]">
+            SF
+          </div>
+          <span class="font-bold text-sm tracking-tight text-[var(--foreground)]">ShipFlow</span>
+        </div>
+
+        <!-- Links beside the logo -->
+        <nav class="flex items-center gap-4 text-xs font-medium">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Date at Bottom Right -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        September 28, 2026
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function setPublicTab(tab) {
+      document.querySelectorAll('.pub-tab').forEach(b => {
+        b.classList.remove('text-blue-600', 'font-semibold', 'border-b-2', 'border-blue-600');
+        b.classList.add('text-[var(--muted-foreground)]');
+      });
+
+      const activeBtn = document.getElementById('nav-' + tab);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-[var(--muted-foreground)]');
+        activeBtn.classList.add('text-blue-600', 'font-semibold', 'border-b-2', 'border-blue-600');
+      }
+
+      ['home', 'demo', 'pricing'].forEach(t => {
+        const view = document.getElementById('view-' + t);
+        if (t === tab) {
+          view.classList.remove('hidden');
+        } else {
+          view.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

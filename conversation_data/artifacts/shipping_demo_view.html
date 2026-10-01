@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Ratesift | New Rate Sheet & Batch Excel Shipping Quotes</title>
+  <meta name="title" content="Ratesift | New Rate Sheet & Batch Excel Shipping Quotes">
+  <meta name="description" content="Upload Excel spreadsheets (.xlsx, .xls) to generate instant bulk shipping quotes. Calculate accurate freight and parcel rates with Ratesift without manual data entry.">
+  <meta name="keywords" content="shipping quotes, Excel shipping calculator, new rate sheet, batch freight quote, spreadsheet shipping estimator">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ratesift.io/new-quote">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ratesift.io/new-quote">
+  <meta property="og:site_name" content="Ratesift">
+  <meta property="og:title" content="Ratesift | New Rate Sheet & Batch Excel Shipping Quotes">
+  <meta property="og:description" content="Upload Excel spreadsheets (.xlsx, .xls) to generate instant bulk shipping quotes.">
+  <meta property="og:image" content="https://ratesift.io/assets/og-new-quote.jpg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ratesift.io/new-quote">
+  <meta name="twitter:title" content="Ratesift | New Rate Sheet & Batch Excel Shipping Quotes">
+  <meta name="twitter:description" content="Calculate instant shipping quotes from spreadsheet rows with Ratesift.">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD: WebPage & Breadcrumb -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "New Rate Sheet - Ratesift",
+    "description": "Batch shipping rate calculator from Excel spreadsheets.",
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ratesift.io/" },
+        { "@type": "ListItem", "position": 2, "name": "New Quote", "item": "https://ratesift.io/new-quote" }
+      ]
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Navigation Bar (Semantic Header) -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative z-20 m-0">
+      <!-- Left: Logo -->
+      <a href="/console/new-quote" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Ratesift Console">
+        <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-8 md:h-9 w-auto object-contain" />
+      </a>
+
+      <!-- Center: Navigation Tabs (New Quote, History) -->
+      <nav role="navigation" aria-label="Main Navigation" class="hidden xs:flex sm:flex absolute inset-x-0 mx-auto items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm font-medium">
+        <a href="#" aria-current="page" class="text-red-600 font-semibold border-b-2 border-red-600 py-1">New Quote</a>
+        <a href="/console/history" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">History</a>
+      </nav>
+
+      <!-- Right: Account Dropdown -->
+      <div class="relative z-20">
+        <button id="account-menu-btn" onclick="toggleAccountMenu()" aria-haspopup="true" aria-expanded="false" aria-label="User Account Menu" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-black/5 transition-all text-xs font-medium text-[var(--foreground)] focus:outline-hidden">
+          <div class="w-6 h-6 rounded-full bg-slate-200 border border-[var(--border)] overflow-hidden flex items-center justify-center text-[10px] font-semibold text-slate-700" aria-hidden="true">
+            AR
+          </div>
+          <span>Alex R.</span>
+          <svg class="w-3 h-3 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+
+        <!-- Dropdown Menu (Account, Settings, Sign out) -->
+        <div id="account-dropdown" role="menu" class="hidden absolute right-0 mt-1.5 w-40 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg py-1.5 z-50 text-xs">
+          <a href="/console/account" role="menuitem" class="flex items-center gap-2 px-3 py-1.5 hover:bg-black/5 text-[var(--foreground)] transition-colors">
+            <svg class="w-3.5 h-3.5 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span>Account</span>
+          </a>
+          <a href="/console/settings" role="menuitem" class="flex items-center gap-2 px-3 py-1.5 hover:bg-black/5 text-[var(--foreground)] transition-colors">
+            <svg class="w-3.5 h-3.5 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span>Settings</span>
+          </a>
+          <div class="my-1 border-t border-[var(--border)]"></div>
+          <a href="/api/auth/logout" role="menuitem" class="flex items-center gap-2 px-3 py-1.5 hover:bg-red-50/60 text-red-600 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            <span>Sign out</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area (Semantic Main) -->
+    <main id="main-content" role="main" class="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 my-2">
+      <article class="w-full max-w-4xl bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--border)]">
+          <div>
+            <h1 class="text-xl font-bold tracking-tight text-[var(--foreground)]">New rate sheet</h1>
+            <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Upload spreadsheets for automated quoting or specify direct origin and destination routing.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+              Batch Excel Mode
+            </span>
+          </div>
+        </div>
+
+        <!-- Excel Drag & Drop Box -->
+        <section aria-labelledby="excel-drop-heading" id="dropzone" onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-[var(--border)] rounded-xl p-5 sm:p-6 flex flex-col items-center justify-center text-center bg-slate-50/40 hover:bg-slate-50/80 hover:border-red-400 transition-all cursor-pointer relative">
+          <input id="file-input" type="file" accept=".xlsx,.xls" class="hidden" onchange="handleFile(event)" aria-label="Upload Excel File">
+          
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left">
+            <div class="w-12 h-12 rounded-xl bg-white border border-[var(--border)] flex items-center justify-center shadow-2xs text-slate-600 shrink-0" aria-hidden="true">
+              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+            <div>
+              <p id="drop-text" class="text-xs text-[var(--foreground)] font-medium leading-relaxed">
+                <span class="font-semibold text-sm">Drag and drop Excel files (.xlsx, .xls)</span> here or <span class="text-red-600 hover:underline font-semibold">browse</span>
+              </p>
+              <p class="text-[11px] text-[var(--muted-foreground)] mt-0.5">Automated coordinate mapping from columns: Origin, Destination, Weight, Dimensions</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-3 mt-3 pt-2 border-t border-slate-200/60 text-xs w-full max-w-md">
+            <a href="/sample-sheets/ecommerce_parcels.xlsx" download="sample_rate_sheet.xlsx" onclick="event.stopPropagation();" class="text-[11px] text-red-600 hover:underline font-medium inline-flex items-center gap-1" title="Download Excel quote template">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Download sample template (.xlsx)
+            </a>
+            <span class="text-slate-300">•</span>
+            <button type="button" onclick="event.stopPropagation(); loadSampleFile();" class="text-[11px] text-slate-600 hover:text-red-600 font-medium inline-flex items-center gap-1">
+              ⚡ Fast-fill demo spreadsheet
+            </button>
+          </div>
+        </section>
+
+        <!-- Route Routing Specifications: Headers Vertical, Options Horizontal -->
+        <section aria-labelledby="routing-heading" class="space-y-4">
+          <h2 id="routing-heading" class="sr-only">Routing Locations</h2>
+
+          <!-- Vertical Header 1: From -->
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-slate-50/50 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-md bg-red-50 text-red-600 border border-red-200 flex items-center justify-center font-bold text-xs">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                </div>
+                <h3 class="text-sm font-bold text-[var(--foreground)] tracking-tight">From</h3>
+                <span class="text-[11px] text-[var(--muted-foreground)] font-normal">(Origin Location)</span>
+              </div>
+              <span class="text-[10px] text-slate-500 font-mono">Origin Routing</span>
+            </div>
+
+            <!-- Horizontal Options: City, Province/State, Postal/Zip, Country -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
+                <label for="from-city" class="block text-xs font-semibold text-[var(--foreground)] mb-1">City Name</label>
+                <input id="from-city" name="from_city" type="text" placeholder="e.g. San Francisco" value="San Francisco" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+              </div>
+              <div>
+                <label for="from-state" class="block text-xs font-semibold text-[var(--foreground)] mb-1">Province / State</label>
+                <input id="from-state" name="from_state" type="text" placeholder="e.g. CA" value="CA" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+              </div>
+              <div>
+                <label for="from-postal" class="block text-xs font-semibold text-[var(--foreground)] mb-1">Postal Code / Zip Code</label>
+                <input id="from-postal" name="from_postal" type="text" placeholder="e.g. 94103" value="94103" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-mono">
+              </div>
+              <div>
+                <label for="from-country" class="block text-xs font-semibold text-[var(--foreground)] mb-1">Country</label>
+                <select id="from-country" name="from_country" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-2 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500">
+                  <option value="US" selected>United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="MX">Mexico</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="DE">Germany</option>
+                  <option value="FR">France</option>
+                  <option value="AU">Australia</option>
+                  <option value="JP">Japan</option>
+                  <option value="CN">China</option>
+                  <option value="IN">India</option>
+                  <option value="BR">Brazil</option>
+                  <option value="IT">Italy</option>
+                  <option value="ES">Spain</option>
+                  <option value="NL">Netherlands</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vertical Header 2: To -->
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-slate-50/50 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-md bg-red-50 text-red-600 border border-red-200 flex items-center justify-center font-bold text-xs">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+                <h3 class="text-sm font-bold text-[var(--foreground)] tracking-tight">To</h3>
+                <span class="text-[11px] text-[var(--muted-foreground)] font-normal">(Destination Location)</span>
+              </div>
+              <span class="text-[10px] text-slate-500 font-mono">Destination Routing</span>
+            </div>
+
+            <!-- Horizontal Options: City, Province/State, Postal/Zip, Country -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
+                <label for="to-city" class="block text-xs font-semibold text-[var(--foreground)] mb-1">City Name</label>
+                <input id="to-city" name="to_city" type="text" placeholder="e.g. Chicago" value="Chicago" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+              </div>
+              <div>
+                <label for="to-state" class="block text-xs font-semibold text-[var(--foreground)] mb-1">Province / State</label>
+                <input id="to-state" name="to_state" type="text" placeholder="e.g. IL" value="IL" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+              </div>
+              <div>
+                <label for="to-postal" class="block text-xs font-semibold text-[var(--foreground)] mb-1">Postal Code / Zip Code</label>
+                <input id="to-postal" name="to_postal" type="text" placeholder="e.g. 60601" value="60601" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-mono">
+              </div>
+              <div>
+                <label for="to-country" class="block text-xs font-semibold text-[var(--foreground)] mb-1">Country</label>
+                <select id="to-country" name="to_country" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-2 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500">
+                  <option value="US" selected>United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="MX">Mexico</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="DE">Germany</option>
+                  <option value="FR">France</option>
+                  <option value="AU">Australia</option>
+                  <option value="JP">Japan</option>
+                  <option value="CN">China</option>
+                  <option value="IN">India</option>
+                  <option value="BR">Brazil</option>
+                  <option value="IT">Italy</option>
+                  <option value="ES">Spain</option>
+                  <option value="NL">Netherlands</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Status & Process Action -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-[var(--border)]">
+          <div id="batch-status-box" class="w-full sm:w-auto flex-1 p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-[11px] text-slate-600 font-mono flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+            <span>Ready for spreadsheet upload or location routing</span>
+          </div>
+
+          <button type="button" id="process-btn" onclick="processBatchQuotes()" class="w-full sm:w-auto min-w-[140px] bg-red-600 hover:bg-red-700 text-white font-medium text-xs py-2.5 px-6 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs" aria-label="Process shipping quote">
+            <span id="process-text">Process</span>
+            <span id="process-arrow" aria-hidden="true">→</span>
+            <span id="process-spinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          </button>
+        </div>
+      </article>
+    </main>
+
+    <!-- Semantic Footer -->
+    <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
+      <!-- Left: Logo & Links Directly Beside It -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <!-- Links beside the logo -->
+        <nav aria-label="Footer Navigation" class="flex items-center gap-4 text-xs font-medium">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Date at Bottom Right -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        September 28, 2026
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function toggleAccountMenu() {
+      const menu = document.getElementById('account-dropdown');
+      const btn = document.getElementById('account-menu-btn');
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !isExpanded);
+      menu.classList.toggle('hidden');
+    }
+
+    let selectedFile = null;
+
+    function loadSampleFile() {
+      fetch('/sample-sheets/ecommerce_parcels.xlsx')
+        .then(res => res.blob())
+        .then(blob => {
+          const file = new File([blob], 'ecommerce_parcels.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          selectedFile = file;
+          document.getElementById('drop-text').innerHTML = `<span class="text-red-600 font-semibold">${file.name}</span><br><span class="text-[10px] text-slate-500">Ready to quote (${(file.size / 1024).toFixed(1)} KB)</span>`;
+          const statusBox = document.getElementById('batch-status-box');
+          if (statusBox) {
+            statusBox.className = "w-full sm:w-auto flex-1 p-2.5 rounded-lg border border-red-200 bg-red-50 text-[11px] text-red-800 font-mono flex items-center gap-2";
+            statusBox.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-600"></span><span>Ready: ${file.name} (7 shipments). Click 'Process →'</span>`;
+          }
+          // Populate From & To
+          const fc = document.getElementById('from-city'); if (fc) fc.value = "San Francisco";
+          const fs = document.getElementById('from-state'); if (fs) fs.value = "CA";
+          const fp = document.getElementById('from-postal'); if (fp) fp.value = "94103";
+          const fcn = document.getElementById('from-country'); if (fcn) fcn.value = "US";
+
+          const tc = document.getElementById('to-city'); if (tc) tc.value = "Chicago";
+          const ts = document.getElementById('to-state'); if (ts) ts.value = "IL";
+          const tp = document.getElementById('to-postal'); if (tp) tp.value = "60601";
+          const tcn = document.getElementById('to-country'); if (tcn) tcn.value = "US";
+        })
+        .catch(err => {
+          console.error("Could not load sample sheet", err);
+        });
+    }
+
+    function handleFile(e) {
+      const file = e.target.files[0];
+      if (file) {
+        selectedFile = file;
+        document.getElementById('drop-text').innerHTML = `<span class="text-red-600 font-semibold">${file.name}</span><br><span class="text-[10px] text-slate-500">Ready to quote (${(file.size / 1024).toFixed(1)} KB)</span>`;
+        const statusBox = document.getElementById('batch-status-box');
+        if (statusBox) {
+          statusBox.className = "w-full sm:w-auto flex-1 p-2.5 rounded-lg border border-red-200 bg-red-50 text-[11px] text-red-800 font-mono flex items-center gap-2";
+          statusBox.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-600"></span><span>Ready: ${file.name}. Click 'Process →'</span>`;
+        }
+      }
+    }
+
+    function processBatchQuotes() {
+      const fileInput = document.getElementById('file-input');
+      const file = selectedFile || (fileInput.files && fileInput.files[0]);
+      const statusBox = document.getElementById('batch-status-box');
+      const btn = document.getElementById('process-btn');
+      const spinner = document.getElementById('process-spinner');
+      const text = document.getElementById('process-text');
+      const arrow = document.getElementById('process-arrow');
+
+      if (!file) {
+        const fp = document.getElementById('from-postal');
+        const tp = document.getElementById('to-postal');
+        if (fp && tp && fp.value && tp.value) {
+          statusBox.className = "w-full sm:w-auto flex-1 p-2.5 rounded-lg border border-amber-300 bg-amber-50 text-[11px] text-amber-800 font-medium flex items-center gap-2";
+          statusBox.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Auto-loading spreadsheet for ${document.getElementById('from-city').value || 'Origin'} → ${document.getElementById('to-city').value || 'Destination'}... Click 'Process →'</span>`;
+          loadSampleFile();
+          return;
+        }
+        statusBox.className = "w-full sm:w-auto flex-1 p-2.5 rounded-lg border border-amber-300 bg-amber-50 text-[11px] text-amber-800 font-medium flex items-center gap-2";
+        statusBox.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Please select or drop an Excel spreadsheet (.xlsx, .xls) first.</span>`;
+        return;
+      }
+
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+      arrow.classList.add('hidden');
+      text.textContent = "Calculating Rates...";
+      statusBox.className = "p-2 rounded-lg border border-red-200 bg-red-50 text-[11px] text-red-700 font-mono";
+      statusBox.textContent = "Parsing columns, mapping cell coordinates, applying broker markup...";
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      fetch('/api/quotes/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(data => { throw new Error(data.detail || "Rate calculation failed."); });
+        }
+        return res.json();
+      })
+      .then(data => {
+        statusBox.className = "p-2 rounded-lg border border-emerald-300 bg-emerald-50 text-[11px] text-emerald-800 font-semibold";
+        statusBox.textContent = `✓ Successfully calculated ${data.total_quotes} rates with cell coordinates! Redirecting to History...`;
+        setTimeout(() => {
+          window.location.href = "/console/history";
+        }, 700);
+      })
+      .catch(err => {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        arrow.classList.remove('hidden');
+        text.textContent = "Process";
+        statusBox.className = "p-2 rounded-lg border border-red-300 bg-red-50 text-[11px] text-red-800 font-medium";
+        statusBox.textContent = err.message || "Failed to process quote.";
+      });
+    }
+
+    const dropzone = document.getElementById('dropzone');
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-red-500', 'bg-red-50/30');
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('border-red-500', 'bg-red-50/30');
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-red-500', 'bg-red-50/30');
+      if (e.dataTransfer.files.length) {
+        document.getElementById('file-input').files = e.dataTransfer.files;
+        handleFile({ target: { files: e.dataTransfer.files } });
+      }
+    });
+
+    window.addEventListener('click', function(e) {
+      const accBtn = document.getElementById('account-menu-btn');
+      const accMenu = document.getElementById('account-dropdown');
+      if (accBtn && accMenu && !accBtn.contains(e.target) && !accMenu.contains(e.target)) {
+        accMenu.classList.add('hidden');
+        accBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  </script>
+</body>
+</html>

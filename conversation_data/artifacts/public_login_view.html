@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Ratesift | Account Login & Quoting Console Access</title>
+  <meta name="title" content="Ratesift | Account Login & Quoting Console Access">
+  <meta name="description" content="Log in to your Ratesift account to manage Excel rate sheets, view quote history with spreadsheet coordinates, and configure custom profit markup rules.">
+  <meta name="keywords" content="Ratesift login, shipping quote console, rate sheet login, freight broker portal, spreadsheet shipping account">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="Ratesift Technologies">
+  <link rel="canonical" href="https://ratesift.io/login">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ratesift.io/login">
+  <meta property="og:site_name" content="Ratesift">
+  <meta property="og:title" content="Ratesift | Account Login & Quoting Console Access">
+  <meta property="og:description" content="Access your saved rate sheets, spreadsheet coordinate archives, and custom margin rules.">
+  <meta property="og:image" content="https://ratesift.io/assets/og-login.jpg">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ratesift.io/login">
+  <meta name="twitter:title" content="Ratesift | Account Login & Quoting Console Access">
+  <meta name="twitter:description" content="Log in to Ratesift's automated spreadsheet shipping rate quoting platform.">
+  <meta name="twitter:image" content="https://ratesift.io/assets/twitter-login.jpg">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD Structured Data: WebPage & BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "name": "Ratesift Account Login",
+        "url": "https://ratesift.io/login",
+        "description": "Secure account login page for Ratesift users accessing batch rate quoting and history tools."
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ratesift.io/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Log in",
+            "item": "https://ratesift.io/login"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Semantic Navigation Bar (Identical to Landing, Demo & Pricing) -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative z-20 m-0">
+      <!-- Left: Brand Identity -->
+      <a href="/" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Ratesift Home">
+        <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-8 md:h-9 w-auto object-contain" />
+      </a>
+
+      <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
+      <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
+        <a href="/" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Home</a>
+        <a href="/demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Demo</a>
+        <a href="/pricing" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Pricing</a>
+      </nav>
+
+      <!-- Right: User Conversion CTAs -->
+      <div class="flex items-center gap-3 z-10">
+        <a href="/login" aria-current="page" class="text-xs font-semibold text-red-600 border-b-2 border-red-600 transition-colors px-2 py-1" title="Currently on Login page">
+          Log in
+        </a>
+        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Create a free Ratesift account">
+          Get Started
+        </a>
+        <!-- Mobile Menu Toggle Button (Phone Only) -->
+        <button type="button" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" class="md:hidden p-1.5 rounded-lg border border-[var(--border)] text-slate-600 hover:bg-black/5 focus:outline-hidden transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Collapsible Mobile Navigation Drawer for Phones (< 768px) -->
+    <nav id="mobile-nav-drawer" aria-label="Mobile Navigation" class="hidden md:hidden border-b border-[var(--border)] bg-slate-50/95 px-4 py-3 space-y-1.5 text-xs font-medium transition-all">
+      <a href="/" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Home</a>
+      <a href="/demo" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Demo</a>
+      <a href="/pricing" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Pricing</a>
+      <div class="pt-2 mt-2 border-t border-[var(--border)] flex items-center justify-between">
+        <a href="/login" class="text-xs font-semibold px-2 py-1 rounded text-red-600 font-bold bg-red-50/80">Log in</a>
+        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs ">Get Started</a>
+      </div>
+    </nav>
+
+    <!-- Main Content Area: Centered Login Card -->
+    <main id="main-content" role="main" class="flex-1 flex items-center justify-center p-6 md:p-10">
+      
+      <div class="w-full max-w-md space-y-6">
+        
+        <!-- Header Text -->
+        <div class="text-center space-y-2">
+          <div class="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 text-red-600 flex items-center justify-center mx-auto text-xl shadow-2xs font-bold" aria-hidden="true">ri</div>
+          <h1 class="text-2xl font-extrabold tracking-tight text-[var(--foreground)]">
+            Welcome back
+          </h1>
+          <p class="text-xs text-[var(--muted-foreground)] max-w-sm mx-auto leading-relaxed">
+            Enter your credentials to access your rate calculation console, saved spreadsheets, and coordinate history.
+          </p>
+        </div>
+
+        <!-- 1-Click Interactive Demo Fast-Fill Alert -->
+        <div class="p-3 bg-red-50/70 border border-red-200 rounded-xl flex items-center justify-between text-xs text-red-900">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true">💡</span>
+            <span>Testing the demo?</span>
+          </div>
+          <button type="button" onclick="prefillDemoUser()" class="px-2.5 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold text-[11px] transition-colors shadow-2xs">
+            Auto-fill Alex Rivers
+          </button>
+        </div>
+
+        <!-- Accessible Authentication Form -->
+        <div class="border border-[var(--border)] rounded-2xl bg-[var(--card)] p-6 shadow-sm space-y-4">
+          
+          <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4" novalidate>
+            
+            <!-- Email Address Field -->
+            <div class="space-y-1.5">
+              <label for="login-email" class="block text-xs font-bold text-[var(--foreground)]">
+                Email address
+              </label>
+              <div class="relative">
+                <input 
+                  type="email" 
+                  id="login-email" 
+                  name="email" 
+                  required 
+                  autocomplete="username" 
+                  placeholder="name@company.com" 
+                  class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all font-mono"
+                  aria-describedby="email-error"
+                >
+              </div>
+              <div id="email-error" class="hidden text-[11px] text-red-600 font-medium">Please enter a valid email address.</div>
+            </div>
+
+            <!-- Password Field with Show/Hide Toggle -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label for="login-password" class="block text-xs font-bold text-[var(--foreground)]">
+                  Password
+                </label>
+                <a href="#" onclick="alert('Password reset link sent to registered email address.'); return false;" class="text-[11px] text-red-600 hover:underline font-medium">
+                  Forgot password?
+                </a>
+              </div>
+              <div class="relative">
+                <input 
+                  type="password" 
+                  id="login-password" 
+                  name="password" 
+                  required 
+                  autocomplete="current-password" 
+                  placeholder="••••••••••••" 
+                  class="w-full pl-3 pr-10 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all font-mono"
+                  aria-describedby="password-error"
+                >
+                <button 
+                  type="button" 
+                  onclick="togglePasswordVisibility()" 
+                  id="toggle-pwd-btn" 
+                  aria-label="Toggle password visibility" 
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 text-xs focus:outline-hidden"
+                >
+                  <span id="pwd-icon-show">👁️</span>
+                </button>
+              </div>
+              <div id="password-error" class="hidden text-[11px] text-red-600 font-medium">Password is required.</div>
+            </div>
+
+            <!-- Remember Me Checkbox -->
+            <div class="flex items-center justify-between pt-1">
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  id="remember-me" 
+                  name="remember" 
+                  checked 
+                  class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 focus:ring-1"
+                >
+                <span class="text-xs text-[var(--muted-foreground)]">Remember this browser for 30 days</span>
+              </label>
+            </div>
+
+            <!-- Submit Button with Interactive Feedback -->
+            <button 
+              type="submit" 
+              id="submit-btn" 
+              class="w-full py-2.5 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition-all shadow-xs flex items-center justify-center gap-2"
+            >
+              <span id="submit-text">Log in →</span>
+              <span id="login-spinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            </button>
+
+            <!-- Status Feedback Region -->
+            <div id="login-status" role="status" aria-live="polite" class="text-center text-xs"></div>
+
+          </form>
+
+          <!-- Divider -->
+          <div class="relative py-2">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-[var(--border)]"></div>
+            </div>
+            <div class="relative flex justify-center text-[10px] uppercase">
+              <span class="bg-[var(--card)] px-2 text-[var(--muted-foreground)] font-semibold">Or continue with</span>
+            </div>
+          </div>
+
+          <!-- Enterprise SSO Button -->
+          <button 
+            type="button" 
+            onclick="prefillDemoUser(); document.getElementById('submit-btn').click();" 
+            class="w-full py-2 px-3 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-slate-50 text-[var(--foreground)] font-medium text-xs transition-colors flex items-center justify-center gap-2"
+          >
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            <span>Single Sign-On (SAML / Okta)</span>
+          </button>
+
+        </div>
+
+        <!-- Registration Link & Trust Footer -->
+        <div class="text-center space-y-3">
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Don't have an account yet? 
+            <a href="/pricing" class="text-red-600 hover:underline font-bold">
+              Start Free on Starter Tier →
+            </a>
+          </p>
+
+          <div class="flex items-center justify-center gap-4 text-[11px] text-[var(--muted-foreground)] pt-1">
+            <span class="flex items-center gap-1">
+              <span>🔒</span> 256-bit TLS Encryption
+            </span>
+            <span>•</span>
+            <span class="flex items-center gap-1">
+              <span>📊</span> Spreadsheet Data Privacy
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Semantic Footer (Identical to Landing, Demo & Pricing Pages) -->
+    <footer role="contentinfo" class="mt-8 px-6 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-4 bg-[var(--card)]">
+      <!-- Left: Logo & Crawlable Navigation Links -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <!-- Crawlable Footer Links -->
+        <nav aria-label="Footer Legal and Support Navigation" class="flex items-center gap-4 text-xs font-medium text-[var(--muted-foreground)]">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Copyright & Current Date -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        September 28, 2026
+      </div>
+    </footer>
+  </div>
+
+  <!-- Interactive Login Page Script -->
+  <script>
+    function prefillDemoUser() {
+      document.getElementById('login-email').value = "alex.rivers@techcorp.io";
+      document.getElementById('login-password').value = "ShipFlowDemo2026!";
+      
+      const status = document.getElementById('login-status');
+      status.className = "text-center text-xs text-red-600 font-semibold";
+      status.textContent = "Alex Rivers credentials loaded. Click 'Log in' to access console.";
+    }
+
+    function togglePasswordVisibility() {
+      const pwd = document.getElementById('login-password');
+      const icon = document.getElementById('pwd-icon-show');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.textContent = '🙈';
+      } else {
+        pwd.type = 'password';
+        icon.textContent = '👁️';
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const status = document.getElementById('login-status');
+      const spinner = document.getElementById('login-spinner');
+      const submitText = document.getElementById('submit-text');
+      const submitBtn = document.getElementById('submit-btn');
+
+      if (!email || !email.includes('@')) {
+        document.getElementById('email-error').classList.remove('hidden');
+        return;
+      } else {
+        document.getElementById('email-error').classList.add('hidden');
+      }
+
+      if (!password) {
+        document.getElementById('password-error').classList.remove('hidden');
+        return;
+      } else {
+        document.getElementById('password-error').classList.add('hidden');
+      }
+
+      // Simulate authenticating and redirecting
+      spinner.classList.remove('hidden');
+      submitText.textContent = "Authenticating...";
+      submitBtn.disabled = true;
+
+      status.className = "text-center text-xs text-slate-500 font-medium";
+      status.textContent = "Verifying credentials and establishing session...";
+
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('password', password);
+
+      fetch('/api/auth/login', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("Invalid email or password.");
+        }
+        return res.json();
+      })
+      .then(data => {
+        status.className = "text-center text-xs text-emerald-600 font-semibold";
+        status.textContent = "✓ Authentication successful! Loading Quoting Console...";
+        setTimeout(() => {
+          window.location.href = data.redirect || "/console/new-quote";
+        }, 400);
+      })
+      .catch(err => {
+        spinner.classList.add('hidden');
+        submitText.textContent = "Log in →";
+        submitBtn.disabled = false;
+        status.className = "text-center text-xs text-red-600 font-semibold";
+        status.textContent = err.message || "Authentication failed. Please try again.";
+      });
+    }
+  
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+      }
+    }</script>
+</body>
+</html>

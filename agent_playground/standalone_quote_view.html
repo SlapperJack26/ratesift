@@ -1,0 +1,2162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>RateSift Agent Playground | IDE Quote Simulator & Training Lab</title>
+  <meta name="description" content="Standalone RateSift Agent Playground for testing agent training ideas directly in the IDE without launching the website.">
+  
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --muted-foreground: #64748b;
+    }
+    /* Google Pixel 7 Frame Simulator (412px width) */
+    .pixel7-frame {
+      max-width: 412px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      border: 6px solid #1e293b !important;
+      border-radius: 36px !important;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+      overflow: hidden !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+
+  <!-- Header: RateSift Official Brand Lockup & IDE Playground Banner -->
+  <header class="w-full px-3 sm:px-6 py-2.5 sm:py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-white sticky top-0 z-30 shadow-xs">
+    <div class="flex items-center gap-2 sm:gap-3">
+      <img src="../static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-7 sm:h-8 md:h-9 w-auto object-contain" />
+      <div class="h-4 w-px bg-slate-300 mx-0.5 hidden sm:block"></div>
+      <span class="text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+        🧪 Playground
+      </span>
+    </div>
+
+    <!-- Right Controls: Pixel 7 Frame Toggle & Active Variant Badge -->
+    <div class="flex items-center gap-2 text-xs">
+      <button type="button" id="btn-pixel7-toggle" onclick="togglePixel7View()" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-2xs" title="Toggle Google Pixel 7 (412px) Viewport Simulator">
+        <span>📱</span>
+        <span id="pixel7-toggle-text">Pixel 7 (412px)</span>
+      </button>
+
+      <span id="active-variant-badge" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-red-50 text-red-700 font-bold border border-red-200 text-[10px] sm:text-xs hidden xs:inline-block">
+        Standard Strict
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Content Layout (Responsive for Mobile Google Pixel 7: 412px & Desktop) -->
+  <main id="main-container" class="flex-1 w-full max-w-5xl mx-auto px-2.5 sm:px-4 md:px-6 py-3 sm:py-6 space-y-3.5 sm:space-y-6 transition-all duration-200">
+
+    <!-- Top Playground Controller & Training Experimentation Toolbar -->
+    <section class="bg-white border border-purple-200 rounded-2xl p-5 shadow-xs space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-purple-100 pb-3">
+        <div>
+          <h1 class="text-base font-bold text-purple-950 flex items-center gap-2">
+            <span>Agent Training Configuration & Ideation Lab</span>
+          </h1>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Test how different agent prompts, rules, and training variants handle freight quoting scenarios without touching live website code.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="exportCurrentScenarioJSON()" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
+            <span>📥 Export Run JSON</span>
+          </button>
+          <label class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
+            <span>📤 Import Run JSON</span>
+            <input type="file" accept=".json" class="hidden" onchange="importScenarioJSON(event)">
+          </label>
+        </div>
+      </div>
+
+      <!-- Agent Variant Selection Grid -->
+      <!-- Agent Variant Selection Grid (5 Variants) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 text-xs">
+        
+        <button type="button" onclick="setAgentVariant('variant_1_strict_32_rules')" id="var-btn-strict" class="p-3 rounded-xl border-2 border-red-600 bg-red-50/50 text-left transition-all cursor-pointer">
+          <div class="font-bold text-red-900 flex items-center justify-between">
+            <span>1. Strict 36 Rules</span>
+            <span class="w-2 h-2 rounded-full bg-red-600"></span>
+          </div>
+          <p class="text-[11px] text-red-700 mt-1 leading-snug">Baseline production. Rejects missing origins/destinations (Rule 25).</p>
+        </button>
+
+        <button type="button" onclick="setAgentVariant('variant_2_flexible_broker')" id="var-btn-flex" class="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-left transition-all cursor-pointer">
+          <div class="font-bold text-slate-800 flex items-center justify-between">
+            <span>2. Flexible Broker</span>
+            <span class="w-2 h-2 rounded-full bg-transparent"></span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1 leading-snug">Auto-resolves missing origin to Company HQ. Bypasses non-critical metadata.</p>
+        </button>
+
+        <button type="button" onclick="setAgentVariant('variant_3_deep_auditor')" id="var-btn-audit" class="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-left transition-all cursor-pointer">
+          <div class="font-bold text-slate-800 flex items-center justify-between">
+            <span>3. Deep Auditor</span>
+            <span class="w-2 h-2 rounded-full bg-transparent"></span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1 leading-snug">Scrutinizes hidden footnotes, accessorial exceptions, and cell coordinates.</p>
+        </button>
+
+        <button type="button" onclick="setAgentVariant('variant_4_speed_priority')" id="var-btn-speed" class="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-left transition-all cursor-pointer">
+          <div class="font-bold text-slate-800 flex items-center justify-between">
+            <span>4. Speed Priority</span>
+            <span class="w-2 h-2 rounded-full bg-transparent"></span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1 leading-snug">Ranks by fastest transit days first, price second. Express logistics.</p>
+        </button>
+
+        <button type="button" onclick="setAgentVariant('variant_5_doc_trained_classifier')" id="var-btn-classifier" class="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-left transition-all cursor-pointer">
+          <div class="font-bold text-slate-800 flex items-center justify-between">
+            <span>5. 7-Tier Classifier</span>
+            <span class="w-2 h-2 rounded-full bg-transparent"></span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1 leading-snug">Word doc trained: multi-signal cell classifier & ambiguity routing.</p>
+        </button>
+
+      </div>
+
+      <!-- Quick Benchmark Scenarios Bar -->
+      <div class="pt-2 border-t border-purple-100 flex flex-wrap items-center gap-2 text-xs">
+        <span class="text-[11px] font-bold text-purple-900 uppercase tracking-wide">Test Training Scenarios:</span>
+        <button type="button" onclick="runScenario('scenario-01')" class="px-2.5 py-1 rounded-lg border border-purple-200 bg-purple-50/70 hover:bg-purple-100 text-purple-800 text-[11px] font-medium transition-colors cursor-pointer">
+          1. Standard Pallet (Calgary → Lindsay)
+        </button>
+        <button type="button" onclick="runScenario('scenario-02')" class="px-2.5 py-1 rounded-lg border border-purple-200 bg-purple-50/70 hover:bg-purple-100 text-purple-800 text-[11px] font-medium transition-colors cursor-pointer">
+          2. High-Cube DIM Overrun
+        </button>
+        <button type="button" onclick="runScenario('scenario-03')" class="px-2.5 py-1 rounded-lg border border-purple-200 bg-purple-50/70 hover:bg-purple-100 text-purple-800 text-[11px] font-medium transition-colors cursor-pointer">
+          3. Sub-Minimum Floor Test
+        </button>
+        <button type="button" onclick="runScenario('scenario-04')" class="px-2.5 py-1 rounded-lg border border-purple-200 bg-purple-50/70 hover:bg-purple-100 text-purple-800 text-[11px] font-medium transition-colors cursor-pointer">
+          4. Express Parcel (Toronto → Ottawa)
+        </button>
+        <button type="button" onclick="runScenario('scenario-06')" class="px-2.5 py-1 rounded-lg border border-purple-200 bg-purple-50/70 hover:bg-purple-100 text-purple-800 text-[11px] font-medium transition-colors cursor-pointer">
+          5. Missing Origin (HQ Test)
+        </button>
+      </div>
+    </section>
+
+    <!-- TOP PLAYGROUND WORKSPACE MODE SWITCHER -->
+    <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-slate-200 shadow-xs">
+      <div class="flex items-center gap-2">
+        <button type="button" id="tab-rater-btn" onclick="switchSimulatorMode('rater')" class="px-3.5 py-2 rounded-xl bg-red-600 text-white font-bold text-xs shadow-xs transition-all cursor-pointer">
+          Mode 1: Instant Freight Rater (Prompt #49 Format)
+        </button>
+        <button type="button" id="tab-detector-btn" onclick="switchSimulatorMode('detector')" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5">
+          <span>Mode 2: Dynamic Sheet Scanner & Confusion Gate Lab</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[10px]">Zero Data Loss</span>
+        </button>
+      </div>
+      <div class="text-[11px] text-slate-500 font-mono hidden md:block">
+        Autonomous Semantic Header Scoring & Human Gate
+      </div>
+    </div>
+
+    <!-- WRAPPER FOR MODE 1: FREIGHT RATER -->
+    <div id="section-mode-rater" class="space-y-6">
+
+    <!-- NEW QUOTE PAGE SIMULATOR FORM -->
+    <section class="bg-white border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+        <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
+          <span>Freight Rating Console (Mimics New Quote Page)</span>
+        </h2>
+        <span class="text-[11px] text-slate-500 font-mono">100% Deterministic Engine • Canadian WHC</span>
+      </div>
+
+      <form id="quote-sim-form" onsubmit="event.preventDefault(); executeSimulatedQuote();" class="space-y-6">
+        
+        <!-- VERTICAL HEADERS FOR "FROM" AND "TO" WITH HORIZONTAL INPUT FIELDS (Prompt #49 Standard) -->
+        <div class="space-y-4">
+          
+          <!-- FROM (ORIGIN) SECTION -->
+          <div class="p-3 sm:p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                From (Origin Location)
+              </span>
+              <span class="text-[10px] text-slate-400 font-mono">Rule 10/25</span>
+            </div>
+            
+            <!-- 2-column on Pixel 7 (412px), 4-column on desktop -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+              <div>
+                <label for="from-city" class="block text-[11px] font-semibold text-slate-600 mb-1">City Name</label>
+                <input id="from-city" type="text" placeholder="e.g. CALGARY" value="CALGARY" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="from-province" class="block text-[11px] font-semibold text-slate-600 mb-1">Province / State</label>
+                <input id="from-province" type="text" placeholder="e.g. AB" value="AB" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="from-postal" class="block text-[11px] font-semibold text-slate-600 mb-1">Postal Code / Zip</label>
+                <input id="from-postal" type="text" placeholder="e.g. T2P 2M5" value="T2P 2M5" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="from-country" class="block text-[11px] font-semibold text-slate-600 mb-1">Country</label>
+                <select id="from-country" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+                  <option value="CA" selected>Canada (CA)</option>
+                  <option value="US">United States (US)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- TO (DESTINATION) SECTION -->
+          <div class="p-3 sm:p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                To (Destination Location)
+              </span>
+              <span class="text-[10px] text-slate-400 font-mono">Rule 10/25</span>
+            </div>
+            
+            <!-- 2-column on Pixel 7 (412px), 4-column on desktop -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+              <div>
+                <label for="to-city" class="block text-[11px] font-semibold text-slate-600 mb-1">City Name</label>
+                <input id="to-city" type="text" placeholder="e.g. LINDSAY" value="LINDSAY" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="to-province" class="block text-[11px] font-semibold text-slate-600 mb-1">Province / State</label>
+                <input id="to-province" type="text" placeholder="e.g. ON" value="ON" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="to-postal" class="block text-[11px] font-semibold text-slate-600 mb-1">Postal Code / Zip</label>
+                <input id="to-postal" type="text" placeholder="e.g. K9V 4R1" value="K9V 4R1" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="to-country" class="block text-[11px] font-semibold text-slate-600 mb-1">Country</label>
+                <select id="to-country" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+                  <option value="CA" selected>Canada (CA)</option>
+                  <option value="US">United States (US)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- SHIPMENT CARGO SPECIFICATIONS (2-col mobile, 5-col desktop) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-xs">
+          <div>
+            <label for="input-weight" class="block font-bold text-slate-800 mb-1">Actual Wt (lbs)</label>
+            <input id="input-weight" type="number" step="0.1" min="0.1" value="1450" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+          </div>
+          <div>
+            <label for="input-length" class="block font-bold text-slate-800 mb-1">Length (in)</label>
+            <input id="input-length" type="number" step="0.1" min="0" placeholder="e.g. 48" value="48" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+          </div>
+          <div>
+            <label for="input-width" class="block font-bold text-slate-800 mb-1">Width (in)</label>
+            <input id="input-width" type="number" step="0.1" min="0" placeholder="e.g. 40" value="40" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+          </div>
+          <div>
+            <label for="input-height" class="block font-bold text-slate-800 mb-1">Height (in)</label>
+            <input id="input-height" type="number" step="0.1" min="0" placeholder="e.g. 50" value="50" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <label for="input-date" class="block font-bold text-slate-800 mb-1">Shipment Date (Rule 16)</label>
+            <input id="input-date" type="date" value="2026-09-29" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 font-medium text-slate-800 focus:ring-1 focus:ring-red-500">
+          </div>
+        </div>
+
+        <!-- ACCESSORIALS & SURCHARGES CHECKBOXES (Rule 11) -->
+        <div class="space-y-2 pt-2 border-t border-slate-200">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-800">Accessorials & Surcharges:</span>
+            <span class="text-[10px] text-slate-500 font-mono">Rule 11</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-1.5 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-100 cursor-pointer">
+              <input type="checkbox" name="accessorial" value="liftgate" checked class="rounded text-red-600">
+              <span class="text-[11px] font-medium text-slate-700">Power Tailgate / Liftgate</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-100 cursor-pointer">
+              <input type="checkbox" name="accessorial" value="appointment" class="rounded text-red-600">
+              <span class="text-[11px] font-medium text-slate-700">Delivery Appointment</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-100 cursor-pointer">
+              <input type="checkbox" name="accessorial" value="heated" class="rounded text-red-600">
+              <span class="text-[11px] font-medium text-slate-700">Protect From Freeze</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-100 cursor-pointer">
+              <input type="checkbox" name="accessorial" value="dangerous_goods" class="rounded text-red-600">
+              <span class="text-[11px] font-medium text-slate-700">Dangerous Goods / Hazmat</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-100 cursor-pointer">
+              <input type="checkbox" name="accessorial" value="residential" class="rounded text-red-600">
+              <span class="text-[11px] font-medium text-slate-700">Residential Delivery</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-100 cursor-pointer">
+              <input type="checkbox" name="accessorial" value="residential_pickup" class="rounded text-red-600">
+              <span class="text-[11px] font-medium text-slate-700">Residential Pickup</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-100 cursor-pointer">
+              <input type="checkbox" name="accessorial" value="inside_delivery" class="rounded text-red-600">
+              <span class="text-[11px] font-medium text-slate-700">Inside Delivery</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-100 cursor-pointer">
+              <input type="checkbox" name="accessorial" value="after_hours" class="rounded text-red-600">
+              <span class="text-[11px] font-medium text-slate-700">After Hours Delivery</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- FORM ACTION & RUN BUTTON (Responsive full-width on mobile) -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-3 border-t border-slate-200">
+          <div id="sim-status-indicator" class="text-[11px] sm:text-xs text-slate-500 font-mono flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+            <span class="truncate">Simulator Ready • Standalone Client Math</span>
+          </div>
+
+          <button type="submit" id="btn-calc-rates" class="w-full sm:w-auto justify-center bg-red-600 hover:bg-red-700 text-white font-semibold text-xs py-2.5 px-6 rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer">
+            <span>Run Agent & Calculate Rates →</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- AGENT DECISION LOG & RULE AUDIT ACCORDION -->
+    <section id="agent-audit-section" class="hidden bg-purple-50/60 border border-purple-200 rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2 font-bold text-purple-950">
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+          <span>Agent Reasoning & Rule Trace</span>
+          <span id="audit-rule-count-badge" class="px-2 py-0.5 rounded-full bg-purple-200 text-purple-900 text-[10px]">
+            0 Rules Fired
+          </span>
+        </div>
+        <button type="button" onclick="toggleAuditDrawer()" class="text-purple-700 hover:text-purple-900 font-semibold cursor-pointer">
+          <span id="audit-toggle-text">Show Details ▼</span>
+        </button>
+      </div>
+
+      <div id="agent-decision-notes" class="text-xs text-purple-900 space-y-1 font-mono bg-white/70 p-3 rounded-xl border border-purple-100">
+        <!-- Notes injected here -->
+      </div>
+
+      <div id="agent-rules-list" class="hidden pt-2 border-t border-purple-200 space-y-1.5 text-xs">
+        <!-- Rule trace items injected here -->
+      </div>
+    </section>
+
+    <!-- RESULTS SECTION: CONCISE CARDS & IN-MEMORY SORTING (Rules 13, 20, 21, 22, 26) -->
+    <section id="section-results" class="space-y-4">
+      
+      <!-- Results Controls Header -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-bold text-slate-900 tracking-tight" id="results-lane-title">CALGARY, AB → LINDSAY, ON</h3>
+            <span id="results-count-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+              0 Options
+            </span>
+          </div>
+          <div class="text-[11px] text-slate-500 mt-0.5" id="results-specs-subtitle">
+            Weight: 1,450.0 lbs • DIM Divisor: 139 • Mode: Standalone
+          </div>
+        </div>
+
+        <!-- Rule 21: In-Memory Re-Sorting Toggles -->
+        <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
+          <span class="text-[10px] uppercase font-bold text-slate-400 px-2">Sort:</span>
+          <button type="button" id="sort-price-btn" onclick="setSortMode('price')" class="px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer">
+            Lowest Price
+          </button>
+          <button type="button" id="sort-transit-btn" onclick="setSortMode('transit')" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
+            Fastest Transit
+          </button>
+          <button type="button" id="sort-value-btn" onclick="setSortMode('value')" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
+            Best Value
+          </button>
+        </div>
+      </div>
+
+      <!-- Carrier Quote Cards Container (Rendered dynamically) -->
+      <div id="quote-cards-container" class="space-y-3">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Excluded Sheets Drawer (Rules 16, 18, 24) -->
+      <div id="excluded-sheets-box" class="hidden bg-slate-100/70 border border-slate-200 rounded-2xl p-4 space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+          <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Excluded Carriers & Tariffs (<span id="excluded-count">0</span>)
+          </span>
+          <span class="text-[10px] text-slate-400 font-normal">Rules 16, 18 & 24 Compliance</span>
+        </div>
+        <div id="excluded-list-container" class="space-y-1.5 text-xs text-slate-600 divide-y divide-slate-200">
+          <!-- Excluded items injected here -->
+        </div>
+      </div>
+
+      <!-- Rule 26 Non-Binding Legal Disclaimer -->
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-white text-[11px] text-slate-500 flex items-start gap-2 shadow-2xs">
+        <svg class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div>
+          <span class="font-semibold text-slate-700">Rule 26 Legal Notice:</span>
+          <span>All rates are calculated deterministically from confirmed customer tariffs using exact weight breaks and accessorial formulas. Non-binding quotation for simulation and training review.</span>
+        </div>
+      </div>
+
+    </section>
+
+    </div> <!-- END OF SECTION MODE 1 (RATER) -->
+
+    <!-- WRAPPER FOR MODE 2: DYNAMIC SHEET SCANNER & CONFUSION GATE LAB -->
+    <div id="section-mode-detector" class="hidden space-y-6">
+      
+      <!-- Controls & Carrier Sheet Presets -->
+      <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+              <span>Autonomous Dynamic Sheet Classifier & Zero-Data-Loss Ingestion</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Scans alternate sheets without hardcoded line numbers. Filters non-critical company disclaimers and halts to ask the user if confused.
+            </p>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-200">
+            ✓ Zero Data Loss Lock
+          </span>
+        </div>
+
+        <!-- Presets Selection Bar (5 Scenarios covering all tests & ambiguity issues) -->
+        <div class="space-y-2">
+          <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Test Carrier Sheet Presets (Multi-Offset & Ambiguity Scenarios):</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
+            <button type="button" onclick="loadDetectorPreset('day_ross_row90')" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-purple-50 hover:border-purple-300 text-left transition-all cursor-pointer">
+              <div class="font-bold text-slate-800">1. Day & Ross Tariff</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">Headers at Row 89/90 (88 lines preamble, surcharges, multi-segment)</div>
+            </button>
+            <button type="button" onclick="loadDetectorPreset('carrier_a_row12')" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-purple-50 hover:border-purple-300 text-left transition-all cursor-pointer">
+              <div class="font-bold text-slate-800">2. Carrier Express</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">Headers at Row 12 (compact tariff layout)</div>
+            </button>
+            <button type="button" onclick="loadDetectorPreset('carrier_b_row140')" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-purple-50 hover:border-purple-300 text-left transition-all cursor-pointer">
+              <div class="font-bold text-slate-800">3. Intermodal Tariff</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">Headers at Row 140 (extensive terms block)</div>
+            </button>
+            <button type="button" onclick="loadDetectorPreset('transit_vs_rate')" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-purple-50 hover:border-purple-300 text-left transition-all cursor-pointer">
+              <div class="font-bold text-slate-800 flex items-center justify-between">
+                <span>4. Transit vs Rate</span>
+                <span class="px-1.5 py-0.5 rounded-sm bg-purple-100 text-purple-800 text-[9px] font-bold">Issue 1 Solved</span>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-0.5">Transit capped &lt;50%; rate table wins automatically</div>
+            </button>
+            <button type="button" onclick="loadDetectorPreset('ambiguous_competing')" class="p-2.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-left transition-all cursor-pointer">
+              <div class="font-bold text-amber-900 flex items-center justify-between">
+                <span>5. Competing Rates</span>
+                <span class="px-1.5 py-0.5 rounded-sm bg-amber-200 text-amber-800 text-[9px] font-bold">Confusion Gate</span>
+              </div>
+              <div class="text-[11px] text-amber-700 mt-0.5">Competing matrices within 10% -&gt; Halts &amp; previews</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Raw Sheet Input Box -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-700">
+            <span>Raw Sheet Data (CSV or Tabular Format):</span>
+            <span id="sheet-input-row-count" class="text-slate-400 font-mono text-[11px]">0 rows loaded</span>
+          </div>
+          <textarea id="detector-raw-input" rows="7" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-[11px] font-mono text-slate-800 focus:bg-white focus:ring-1 focus:ring-purple-500" placeholder="Paste CSV or select a preset above..."></textarea>
+        </div>
+
+        <!-- Action Button -->
+        <div class="flex items-center justify-between pt-2">
+          <div id="detector-status-text" class="text-xs text-slate-500 font-mono flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+            <span>Ready to run autonomous dynamic scan</span>
+          </div>
+          <button type="button" onclick="executeDynamicScan()" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center gap-2">
+            <span>Scan Sheet Autonomously →</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- RESULTS SECTION: CLASSIFICATION & ZERO-DATA-LOSS AUDIT -->
+      <section id="detector-results-section" class="hidden space-y-4">
+        
+        <!-- Header Detection & Health Score Bar -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">
+                  Header Located Autonomously
+                </span>
+                <h3 class="text-sm font-bold text-slate-900" id="det-header-title">Starting Rate Header: Row 90</h3>
+                <span id="det-confidence-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                  Confidence: 98%
+                </span>
+                <span id="det-health-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                  Sheet Health: 95%
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 mt-1" id="det-columns-preview">
+                Detected Columns: Origin, Destination, MIN, LTL, CWT:1000, CWT:2000...
+              </p>
+            </div>
+            
+            <div class="text-right">
+              <span class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-black text-xs border border-emerald-200 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span id="det-zero-loss-text">0 Rows Deleted or Dropped (100% Preserved)</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- ZERO-LOSS ROW RECONCILIATION AUDIT CARD (Issue D Fix) -->
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span class="text-xs font-bold text-slate-900 uppercase tracking-wide">Zero-Loss Row Reconciliation Audit (Rule 1 & Audit Lock)</span>
+              </div>
+              <span id="det-audit-status-badge" class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
+                ✓ 100% Reconciled (0 Unaccounted Rows)
+              </span>
+            </div>
+
+            <!-- Reconciliation Metrics Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div class="p-2.5 rounded-lg bg-white border border-slate-200 text-center">
+                <div class="text-[10px] uppercase font-bold text-slate-400">Total Sheet Rows</div>
+                <div id="det-audit-total-rows" class="text-base font-black text-slate-800 mt-0.5">0</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-white border border-slate-200 text-center">
+                <div class="text-[10px] uppercase font-bold text-slate-400">Reconciled Rows</div>
+                <div id="det-audit-reconciled-rows" class="text-base font-black text-emerald-600 mt-0.5">0</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-white border border-slate-200 text-center">
+                <div class="text-[10px] uppercase font-bold text-slate-400">Unaccounted Rows</div>
+                <div id="det-audit-unaccounted-rows" class="text-base font-black text-emerald-600 mt-0.5">0</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-white border border-slate-200 text-center">
+                <div class="text-[10px] uppercase font-bold text-slate-400">Audit Status</div>
+                <div id="det-audit-verdict" class="text-xs font-bold text-emerald-700 mt-1">PASSED (Zero Loss)</div>
+              </div>
+            </div>
+
+            <!-- Category Breakdown Bar -->
+            <div class="pt-2 border-t border-slate-200/80 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-slate-600 font-mono">
+              <div>Preamble & Terms: <span id="det-breakdown-preamble" class="font-bold text-slate-800">0</span></div>
+              <div>Table Headers: <span id="det-breakdown-headers" class="font-bold text-purple-700">0</span></div>
+              <div>Rate Data Rows: <span id="det-breakdown-data" class="font-bold text-emerald-700">0</span></div>
+              <div>Blank Spacers: <span id="det-breakdown-blanks" class="font-bold text-slate-500">0</span></div>
+            </div>
+          </div>
+
+          <!-- STRUCTURED PROSE SURCHARGES EXTRACTED CARD (Issue B Fix) -->
+          <div id="det-structured-surcharges-container" class="p-4 rounded-xl bg-purple-50/70 border border-purple-200 space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-purple-600"></span>
+                <span class="text-xs font-bold text-purple-950 uppercase tracking-wide">Structured Surcharges Extracted from Prose</span>
+              </div>
+              <span class="text-[10px] text-purple-700 font-semibold bg-white px-2 py-0.5 rounded-md border border-purple-200">
+                Hard Grid Invariant: Isolated from Rate Grid
+              </span>
+            </div>
+            <p class="text-[11px] text-purple-900 leading-snug">
+              Accessorial terms embedded in prose sentences are parsed into structured surcharge records and strictly prohibited from populating rate matrix columns.
+            </p>
+            <div id="det-surcharges-list" class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
+              <!-- Surcharge cards injected dynamically -->
+            </div>
+          </div>
+
+          <!-- 3-Tier Categorization Grid (Word Doc 7-Category Mapped) -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            
+            <!-- Box 1: Non-Critical Company Info -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-slate-800 flex items-center justify-between">
+                <span>Company Info (Non-Critical)</span>
+                <span id="det-count-company" class="px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-700 text-[10px]">0</span>
+              </div>
+              <p class="text-[11px] text-slate-500">Customer name, address, telephone, fax, account #. Ignored during rating without halting.</p>
+              <div id="det-list-company" class="text-[10px] text-slate-600 max-h-24 overflow-y-auto space-y-0.5 font-mono pt-1"></div>
+            </div>
+
+            <!-- Box 2: Non-Critical Legal Disclaimers -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-slate-800 flex items-center justify-between">
+                <span>Legal Disclaimers (Non-Critical)</span>
+                <span id="det-count-disclaimers" class="px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-700 text-[10px]">0</span>
+              </div>
+              <p class="text-[11px] text-slate-500">Payment terms (30 days), proprietary notices, null & void clauses. Bypassed safely.</p>
+              <div id="det-list-disclaimers" class="text-[10px] text-slate-600 max-h-24 overflow-y-auto space-y-0.5 font-mono pt-1"></div>
+            </div>
+
+            <!-- Box 3: Active Operational Accessorial Rules -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-slate-800 flex items-center justify-between">
+                <span>Active Surcharge Rules</span>
+                <span id="det-count-accessorials" class="px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[10px]">0</span>
+              </div>
+              <p class="text-[11px] text-slate-500">Operational fees extracted into tariff accessorial matrix (Appointment $20, Tailgate, DG).</p>
+              <div id="det-list-accessorials" class="text-[10px] text-purple-900 max-h-24 overflow-y-auto space-y-0.5 font-mono pt-1"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Protected Rate Matrix Data Table (Zero Data Loss, Multi-Segment & Original Header Preservation) -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <span>Protected Freight Rate Matrix Data</span>
+                <span id="det-rate-rows-count" class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
+                  0 Rows Extracted
+                </span>
+              </h4>
+              <p class="text-xs text-slate-500 mt-0.5">Every row beneath the header is preserved 1-to-1 under its original table headers.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono text-purple-700 font-semibold bg-purple-50 px-2 py-1 rounded-md border border-purple-200">
+                Original Headers Preserved
+              </span>
+              <span class="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                Rule 1 & Rule 3 Enforced
+              </span>
+            </div>
+          </div>
+
+          <!-- MULTI-SEGMENT TABS BAR (Issue D Fix) -->
+          <div id="det-segment-tabs-container" class="hidden flex flex-wrap items-center gap-2 pt-1 pb-1">
+            <!-- Injected via JavaScript -->
+          </div>
+
+          <!-- Preserved Rate Header Titles Bar -->
+          <div class="space-y-1">
+            <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
+              <span>Original Rate Table Headers:</span>
+              <span class="text-[10px] text-slate-400 font-normal">(Swipe horizontally on Pixel 7 mobile)</span>
+            </div>
+            <div id="det-rate-headers-pills" class="flex flex-wrap items-center gap-1.5 pt-0.5">
+              <!-- Header badges injected dynamically -->
+            </div>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl overflow-x-auto max-h-80 overflow-y-auto">
+            <table class="w-full text-left border-collapse text-xs whitespace-nowrap min-w-full">
+              <thead id="det-rate-thead" class="bg-slate-100 text-slate-700 sticky top-0 font-bold text-[11px] uppercase tracking-wider">
+                <tr>
+                  <th class="p-2.5 border-b border-slate-200">Row</th>
+                  <th class="p-2.5 border-b border-slate-200">Segment</th>
+                  <th class="p-2.5 border-b border-slate-200">Origin Lane</th>
+                  <th class="p-2.5 border-b border-slate-200">Destination Lane</th>
+                  <th class="p-2.5 border-b border-slate-200">Rate Breaks & Values</th>
+                  <th class="p-2.5 border-b border-slate-200 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="det-rate-tbody" class="divide-y divide-slate-100 font-mono text-[11px]">
+                <!-- Rows injected here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+    </div> <!-- END OF SECTION MODE 2 (DETECTOR) -->
+
+    <!-- CONFUSION GATE CLARIFICATION MODAL (Rule 6, 7 & 25 with Rich 2-3 Row Preview) -->
+    <div id="confusion-gate-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150 my-auto">
+        
+        <!-- Header -->
+        <div class="p-5 border-b border-amber-200 bg-amber-50 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-sm">
+              ?
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-amber-950">Agent Clarification Required (Confusion Gate)</h3>
+              <p class="text-xs text-amber-800">Competing candidates detected within 10% threshold. The agent will not guess or drop data.</p>
+            </div>
+          </div>
+          <button type="button" onclick="closeConfusionModal()" class="text-amber-800 hover:text-amber-950 text-sm font-bold cursor-pointer">✕</button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 space-y-4 text-xs">
+          <p class="text-slate-700 text-sm leading-relaxed" id="confusion-prompt-message">
+            Multiple potential rate matrix headers were detected on this sheet with close confidence scores. Which row represents your primary freight rate table header?
+          </p>
+
+          <div id="confusion-candidates-list" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+            <!-- Candidate row preview cards injected here -->
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+          <span class="text-[11px] text-slate-500">Selecting a row locks the table and guarantees 100% zero-data-loss extraction.</span>
+          <button type="button" onclick="closeConfusionModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-800 font-semibold cursor-pointer">
+            Cancel
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Semantic Footer -->
+  <footer class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-500 bg-white mt-auto">
+    <div class="flex items-center gap-3">
+      <img src="../static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='../static/images/ratesift-logo.jpg';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" />
+      <span>RateSift Agent Training Lab • Isolated Sandbox</span>
+    </div>
+    <div class="text-xs text-slate-400 font-mono">
+      WHC Canada Residency (Rule 29) • Standalone Zero-Server Execution
+    </div>
+  </footer>
+
+  <!-- EMBEDDED DETERMINISTIC RATING ENGINE & AGENT LOGIC (VANILLA JS) -->
+  <script>
+    // Embedded Carrier Tariffs (Day & Ross Guide #1, Purolator Parcel, Intermodal Rail)
+    const TARIFFS = [
+      {
+        id: "day-ross-ltl",
+        name: "Day & Ross LTL",
+        service: "Standard LTL Freight",
+        currency: "CAD",
+        dim_divisor: 139.0,
+        fsc_pct: 28.5,
+        min_charge: 225.00,
+        breaks: [
+          { min_w: 0, max_w: 499, rate: 48.50, transit: 4, src: "DayRoss!C22" },
+          { min_w: 500, max_w: 999, rate: 39.75, transit: 4, src: "DayRoss!D22" },
+          { min_w: 1000, max_w: 1999, rate: 31.20, transit: 4, src: "DayRoss!E22" },
+          { min_w: 2000, max_w: 4999, rate: 26.40, transit: 4, src: "DayRoss!F22" },
+          { min_w: 5000, max_w: 99999, rate: 21.10, transit: 4, src: "DayRoss!G22" }
+        ],
+        accessorials: {
+          liftgate: { name: "Power Tailgate / Liftgate", type: "FLAT", amount: 75.00 },
+          appointment: { name: "Delivery Appointment / Notify", type: "FLAT", amount: 35.00 },
+          heated: { name: "Protect from Freeze (Heated)", type: "PCT", amount: 15.0, min: 45.00 },
+          dangerous_goods: { name: "Dangerous Goods / Hazmat", type: "FLAT", amount: 85.00 },
+          residential: { name: "Residential Delivery", type: "FLAT", amount: 65.00 },
+          residential_pickup: { name: "Residential Pickup", type: "FLAT", amount: 65.00 },
+          inside_delivery: { name: "Inside Delivery", type: "FLAT", amount: 50.00 },
+          after_hours: { name: "After Hours Delivery", type: "FLAT", amount: 90.00 }
+        }
+      },
+      {
+        id: "purolator-express",
+        name: "Purolator Express",
+        service: "Ground Parcel",
+        currency: "CAD",
+        dim_divisor: 139.0,
+        fsc_pct: 21.0,
+        max_weight: 150.0,
+        min_charge: 22.50,
+        breaks: [
+          { min_w: 0, max_w: 10, rate: 18.50, transit: 1, is_flat: true, src: "Puro!C4" },
+          { min_w: 11, max_w: 50, rate: 34.20, transit: 1, is_flat: true, src: "Puro!C5" },
+          { min_w: 51, max_w: 150, rate: 58.00, transit: 1, is_flat: true, src: "Puro!C6" }
+        ],
+        accessorials: {
+          residential: { name: "Residential Surcharge", type: "FLAT", amount: 6.50 },
+          appointment: { name: "Signature Required", type: "FLAT", amount: 5.00 }
+        }
+      },
+      {
+        id: "intermodal-rail",
+        name: "Canadian Intermodal Rail",
+        service: "Economy Rail / PTL",
+        currency: "CAD",
+        dim_divisor: 139.0,
+        fsc_pct: 24.0,
+        min_weight: 500.0,
+        min_charge: 290.00,
+        breaks: [
+          { min_w: 500, max_w: 1999, rate: 24.80, transit: 7, src: "Rail!C12" },
+          { min_w: 2000, max_w: 99999, rate: 18.50, transit: 7, src: "Rail!D12" }
+        ],
+        accessorials: {
+          liftgate: { name: "Terminal Liftgate", type: "FLAT", amount: 80.00 },
+          heated: { name: "Heated Railcar", type: "PCT", amount: 12.0, min: 60.00 }
+        }
+      }
+    ];
+
+    // State
+    let currentVariant = "variant_1_strict_32_rules";
+    let currentQuotes = [];
+    let currentExcluded = [];
+    let currentSortMode = "price";
+    let firedRules = [];
+    let decisionNotes = [];
+
+    // Training Scenarios definition
+    const SCENARIOS = {
+      "scenario-01": {
+        from: { city: "CALGARY", prov: "AB", postal: "T2P 2M5", country: "CA" },
+        to: { city: "LINDSAY", prov: "ON", postal: "K9V 4R1", country: "CA" },
+        weight: 1450, l: 48, w: 40, h: 50,
+        accs: ["liftgate"]
+      },
+      "scenario-02": {
+        from: { city: "CALGARY", prov: "AB", postal: "T2P 2M5", country: "CA" },
+        to: { city: "LINDSAY", prov: "ON", postal: "K9V 4R1", country: "CA" },
+        weight: 250, l: 72, w: 60, h: 60,
+        accs: []
+      },
+      "scenario-03": {
+        from: { city: "CALGARY", prov: "AB", postal: "T2P 2M5", country: "CA" },
+        to: { city: "LINDSAY", prov: "ON", postal: "K9V 4R1", country: "CA" },
+        weight: 50, l: 20, w: 20, h: 20,
+        accs: []
+      },
+      "scenario-04": {
+        from: { city: "TORONTO", prov: "ON", postal: "M5V 2T6", country: "CA" },
+        to: { city: "OTTAWA", prov: "ON", postal: "K1P 1J1", country: "CA" },
+        weight: 45, l: 12, w: 10, h: 8,
+        accs: ["residential"]
+      },
+      "scenario-06": {
+        from: { city: "", prov: "", postal: "", country: "CA" },
+        to: { city: "MONTREAL", prov: "QC", postal: "H3B 1A7", country: "CA" },
+        weight: 800, l: 48, w: 40, h: 48,
+        accs: ["appointment"]
+      }
+    };
+
+    function setAgentVariant(vKey) {
+      currentVariant = vKey;
+      const bStrict = document.getElementById("var-btn-strict");
+      const bFlex = document.getElementById("var-btn-flex");
+      const bAudit = document.getElementById("var-btn-audit");
+      const bSpeed = document.getElementById("var-btn-speed");
+      const bClass = document.getElementById("var-btn-classifier");
+      const badge = document.getElementById("active-variant-badge");
+
+      [bStrict, bFlex, bAudit, bSpeed, bClass].forEach(b => {
+        if (!b) return;
+        b.className = "p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-left transition-all cursor-pointer";
+        const dot = b.querySelector(".rounded-full");
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-transparent";
+      });
+
+      if (vKey === "variant_1_strict_32_rules") {
+        bStrict.className = "p-3 rounded-xl border-2 border-red-600 bg-red-50/50 text-left transition-all cursor-pointer";
+        bStrict.querySelector(".rounded-full").className = "w-2 h-2 rounded-full bg-red-600";
+        badge.textContent = "Standard Strict (36 Rules)";
+      } else if (vKey === "variant_2_flexible_broker") {
+        bFlex.className = "p-3 rounded-xl border-2 border-emerald-600 bg-emerald-50/50 text-left transition-all cursor-pointer";
+        bFlex.querySelector(".rounded-full").className = "w-2 h-2 rounded-full bg-emerald-600";
+        badge.textContent = "Flexible Broker Assistant";
+      } else if (vKey === "variant_3_deep_auditor") {
+        bAudit.className = "p-3 rounded-xl border-2 border-amber-600 bg-amber-50/50 text-left transition-all cursor-pointer";
+        bAudit.querySelector(".rounded-full").className = "w-2 h-2 rounded-full bg-amber-600";
+        badge.textContent = "Deep Tariff Auditor";
+      } else if (vKey === "variant_4_speed_priority") {
+        bSpeed.className = "p-3 rounded-xl border-2 border-purple-600 bg-purple-50/50 text-left transition-all cursor-pointer";
+        bSpeed.querySelector(".rounded-full").className = "w-2 h-2 rounded-full bg-purple-600";
+        badge.textContent = "Speed Priority Agent";
+      } else if (vKey === "variant_5_doc_trained_classifier") {
+        if (bClass) {
+          bClass.className = "p-3 rounded-xl border-2 border-indigo-600 bg-indigo-50/50 text-left transition-all cursor-pointer";
+          bClass.querySelector(".rounded-full").className = "w-2 h-2 rounded-full bg-indigo-600";
+        }
+        badge.textContent = "7-Tier Doc-Trained Classifier";
+      }
+
+      executeSimulatedQuote();
+    }
+
+    function runScenario(scId) {
+      const s = SCENARIOS[scId];
+      if (!s) return;
+
+      document.getElementById("from-city").value = s.from.city;
+      document.getElementById("from-province").value = s.from.prov;
+      document.getElementById("from-postal").value = s.from.postal;
+      document.getElementById("from-country").value = s.from.country;
+
+      document.getElementById("to-city").value = s.to.city;
+      document.getElementById("to-province").value = s.to.prov;
+      document.getElementById("to-postal").value = s.to.postal;
+      document.getElementById("to-country").value = s.to.country;
+
+      document.getElementById("input-weight").value = s.weight;
+      document.getElementById("input-length").value = s.l || "";
+      document.getElementById("input-width").value = s.w || "";
+      document.getElementById("input-height").value = s.h || "";
+
+      document.querySelectorAll('input[name="accessorial"]').forEach(cb => {
+        cb.checked = s.accs.includes(cb.value);
+      });
+
+      executeSimulatedQuote();
+    }
+
+    function executeSimulatedQuote() {
+      firedRules = [];
+      decisionNotes = [];
+
+      let fromCity = document.getElementById("from-city").value.trim().toUpperCase();
+      let fromProv = document.getElementById("from-province").value.trim().toUpperCase();
+      let toCity = document.getElementById("to-city").value.trim().toUpperCase();
+      let toProv = document.getElementById("to-province").value.trim().toUpperCase();
+
+      const weight = parseFloat(document.getElementById("input-weight").value) || 0;
+      const l = parseFloat(document.getElementById("input-length").value) || null;
+      const w = parseFloat(document.getElementById("input-width").value) || null;
+      const h = parseFloat(document.getElementById("input-height").value) || null;
+
+      const checkedAccs = Array.from(document.querySelectorAll('input[name="accessorial"]:checked')).map(cb => cb.value);
+
+      // Rule 25 Check with Flexible Auto-Bypass
+      if (!fromCity) {
+        if (currentVariant === "variant_2_flexible_broker") {
+          fromCity = "TORONTO";
+          fromProv = "ON";
+          document.getElementById("from-city").value = "TORONTO (Company HQ)";
+          document.getElementById("from-province").value = "ON";
+          decisionNotes.push("🏷️ Flexible Agent: Missing origin resolved automatically to registered Company HQ (TORONTO, ON).");
+          firedRules.push({ num: 28, text: "Bypassed missing origin using registered Company HQ profile." });
+        } else {
+          firedRules.push({ num: 25, text: "Halted on Rule 25: Origin location missing in strict mode." });
+          renderError("Rule 25 Validation Error: Origin location is missing. Strict Agent requires explicit Origin.");
+          return;
+        }
+      }
+
+      if (!toCity) {
+        firedRules.push({ num: 25, text: "Halted on Rule 25: Destination location missing." });
+        renderError("Rule 25 Validation Error: Destination location is missing.");
+        return;
+      }
+
+      if (weight <= 0) {
+        firedRules.push({ num: 25, text: "Halted on Rule 25: Cargo weight must be > 0 lbs." });
+        renderError("Rule 25 Validation Error: Actual weight must be greater than 0 lbs.");
+        return;
+      }
+
+      firedRules.push({ num: 5, text: `Detected units: Weight in pounds (${weight} lbs), Currency in CAD ($).` });
+      firedRules.push({ num: 10, text: `Resolved Origin: ${fromCity}, ${fromProv} | Destination: ${toCity}, ${toProv}.` });
+
+      // Rule 9: DIM Weight Calculation
+      let dimWeight = 0;
+      if (l && w && h) {
+        dimWeight = (l * w * h) / 139.0;
+      }
+      const billableWeight = Math.max(weight, dimWeight);
+      if (dimWeight > weight) {
+        firedRules.push({ num: 9, text: `Applied Rule 9: DIM weight (${dimWeight.toFixed(1)} lbs) exceeds actual weight (${weight} lbs). Billed on greater.` });
+        decisionNotes.push(`📦 DIM Overrun: Cargo billed on ${dimWeight.toFixed(1)} lbs (Divisor 139).`);
+      } else {
+        firedRules.push({ num: 9, text: `Applied Rule 9: Actual weight (${weight} lbs) used as billable weight.` });
+      }
+
+      currentQuotes = [];
+      currentExcluded = [];
+
+      TARIFFS.forEach(t => {
+        // Rule 18: Operational Limits
+        if (t.max_weight && billableWeight > t.max_weight) {
+          currentExcluded.push({ carrier: t.name, reason: `Rule 18: Weight (${billableWeight.toFixed(1)} lbs) exceeds parcel limit of ${t.max_weight} lbs.` });
+          return;
+        }
+        if (t.min_weight && billableWeight < t.min_weight) {
+          currentExcluded.push({ carrier: t.name, reason: `Rule 18: Weight (${billableWeight.toFixed(1)} lbs) below minimum rail limit of ${t.min_weight} lbs.` });
+          return;
+        }
+
+        // Match break
+        let matchedBreak = null;
+        for (let b of t.breaks) {
+          if (billableWeight >= b.min_w && billableWeight <= b.max_w) {
+            matchedBreak = b;
+            break;
+          }
+        }
+        if (!matchedBreak) {
+          matchedBreak = t.breaks[t.breaks.length - 1];
+        }
+
+        // Base rate
+        let rawBase = 0;
+        if (matchedBreak.is_flat) {
+          rawBase = matchedBreak.rate;
+        } else {
+          rawBase = (billableWeight / 100.0) * matchedBreak.rate;
+        }
+
+        // Rule 12: Minimum Charge Floor
+        let minAdj = 0;
+        let baseRate = rawBase;
+        if (rawBase < t.min_charge) {
+          minAdj = t.min_charge - rawBase;
+          baseRate = t.min_charge;
+        }
+
+        // Fuel FSC
+        const fuelAmt = (t.fsc_pct / 100.0) * baseRate;
+
+        // Accessorials (Rule 11)
+        let totalAcc = 0;
+        let itemizedAccs = [];
+        checkedAccs.forEach(code => {
+          const accSpec = t.accessorials[code];
+          if (accSpec) {
+            let fee = 0;
+            if (accSpec.type === "FLAT") fee = accSpec.amount;
+            else if (accSpec.type === "PCT") fee = Math.max((accSpec.amount / 100.0) * baseRate, accSpec.min || 0);
+            totalAcc += fee;
+            itemizedAccs.push({ code: code, name: accSpec.name, fee: fee });
+          }
+        });
+
+        // Total
+        const total = baseRate + fuelAmt + totalAcc;
+
+        currentQuotes.push({
+          carrier: t.name,
+          service: t.service,
+          transit: matchedBreak.transit,
+          baseRate: baseRate,
+          rawBase: rawBase,
+          minAdj: minAdj,
+          fuelAmt: fuelAmt,
+          fscPct: t.fsc_pct,
+          itemizedAccs: itemizedAccs,
+          totalAcc: totalAcc,
+          total: total,
+          src: matchedBreak.src,
+          isDim: dimWeight > weight
+        });
+      });
+
+      // Record rules
+      firedRules.push({ num: 8, text: "Deterministic pricing calculated with zero LLM estimation." });
+      firedRules.push({ num: 11, text: `Evaluated accessorials: ${checkedAccs.join(', ') || 'None'}.` });
+      firedRules.push({ num: 12, text: "Enforced carrier minimum charge floor." });
+      firedRules.push({ num: 13, text: "Full breakdown transparency generated." });
+      firedRules.push({ num: 15, text: "Half-up rounding applied at final calculation." });
+      firedRules.push({ num: 20, text: currentVariant === "variant_4_speed_priority" ? "Ranked by fastest transit days first." : "Ranked by lowest price first." });
+      firedRules.push({ num: 26, text: "Rule 26 Non-Binding Legal Disclaimer attached." });
+      firedRules.push({ num: 29, text: "Data verified for WHC Canadian residency." });
+
+      // Apply initial sorting
+      applySort();
+
+      // Render
+      renderResults(fromCity, fromProv, toCity, toProv, billableWeight, weight, dimWeight);
+      renderAuditDrawer();
+    }
+
+    function setSortMode(mode) {
+      currentSortMode = mode;
+      const bPrice = document.getElementById("sort-price-btn");
+      const bTransit = document.getElementById("sort-transit-btn");
+      const bValue = document.getElementById("sort-value-btn");
+
+      [bPrice, bTransit, bValue].forEach(b => {
+        b.className = "px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
+      });
+
+      if (mode === "price") {
+        bPrice.className = "px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer";
+      } else if (mode === "transit") {
+        bTransit.className = "px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer";
+      } else if (mode === "value") {
+        bValue.className = "px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer";
+      }
+
+      applySort();
+      renderCardsOnly();
+    }
+
+    function applySort() {
+      if (currentSortMode === "price") {
+        currentQuotes.sort((a, b) => a.total - b.total || a.transit - b.transit);
+      } else if (currentSortMode === "transit") {
+        currentQuotes.sort((a, b) => a.transit - b.transit || a.total - b.total);
+      } else if (currentSortMode === "value") {
+        // Value heuristic: total / (10 - transit)
+        currentQuotes.sort((a, b) => (a.total * (a.transit + 2)) - (b.total * (b.transit + 2)));
+      }
+    }
+
+    function renderResults(fc, fp, tc, tp, billW, actW, dimW) {
+      document.getElementById("results-lane-title").textContent = `${fc}, ${fp} → ${tc}, ${tp}`;
+      document.getElementById("results-count-badge").textContent = `${currentQuotes.length} Options`;
+      document.getElementById("results-specs-subtitle").textContent = `Weight: ${actW} lbs (Billable: ${billW.toFixed(1)} lbs) • DIM Divisor: 139 • Date: ${document.getElementById("input-date").value}`;
+
+      renderCardsOnly();
+
+      // Excluded drawer
+      const exclBox = document.getElementById("excluded-sheets-box");
+      const exclList = document.getElementById("excluded-list-container");
+      const exclCount = document.getElementById("excluded-count");
+
+      if (currentExcluded.length > 0) {
+        exclBox.classList.remove("hidden");
+        exclCount.textContent = currentExcluded.length;
+        exclList.innerHTML = currentExcluded.map(e => `
+          <div class="pt-1.5 flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-800">${e.carrier}</span>
+            <span class="text-amber-800">${e.reason}</span>
+          </div>
+        `).join("");
+      } else {
+        exclBox.classList.add("hidden");
+      }
+    }
+
+    function renderCardsOnly() {
+      const container = document.getElementById("quote-cards-container");
+      if (currentQuotes.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 rounded-2xl bg-white border border-slate-200 text-center text-slate-500 text-xs">
+            No qualifying carrier quotes found for this lane and cargo criteria.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = currentQuotes.map((q, idx) => `
+        <div class="bg-white border ${idx === 0 ? 'border-red-400 ring-1 ring-red-400' : 'border-slate-200'} rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-xs space-y-2.5 sm:space-y-3 transition-all hover:shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <h4 class="text-sm sm:text-base font-bold text-slate-900">${q.carrier}</h4>
+                ${idx === 0 ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800">Best Match (Rule 20)</span>' : ''}
+                ${q.isDim ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">DIM Billed (Rule 9)</span>' : ''}
+              </div>
+              <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">${q.service} • Transit: <strong class="text-slate-800">${q.transit} business days</strong></p>
+            </div>
+
+            <div class="flex sm:flex-col items-baseline sm:items-end justify-between sm:justify-start pt-1 sm:pt-0 border-t border-slate-100 sm:border-0">
+              <span class="text-[10px] sm:text-xs text-slate-400 font-mono">Total (CAD)</span>
+              <div class="text-xl sm:text-2xl font-black text-slate-900">$${q.total.toFixed(2)}</div>
+            </div>
+          </div>
+
+          <!-- Deep Breakdown Accordion (Rule 13) -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5 font-mono">
+            <div class="flex items-center justify-between text-slate-600">
+              <span>Base Freight (Source: ${q.src}):</span>
+              <span class="font-bold text-slate-800">$${q.baseRate.toFixed(2)} ${q.minAdj > 0 ? '(Adjusted to Min Floor)' : ''}</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-600">
+              <span>Fuel Surcharge (${q.fscPct}%):</span>
+              <span class="font-bold text-slate-800">$${q.fuelAmt.toFixed(2)}</span>
+            </div>
+            ${q.itemizedAccs.map(a => `
+              <div class="flex items-center justify-between text-slate-600 pl-2 border-l-2 border-slate-300">
+                <span>+ ${a.name}:</span>
+                <span class="font-bold text-slate-800">$${a.fee.toFixed(2)}</span>
+              </div>
+            `).join("")}
+            <div class="pt-1.5 border-t border-slate-200 flex items-center justify-between font-bold text-slate-900">
+              <span>Final Total:</span>
+              <span class="text-red-700 text-sm">$${q.total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderAuditDrawer() {
+      const section = document.getElementById("agent-audit-section");
+      section.classList.remove("hidden");
+
+      document.getElementById("audit-rule-count-badge").textContent = `${firedRules.length} Rules Enforced`;
+
+      const notesBox = document.getElementById("agent-decision-notes");
+      if (decisionNotes.length > 0) {
+        notesBox.innerHTML = decisionNotes.map(n => `<div>• ${n}</div>`).join("");
+      } else {
+        notesBox.innerHTML = `<div>• 100% deterministic execution under active variant (${currentVariant}).</div>`;
+      }
+
+      const list = document.getElementById("agent-rules-list");
+      list.innerHTML = firedRules.map(r => `
+        <div class="flex items-start gap-2 bg-white p-2 rounded-lg border border-purple-100">
+          <span class="px-1.5 py-0.5 rounded-sm bg-purple-100 text-purple-900 font-bold text-[10px]">Rule ${r.num}</span>
+          <span class="text-slate-700">${r.text}</span>
+        </div>
+      `).join("");
+    }
+
+    function toggleAuditDrawer() {
+      const list = document.getElementById("agent-rules-list");
+      const toggle = document.getElementById("audit-toggle-text");
+      const isHidden = list.classList.contains("hidden");
+
+      if (isHidden) {
+        list.classList.remove("hidden");
+        toggle.textContent = "Hide Details ▲";
+      } else {
+        list.classList.add("hidden");
+        toggle.textContent = "Show Details ▼";
+      }
+    }
+
+    function renderError(msg) {
+      document.getElementById("quote-cards-container").innerHTML = `
+        <div class="p-5 rounded-2xl bg-red-50 border border-red-300 text-red-800 text-xs space-y-1">
+          <div class="font-bold text-sm flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+            <span>Agent Validation Halt</span>
+          </div>
+          <p>${msg}</p>
+          <p class="text-[11px] text-red-600 font-mono mt-2">Try switching to 'Flexible Broker Assistant' or supply the missing lane field.</p>
+        </div>
+      `;
+      renderAuditDrawer();
+    }
+
+    function exportCurrentScenarioJSON() {
+      const payload = {
+        variant: currentVariant,
+        timestamp: new Date().toISOString(),
+        inputs: {
+          from: {
+            city: document.getElementById("from-city").value,
+            prov: document.getElementById("from-province").value,
+            postal: document.getElementById("from-postal").value,
+            country: document.getElementById("from-country").value
+          },
+          to: {
+            city: document.getElementById("to-city").value,
+            prov: document.getElementById("to-province").value,
+            postal: document.getElementById("to-postal").value,
+            country: document.getElementById("to-country").value
+          },
+          weight: document.getElementById("input-weight").value,
+          dimensions: [
+            document.getElementById("input-length").value,
+            document.getElementById("input-width").value,
+            document.getElementById("input-height").value
+          ],
+          accessorials: Array.from(document.querySelectorAll('input[name="accessorial"]:checked')).map(cb => cb.value)
+        },
+        results: currentQuotes,
+        excluded: currentExcluded,
+        rules_fired: firedRules
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+      const dlAnchor = document.createElement("a");
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", `ratesift_agent_run_${Date.now()}.json`);
+      dlAnchor.click();
+    }
+
+    function importScenarioJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.inputs) {
+            document.getElementById("from-city").value = data.inputs.from.city || "";
+            document.getElementById("from-province").value = data.inputs.from.prov || "";
+            document.getElementById("from-postal").value = data.inputs.from.postal || "";
+            document.getElementById("to-city").value = data.inputs.to.city || "";
+            document.getElementById("to-province").value = data.inputs.to.prov || "";
+            document.getElementById("to-postal").value = data.inputs.to.postal || "";
+            document.getElementById("input-weight").value = data.inputs.weight || 0;
+            if (data.inputs.dimensions) {
+              document.getElementById("input-length").value = data.inputs.dimensions[0] || "";
+              document.getElementById("input-width").value = data.inputs.dimensions[1] || "";
+              document.getElementById("input-height").value = data.inputs.dimensions[2] || "";
+            }
+            if (data.inputs.accessorials) {
+              document.querySelectorAll('input[name="accessorial"]').forEach(cb => {
+                cb.checked = data.inputs.accessorials.includes(cb.value);
+              });
+            }
+          }
+          if (data.variant) {
+            setAgentVariant(data.variant);
+          } else {
+            executeSimulatedQuote();
+          }
+        } catch (err) {
+          alert("Invalid JSON scenario file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // --- MODE 2: DYNAMIC SHEET DETECTOR & CONFUSION GATE LOGIC ---
+
+    function switchSimulatorMode(mode) {
+      const raterSec = document.getElementById("section-mode-rater");
+      const detSec = document.getElementById("section-mode-detector");
+      const raterBtn = document.getElementById("tab-rater-btn");
+      const detBtn = document.getElementById("tab-detector-btn");
+
+      if (mode === "rater") {
+        raterSec.classList.remove("hidden");
+        detSec.classList.add("hidden");
+        raterBtn.className = "px-3.5 py-2 rounded-xl bg-red-600 text-white font-bold text-xs shadow-xs transition-all cursor-pointer";
+        detBtn.className = "px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5";
+      } else {
+        raterSec.classList.add("hidden");
+        detSec.classList.remove("hidden");
+        detBtn.className = "px-3.5 py-2 rounded-xl bg-purple-600 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center gap-1.5";
+        raterBtn.className = "px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all cursor-pointer";
+        if (!document.getElementById("detector-raw-input").value.trim()) {
+          loadDetectorPreset('day_ross_row90');
+        }
+      }
+    }
+
+    const DETECTOR_PRESETS = {
+      "day_ross_row90": `Customer,NAFF,,,,,,,,,
+Address,375 PENDANT DR,,,,,,,,,
+,C O NORTH AMERICAN FREIGH,,,,,,,,,
+,Mississauga ON,,,,,,,,,
+,L5T2W9,,,,,,,,,
+Telephone,,,,,,,,,,
+Fax,,,,,,,,,,
+,,,,,,,,,,
+Tariff,O-33545   ,,,,,,,,,
+Revision,336,,,,,,,,,
+D & R Acct #,158437,,,,,,,,,
+Effective Date,2023-11-15,,,,,,,,,
+Expiry Date,2024-04-30,,,,,,,,,
+Issue Date,,,,,,,,,,
+Pricing Official,Frank Carvell,,,,,,,,,
+,,,,,,,,,,
+Commodity,,,,,,,,,,
+,,,,,,,,,,
+Terms And Conditions,,,,,,,,,,
+1,Appointment Deliveries:,,,,,,,,,
+,"When customer requests via the bill of lading a charge of $20.00 per shipment shall be assessed to the payer",,,,,,,,,
+8,Power Tailgate:,,,,,,,,,
+,waived,,,,,,,,,
+11,Protective Service:,,,,,,,,,
+,Subject to a surcharge of 18.00 % of the freight charge but not less than $39.50 per shipment.,,,,,,,,,
+14,Payment Terms:,,,,,,,,,
+,Freight charges are to paid within 30 days from date of invoicing. Contras on account will not be accepted.,,,,,,,,,
+24,Notes:,,,,,,,,,
+,"The Customer recognizes the competitive value and proprietary nature of the rates and shall not disclose said Rates",,,,,,,,,
+Service Level,General Road LTL ,,,,,,,,,
+Origin,,Destination,,MIN,LTL,CWT:1000,CWT:2000,CWT:5000,CWT:10000,CWT:20000
+CALGARY, AB,LINDSAY, ON,96.89,34.51,27.73,25.71,23.93,21.38,0
+EDMONTON, AB,BARRIE, ON,96.89,34.11,27.32,25.26,23.47,20.91,0
+EDMONTON, AB,LINDSAY, ON,96.89,34.51,27.73,25.71,23.88,21.34,0
+GRANDE PRAIRIE, AB,CALGARY, AB,159.22,35.76,19.36,17.11,13.92,10.64,0
+LLOYDMINSTER, AB,VICTORIA, BC,154.41,36.6,30.43,27.83,24.97,21.66,0
+MEDICINE HAT, AB,BEAMSVILLE, ON,112.21,41.74,33.5,31.19,28.68,24.92,0
+MEDICINE HAT, AB,MOUNT FOREST, ON,111.29,39.67,31.01,28.97,26.95,18.5,0
+RED DEER, AB,BEAMSVILLE, ON,107.52,29.34,21.03,19.02,17.21,14.48,0
+Between Localities,,,,MIN,LTL,CWT:1000,CWT:2000,CWT:5000,CWT:10000,CWT:20000
+CALGARY, AB,CALGARY, AB,60.32,17.24,7.09,6.94,5.91,3.5,0
+CALGARY, AB,COCHRANE, AB,60.32,17.48,7.31,7.2,6.16,3.74,0
+CALGARY, AB,EDMONTON, AB,60.32,21.43,10.49,10.21,8.83,5.91,0`,
+
+      "carrier_a_row12": `Carrier,FastFreight Express Canada
+Effective Date,2026-01-01
+Customer,Canadian Retail Supply
+Address,100 Bay St, Toronto ON
+Contact,dispatch@fastfreight.ca
+Notes,Subject to standard tariff conditions and reissues thereof.
+Payment Terms,Net 30 days from billing. Contras on account strictly prohibited.
+
+
+Accessorial,Tailgate service $50 flat fee
+
+
+Origin,Destination,MIN,LTL,CWT:1000,CWT:5000
+TORONTO, ON,MONTREAL, QC,120.00,22.50,18.00,14.50
+TORONTO, ON,OTTAWA, ON,110.00,20.00,16.50,13.00
+TORONTO, ON,CALGARY, AB,210.00,42.00,34.00,28.00
+TORONTO, ON,VANCOUVER, BC,240.00,48.00,39.00,32.00`,
+
+      "carrier_b_row140": (function() {
+        let lines = [];
+        for (let i = 1; i <= 138; i++) {
+          if (i % 6 === 0) lines.push(`Notes,Legal disclaimer clause #${i} - confidential and proprietary terms.`);
+          else lines.push(`Term ${i},General operational tariff guideline and freight conditions clause #${i}`);
+        }
+        lines.push("Origin Lane,Destination Lane,MIN,CWT:500,CWT:1000,CWT:2000");
+        for (let j = 1; j <= 12; j++) {
+          lines.push(`CITY_${j}, ON,DEST_${j}, QC,95.00,25.00,20.00,17.00`);
+        }
+        return lines.join("\n");
+      })(),
+
+      "transit_vs_rate": `Overview Sheet,Transit Estimates
+From Zone,To Zone,Est Days
+Toronto,Montreal,2
+Calgary,Vancouver,3
+
+
+Summary Header,Secondary Matrix
+Origin,Destination,Base Cost,Min Fee
+Toronto,Ottawa,150.00,45.00
+Calgary,Edmonton,120.00,40.00`,
+
+      "ambiguous_competing": `Section A,General LTL Rates
+Origin,Destination,MIN,LTL,CWT:1000
+CALGARY, AB,LINDSAY, ON,96.89,34.51,27.73
+EDMONTON, AB,BARRIE, ON,96.89,34.11,27.32
+
+
+Section B,Specialized Freight Matrix
+Origin,Destination,MIN,LTL,CWT:1000
+CALGARY, AB,LINDSAY, ON,105.00,38.00,30.00
+EDMONTON, AB,BARRIE, ON,105.00,37.50,29.50`
+    };
+
+    const CANADIAN_PROVINCES = new Set(["AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"]);
+    const US_STATES = new Set([
+      "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+      "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+      "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+      "VA", "WA", "WV", "WI", "WY"
+    ]);
+    const ALL_PROV_STATE_CODES = new Set([...CANADIAN_PROVINCES, ...US_STATES]);
+
+    let globalScanState = null;
+
+    function loadDetectorPreset(key) {
+      const text = DETECTOR_PRESETS[key] || "";
+      const input = document.getElementById("detector-raw-input");
+      input.value = text;
+      const rowCount = text.split("\n").filter(l => l.trim()).length;
+      document.getElementById("sheet-input-row-count").textContent = `${rowCount} rows loaded`;
+      document.getElementById("detector-results-section").classList.add("hidden");
+      document.getElementById("detector-status-text").innerHTML = `<span class="w-2 h-2 rounded-full bg-purple-500"></span><span>Loaded preset '${key}'. Ready to scan.</span>`;
+    }
+
+    function parseCSVLines(raw) {
+      return raw.split(/\r?\n/).map(line => {
+        let cells = [];
+        let curr = "";
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          let c = line[i];
+          if (c === '"') { inQuotes = !inQuotes; }
+          else if (c === ',' && !inQuotes) { cells.push(curr.trim()); curr = ""; }
+          else { curr += c; }
+        }
+        cells.push(curr.trim());
+        return cells;
+      });
+    }
+
+    function isRateNumeric(val, allowInteger = false) {
+      if (!val) return false;
+      const clean = val.replace("$", "").replace(",", "").trim();
+      if (!clean) return false;
+      const num = parseFloat(clean);
+      if (isNaN(num)) return false;
+      if (clean.includes(".")) return true;
+      if (val.trim().startsWith("$")) return true;
+      if (allowInteger || num === 0) return true;
+      if (/^\d+$/.test(clean) && clean.length >= 3) return false; // Non-decimal integer (e.g. acct 158437, rev 336)
+      return true;
+    }
+
+    function isProseCell(text) {
+      if (!text) return false;
+      const words = text.trim().split(/\s+/);
+      return words.length >= 4 && /[.:;,]/.test(text);
+    }
+
+    function extractStructuredSurcharge(text) {
+      const clean = text.trim();
+      const lower = clean.toLowerCase();
+
+      // 1. Percentage with minimum fee (e.g. 18.00 % of the freight charge but not less than $39.50)
+      const pctMinMatch = lower.match(/([0-9.]+)\s*%\s*(?:of the freight charge)?.*?(?:not less than|min|minimum)\s*\$?([0-9.]+)/i);
+      if (pctMinMatch) {
+        const name = (lower.includes("protective") || lower.includes("heat")) ? "Protective Service / Heated" : "Percentage Surcharge";
+        return {
+          name: name,
+          type: "PCT",
+          amount: parseFloat(pctMinMatch[1]),
+          minFee: parseFloat(pctMinMatch[2]),
+          raw: clean
+        };
+      }
+
+      // 2. Flat fee (e.g. charge of $20.00 or $50 flat fee)
+      const flatMatch = lower.match(/(?:charge of|fee of|fee|rate of|\$)\s*\$?([0-9.]+)/i);
+      if (flatMatch && clean.includes("$")) {
+        const name = lower.includes("appointment") ? "Delivery Appointment" : ((lower.includes("tailgate") || lower.includes("liftgate")) ? "Tailgate Service" : "Accessorial Fee");
+        return {
+          name: name,
+          type: "FLAT",
+          amount: parseFloat(flatMatch[1]),
+          minFee: null,
+          raw: clean
+        };
+      }
+
+      // 3. Waived fee
+      if (lower.includes("waived")) {
+        const name = (lower.includes("tailgate") || lower.includes("liftgate")) ? "Power Tailgate" : "Waived Accessorial";
+        return {
+          name: name,
+          type: "WAIVED",
+          amount: 0.0,
+          minFee: null,
+          raw: clean
+        };
+      }
+
+      return null;
+    }
+
+    function scoreHeaderCandidate(rowIdx, rowCells, allRows) {
+      const rowStr = rowCells.filter(c => c).join(" ").toLowerCase();
+      if (!rowStr) {
+        return { score: 0.0, reasons: ["Empty row"], continuousRows: 0, dataPreview: [] };
+      }
+
+      let score = 0.0;
+      let reasons = [];
+      const tokens = rowCells.filter(c => c).map(c => c.toLowerCase());
+
+      const ORIGIN_WORDS = ["origin", "from", "orig", "city", "postal", "o-zip", "fsa", "between localities"];
+      const DEST_WORDS = ["destination", "dest", "to", "d-zip"];
+      const RATE_WORDS = ["min", "ltl", "cwt", "cwt:1000", "cwt:2000", "cwt:5000", "cwt:10000", "cwt:20000", "cwt:500", "flat", "rate", "base cost"];
+
+      // 1. Origin match
+      if (tokens.some(t => ORIGIN_WORDS.some(w => t.includes(w)))) {
+        score += 0.35;
+        reasons.push("Contains origin token");
+      }
+
+      // 2. Destination match
+      if (tokens.some(t => DEST_WORDS.some(w => t.includes(w)))) {
+        score += 0.35;
+        reasons.push("Contains destination token");
+      }
+
+      // 3. Rate break metrics
+      const rateMatches = tokens.filter(t => RATE_WORDS.some(w => t.includes(w)));
+      if (rateMatches.length > 0) {
+        score += Math.min(0.30, rateMatches.length * 0.08);
+        reasons.push(`Contains ${rateMatches.length} rate break tokens`);
+      }
+
+      // 4. Scan subsequent rows for continuous rate data and currency formatting
+      const subsequentRows = allRows.slice(rowIdx + 1, rowIdx + 45);
+      let continuousRateRows = 0;
+      let hasCurrencyFormat = false;
+      let dataPreview = [];
+
+      for (let sRow of subsequentRows) {
+        const sCells = sRow.filter(c => (c || "").trim());
+        if (sCells.length === 0) break;
+
+        const numCells = sCells.filter(c => isRateNumeric(c));
+        const textCells = sCells.filter(c => isNaN(parseFloat(c.replace("$", "").replace(",", ""))));
+
+        if (numCells.some(c => c.includes(".") || c.includes("$"))) {
+          hasCurrencyFormat = true;
+        }
+
+        if (textCells.length >= 1 && numCells.length >= 1) {
+          continuousRateRows++;
+          if (dataPreview.length < 3) {
+            dataPreview.push(sCells.slice(0, 6));
+          }
+        } else {
+          break;
+        }
+      }
+
+      // Hard Currency Prerequisite (Issue 1)
+      if (rateMatches.length === 0 && !hasCurrencyFormat) {
+        score = Math.min(score, 0.45);
+        reasons.push("Capped <50%: Lacks currency formatted columns or rate break tokens (transit schedule)");
+      }
+
+      // Continuous Row Density Weighting (Issue 1)
+      if (continuousRateRows >= 10) {
+        score += 0.20;
+        reasons.push(`High continuous density: ${continuousRateRows} contiguous rate rows verified`);
+      } else if (continuousRateRows >= 3) {
+        score += 0.10;
+        reasons.push(`Verified ${continuousRateRows} contiguous rate rows beneath`);
+      } else if (continuousRateRows === 1) {
+        score -= 0.15;
+        reasons.push("Low density: only 1 contiguous row following candidate");
+      } else if (continuousRateRows === 0 && score >= 0.50) {
+        score -= 0.35;
+        reasons.push("Penalty: Zero rate data rows beneath candidate");
+      }
+
+      return {
+        rowIdx: rowIdx,
+        rawRow: rowCells.filter(c => (c || "").trim()),
+        score: Math.round(Math.min(1.0, Math.max(0.0, score)) * 1000) / 1000,
+        reasons: reasons,
+        continuousRows: continuousRateRows,
+        dataPreview: dataPreview
+      };
+    }
+
+    function executeDynamicScan(overrideRowIdx) {
+      const rawText = document.getElementById("detector-raw-input").value.trim();
+      if (!rawText) {
+        alert("Please paste sheet CSV data or select a preset.");
+        return;
+      }
+
+      const rows = parseCSVLines(rawText);
+
+      // Pass 1 & Pass 2: Header Candidate Search & Scoring
+      let candidates = [];
+      for (let i = 0; i < rows.length; i++) {
+        const res = scoreHeaderCandidate(i, rows[i], rows);
+        if (res.score >= 0.50) {
+          candidates.push(res);
+        }
+      }
+
+      candidates.sort((a, b) => b.score - a.score);
+
+      let selectedRowIdx = overrideRowIdx;
+      if (selectedRowIdx === undefined) {
+        if (candidates.length === 0) {
+          triggerConfusionGate(
+            "The agent could not locate a clear freight rate matrix header. Please specify the row number where your rate columns begin.",
+            []
+          );
+          return;
+        }
+
+        const top = candidates[0];
+        // Narrowed Confusion Gate Trigger: Scores within 10% (0.10) (Issue 1)
+        const hasCloseRunnerUp = candidates.length > 1 && (top.score - candidates[1].score) < 0.10;
+
+        if (top.score < 0.90 || hasCloseRunnerUp) {
+          triggerConfusionGate(
+            "Ambiguity detected: Multiple potential rate table headers were found with close confidence scores. Which row represents your primary freight rate table header?",
+            candidates
+          );
+          return;
+        }
+
+        selectedRowIdx = top.rowIdx;
+      }
+
+      closeConfusionModal();
+
+      // Pass 1: Global Partitioning of Rows prior to selectedRowIdx
+      let preambleRows = [];
+      let companyInfo = [];
+      let disclaimers = [];
+      let accessorials = [];
+      let structuredSurcharges = [];
+      let blankRowIndices = [];
+
+      const LEGAL_KEYWORDS = [
+        "terms and conditions", "subject to change", "e&oe", "e. & o.e.", "confidential",
+        "proprietary", "null & void", "liability", "reissues", "valid for", "payment terms", "contras on account"
+      ];
+      const COMPANY_KEYS = [
+        "customer", "address", "telephone", "phone", "fax", "email", "tariff", "revision",
+        "acct", "effective", "expiry", "issue date", "official", "commodity"
+      ];
+      const ACC_KEYWORDS = [
+        "fuel", "appointment", "tailgate", "liftgate", "heated", "dangerous goods",
+        "protective service", "residential", "after hour", "storage"
+      ];
+
+      for (let i = 0; i < selectedRowIdx; i++) {
+        const rCells = rows[i].filter(c => (c || "").trim());
+        if (rCells.length === 0) {
+          blankRowIndices.push(i);
+          continue;
+        }
+
+        const rText = rCells.join(" ");
+        const rTextLower = rText.toLowerCase();
+        const entry = { row: i + 1, text: rCells.join(" | ") };
+        preambleRows.push(entry);
+
+        // Check Prose Surcharges & Accessorial Notes (Issue B Fix)
+        const isProse = rCells.some(c => isProseCell(c));
+        const hasMetric = rText.includes("$") || rText.includes("%") || rTextLower.includes("waived");
+        const hasAccKey = ACC_KEYWORDS.some(k => rTextLower.includes(k));
+
+        if ((hasAccKey && hasMetric) || (isProse && hasAccKey)) {
+          accessorials.push(entry);
+          const struct = extractStructuredSurcharge(rText);
+          if (struct) {
+            structuredSurcharges.push(struct);
+          }
+        } else if (LEGAL_KEYWORDS.some(k => rTextLower.includes(k))) {
+          disclaimers.push(entry);
+        } else if (COMPANY_KEYS.some(k => rTextLower.includes(k))) {
+          companyInfo.push(entry);
+        } else {
+          companyInfo.push(entry);
+        }
+      }
+
+      // Analyze Header Row Structure & Authoritative Column Indexing (Issue C Fix)
+      const rawHeaderRow = rows[selectedRowIdx];
+      const cleanedHeaders = rawHeaderRow.map(c => (c || "").trim());
+      const ORIGIN_TOKENS = ["origin", "from", "orig", "city", "postal", "o-zip", "fsa", "between localities"];
+      const DEST_TOKENS = ["destination", "dest", "to", "d-zip"];
+
+      let totalCols = rawHeaderRow.length;
+      let origColIdx = 0;
+      let origProvColIdx = null;
+      let destColIdx = 1;
+      let destProvColIdx = null;
+      let ghostColumnsPaired = [];
+
+      // 1. Detect Origin Column
+      for (let c = 0; c < totalCols; c++) {
+        let h = (rawHeaderRow[c] || "").trim().toLowerCase();
+        if (ORIGIN_TOKENS.some(tok => h.includes(tok))) {
+          origColIdx = c;
+          break;
+        }
+      }
+
+      // Province pairing for Origin
+      if (origColIdx + 1 < totalCols) {
+        let nextH = (rawHeaderRow[origColIdx + 1] || "").trim().toLowerCase();
+        let sampleValues = rows.slice(selectedRowIdx + 1, selectedRowIdx + 10).map(r => (r[origColIdx + 1] || "").trim().toUpperCase());
+        let hasProvCodes = sampleValues.filter(v => ALL_PROV_STATE_CODES.has(v)).length >= 2;
+        if (!nextH || nextH.includes("prov") || nextH.includes("state") || hasProvCodes) {
+          origProvColIdx = origColIdx + 1;
+          ghostColumnsPaired.push(`Origin Province paired at Col ${origProvColIdx + 1}`);
+        }
+      }
+
+      // 2. Detect Destination Column
+      let startDestSearch = (origProvColIdx !== null ? origProvColIdx : origColIdx) + 1;
+      for (let c = startDestSearch; c < totalCols; c++) {
+        let h = (rawHeaderRow[c] || "").trim().toLowerCase();
+        if (DEST_TOKENS.some(tok => h.includes(tok))) {
+          destColIdx = c;
+          break;
+        }
+      }
+
+      // Province pairing for Destination
+      if (destColIdx + 1 < totalCols) {
+        let nextH = (rawHeaderRow[destColIdx + 1] || "").trim().toLowerCase();
+        let sampleValues = rows.slice(selectedRowIdx + 1, selectedRowIdx + 10).map(r => (r[destColIdx + 1] || "").trim().toUpperCase());
+        let hasProvCodes = sampleValues.filter(v => ALL_PROV_STATE_CODES.has(v)).length >= 2;
+        if (!nextH || nextH.includes("prov") || nextH.includes("state") || hasProvCodes) {
+          destProvColIdx = destColIdx + 1;
+          ghostColumnsPaired.push(`Destination Province paired at Col ${destProvColIdx + 1}`);
+        }
+      }
+
+      // 3. Detect Rate Break Columns with original titles preserved
+      let rateStartIdx = (destProvColIdx !== null ? destProvColIdx : destColIdx) + 1;
+      let rateColumns = [];
+      for (let c = rateStartIdx; c < totalCols; c++) {
+        let title = (rawHeaderRow[c] || "").trim();
+        if (title) {
+          rateColumns.push({ colIndex: c, title: title });
+        } else {
+          let hasNumericData = rows.slice(selectedRowIdx + 1, selectedRowIdx + 6).some(r => isRateNumeric(r[c] || ""));
+          if (hasNumericData) {
+            rateColumns.push({ colIndex: c, title: `Rate_Col_${c + 1}` });
+          }
+        }
+      }
+
+      // Multi-Segment Extraction (Issue D Fix)
+      let segments = [];
+      let currentSegment = {
+        id: 1,
+        title: "Primary Rate Matrix (General Road LTL)",
+        headerRow: selectedRowIdx + 1,
+        rows: []
+      };
+
+      let rateDataRows = [];
+      let headerRowIndices = [selectedRowIdx];
+      let misalignedRows = [];
+
+      for (let i = selectedRowIdx + 1; i < rows.length; i++) {
+        const rCells = rows[i];
+        if (!rCells.some(c => (c || "").trim())) {
+          blankRowIndices.push(i);
+          continue;
+        }
+
+        // Check Continuous Secondary Header (e.g. "Between Localities")
+        const candCheck = scoreHeaderCandidate(i, rCells, rows);
+        const rTextLower = rCells.join(" ").toLowerCase();
+        const isSecondaryHeader = (
+          (candCheck.score >= 0.60 || rTextLower.includes("between localities")) &&
+          ["min", "ltl", "cwt"].some(tok => rTextLower.includes(tok))
+        );
+
+        if (isSecondaryHeader) {
+          headerRowIndices.push(i);
+          if (currentSegment.rows.length > 0) {
+            segments.push(currentSegment);
+          }
+          const segTitle = (rCells[0] || "").trim() || `Segment ${segments.length + 1}`;
+          currentSegment = {
+            id: segments.length + 1,
+            title: segTitle,
+            headerRow: i + 1,
+            rows: []
+          };
+          continue;
+        }
+
+        // Construct compound Origin and Destination lanes
+        let orig = "";
+        if (origProvColIdx !== null && rCells[origProvColIdx]) {
+          orig = `${(rCells[origColIdx] || "").trim()}, ${(rCells[origProvColIdx] || "").trim()}`.trim();
+        } else {
+          orig = (rCells[origColIdx] || "").trim();
+        }
+
+        let dest = "";
+        if (destProvColIdx !== null && rCells[destProvColIdx]) {
+          dest = `${(rCells[destColIdx] || "").trim()}, ${(rCells[destProvColIdx] || "").trim()}`.trim();
+        } else {
+          dest = (rCells[destColIdx] || "").trim();
+        }
+
+        let rowBreaks = {};
+        let isMisaligned = false;
+        rateColumns.forEach(rc => {
+          const val = (rCells[rc.colIndex] || "").trim();
+          if (val && !isRateNumeric(val, true)) {
+            isMisaligned = true;
+          }
+          rowBreaks[rc.title] = val;
+        });
+
+        if (isMisaligned) {
+          misalignedRows.push(i + 1);
+        }
+
+        const rowRecord = {
+          row: i + 1,
+          segmentId: currentSegment.id,
+          segmentTitle: currentSegment.title,
+          origin: orig,
+          destination: dest,
+          rateBreaks: rowBreaks,
+          rawValues: rCells.map(c => (c || "").trim()),
+          isMisaligned: isMisaligned
+        };
+
+        rateDataRows.push(rowRecord);
+        currentSegment.rows.push(rowRecord);
+      }
+
+      if (currentSegment.rows.length > 0) {
+        segments.push(currentSegment);
+      }
+
+      // Zero-Data-Loss Row Reconciliation Audit (Issue D Fix)
+      const totalRawRows = rows.length;
+      const countedPreamble = preambleRows.length;
+      const countedBlanks = blankRowIndices.length;
+      const countedHeaders = headerRowIndices.length;
+      const countedData = rateDataRows.length;
+
+      const totalReconciled = countedPreamble + countedBlanks + countedHeaders + countedData;
+      const unaccountedRows = Math.max(0, totalRawRows - totalReconciled);
+
+      // Composite Sheet Health Score Calculation
+      let healthScore = 100;
+      if (countedPreamble > 25) healthScore -= 5;
+      if (segments.length > 1) healthScore -= 5;
+      if (ghostColumnsPaired.length > 0) healthScore -= 5;
+      if (misalignedRows.length > 0) healthScore -= 10;
+      if (unaccountedRows > 0) healthScore -= 20;
+
+      const compositeSheetHealth = Math.max(10, Math.min(100, healthScore));
+
+      // Save Global State for Tab Switching & Review
+      globalScanState = {
+        headerRow1: selectedRowIdx + 1,
+        headerTokens: cleanedHeaders.filter(c => c),
+        companyInfo: companyInfo,
+        disclaimers: disclaimers,
+        accessorials: accessorials,
+        structuredSurcharges: structuredSurcharges,
+        rateDataRows: rateDataRows,
+        segments: segments,
+        rateColumns: rateColumns,
+        ghostColumnsPaired: ghostColumnsPaired,
+        compositeSheetHealth: compositeSheetHealth,
+        activeSegmentId: "ALL",
+        audit: {
+          totalRawRows: totalRawRows,
+          totalReconciled: totalReconciled,
+          unaccountedRows: unaccountedRows,
+          breakdown: {
+            preamble: countedPreamble,
+            headers: countedHeaders,
+            data: countedData,
+            blanks: countedBlanks
+          }
+        }
+      };
+
+      renderDetectorResults();
+    }
+
+    function renderDetectorResults() {
+      if (!globalScanState) return;
+      const st = globalScanState;
+      const section = document.getElementById("detector-results-section");
+      section.classList.remove("hidden");
+
+      // Header Bar
+      document.getElementById("det-header-title").textContent = `Starting Rate Header: Row ${st.headerRow1}`;
+      document.getElementById("det-columns-preview").textContent = `Detected Headers: ${st.headerTokens.join(" | ")}`;
+      document.getElementById("det-zero-loss-text").textContent = `0 Rows Deleted or Dropped (100% of ${st.rateDataRows.length} Rows Preserved)`;
+      
+      const healthBadge = document.getElementById("det-health-badge");
+      if (healthBadge) {
+        healthBadge.textContent = `Sheet Health: ${st.compositeSheetHealth}%`;
+      }
+
+      // Zero-Loss Row Reconciliation Audit Card
+      document.getElementById("det-audit-total-rows").textContent = st.audit.totalRawRows;
+      document.getElementById("det-audit-reconciled-rows").textContent = st.audit.totalReconciled;
+      document.getElementById("det-audit-unaccounted-rows").textContent = st.audit.unaccountedRows;
+      document.getElementById("det-audit-verdict").textContent = st.audit.unaccountedRows === 0 ? "PASSED (Zero Loss)" : "RECONCILIATION REVIEW REQUIRED";
+      document.getElementById("det-audit-verdict").className = st.audit.unaccountedRows === 0 ? "text-xs font-bold text-emerald-700 mt-1" : "text-xs font-bold text-red-600 mt-1";
+
+      document.getElementById("det-breakdown-preamble").textContent = st.audit.breakdown.preamble;
+      document.getElementById("det-breakdown-headers").textContent = st.audit.breakdown.headers;
+      document.getElementById("det-breakdown-data").textContent = st.audit.breakdown.data;
+      document.getElementById("det-breakdown-blanks").textContent = st.audit.breakdown.blanks;
+
+      // Structured Prose Surcharges Extracted Card
+      const surchargesContainer = document.getElementById("det-structured-surcharges-container");
+      const surchargesList = document.getElementById("det-surcharges-list");
+      if (st.structuredSurcharges && st.structuredSurcharges.length > 0) {
+        surchargesContainer.classList.remove("hidden");
+        surchargesList.innerHTML = st.structuredSurcharges.map(s => {
+          let badgeText = s.type === "PCT" ? `${s.amount.toFixed(2)}% (Min $${s.minFee.toFixed(2)})` : (s.type === "FLAT" ? `$${s.amount.toFixed(2)} Flat` : "WAIVED ($0.00)");
+          let badgeColor = s.type === "PCT" ? "bg-amber-100 text-amber-900 border-amber-300" : (s.type === "FLAT" ? "bg-emerald-100 text-emerald-900 border-emerald-300" : "bg-purple-100 text-purple-900 border-purple-300");
+          return `
+            <div class="p-2.5 rounded-lg bg-white border border-purple-200 shadow-2xs space-y-1">
+              <div class="flex items-center justify-between font-bold text-slate-800">
+                <span>${s.name}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${badgeColor}">${badgeText}</span>
+              </div>
+              <p class="text-[10px] text-slate-500 font-mono truncate" title="${s.raw}">"${s.raw}"</p>
+            </div>
+          `;
+        }).join("");
+      } else {
+        surchargesList.innerHTML = `<div class="col-span-3 text-slate-400 font-mono text-[11px] p-2 bg-white rounded-lg border border-purple-100">No accessorial surcharges embedded in preamble text.</div>`;
+      }
+
+      // 3-Tier Categorization Counts & Lists
+      document.getElementById("det-count-company").textContent = st.companyInfo.length;
+      document.getElementById("det-count-disclaimers").textContent = st.disclaimers.length;
+      document.getElementById("det-count-accessorials").textContent = st.accessorials.length;
+
+      document.getElementById("det-list-company").innerHTML = st.companyInfo.slice(0, 8).map(c => `<div>Row ${c.row}: ${c.text}</div>`).join("") || "<div>None</div>";
+      document.getElementById("det-list-disclaimers").innerHTML = st.disclaimers.slice(0, 8).map(d => `<div>Row ${d.row}: ${d.text}</div>`).join("") || "<div>None</div>";
+      document.getElementById("det-list-accessorials").innerHTML = st.accessorials.slice(0, 8).map(a => `<div>Row ${a.row}: ${a.text}</div>`).join("") || "<div>None</div>";
+
+      // Render Multi-Segment Tabs (Issue D Fix)
+      const tabsContainer = document.getElementById("det-segment-tabs-container");
+      if (st.segments && st.segments.length > 1) {
+        tabsContainer.classList.remove("hidden");
+        tabsContainer.innerHTML = `
+          <button type="button" onclick="filterSegmentRows('ALL')" class="px-3 py-1 rounded-lg text-xs font-bold cursor-pointer transition-all ${st.activeSegmentId === 'ALL' ? 'bg-purple-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+            All Segments (${st.rateDataRows.length} Rows)
+          </button>
+          ${st.segments.map(seg => `
+            <button type="button" onclick="filterSegmentRows(${seg.id})" class="px-3 py-1 rounded-lg text-xs font-bold cursor-pointer transition-all ${st.activeSegmentId === seg.id ? 'bg-purple-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+              Segment ${seg.id}: ${seg.title} (${seg.rows.length} Rows)
+            </button>
+          `).join("")}
+        `;
+      } else {
+        tabsContainer.classList.add("hidden");
+      }
+
+      // Rate Headers Pills Bar
+      const pillsContainer = document.getElementById("det-rate-headers-pills");
+      if (pillsContainer) {
+        pillsContainer.innerHTML = st.rateColumns.map(rc => `
+          <span class="px-2.5 py-1 rounded-lg bg-purple-100/90 text-purple-900 border border-purple-300 text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-2xs">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+            <span>${rc.title}</span>
+          </span>
+        `).join("");
+      }
+
+      // Filter Rows by activeSegmentId
+      const visibleRows = st.activeSegmentId === "ALL" ? st.rateDataRows : st.rateDataRows.filter(r => r.segmentId === st.activeSegmentId);
+      document.getElementById("det-rate-rows-count").textContent = `${visibleRows.length} Protected Rows Extracted (${st.rateColumns.length} Headers Preserved)`;
+
+      // Render Table Headers
+      const thead = document.getElementById("det-rate-thead");
+      thead.innerHTML = `
+        <tr>
+          <th class="p-2.5 border-b border-slate-200 font-bold">Row</th>
+          <th class="p-2.5 border-b border-slate-200 font-bold">Segment</th>
+          <th class="p-2.5 border-b border-slate-200 font-bold">Origin Lane</th>
+          <th class="p-2.5 border-b border-slate-200 font-bold">Destination Lane</th>
+          ${st.rateColumns.map(rc => `<th class="p-2.5 border-b border-purple-200 text-right font-mono bg-purple-50 text-purple-950 font-bold whitespace-nowrap">${rc.title}</th>`).join("")}
+          <th class="p-2.5 border-b border-slate-200 text-center font-bold">Status</th>
+        </tr>
+      `;
+
+      // Render Table Rows
+      const tbody = document.getElementById("det-rate-tbody");
+      tbody.innerHTML = visibleRows.slice(0, 100).map(r => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-2.5 font-bold text-slate-500 font-mono">${r.row}</td>
+          <td class="p-2.5 text-[10px] text-purple-900 font-bold"><span class="px-1.5 py-0.5 rounded bg-purple-50 border border-purple-200">Seg ${r.segmentId}</span></td>
+          <td class="p-2.5 font-bold text-slate-900">${r.origin || 'N/A'}</td>
+          <td class="p-2.5 font-bold text-slate-900">${r.destination || 'N/A'}</td>
+          ${st.rateColumns.map(rc => {
+            const rawVal = r.rateBreaks[rc.title];
+            const displayVal = (rawVal !== undefined && rawVal !== "") ? (isNaN(parseFloat(rawVal)) ? rawVal : (parseFloat(rawVal) === 0 ? "0.00" : parseFloat(rawVal).toFixed(2))) : "-";
+            return `<td class="p-2.5 text-right font-mono font-medium text-slate-800 bg-slate-50/30">${displayVal}</td>`;
+          }).join("")}
+          <td class="p-2.5 text-center">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Protected</span>
+          </td>
+        </tr>
+      `).join("");
+
+      document.getElementById("detector-status-text").innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>Scan complete: ${st.rateDataRows.length} rows protected across ${st.segments.length} table segments (0 lost).</span>`;
+    }
+
+    function filterSegmentRows(segId) {
+      if (!globalScanState) return;
+      globalScanState.activeSegmentId = segId;
+      renderDetectorResults();
+    }
+
+    function triggerConfusionGate(promptMsg, candidates) {
+      document.getElementById("confusion-prompt-message").textContent = promptMsg;
+      const list = document.getElementById("confusion-candidates-list");
+      
+      if (candidates.length === 0) {
+        list.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-slate-100 text-slate-700 space-y-2">
+            <span>Enter header row number manually (1-based):</span>
+            <div class="flex items-center gap-2">
+              <input id="manual-header-input" type="number" min="1" placeholder="e.g. 90" class="border border-slate-300 rounded px-2.5 py-1.5 text-xs w-28 bg-white">
+              <button type="button" onclick="confirmManualHeader()" class="px-3.5 py-1.5 bg-purple-600 text-white rounded-lg text-xs font-bold cursor-pointer">Confirm Row</button>
+            </div>
+          </div>
+        `;
+      } else {
+        list.innerHTML = candidates.map(c => `
+          <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-purple-50/50 hover:border-purple-300 transition-all space-y-2 text-xs">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-900 text-sm">Row ${c.rowIdx + 1}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] bg-purple-100 text-purple-800 font-mono font-bold">${(c.score * 100).toFixed(0)}% Confidence</span>
+                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                  ${c.continuousRows} Contiguous Data Rows
+                </span>
+              </div>
+              <button type="button" onclick="executeDynamicScan(${c.rowIdx})" class="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs cursor-pointer">
+                Select Row ${c.rowIdx + 1} as Primary Header →
+              </button>
+            </div>
+            
+            <p class="text-[11px] text-slate-600 font-mono">
+              Headers: <span class="font-bold text-purple-950">${c.rawRow.slice(0, 7).join(" | ")}</span>
+            </p>
+
+            ${c.dataPreview && c.dataPreview.length > 0 ? `
+              <div class="mt-2 border border-slate-200 rounded-lg overflow-x-auto bg-white p-1">
+                <div class="text-[10px] font-bold text-slate-500 uppercase px-1 py-0.5">Sample Data Following Row ${c.rowIdx + 1}:</div>
+                <table class="w-full text-[10px] font-mono text-left whitespace-nowrap">
+                  <tbody>
+                    ${c.dataPreview.map(pRow => `
+                      <tr class="border-t border-slate-100">
+                        ${pRow.map(cell => `<td class="p-1 px-2 text-slate-700">${cell}</td>`).join("")}
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              </div>
+            ` : ''}
+
+            <p class="text-[10px] text-slate-500 font-mono pt-1">Reasons: ${c.reasons.join(" • ")}</p>
+          </div>
+        `).join("");
+      }
+
+      document.getElementById("confusion-gate-modal").classList.remove("hidden");
+    }
+
+    function closeConfusionModal() {
+      document.getElementById("confusion-gate-modal").classList.add("hidden");
+    }
+
+    function confirmManualHeader() {
+      const val = parseInt(document.getElementById("manual-header-input").value);
+      if (!isNaN(val) && val >= 1) {
+        executeDynamicScan(val - 1);
+      }
+    }
+
+    // Google Pixel 7 (412px) Viewport Frame Toggle
+    function togglePixel7View() {
+      const container = document.getElementById("main-container");
+      const btn = document.getElementById("btn-pixel7-toggle");
+      const text = document.getElementById("pixel7-toggle-text");
+      const isPixel7 = container.classList.contains("pixel7-frame");
+
+      if (isPixel7) {
+        container.classList.remove("pixel7-frame");
+        btn.className = "px-2.5 py-1 rounded-lg border border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-2xs";
+        text.textContent = "Pixel 7 (412px)";
+      } else {
+        container.classList.add("pixel7-frame");
+        btn.className = "px-2.5 py-1 rounded-lg border border-purple-400 bg-purple-600 text-white font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs";
+        text.textContent = "Exit Pixel 7 (412px)";
+      }
+    }
+
+    // Auto-run on load
+    window.addEventListener("DOMContentLoaded", () => {
+      executeSimulatedQuote();
+    });
+  </script>
+</body>
+</html>

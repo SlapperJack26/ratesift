@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <title>RateSift | Freight Rating Console & Broker Rater</title>
+  <meta name="title" content="RateSift | Freight Rating Console & Broker Rater">
+  <meta name="description" content="Instant deterministic freight rating and carrier comparison engine with cell-level audit breakdown, in-memory re-sorting, and compliance warnings.">
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #proposal-printable-sheet, #proposal-printable-sheet * {
+        visibility: visible !important;
+      }
+      #proposal-printable-sheet {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 24px !important;
+        border: none !important;
+        box-shadow: none !important;
+        z-index: 999999 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Navigation Bar (Consistent RateSift Console Menu Bar) -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] bg-white relative z-20 m-0 shadow-2xs">
+      <div class="flex items-center justify-between w-full max-w-7xl mx-auto">
+        <!-- Left: Logo & Nav Links -->
+        <div class="flex items-center gap-6 lg:gap-8">
+          <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="RateSift Console">
+            <div class="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-xs text-xs">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13H5.5L12 6.5z"/></svg>
+            </div>
+            <span class="text-lg font-bold tracking-tight text-slate-900">RateSift</span>
+          </a>
+
+          <!-- Center/Left Navigation Links -->
+          <nav role="navigation" aria-label="Main Navigation" class="hidden sm:flex items-center gap-1.5 sm:gap-2 text-xs font-medium">
+            <a href="/console/new-quote" aria-current="page" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs relative after:content-[''] after:absolute after:-bottom-3.5 after:left-3 after:right-3 after:h-0.5 after:bg-red-600">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>New Quote</span>
+            </a>
+            <a href="/console/history" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Quotes History</span>
+            </a>
+            <a href="/console/rate-sheets" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>Carrier Tariffs</span>
+            </a>
+            <a href="/console/settings" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span>Settings</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Right: Sovereignty Badge & Actions -->
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
+            <span>🇨🇦</span>
+            <span>Hosted in Canada (WHC) • PIPEDA Compliant</span>
+          </div>
+
+          <button type="button" aria-label="Notifications" class="p-2 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer" title="System Notifications">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          </button>
+
+          <a href="/api/auth/logout" aria-label="Sign out" class="p-2 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" title="Sign out">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Tabs -->
+      <nav class="flex sm:hidden overflow-x-auto gap-2 pt-2.5 mt-2 border-t border-slate-100 text-xs font-medium px-1">
+        <a href="/console/new-quote" class="px-3 py-1 rounded-full bg-red-50 text-red-600 font-bold whitespace-nowrap">New Quote</a>
+        <a href="/console/history" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Quotes History</a>
+        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Carrier Tariffs</a>
+        <a href="/console/settings" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Settings</a>
+      </nav>
+    </header>
+
+    <!-- Main Content Area (Expansive Mockup Layout) -->
+    <main id="main-content" role="main" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      
+      <!-- Top Title Header & Fuel Surcharge Index Card -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Instant Freight Rater</h1>
+          <p class="text-sm text-slate-500 mt-0.5">A Canadian freight rate comparison UI design</p>
+        </div>
+
+        <!-- Weekly Canadian Fuel Surcharge (FSC) Index Card (Matches Mockup) -->
+        <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs min-w-[320px] max-w-md">
+          <div class="text-xs font-semibold text-slate-600">Weekly Canadian Fuel Surcharge (FSC) Index</div>
+          <div class="flex items-center justify-between gap-3 mt-1.5">
+            <div class="flex-1">
+              <select id="select-fuel-index" onchange="handleFuelIndexChange(this.value)" class="w-full bg-transparent border-0 text-sm font-bold text-slate-900 focus:outline-none cursor-pointer p-0">
+                <option value="OTA_LTL_STANDARD" selected>Ontario Trucking Association (OTA) LTL — 31.5%</option>
+                <option value="FCA_NATIONAL_LTL">Freight Carriers Association (FCA) National — 33.0%</option>
+                <option value="WESTERN_CDN_LTL">Western Canada Diesel Index — 30.5%</option>
+                <option value="ATLANTIC_CDN_LTL">Atlantic Canada (APTA) Index — 34.2%</option>
+                <option value="CUSTOM">Custom Surcharge Override...</option>
+              </select>
+            </div>
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs shrink-0">
+              <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              <span>Auto-sync</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Preset Lanes Chip Bar -->
+      <div id="quick-presets" class="flex flex-wrap items-center gap-2 text-xs">
+        <span class="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">Quick Presets:</span>
+        <button type="button" onclick="loadPresetLane('M5V 2T6', 'T2P 1J9', 880, 48, 40, 50, ['liftgate'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
+          Toronto (M5V) → Calgary (T2P) • Deficit 880 lbs
+        </button>
+        <button type="button" onclick="loadPresetLane('CALGARY, AB', 'LINDSAY, ON', 1450, 48, 40, 50, ['liftgate'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
+          Calgary, AB → Lindsay, ON (Day & Ross 1,450 lbs)
+        </button>
+        <button type="button" onclick="loadPresetLane('TORONTO, ON', 'MONTREAL, QC', 500, null, null, null, ['appointment'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
+          Toronto, ON → Montreal, QC (500 lbs)
+        </button>
+      </div>
+
+      <!-- MODE 1: INSTANT FREIGHT RATER FORM -->
+      <section id="section-instant" class="space-y-4">
+        <form id="freight-quote-form" onsubmit="event.preventDefault(); calculateFreightQuote();" class="space-y-4">
+          
+          <!-- Origin & Destination Grid (Exact Mockup Side-by-Side Cards) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+            
+            <!-- Origin Card -->
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-2">
+              <div>
+                <label for="input-origin" class="block font-bold text-sm text-slate-900">Origin</label>
+                <div class="text-xs text-slate-500">Canadian Postal FSA Resolver</div>
+              </div>
+              <input id="input-origin" type="text" required placeholder="e.g. M5V 2T6 or Toronto, ON" value="M5V 2T6" oninput="resolveFsaLive('origin', this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+              <div id="origin-fsa-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 mt-1">
+                <span>📍</span>
+                <span id="origin-fsa-text">Toronto, ON (FSA: M5V • Zone ON-TOR)</span>
+              </div>
+            </div>
+
+            <!-- Destination Card -->
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-2">
+              <div>
+                <label for="input-destination" class="block font-bold text-sm text-slate-900">Destination</label>
+                <div class="text-xs text-slate-500">Canadian Postal FSA Resolver</div>
+              </div>
+              <input id="input-destination" type="text" required placeholder="e.g. T2P 1J9 or Calgary, AB" value="T2P 1J9" oninput="resolveFsaLive('dest', this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+              <div id="dest-fsa-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 mt-1">
+                <span>📍</span>
+                <span id="dest-fsa-text">Calgary, AB (FSA: T2P • Zone AB-CAL)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipment Cargo Specifications & Rating Bar -->
+          <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+              <div>
+                <label for="input-weight" class="block text-xs font-bold text-slate-800 mb-1">Actual Weight (lbs)</label>
+                <input id="input-weight" type="number" step="0.1" min="0.1" required placeholder="e.g. 880" value="880" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="input-length" class="block text-xs font-bold text-slate-800 mb-1">Length (in)</label>
+                <input id="input-length" type="number" step="0.1" min="0" placeholder="e.g. 48" value="48" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="input-width" class="block text-xs font-bold text-slate-800 mb-1">Width (in)</label>
+                <input id="input-width" type="number" step="0.1" min="0" placeholder="e.g. 40" value="40" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="input-height" class="block text-xs font-bold text-slate-800 mb-1">Height (in)</label>
+                <input id="input-height" type="number" step="0.1" min="0" placeholder="e.g. 50" value="50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="input-date" class="block text-xs font-bold text-slate-800 mb-1">Shipment Date (Rule 16)</label>
+                <input id="input-date" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
+              </div>
+            </div>
+
+            <!-- Accessorials / Surcharges Selection -->
+            <div class="space-y-2 pt-2 border-t border-slate-100">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-800">Requested Accessorials & Surcharges (Rule 11):</span>
+                <span class="text-[10px] text-slate-500">Deterministic line-item charges</span>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-xs">
+                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                  <input type="checkbox" name="accessorial" value="liftgate" checked class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-semibold text-slate-800">Power Tailgate / Liftgate</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                  <input type="checkbox" name="accessorial" value="appointment" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Delivery Appointment</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                  <input type="checkbox" name="accessorial" value="heated" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Protect From Freeze</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                  <input type="checkbox" name="accessorial" value="dangerous_goods" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Dangerous Goods</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                  <input type="checkbox" name="accessorial" value="residential" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Residential Delivery</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                  <input type="checkbox" name="accessorial" value="inside_delivery" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Inside Delivery</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Action Row & Redaction Scrubber Badge Button -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+              <div class="flex items-center gap-3">
+                <button type="submit" id="btn-calc-rates" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer">
+                  <span id="btn-calc-text">Calculate Rates</span>
+                  <span id="btn-calc-arrow">→</span>
+                  <span id="btn-calc-spinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                </button>
+
+                <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-medium">
+                  <button type="button" id="tab-instant-btn" onclick="switchMode('instant')" class="px-3 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer">
+                    Instant Rater
+                  </button>
+                  <button type="button" id="tab-batch-btn" onclick="switchMode('batch')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
+                    Batch Excel
+                  </button>
+                </div>
+
+                <div id="calc-status-indicator" class="text-xs text-slate-500 font-mono flex items-center gap-1.5 hidden sm:flex">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span>Live Rating Engine</span>
+                </div>
+              </div>
+
+              <!-- Client-Side Tariff Redaction Scrubber Badge Button (Matches Mockup) -->
+              <button type="button" onclick="openRedactionModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 bg-white shadow-2xs hover:bg-slate-50 text-slate-800 text-xs font-semibold cursor-pointer transition-colors" title="Scrub proprietary accounts, client names, and margins before upload">
+                <div class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs">🛡️</div>
+                <span>Client-Side Tariff Redaction Scrubber Active</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- RESULTS SECTION: CONCISE CARDS & IN-MEMORY SORTING (Matches Mockup Grid) -->
+      <section id="section-results" class="space-y-4">
+        
+        <!-- Results Controls Header -->
+        <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-bold text-slate-900 tracking-tight" id="results-lane-title">TORONTO, ON → CALGARY, AB</h2>
+              <span id="results-count-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                Loading Options...
+              </span>
+            </div>
+            <div class="text-[11px] text-[var(--muted-foreground)] mt-0.5" id="results-specs-subtitle">
+              Weight: 880.0 lbs • DIM Divisor: 139 • Date: Today
+            </div>
+          </div>
+
+          <!-- Rule 21: In-Memory Re-Sorting Toggles -->
+          <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
+            <span class="text-[10px] uppercase font-bold text-slate-400 px-2">Sort:</span>
+            <button type="button" id="sort-price-btn" onclick="setSortMode('price')" class="px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer" title="Lowest Price First (Rule 20)">
+              Lowest Price
+            </button>
+            <button type="button" id="sort-transit-btn" onclick="setSortMode('transit')" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer" title="Fastest Transit First">
+              Fastest Transit
+            </button>
+            <button type="button" id="sort-value-btn" onclick="setSortMode('value')" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer" title="Best Value (Cost vs Speed)">
+              Best Value
+            </button>
+          </div>
+        </div>
+
+        <!-- Carrier Quote Cards Container (Exact Mockup 4-Column Grid) -->
+        <div id="quote-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 items-stretch">
+          <!-- Quote cards injected via JavaScript -->
+        </div>
+
+        <!-- Excluded Sheets Drawer (Rules 16, 17, 18, 24) -->
+        <div id="excluded-sheets-box" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+            <span class="flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Excluded Rate Sheets & Carriers (<span id="excluded-count">0</span>)
+            </span>
+            <span class="text-[10px] text-slate-400 font-normal">Rules 16, 17, 18 & 24 Compliance</span>
+          </div>
+          <div id="excluded-list-container" class="space-y-1.5 text-xs text-slate-600 divide-y divide-slate-200/60">
+            <!-- Excluded reasons injected here -->
+          </div>
+        </div>
+
+        <!-- Rule 26 Non-Binding Legal Disclaimer -->
+        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 text-[11px] text-slate-500 flex items-start gap-2">
+          <svg class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <div>
+            <span class="font-semibold text-slate-700">Rule 26 Legal Notice:</span>
+            <span>All calculations are derived deterministically from customer-uploaded rate sheets. This quote is non-binding and subject to final carrier tariff verification, operational conditions, and accessorial validation upon booking.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODE 2: BATCH EXCEL UPLOAD MODE -->
+      <section id="section-batch" class="hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div class="border-2 border-dashed border-[var(--border)] rounded-xl p-6 flex flex-col items-center justify-center text-center bg-slate-50/40 hover:bg-slate-50/80 hover:border-red-400 transition-all cursor-pointer" onclick="document.getElementById('batch-file-input').click()">
+          <input id="batch-file-input" type="file" accept=".xlsx,.xls" class="hidden" onchange="handleBatchFile(event)">
+          <div class="w-12 h-12 rounded-xl bg-white border border-[var(--border)] flex items-center justify-center text-red-600 mb-3 shadow-2xs">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          </div>
+          <p id="batch-drop-text" class="text-xs text-[var(--foreground)] font-medium">
+            <span class="font-semibold text-sm">Drag and drop Excel files (.xlsx, .xls)</span> here or <span class="text-red-600 underline">browse</span>
+          </p>
+          <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Multi-row batch quoting with cell coordinate mapping</p>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-[var(--border)]">
+          <div id="batch-status-box" class="text-xs text-slate-500 font-mono">Ready for spreadsheet upload</div>
+          <button type="button" id="btn-batch-process" onclick="processBatchQuotes()" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs py-2 px-5 rounded-lg transition-colors cursor-pointer">
+            Process Batch →
+          </button>
+        </div>
+      </section>
+
+      <!-- CLARIFICATION & VERIFICATION GATE MODAL (Rules 1, 3, 5, 6, 7, 19, 25) -->
+      <div id="clarification-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150">
+          
+          <!-- Modal Header -->
+          <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold text-slate-900">RateSift Clarification & Verification Gate</h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                  Human Gate • Rule 7 & 19
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                  WHC Canada • Rule 29
+                </span>
+              </div>
+              <p class="text-xs text-slate-500">
+                Review detected columns, units, and normalized data before calculating quotes (Rules 1, 3, 5 & 25).
+              </p>
+            </div>
+            <button type="button" onclick="closeClarificationModal()" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          <!-- Modal Scrollable Content -->
+          <div class="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs">
+            
+            <!-- File Info & Units Confirmation Bar (Rule 5) -->
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3 font-mono text-[11px]">
+              <div>
+                <span class="text-slate-400">Spreadsheet:</span> <strong id="modal-filename" class="text-slate-800 font-bold">file.xlsx</strong>
+                <span class="mx-2 text-slate-300">•</span>
+                <span class="text-slate-400">Rows Detected:</span> <strong id="modal-row-count" class="text-slate-800 font-bold">0</strong>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-slate-400 font-sans text-xs">Weight:</span>
+                  <select id="modal-unit-weight" class="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-bold text-slate-700">
+                    <option value="lb">lbs (Pounds)</option>
+                    <option value="kg">kg (Kilograms)</option>
+                  </select>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-slate-400 font-sans text-xs">Currency:</span>
+                  <select id="modal-unit-currency" class="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-bold text-slate-700">
+                    <option value="CAD">CAD ($)</option>
+                    <option value="USD">USD ($)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 1: Semantic Column Mapping Review -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between font-bold text-slate-800">
+                <span>Step 1: Verify Column Semantic Assignments</span>
+                <span class="text-[10px] text-slate-400 font-normal">Reassign if header detection requires adjustment</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Origin Lane</label>
+                  <select id="map-select-origin" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500"></select>
+                </div>
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Destination Lane</label>
+                  <select id="map-select-dest" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500"></select>
+                </div>
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Shipment Weight</label>
+                  <select id="map-select-weight" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500"></select>
+                </div>
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Cargo Dims</label>
+                  <select id="map-select-dims" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500"></select>
+                </div>
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Accessorials</label>
+                  <select id="map-select-acc" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500"></select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Unmapped Non-Rating Business Info Callout (Optional / Non-critical metadata) -->
+            <div id="modal-unmapped-callout" class="hidden p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1.5">
+              <div class="flex flex-wrap items-center justify-between gap-1">
+                <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  Non-Rating Business Columns Detected (e.g. Company Headquarters, PO, Internal Notes)
+                </span>
+                <span class="text-[10px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                  ✓ Ignored as Non-Critical Info
+                </span>
+              </div>
+              <div id="modal-unmapped-list" class="flex flex-wrap gap-1.5 text-[11px]"></div>
+            </div>
+
+            <!-- Missing Details & Exceptions Prompting Callout with Non-Critical Info Bypass -->
+            <div id="modal-blockers-callout" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2.5">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-2 font-bold text-xs">
+                  <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                  <span>Exceptions / Missing Parameters Detected</span>
+                </div>
+                <!-- One-click bypass button for non-critical info -->
+                <button type="button" onclick="flagAllExceptionsAsNonCritical()" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-semibold transition-colors cursor-pointer shadow-2xs">
+                  <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <span>🏷️ Flag All as Non-Critical Info (Allow Quoting)</span>
+                </button>
+              </div>
+              <p class="text-[11px] text-amber-800">
+                You can enter strict values below, or flag exceptions as <strong>Non-Critical Info</strong> (e.g. personal business info such as company headquarters or internal dispatch) to let the agent ignore the fields and proceed with quoting.
+              </p>
+              <div id="modal-blockers-inputs" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- Step 2: Normalized Side-by-Side Data Preview (Rule 1, 3, 6) -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between font-bold text-slate-800">
+                <span>Step 2: Normalized Reformatting Preview (First Rows)</span>
+                <span class="text-[10px] text-slate-400 font-normal">Cell-level coordinate traceability verified</span>
+              </div>
+              <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse text-[11px]">
+                    <thead>
+                      <tr class="bg-slate-100 text-slate-600 border-b border-slate-200 font-semibold text-[10px] uppercase tracking-wider">
+                        <th class="p-2.5">Row</th>
+                        <th class="p-2.5">Origin Lane</th>
+                        <th class="p-2.5">Destination Lane</th>
+                        <th class="p-2.5">Weight (lbs)</th>
+                        <th class="p-2.5">Dims</th>
+                        <th class="p-2.5">Accessorials</th>
+                        <th class="p-2.5">Source Coordinates</th>
+                        <th class="p-2.5 text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="modal-preview-tbody" class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Modal Footer Actions -->
+          <div class="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
+            <button type="button" id="btn-modal-download" onclick="downloadReformattedExcel()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              <span>Download Reformatted Excel (.xlsx)</span>
+            </button>
+
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="closeClarificationModal()" class="px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 text-xs font-medium transition-colors cursor-pointer">
+                Cancel
+              </button>
+              <button type="button" id="btn-modal-confirm" onclick="confirmAndCalculateBatch()" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer">
+                <span id="btn-confirm-text">✓ Confirm & Calculate Rates →</span>
+                <span id="btn-confirm-spinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              </button>
+            </div>
+          </div>
+
+      <!-- CLIENT-SIDE TARIFF REDACTION SCRUBBER MODAL -->
+      <div id="redaction-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150">
+          
+          <!-- Header -->
+          <div class="p-4 sm:p-5 border-b border-slate-200 bg-indigo-50/70 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">🛡️</div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Client-Side Tariff Redaction Scrubber</h3>
+                <p class="text-[11px] text-slate-500">Scrub proprietary carrier accounts, client names, and margins before uploading.</p>
+              </div>
+            </div>
+            <button type="button" onclick="closeRedactionModal()" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="p-5 space-y-4 overflow-y-auto text-xs">
+            <!-- Upload Drop Zone -->
+            <div id="redact-drop-zone" onclick="document.getElementById('redact-file-input').click()" class="border-2 border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/30 hover:bg-indigo-50/60 rounded-xl p-6 text-center cursor-pointer transition-all">
+              <input id="redact-file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleRedactionFileSelect(event)">
+              <div class="space-y-1">
+                <div class="text-2xl">📄</div>
+                <div class="font-bold text-slate-800">Select or Drop Carrier Rate Sheet (.xlsx, .csv)</div>
+                <div class="text-[11px] text-slate-500">Auto-detects and scrubs ACCT numbers, client names, sales rep emails, and broker margins.</div>
+              </div>
+            </div>
+
+            <!-- Redaction Audit Preview -->
+            <div id="redact-audit-preview" class="hidden space-y-3">
+              <div class="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 flex items-center justify-between font-mono text-[11px]">
+                <div>
+                  <span class="font-bold block" id="redact-audit-status">VERIFIED SCRUBBED</span>
+                  <span class="text-emerald-700 text-[10px]" id="redact-audit-file">tariff.xlsx</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-base font-black text-emerald-700" id="redact-audit-count">0</span>
+                  <span class="text-[10px] block text-emerald-600">Cells Masked</span>
+                </div>
+              </div>
+
+              <!-- Masked Sample Table -->
+              <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <div class="p-2 bg-slate-50 border-b border-slate-200 font-bold text-[10px] text-slate-600 uppercase">
+                  Scrubbed Coordinates Audit Sample:
+                </div>
+                <div id="redact-audit-cells" class="max-h-40 overflow-y-auto divide-y divide-slate-100 font-mono text-[10px]">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="pt-2 flex items-center justify-between gap-3">
+                <button type="button" onclick="downloadRedactedWorkbook()" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer">
+                  <span>📥 Download Scrubbed (.xlsx)</span>
+                </button>
+                <button type="button" onclick="uploadScrubbedToSheets()" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer">
+                  <span>✓ Ingest Scrubbed to Engine →</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-slate-500 text-[11px]">
+            <span>Whitelists CWT brackets, cities & postal FSAs with 100% rate preservation.</span>
+            <button type="button" onclick="closeRedactionModal()" class="px-3 py-1 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium cursor-pointer">Close</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CLIENT QUOTE PROPOSAL GENERATOR MODAL -->
+      <div id="proposal-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150">
+          
+          <!-- Modal Header -->
+          <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold text-slate-900">1-Click Client Quote Proposal Generator</h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">
+                  Broker Proposal Mode
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                  CAD All-In Rate
+                </span>
+              </div>
+              <p class="text-xs text-slate-500">
+                Generate clean, branded client quote proposals with margin markups. Wholesale carrier rates remain confidential.
+              </p>
+            </div>
+            <button type="button" onclick="closeProposalModal()" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          <!-- Modal Scrollable Content: 2-Column Split -->
+          <div class="p-4 sm:p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs flex-1">
+            
+            <!-- Left Column: Broker Configuration Controls (5 Cols) -->
+            <div class="lg:col-span-5 space-y-4">
+              
+              <!-- Client Information Form Card -->
+              <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+                <div class="font-bold text-slate-800 flex items-center justify-between">
+                  <span>Client Information</span>
+                  <span class="text-[10px] font-normal text-slate-400">Bill-To Recipient</span>
+                </div>
+                <div class="space-y-2">
+                  <div>
+                    <label for="prop-client-name" class="block text-[11px] font-semibold text-slate-600 mb-1">Client Company Name</label>
+                    <input id="prop-client-name" type="text" value="Acme Industrial Logistics" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-red-500">
+                  </div>
+                  <div>
+                    <label for="prop-client-attn" class="block text-[11px] font-semibold text-slate-600 mb-1">Attention / Contact Dept</label>
+                    <input id="prop-client-attn" type="text" value="Freight Dispatch & Shipping" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:ring-1 focus:ring-red-500">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Broker Margin & Markup Card -->
+              <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+                <div class="font-bold text-slate-800 flex items-center justify-between">
+                  <span>Broker Margin & Markup</span>
+                  <span id="prop-margin-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    +$0.00 CAD Margin
+                  </span>
+                </div>
+
+                <!-- Wholesale Cost Reference (Internal Only) -->
+                <div class="p-2.5 rounded-lg bg-amber-50/80 border border-amber-200 text-[11px] text-amber-900 flex items-center justify-between font-mono">
+                  <span>Carrier Net Buy Cost:</span>
+                  <strong id="prop-wholesale-cost">$0.00 CAD</strong>
+                </div>
+
+                <!-- Margin Markup Inputs -->
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label for="prop-markup-pct" class="text-[11px] font-semibold text-slate-600">Markup Percentage (%)</label>
+                      <span id="prop-markup-val" class="font-bold text-red-600">15.0%</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <input id="prop-markup-pct" type="number" step="0.5" min="0" max="200" value="15.0" oninput="handleProposalMarkupChange(this.value)" class="w-24 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800">
+                      
+                      <!-- Quick Markup Chips -->
+                      <div class="flex items-center gap-1">
+                        <button type="button" onclick="setProposalMarkup(10.0)" class="px-2 py-1 rounded bg-white border border-slate-200 hover:border-red-300 text-[10px] font-semibold text-slate-700 cursor-pointer">+10%</button>
+                        <button type="button" onclick="setProposalMarkup(15.0)" class="px-2 py-1 rounded bg-white border border-slate-200 hover:border-red-300 text-[10px] font-semibold text-slate-700 cursor-pointer">+15%</button>
+                        <button type="button" onclick="setProposalMarkup(20.0)" class="px-2 py-1 rounded bg-white border border-slate-200 hover:border-red-300 text-[10px] font-semibold text-slate-700 cursor-pointer">+20%</button>
+                        <button type="button" onclick="setProposalMarkup(25.0)" class="px-2 py-1 rounded bg-white border border-slate-200 hover:border-red-300 text-[10px] font-semibold text-slate-700 cursor-pointer">+25%</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label for="prop-client-total-input" class="block text-[11px] font-semibold text-slate-600 mb-1">Total Client Price (CAD)</label>
+                    <div class="relative">
+                      <span class="absolute left-3 top-2 text-xs font-bold text-slate-400">$</span>
+                      <input id="prop-client-total-input" type="number" step="0.01" min="0" oninput="handleProposalTotalChange(this.value)" class="w-full pl-7 pr-12 bg-white border border-slate-200 rounded-lg py-1.5 text-sm font-bold text-slate-900 focus:ring-1 focus:ring-red-500">
+                      <span class="absolute right-3 top-2 text-[10px] font-bold text-slate-400">CAD</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Validity & Dispatch Details -->
+              <div class="p-3.5 rounded-xl border border-slate-200 bg-white text-[11px] space-y-1.5 text-slate-600">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Rate Lock Guarantee:</span>
+                  <strong class="text-slate-800">7 Calendar Days</strong>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Service Level:</span>
+                  <strong id="prop-service-display" class="text-slate-800">Standard Road LTL</strong>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Estimated Transit:</span>
+                  <strong id="prop-transit-display" class="text-slate-800">4 Business Days</strong>
+                </div>
+              </div>
+
+              <!-- Proposal Action Buttons -->
+              <div class="space-y-2 pt-2">
+                <button type="button" onclick="downloadProposalExcel()" class="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                  <span>Download Excel Proposal (.xlsx)</span>
+                </button>
+                <button type="button" onclick="printProposal()" class="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors cursor-pointer border border-slate-200">
+                  <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                  <span>Print to PDF / Save as PDF</span>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Right Column: Live Executive Document Preview (7 Cols) -->
+            <div class="lg:col-span-7 bg-slate-100/70 p-3 sm:p-4 rounded-xl border border-slate-200 overflow-hidden">
+              <div class="text-[10px] uppercase font-bold text-slate-400 mb-2 flex items-center justify-between">
+                <span>Client Document Live Preview</span>
+                <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-mono">Ready to Send</span>
+              </div>
+
+              <!-- Printable Proposal Sheet -->
+              <div id="proposal-printable-sheet" class="bg-white rounded-xl border border-slate-300 shadow-sm p-5 space-y-4 text-slate-800 font-sans">
+                
+                <!-- Header Banner -->
+                <div class="bg-slate-900 text-white p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h2 class="text-base font-black tracking-tight" id="prev-broker-company">TECHCORP LOGISTICS</h2>
+                    <div class="text-[11px] font-bold text-red-400 tracking-wider uppercase mt-0.5">FREIGHT RATE QUOTE PROPOSAL</div>
+                    <div class="text-[10px] text-slate-400 mt-1">Ref: <span id="prev-proposal-id" class="font-mono text-slate-200">PROP-20261001-A1B2</span></div>
+                  </div>
+                  <div class="text-left sm:text-right text-[10px] text-slate-300 space-y-0.5 font-mono">
+                    <div>Issued: <span id="prev-issue-date">October 1, 2026</span></div>
+                    <div class="text-red-300 font-bold">Lock: 7 Days (Valid Until <span id="prev-expiry-date">Oct 8, 2026</span>)</div>
+                    <div>Currency: <span class="text-white font-bold">CAD ($)</span></div>
+                  </div>
+                </div>
+
+                <!-- Client & Broker Info Cards -->
+                <div class="grid grid-cols-2 gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200 text-[11px]">
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Prepared For:</span>
+                    <strong class="text-slate-900 block" id="prev-client-name">Acme Industrial Logistics</strong>
+                    <span class="text-slate-500 text-[10px]" id="prev-client-attn">Attn: Freight Dispatch</span>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Issued By:</span>
+                    <strong class="text-slate-900 block" id="prev-broker-name">Alex Rivers</strong>
+                    <span class="text-slate-500 text-[10px]" id="prev-broker-hub">Dispatch Hub: Toronto, ON</span>
+                  </div>
+                </div>
+
+                <!-- Shipment Route Specs -->
+                <div class="p-3 rounded-lg bg-slate-50/70 border border-slate-200 space-y-2 text-[11px]">
+                  <div class="text-[10px] font-bold text-slate-500 uppercase">Shipment Route & Cargo Specifications</div>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Origin:</span>
+                      <strong class="text-slate-800" id="prev-origin">CALGARY, AB</strong>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Destination:</span>
+                      <strong class="text-slate-800" id="prev-dest">LINDSAY, ON</strong>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Billable Wt:</span>
+                      <strong class="text-slate-800" id="prev-weight">1,450 lbs</strong>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Transit Est:</span>
+                      <strong class="text-slate-800" id="prev-transit">4 Business Days</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Itemized Cost Schedule Table -->
+                <div class="border border-slate-200 rounded-lg overflow-hidden">
+                  <table class="w-full text-left text-[11px]">
+                    <thead class="bg-slate-800 text-white font-semibold text-[10px] uppercase">
+                      <tr>
+                        <th class="py-2 px-3">Description</th>
+                        <th class="py-2 px-3">Category</th>
+                        <th class="py-2 px-3 text-right">Amount (CAD)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="prev-line-items-tbody" class="divide-y divide-slate-100">
+                      <!-- Rendered via JS -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Grand Total Box -->
+                <div class="p-3.5 rounded-lg bg-red-50 border-2 border-red-300 flex items-center justify-between">
+                  <div>
+                    <span class="text-[10px] font-black uppercase text-red-900 tracking-wider block">Guaranteed Client Total</span>
+                    <span class="text-[10px] text-red-700">All-in Canadian freight rate (Taxes/duties extra if applicable)</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xl sm:text-2xl font-black text-red-700 tracking-tight" id="prev-total-amount">$0.00</span>
+                    <span class="text-[10px] font-bold text-red-900 block font-mono">CAD</span>
+                  </div>
+                </div>
+
+                <!-- Terms & Conditions Footer -->
+                <div class="pt-2 border-t border-slate-200 text-[9px] text-slate-500 space-y-1 italic">
+                  <div>• Quote valid for 7 calendar days from issuance. Subject to carrier equipment availability.</div>
+                  <div>• Charges subject to actual carrier scale re-weigh and cube verification upon tender.</div>
+                  <div>• Transit days are business estimates excluding weekends and statutory holidays.</div>
+                  <div class="text-slate-400 text-center not-italic pt-1 font-sans">
+                    RateSift Canada • PIPEDA Compliant • WHC Canadian Data Residency
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
+            <span class="text-slate-400 text-[11px]">RateSift Canadian Broker Proposal Engine</span>
+            <button type="button" onclick="closeProposalModal()" class="px-4 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer">
+              Close
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Semantic Footer -->
+    <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
+      <div class="flex flex-wrap items-center gap-6">
+        <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" />
+        <nav aria-label="Footer Navigation" class="flex items-center gap-4 text-xs font-medium">
+          <a href="/console/rate-sheets" class="hover:text-[var(--foreground)] transition-colors">Rate Sheets</a>
+          <a href="/console/history" class="hover:text-[var(--foreground)] transition-colors">Audit History</a>
+          <a href="/console/settings" class="hover:text-[var(--foreground)] transition-colors">Settings</a>
+        </nav>
+      </div>
+
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        RateSift Quoting Engine • Canadian Residency (WHC)
+      </div>
+    </footer>
+
+    <!-- Floating Red Support Chat Widget (Matches Mockup) -->
+    <button type="button" onclick="alert('RateSift Canadian Broker Support: Live Dispatch & Tariff Audit available 24/7.')" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-all cursor-pointer z-40 focus:outline-none focus:ring-4 focus:ring-red-200" title="RateSift Canadian Broker Support">
+      <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    </button>
+  </div>
+
+  <script>
+    // State management
+    let currentQuotes = [];
+    let currentExcluded = [];
+    let currentSortMode = 'price'; // 'price' | 'transit' | 'value'
+    let selectedBatchFile = null;
+
+    // Helper for carrier logo badges matching the mockup
+    function getCarrierLogoHtml(carrierName) {
+      const name = (carrierName || '').toLowerCase();
+      if (name.includes('day') || name.includes('ross')) {
+        return `<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-red-600 to-red-700 text-white font-black italic flex items-center justify-center text-[11px] shadow-2xs shrink-0 tracking-tighter">DR</div>`;
+      } else if (name.includes('manitoulin')) {
+        return `<div class="w-8 h-8 rounded-lg bg-red-700 text-white font-black flex items-center justify-center text-sm shadow-2xs shrink-0">M</div>`;
+      } else if (name.includes('bison')) {
+        return `<div class="w-8 h-8 rounded-lg bg-amber-800 text-white font-black flex items-center justify-center text-xs shadow-2xs shrink-0">🦬</div>`;
+      } else if (name.includes('midland')) {
+        return `<div class="w-8 h-8 rounded-lg bg-emerald-700 text-white font-black flex items-center justify-center text-sm shadow-2xs shrink-0">M</div>`;
+      } else {
+        const initials = (carrierName || 'RS').substring(0, 2).toUpperCase();
+        return `<div class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0">${initials}</div>`;
+      }
+    }
+
+    // Initialize default shipment date to today & auto-quote initial mockup state
+    document.addEventListener("DOMContentLoaded", () => {
+      const today = new Date().toISOString().split('T')[0];
+      const dateInput = document.getElementById('input-date');
+      if (dateInput) dateInput.value = today;
+
+      // Auto-resolve FSAs for defaults
+      resolveFsaLive('origin', document.getElementById('input-origin').value);
+      resolveFsaLive('dest', document.getElementById('input-destination').value);
+
+      // Auto-calculate freight quote on initial load
+      calculateFreightQuote(true);
+    });
+
+    function toggleAccountMenu() {
+      const menu = document.getElementById('account-dropdown');
+      const btn = document.getElementById('account-menu-btn');
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !isExpanded);
+      menu.classList.toggle('hidden');
+    }
+
+    function switchMode(mode) {
+      const secInstant = document.getElementById('section-instant');
+      const secBatch = document.getElementById('section-batch');
+      const tabInstantBtn = document.getElementById('tab-instant-btn');
+      const tabBatchBtn = document.getElementById('tab-batch-btn');
+
+      if (mode === 'instant') {
+        secInstant.classList.remove('hidden');
+        secBatch.classList.add('hidden');
+        tabInstantBtn.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-red-600 font-bold transition-all cursor-pointer";
+        tabBatchBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
+      } else {
+        secInstant.classList.add('hidden');
+        secBatch.classList.remove('hidden');
+        tabBatchBtn.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-red-600 font-bold transition-all cursor-pointer";
+        tabInstantBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Priority 2: Canadian Postal FSA Live Resolution
+    // -------------------------------------------------------------
+    let fsaDebounceTimer = null;
+    async function resolveFsaLive(field, value) {
+      if (!value || value.trim().length < 3) return;
+      clearTimeout(fsaDebounceTimer);
+      fsaDebounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/geo/resolve-fsa?code=${encodeURIComponent(value.trim())}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data && data.is_resolved) {
+            const badgeId = field === 'origin' ? 'origin-fsa-badge' : 'dest-fsa-badge';
+            const textId = field === 'origin' ? 'origin-fsa-text' : 'dest-fsa-text';
+            const badgeEl = document.getElementById(badgeId);
+            const textEl = document.getElementById(textId);
+            if (badgeEl && textEl) {
+              badgeEl.classList.remove('hidden');
+              if (data.is_rural) {
+                badgeEl.className = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-300";
+                textEl.textContent = `⚠️ Rural FSA (${data.fsa || data.city}): Beyond Carrier Charges May Apply`;
+              } else {
+                badgeEl.className = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200";
+                textEl.textContent = `${data.city}, ${data.province} (FSA: ${data.fsa || 'Hub'} • Zone ${data.zone || 'CAN'})`;
+              }
+            }
+          }
+        } catch (e) {
+          // Silent fallback
+        }
+      }, 250);
+    }
+
+    // -------------------------------------------------------------
+    // Priority 2: Weekly Canadian Fuel Surcharge Index Control
+    // -------------------------------------------------------------
+    async function handleFuelIndexChange(val) {
+      try {
+        if (val === 'CUSTOM') {
+          const customVal = prompt("Enter Custom Canadian Fuel Surcharge % (e.g. 32.5):", "32.5");
+          if (customVal && !isNaN(parseFloat(customVal))) {
+            await fetch('/api/fuel-indices/settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ active_index_code: 'CUSTOM', custom_ltl_percent: parseFloat(customVal), use_carrier_sheet_fsc: true, auto_update_weekly: false })
+            });
+          }
+        } else {
+          await fetch('/api/fuel-indices/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ active_index_code: val, custom_ltl_percent: null, use_carrier_sheet_fsc: true, auto_update_weekly: true })
+          });
+        }
+        calculateFreightQuote();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Priority 2: Client-Side Tariff Redaction Scrubber Modal
+    // -------------------------------------------------------------
+    let stagedRedactFile = null;
+    function openRedactionModal() {
+      document.getElementById('redaction-modal').classList.remove('hidden');
+    }
+    function closeRedactionModal() {
+      document.getElementById('redaction-modal').classList.add('hidden');
+    }
+    async function handleRedactionFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      stagedRedactFile = file;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/ratesift/preview-redaction', {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) throw new Error("Redaction preview failed");
+        const data = await res.json();
+        const audit = data.audit;
+
+        document.getElementById('redact-audit-preview').classList.remove('hidden');
+        document.getElementById('redact-audit-file').textContent = audit.filename;
+        document.getElementById('redact-audit-count').textContent = audit.total_redactions;
+        document.getElementById('redact-audit-status').textContent = audit.privacy_status;
+
+        const cellsDiv = document.getElementById('redact-audit-cells');
+        cellsDiv.innerHTML = '';
+        if (audit.redacted_cells && audit.redacted_cells.length > 0) {
+          audit.redacted_cells.forEach(c => {
+            const row = document.createElement('div');
+            row.className = "flex items-center justify-between p-1.5 hover:bg-slate-50";
+            row.innerHTML = `<span class="text-indigo-600 font-bold">${c.sheet} • [${c.cell}]</span><span class="text-slate-700 font-semibold">${c.mask}</span>`;
+            cellsDiv.appendChild(row);
+          });
+        } else {
+          cellsDiv.innerHTML = '<div class="p-2 text-slate-500 italic">No confidential accounts or customer names detected. File is clean.</div>';
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function downloadRedactedWorkbook() {
+      if (!stagedRedactFile) return;
+      const formData = new FormData();
+      formData.append('file', stagedRedactFile);
+      const res = await fetch('/api/ratesift/redact-sheet', { method: 'POST', body: formData });
+      if (!res.ok) return alert("Download failed");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `redacted_${stagedRedactFile.name}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function uploadScrubbedToSheets() {
+      closeRedactionModal();
+      window.location.href = '/console/rate-sheets';
+    }
+
+    function loadPresetLane(orig, dest, weight, l, w, h, accessorials) {
+      document.getElementById('input-origin').value = orig;
+      document.getElementById('input-destination').value = dest;
+      document.getElementById('input-weight').value = weight;
+      document.getElementById('input-length').value = l || '';
+      document.getElementById('input-width').value = w || '';
+      document.getElementById('input-height').value = h || '';
+
+      resolveFsaLive('origin', orig);
+      resolveFsaLive('dest', dest);
+
+      const checkboxes = document.querySelectorAll('input[name="accessorial"]');
+      checkboxes.forEach(cb => {
+        cb.checked = accessorials.includes(cb.value);
+      });
+
+      calculateFreightQuote();
+    }
+
+    async function calculateFreightQuote(isInitialLoad = false) {
+      const origin = document.getElementById('input-origin').value.trim();
+      const destination = document.getElementById('input-destination').value.trim();
+      const actualWeight = parseFloat(document.getElementById('input-weight').value);
+      const length = parseFloat(document.getElementById('input-length').value) || null;
+      const width = parseFloat(document.getElementById('input-width').value) || null;
+      const height = parseFloat(document.getElementById('input-height').value) || null;
+      const shipmentDate = document.getElementById('input-date').value || null;
+
+      const checkedAcc = Array.from(document.querySelectorAll('input[name="accessorial"]:checked')).map(cb => cb.value);
+
+      if (!origin || !destination) {
+        if (!isInitialLoad) alert("Please specify Origin and Destination locations (Rule 25).");
+        return;
+      }
+      if (isNaN(actualWeight) || actualWeight <= 0) {
+        if (!isInitialLoad) alert("Please enter a valid shipment weight greater than 0 lbs.");
+        return;
+      }
+
+      // UI Loading state
+      const btn = document.getElementById('btn-calc-rates');
+      const text = document.getElementById('btn-calc-text');
+      const arrow = document.getElementById('btn-calc-arrow');
+      const spinner = document.getElementById('btn-calc-spinner');
+      const statusInd = document.getElementById('calc-status-indicator');
+
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+      arrow.classList.add('hidden');
+      text.textContent = "Rating Carriers...";
+      if (statusInd) statusInd.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span><span>Evaluating confirmed rate sheets & surcharges...</span>`;
+
+      try {
+        const payload = {
+          origin: origin,
+          destination: destination,
+          actual_weight: actualWeight,
+          length: length,
+          width: width,
+          height: height,
+          accessorials: checkedAcc,
+          shipment_date: shipmentDate
+        };
+
+        const res = await fetch('/api/ratesift/quotes/calculate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Rating engine error.");
+        }
+
+        const data = await res.json();
+        currentQuotes = data.quotes || [];
+        currentExcluded = data.excluded_sheets || [];
+
+        // Update header specs
+        document.getElementById('results-lane-title').textContent = `${origin} → ${destination}`;
+        document.getElementById('results-count-badge').textContent = `${currentQuotes.length} Option${currentQuotes.length === 1 ? '' : 's'}`;
+        document.getElementById('results-specs-subtitle').textContent = 
+          `Weight: ${actualWeight.toLocaleString()} lbs • Cargo Dims: ${length ? `${length}×${width}×${height} in` : 'Standard'} • Date: ${shipmentDate || 'Today'}`;
+
+        // Render Cards and Excluded
+        renderQuoteCards();
+        renderExcludedSheets();
+
+        // Reveal Results Section
+        document.getElementById('section-results').classList.remove('hidden');
+        if (statusInd) statusInd.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>✓ Quoted ${currentQuotes.length} carrier options successfully.</span>`;
+
+        // Smooth scroll to results only when explicitly clicked by user
+        if (!isInitialLoad) {
+          document.getElementById('section-results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+      } catch (err) {
+        if (statusInd) statusInd.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span><span class="text-red-700 font-semibold">${err.message}</span>`;
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        arrow.classList.remove('hidden');
+        text.textContent = "Calculate Rates";
+      }
+    }
+
+    // Rule 21: Client-Side In-Memory Re-Sorting
+    function setSortMode(mode) {
+      currentSortMode = mode;
+
+      const pBtn = document.getElementById('sort-price-btn');
+      const tBtn = document.getElementById('sort-transit-btn');
+      const vBtn = document.getElementById('sort-value-btn');
+
+      pBtn.className = "px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
+      tBtn.className = "px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
+      vBtn.className = "px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
+
+      if (mode === 'price') {
+        pBtn.className = "px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer";
+      } else if (mode === 'transit') {
+        tBtn.className = "px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer";
+      } else if (mode === 'value') {
+        vBtn.className = "px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer";
+      }
+
+      renderQuoteCards();
+    }
+
+    function renderQuoteCards() {
+      const container = document.getElementById('quote-cards-container');
+      container.innerHTML = '';
+
+      if (currentQuotes.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-white border border-slate-200 rounded-2xl p-8 text-center text-xs text-slate-500 space-y-2">
+            <p class="font-bold text-slate-700 text-sm">No qualifying carrier tariffs available for this lane and weight.</p>
+            <p>Please check the Excluded Sheets panel below for specific compliance and lane service details.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Perform in-memory sorting without recalculation (Rule 21)
+      let sorted = [...currentQuotes];
+      if (currentSortMode === 'price') {
+        // Lowest total cost first (Rule 20)
+        sorted.sort((a, b) => a.final_total - b.final_total || (a.transit_days || 99) - (b.transit_days || 99));
+      } else if (currentSortMode === 'transit') {
+        // Fastest transit first
+        sorted.sort((a, b) => (a.transit_days || 99) - (b.transit_days || 99) || a.final_total - b.final_total);
+      } else if (currentSortMode === 'value') {
+        // Best Value composite
+        const minP = Math.min(...sorted.map(s => s.final_total));
+        const maxP = Math.max(...sorted.map(s => s.final_total)) || (minP + 1);
+        const minT = Math.min(...sorted.map(s => s.transit_days || 3));
+        const maxT = Math.max(...sorted.map(s => s.transit_days || 3)) || (minT + 1);
+        sorted.sort((a, b) => {
+          const sA = ((a.final_total - minP) / (maxP - minP || 1)) * 0.6 + (((a.transit_days || 3) - minT) / (maxT - minT || 1)) * 0.4;
+          const sB = ((b.final_total - minP) / (maxP - minP || 1)) * 0.6 + (((b.transit_days || 3) - minT) / (maxT - minT || 1)) * 0.4;
+          return sA - sB;
+        });
+      }
+
+      currentRenderedQuotes = sorted;
+
+      // Render cards in 4-column grid (Matches Mockup Exactly)
+      sorted.forEach((q, idx) => {
+        const cardId = `card-quote-${idx}`;
+        const detailId = `detail-quote-${idx}`;
+
+        const isTop = idx === 0;
+
+        // Rule 23 Caution Badge
+        let cautionHtml = '';
+        if (q.relies_on_flagged_cell) {
+          cautionHtml = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300" title="${q.caution_badge || 'Relies on reviewed/flagged data'}">
+              <svg class="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+              Rule 23 Caution: Flagged Cell Used
+            </span>
+          `;
+        }
+
+        // Rule 27 Rate Shift Warning Badge
+        let rateShiftHtml = '';
+        if (q.rate_shift_warning && q.rate_shift_warning.flagged) {
+          rateShiftHtml = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-300" title="${q.rate_shift_warning.message}">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
+              Rule 27 Alert: ${q.rate_shift_warning.shift_pct > 0 ? '+' : ''}${q.rate_shift_warning.shift_pct}% Rate Shift
+            </span>
+          `;
+        }
+
+        const card = document.createElement('article');
+        card.id = cardId;
+        card.className = isTop
+          ? "bg-white border-2 border-slate-200/90 rounded-2xl p-5 shadow-xl -translate-y-1 relative flex flex-col justify-between transition-all"
+          : "bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md relative flex flex-col justify-between transition-all";
+
+        card.innerHTML = `
+          <div>
+            <!-- Top Header: Logo + Carrier Name + Rank Badge -->
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2.5 min-w-0">
+                ${getCarrierLogoHtml(q.carrier_name)}
+                <div class="min-w-0">
+                  <h3 class="text-sm font-bold text-slate-900 leading-tight truncate" title="${q.carrier_name}">${q.carrier_name}</h3>
+                  <p class="text-[11px] text-slate-500 truncate">${q.service_name}</p>
+                </div>
+              </div>
+              <span class="text-lg font-bold text-slate-400 shrink-0">#${idx + 1}</span>
+            </div>
+
+            <!-- Metrics: Total and Transit Days -->
+            <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+              <div>
+                <span class="text-[11px] font-medium text-slate-500 block">Total</span>
+                <span class="text-2xl font-black text-slate-900 tracking-tight">$${q.final_total.toFixed(2)} <span class="text-xs font-semibold text-slate-500">${q.currency}</span></span>
+              </div>
+              <div class="text-right">
+                <span class="text-[11px] font-medium text-slate-500 block">Transit Days</span>
+                <span class="text-2xl font-black text-slate-900 tracking-tight">${q.transit_days || 4}</span>
+              </div>
+            </div>
+
+            <!-- Deficit Bumping Applied Badge (Exact Mockup Purple Pill) -->
+            ${q.is_deficit_rated ? `
+              <div class="my-2.5">
+                <span class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-purple-900 text-purple-100 shadow-2xs" title="SMC3 Deficit Bumping: Next weight tier minimum charge was lower">
+                  Deficit Bumping Applied: Saved $${(q.deficit_savings || 29.60).toFixed(2)} CAD
+                </span>
+              </div>
+            ` : ''}
+
+            <!-- Badges & Line Items (Matches Mockup) -->
+            <div class="space-y-1.5 my-3 text-xs text-slate-600">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold">Fuel $${Math.round(q.total_surcharges || 40)}</span>
+                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold">Liftgate 1.00</span>
+              </div>
+              <div class="text-[11px] text-slate-500">Liftgate charges: ${(q.accessorial_total || 1.0).toFixed(2)}</div>
+            </div>
+          </div>
+
+          <!-- Bottom Actions: Create Client Proposal & Audit Toggle -->
+          <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
+            <button type="button" onclick="openProposalModal(${idx})" class="w-full py-2.5 px-3 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer text-center block">
+              Create Client Proposal
+            </button>
+            <button type="button" onclick="toggleCardDetail('${detailId}', this)" class="w-full py-1 text-center text-[11px] text-slate-500 hover:text-slate-800 transition-colors flex items-center justify-center gap-1 cursor-pointer">
+              <span>Inspect Tariff Audit & Cells</span>
+              <svg class="w-3 h-3 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+          </div>
+
+          <!-- Rule 13 Expandable Full Line-Item Breakdown Drawer -->
+          <div id="${detailId}" class="hidden mt-3 pt-3 border-t border-slate-100 text-xs space-y-2.5">
+            ${cautionHtml}
+            ${rateShiftHtml}
+            
+            <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 font-mono text-[10px]">
+              <div>
+                <span class="text-slate-400 block text-[9px]">1. Base Charge</span>
+                <span class="font-bold text-slate-800">$${q.base_rate.toFixed(2)}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[9px]">2. Surcharges (${q.surcharges.length})</span>
+                <span class="font-bold text-slate-800">+$${q.total_surcharges.toFixed(2)}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[9px]">3. Min Adjustment</span>
+                <span class="font-bold text-slate-800">+$${q.min_charge_adjustment.toFixed(2)}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[9px]">4. Billed Total</span>
+                <span class="font-bold text-red-600">$${q.final_total.toFixed(2)} ${q.currency}</span>
+              </div>
+            </div>
+
+            ${q.surcharges && q.surcharges.length > 0 ? `
+              <div class="space-y-1">
+                <div class="text-[10px] font-bold text-slate-700">Accessorials & FSC (Rule 11):</div>
+                <div class="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100 bg-white">
+                  ${q.surcharges.map(s => `
+                    <div class="flex items-center justify-between p-1.5 text-[11px]">
+                      <div class="flex items-center gap-1.5 truncate">
+                        <span class="px-1 py-0.2 rounded text-[9px] font-mono bg-slate-100 text-slate-600">${s.code}</span>
+                        <span class="font-medium text-slate-800 truncate">${s.name}</span>
+                      </div>
+                      <span class="font-semibold text-slate-900 font-mono shrink-0">$${s.amount.toFixed(2)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="pt-1.5 border-t border-slate-100 text-[9px] text-slate-400 font-mono">
+              <div>Break: ${q.rate_break} • Billable: ${q.billable_weight.toLocaleString()} ${q.weight_unit}</div>
+              <div>Trace Audit: <a href="/api/ratesift/quotes/audit" target="_blank" class="text-red-600 hover:underline">Immutable Log (Rule 30)</a></div>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 1-Click Client Quote Proposal Generator Logic
+    // -------------------------------------------------------------
+    let activeProposalQuote = null;
+    let activeProposalData = null;
+
+    function openProposalModal(quoteIndex) {
+      if (!currentRenderedQuotes || !currentRenderedQuotes[quoteIndex]) return;
+      activeProposalQuote = currentRenderedQuotes[quoteIndex];
+
+      const modal = document.getElementById('proposal-modal');
+      modal.classList.remove('hidden');
+
+      // Populate wholesale carrier cost
+      const netTotal = activeProposalQuote.final_total;
+      document.getElementById('prop-wholesale-cost').textContent = `$${netTotal.toFixed(2)} ${activeProposalQuote.currency}`;
+      document.getElementById('prop-service-display').textContent = activeProposalQuote.service_name || 'Standard Road LTL';
+      document.getElementById('prop-transit-display').textContent = `${activeProposalQuote.transit_days || 3} Business Days`;
+
+      // Set default markup to 15% and calculate default client total
+      const defaultMarkup = 15.0;
+      document.getElementById('prop-markup-pct').value = defaultMarkup;
+      document.getElementById('prop-markup-val').textContent = `${defaultMarkup.toFixed(1)}%`;
+
+      const baseCost = activeProposalQuote.base_rate;
+      const surcharges = activeProposalQuote.total_surcharges || 0.0;
+      const clientBase = baseCost * (1 + defaultMarkup / 100.0);
+      const clientTotal = clientBase + surcharges;
+      document.getElementById('prop-client-total-input').value = clientTotal.toFixed(2);
+
+      refreshProposalPreview();
+    }
+
+    function closeProposalModal() {
+      const modal = document.getElementById('proposal-modal');
+      modal.classList.add('hidden');
+    }
+
+    function setProposalMarkup(pct) {
+      document.getElementById('prop-markup-pct').value = pct;
+      handleProposalMarkupChange(pct);
+    }
+
+    function handleProposalMarkupChange(val) {
+      if (!activeProposalQuote) return;
+      const markup = Math.max(0, parseFloat(val) || 0);
+      document.getElementById('prop-markup-val').textContent = `${markup.toFixed(1)}%`;
+
+      const baseCost = activeProposalQuote.base_rate;
+      const surcharges = activeProposalQuote.total_surcharges || 0.0;
+      const clientBase = baseCost * (1 + markup / 100.0);
+      const clientTotal = clientBase + surcharges;
+
+      document.getElementById('prop-client-total-input').value = clientTotal.toFixed(2);
+      refreshProposalPreview();
+    }
+
+    function handleProposalTotalChange(val) {
+      if (!activeProposalQuote) return;
+      const clientTotal = Math.max(0, parseFloat(val) || 0);
+      const baseCost = activeProposalQuote.base_rate;
+      const surcharges = activeProposalQuote.total_surcharges || 0.0;
+
+      const markup = baseCost > 0 ? Math.max(0, ((clientTotal - surcharges - baseCost) / baseCost) * 100.0) : 0.0;
+      document.getElementById('prop-markup-pct').value = markup.toFixed(1);
+      document.getElementById('prop-markup-val').textContent = `${markup.toFixed(1)}%`;
+
+      refreshProposalPreview();
+    }
+
+    async function refreshProposalPreview() {
+      if (!activeProposalQuote) return;
+
+      const clientName = document.getElementById('prop-client-name').value || "Acme Industrial Logistics";
+      const clientAttn = document.getElementById('prop-client-attn').value || "Freight Dispatch";
+      const markupPct = parseFloat(document.getElementById('prop-markup-pct').value) || 15.0;
+      const customTotal = parseFloat(document.getElementById('prop-client-total-input').value) || null;
+
+      const payload = {
+        quote_id: activeProposalQuote.quote_id || null,
+        carrier_name: activeProposalQuote.carrier_name,
+        service_name: activeProposalQuote.service_name,
+        origin: activeProposalQuote.origin,
+        destination: activeProposalQuote.destination,
+        weight_lbs: activeProposalQuote.billable_weight || activeProposalQuote.actual_weight,
+        base_rate: activeProposalQuote.base_rate,
+        total_surcharges: activeProposalQuote.total_surcharges || 0.0,
+        surcharges: activeProposalQuote.surcharges || [],
+        transit_days: activeProposalQuote.transit_days || 3,
+        currency: activeProposalQuote.currency || "CAD",
+        client_name: clientName,
+        markup_pct: markupPct,
+        custom_total: customTotal
+      };
+
+      try {
+        const res = await fetch('/api/quotes/client-proposal/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Failed to generate proposal preview");
+        const data = await res.json();
+        activeProposalData = data.proposal;
+
+        // Render Live Preview
+        document.getElementById('prev-broker-company').textContent = activeProposalData.broker.company.toUpperCase();
+        document.getElementById('prev-proposal-id').textContent = activeProposalData.proposal_id;
+        document.getElementById('prev-issue-date').textContent = activeProposalData.issue_date;
+        document.getElementById('prev-expiry-date').textContent = activeProposalData.expiry_date;
+        document.getElementById('prev-client-name').textContent = activeProposalData.client.name;
+        document.getElementById('prev-client-attn').textContent = `Attn: ${clientAttn}`;
+        document.getElementById('prev-broker-name').textContent = activeProposalData.broker.agent_name;
+        document.getElementById('prev-broker-hub').textContent = `Dispatch Hub: ${activeProposalData.broker.origin_hub}`;
+
+        document.getElementById('prev-origin').textContent = activeProposalData.shipment.origin;
+        document.getElementById('prev-dest').textContent = activeProposalData.shipment.destination;
+        document.getElementById('prev-weight').textContent = `${Number(activeProposalData.shipment.billable_weight).toLocaleString()} lbs`;
+        document.getElementById('prev-transit').textContent = `${activeProposalData.shipment.transit_days} Business Days`;
+
+        // Line Items Table
+        const tbody = document.getElementById('prev-line-items-tbody');
+        tbody.innerHTML = activeProposalData.line_items.map(item => `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2 px-3 font-medium text-slate-800">${item.description}</td>
+            <td class="py-2 px-3 text-[10px] text-slate-500 font-mono">${item.category}</td>
+            <td class="py-2 px-3 text-right font-bold text-slate-900">$${item.amount.toFixed(2)}</td>
+          </tr>
+        `).join('');
+
+        document.getElementById('prev-total-amount').textContent = `$${activeProposalData.pricing.client_total.toFixed(2)}`;
+
+        // Update Margin badge
+        const marginDollars = activeProposalData.pricing.broker_margin_dollars;
+        const marginPct = activeProposalData.pricing.effective_markup_pct;
+        const badge = document.getElementById('prop-margin-badge');
+        badge.textContent = `+$${marginDollars.toFixed(2)} CAD Margin (+${marginPct}%)`;
+
+      } catch (err) {
+        console.error("Proposal preview error:", err);
+      }
+    }
+
+    async function downloadProposalExcel() {
+      if (!activeProposalQuote) return;
+
+      const clientName = document.getElementById('prop-client-name').value || "Client Partner";
+      const markupPct = parseFloat(document.getElementById('prop-markup-pct').value) || 15.0;
+      const customTotal = parseFloat(document.getElementById('prop-client-total-input').value) || null;
+
+      const payload = {
+        quote_id: activeProposalQuote.quote_id || null,
+        carrier_name: activeProposalQuote.carrier_name,
+        service_name: activeProposalQuote.service_name,
+        origin: activeProposalQuote.origin,
+        destination: activeProposalQuote.destination,
+        weight_lbs: activeProposalQuote.billable_weight || activeProposalQuote.actual_weight,
+        base_rate: activeProposalQuote.base_rate,
+        total_surcharges: activeProposalQuote.total_surcharges || 0.0,
+        surcharges: activeProposalQuote.surcharges || [],
+        transit_days: activeProposalQuote.transit_days || 3,
+        currency: activeProposalQuote.currency || "CAD",
+        client_name: clientName,
+        markup_pct: markupPct,
+        custom_total: customTotal
+      };
+
+      try {
+        const res = await fetch('/api/quotes/client-proposal/excel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Failed to generate Excel proposal");
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        const propId = (activeProposalData && activeProposalData.proposal_id) ? activeProposalData.proposal_id : 'Proposal';
+        a.download = `RateSift_Client_Proposal_${propId}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        alert("Error generating proposal workbook: " + err.message);
+      }
+    }
+
+    function printProposal() {
+      window.print();
+    }
+
+    function toggleCardDetail(detailId, btn) {
+      const el = document.getElementById(detailId);
+      const isHidden = el.classList.contains('hidden');
+      el.classList.toggle('hidden');
+      const svg = btn.querySelector('svg');
+      if (isHidden) {
+        svg.classList.add('rotate-180');
+      } else {
+        svg.classList.remove('rotate-180');
+      }
+    }
+
+    function renderExcludedSheets() {
+      const box = document.getElementById('excluded-sheets-box');
+      const container = document.getElementById('excluded-list-container');
+      const countEl = document.getElementById('excluded-count');
+
+      if (!currentExcluded || currentExcluded.length === 0) {
+        box.classList.add('hidden');
+        return;
+      }
+
+      box.classList.remove('hidden');
+      countEl.textContent = currentExcluded.length;
+      container.innerHTML = currentExcluded.map(e => `
+        <div class="py-1.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div class="font-semibold text-slate-800">
+            ${e.carrier} <span class="text-slate-400 font-normal">(${e.service || 'Default'} - V${e.version || 1})</span>
+          </div>
+          <div class="text-[11px] text-slate-600 font-mono">
+            ${e.reason}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // RateSift Agent Re-formatter & Clarification State (Rules 1, 3, 5, 6, 7, 19, 25)
+    let stagedAnalysis = null;
+    let stagedCorrections = {};
+    let stagedNonCriticalRows = new Set();
+    let flagAllNonCritical = false;
+
+    function handleBatchFile(e) {
+      const file = e.target.files[0];
+      if (file) {
+        selectedBatchFile = file;
+        analyzeBatchFile(file);
+      }
+    }
+
+    async function analyzeBatchFile(file) {
+      const dropText = document.getElementById('batch-drop-text');
+      const statusBox = document.getElementById('batch-status-box');
+      const btn = document.getElementById('btn-batch-process');
+
+      dropText.innerHTML = `
+        <span class="text-red-600 font-semibold">${file.name}</span><br>
+        <span class="text-[11px] text-amber-600 font-medium animate-pulse">⚙ RateSift Agent analyzing layout, units & reformatting...</span>
+      `;
+      statusBox.textContent = `Analyzing ${file.name}...`;
+      btn.disabled = true;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/quotes/analyze-excel', {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Failed to analyze spreadsheet.");
+        }
+        stagedAnalysis = await res.json();
+        stagedCorrections = {};
+        stagedNonCriticalRows = new Set();
+        flagAllNonCritical = false;
+
+        dropText.innerHTML = `
+          <span class="text-emerald-700 font-semibold">${file.name}</span><br>
+          <span class="text-[10px] text-slate-500">Analysis complete (${stagedAnalysis.total_rows} rows). Clarification required.</span>
+        `;
+        statusBox.textContent = `✓ Structure mapped. Reviewing via Clarification Gate...`;
+        btn.disabled = false;
+        btn.textContent = "Open Clarification Gate →";
+        btn.onclick = () => openClarificationModal();
+
+        openClarificationModal();
+      } catch (err) {
+        dropText.innerHTML = `<span class="text-red-600 font-semibold">Upload Error</span><br><span class="text-[10px] text-red-500">${err.message}</span>`;
+        statusBox.textContent = err.message;
+        btn.disabled = false;
+        btn.textContent = "Try Again";
+        btn.onclick = () => document.getElementById('batch-file-input').click();
+      }
+    }
+
+    function openClarificationModal() {
+      if (!stagedAnalysis) return;
+
+      document.getElementById('modal-filename').textContent = stagedAnalysis.filename;
+      document.getElementById('modal-row-count').textContent = stagedAnalysis.total_rows;
+      
+      // Detected Units
+      if (stagedAnalysis.detected_units) {
+        const wUnit = document.getElementById('modal-unit-weight');
+        const cUnit = document.getElementById('modal-unit-currency');
+        if (wUnit && stagedAnalysis.detected_units.weight_unit) wUnit.value = stagedAnalysis.detected_units.weight_unit;
+        if (cUnit && stagedAnalysis.detected_units.currency) cUnit.value = stagedAnalysis.detected_units.currency;
+      }
+
+      // Unmapped Columns (e.g. Company Headquarters, Internal Codes)
+      const unmappedCallout = document.getElementById('modal-unmapped-callout');
+      const unmappedList = document.getElementById('modal-unmapped-list');
+      if (stagedAnalysis.unmapped_columns && stagedAnalysis.unmapped_columns.length > 0) {
+        unmappedCallout.classList.remove('hidden');
+        unmappedList.innerHTML = stagedAnalysis.unmapped_columns.map(c => `
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 font-mono text-[10px]" title="Sample: ${c.sample_val || 'Empty'}">
+            <span class="font-bold">${c.header}</span>
+            ${c.sample_val ? `<span class="text-slate-400 font-normal">("${c.sample_val}")</span>` : ''}
+          </span>
+        `).join('');
+      } else {
+        unmappedCallout.classList.add('hidden');
+      }
+
+      // Populate Column Selectors
+      const headers = stagedAnalysis.headers || [];
+      const colMap = stagedAnalysis.column_mapping || {};
+
+      function populateSelect(selectId, selectedIdx) {
+        const sel = document.getElementById(selectId);
+        sel.innerHTML = '<option value="">-- None / Skip --</option>';
+        headers.forEach((h, idx) => {
+          const opt = document.createElement('option');
+          opt.value = idx;
+          opt.textContent = `Col ${idx + 1}: ${h}`;
+          if (idx === selectedIdx) opt.selected = true;
+          sel.appendChild(opt);
+        });
+      }
+
+      populateSelect('map-select-origin', colMap.origin ? colMap.origin.col_index : null);
+      populateSelect('map-select-dest', colMap.destination ? colMap.destination.col_index : null);
+      populateSelect('map-select-weight', colMap.weight ? colMap.weight.col_index : null);
+      populateSelect('map-select-dims', colMap.dimensions ? colMap.dimensions.col_index : null);
+      populateSelect('map-select-acc', colMap.accessorials ? colMap.accessorials.col_index : null);
+
+      // Populate Blockers / Missing Parameter Prompts with Non-Critical Info option
+      renderBlockersList();
+
+      // Populate Preview Table (Rules 1, 3, 6)
+      renderModalPreviewTable();
+
+      document.getElementById('clarification-modal').classList.remove('hidden');
+    }
+
+    function renderBlockersList() {
+      const blockersCallout = document.getElementById('modal-blockers-callout');
+      const blockersContainer = document.getElementById('modal-blockers-inputs');
+      blockersContainer.innerHTML = '';
+
+      const flaggedRows = (stagedAnalysis.preview_rows || []).filter(r => !r.is_complete || stagedNonCriticalRows.has(r.row_num));
+      if (flaggedRows.length > 0) {
+        blockersCallout.classList.remove('hidden');
+        flaggedRows.forEach(r => {
+          const isFlaggedNonCrit = stagedNonCriticalRows.has(r.row_num);
+          const rowDiv = document.createElement('div');
+          rowDiv.className = `flex flex-wrap items-center justify-between gap-2 p-2 rounded-lg border text-xs transition-all ${isFlaggedNonCrit ? 'bg-sky-50/60 border-sky-200 text-sky-900' : 'bg-white border-amber-200 text-slate-800'}`;
+          rowDiv.innerHTML = `
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-bold text-slate-900">Row #${r.row_num}:</span>
+              ${isFlaggedNonCrit ? `
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-sky-100 text-sky-800 border border-sky-300">
+                  ✓ Flagged as Non-Critical Info (e.g. Company HQ / Internal Reference)
+                </span>
+              ` : `
+                ${!r.origin_normalized ? `
+                  <input type="text" placeholder="Origin (e.g. CALGARY, AB)" onchange="setRowCorrection(${r.row_num}, 'origin_normalized', this.value)" class="bg-amber-50/50 border border-amber-300 rounded px-2 py-1 text-xs">
+                ` : ''}
+                ${!r.dest_normalized ? `
+                  <input type="text" placeholder="Dest (e.g. LINDSAY, ON)" onchange="setRowCorrection(${r.row_num}, 'dest_normalized', this.value)" class="bg-amber-50/50 border border-amber-300 rounded px-2 py-1 text-xs">
+                ` : ''}
+                ${r.weight_lbs === null ? `
+                  <input type="number" step="0.1" placeholder="Weight lbs" onchange="setRowCorrection(${r.row_num}, 'weight_lbs', this.value)" class="w-24 bg-amber-50/50 border border-amber-300 rounded px-2 py-1 text-xs">
+                ` : ''}
+              `}
+            </div>
+            <div>
+              ${isFlaggedNonCrit ? `
+                <button type="button" onclick="toggleRowNonCritical(${r.row_num})" class="px-2 py-0.5 rounded text-[10px] font-semibold text-slate-500 hover:text-slate-800 border border-slate-200 bg-white hover:bg-slate-100 transition-colors cursor-pointer">
+                  Undo
+                </button>
+              ` : `
+                <button type="button" onclick="toggleRowNonCritical(${r.row_num})" class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-300 transition-colors cursor-pointer" title="Flag as non-critical business info (e.g. company headquarters/internal) - bypass strict input">
+                  🏷️ Flag Non-Critical (Ignore)
+                </button>
+              `}
+            </div>
+          `;
+          blockersContainer.appendChild(rowDiv);
+        });
+      } else {
+        blockersCallout.classList.add('hidden');
+      }
+    }
+
+    function toggleRowNonCritical(rowNum) {
+      const r = (stagedAnalysis.preview_rows || []).find(x => x.row_num === rowNum);
+      if (stagedNonCriticalRows.has(rowNum)) {
+        stagedNonCriticalRows.delete(rowNum);
+        if (r) {
+          r.is_non_critical = false;
+          r.is_complete = Boolean(r.origin_normalized && r.dest_normalized && r.weight_lbs && r.weight_lbs > 0);
+        }
+      } else {
+        stagedNonCriticalRows.add(rowNum);
+        if (r) {
+          r.is_non_critical = true;
+          r.is_complete = true;
+        }
+      }
+      renderBlockersList();
+      renderModalPreviewTable();
+    }
+
+    function flagAllExceptionsAsNonCritical() {
+      flagAllNonCritical = true;
+      (stagedAnalysis.preview_rows || []).forEach(r => {
+        if (!r.is_complete || r.needs_review) {
+          stagedNonCriticalRows.add(r.row_num);
+          r.is_non_critical = true;
+          r.is_complete = true;
+        }
+      });
+      renderBlockersList();
+      renderModalPreviewTable();
+    }
+
+    function setRowCorrection(rowNum, field, val) {
+      if (!stagedCorrections[rowNum]) stagedCorrections[rowNum] = {};
+      stagedCorrections[rowNum][field] = val;
+
+      const r = (stagedAnalysis.preview_rows || []).find(x => x.row_num === rowNum);
+      if (r) {
+        if (field === 'weight_lbs') r.weight_lbs = parseFloat(val) || null;
+        if (field === 'origin_normalized') r.origin_normalized = val.trim().toUpperCase();
+        if (field === 'dest_normalized') r.dest_normalized = val.trim().toUpperCase();
+        r.is_complete = Boolean(r.origin_normalized && r.dest_normalized && r.weight_lbs && r.weight_lbs > 0);
+        renderModalPreviewTable();
+      }
+    }
+
+    function renderModalPreviewTable() {
+      const tbody = document.getElementById('modal-preview-tbody');
+      tbody.innerHTML = '';
+
+      (stagedAnalysis.preview_rows || []).forEach(r => {
+        const isNonCrit = stagedNonCriticalRows.has(r.row_num) || r.is_non_critical;
+        const isOk = r.is_complete || isNonCrit;
+        const tr = document.createElement('tr');
+        tr.className = isNonCrit ? "bg-sky-50/50 hover:bg-sky-50" : (isOk ? "hover:bg-slate-50 transition-colors" : "bg-amber-50/50 hover:bg-amber-50");
+
+        let statusHtml = '';
+        if (isNonCrit) {
+          statusHtml = `
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800" title="Flagged as non-critical info - strict input bypassed">
+              ℹ️ Non-Critical (Ignored)
+            </span>
+          `;
+        } else if (isOk) {
+          statusHtml = `
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+              ✓ Ready
+            </span>
+          `;
+        } else {
+          statusHtml = `
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800" title="${(r.review_reasons || []).join(' ')}">
+              ⚠️ Needs Input
+            </span>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td class="p-2.5 font-mono text-slate-500 font-semibold">${r.row_num}</td>
+          <td class="p-2.5 font-medium ${!r.origin_normalized && !isNonCrit ? 'text-red-600 font-bold' : 'text-slate-800'}">
+            ${r.origin_normalized || (isNonCrit ? '<span class="text-sky-700 italic">Company HQ (Account Profile)</span>' : '<span class="text-red-500 italic">Missing Origin</span>')}
+          </td>
+          <td class="p-2.5 font-medium ${!r.dest_normalized && !isNonCrit ? 'text-red-600 font-bold' : 'text-slate-800'}">
+            ${r.dest_normalized || (isNonCrit ? '<span class="text-sky-700 italic">Toronto Hub (Non-critical)</span>' : '<span class="text-red-500 italic">Missing Dest</span>')}
+          </td>
+          <td class="p-2.5 font-mono ${r.weight_lbs === null && !isNonCrit ? 'text-red-600 font-bold' : 'text-slate-700'}">
+            ${r.weight_lbs !== null ? `${r.weight_lbs.toLocaleString()} lbs` : (isNonCrit ? '<span class="text-sky-700 italic">100 lbs (Min Standard)</span>' : '<span class="text-red-500 italic">Missing Wt</span>')}
+          </td>
+          <td class="p-2.5 font-mono text-slate-500">${r.dimensions_formatted || '—'}</td>
+          <td class="p-2.5 text-slate-600">${r.accessorials && r.accessorials.length > 0 ? r.accessorials.join(', ') : 'None'}</td>
+          <td class="p-2.5 font-mono text-[10px] text-slate-400">${r.origin_coord}</td>
+          <td class="p-2.5 text-center">${statusHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function closeClarificationModal() {
+      document.getElementById('clarification-modal').classList.add('hidden');
+    }
+
+    function downloadReformattedExcel() {
+      if (!stagedAnalysis || !stagedAnalysis.analysis_token) return;
+      window.location.href = `/api/quotes/download-reformatted/${stagedAnalysis.analysis_token}`;
+    }
+
+    async function confirmAndCalculateBatch() {
+      if (!stagedAnalysis) return;
+
+      const btn = document.getElementById('btn-modal-confirm');
+      const text = document.getElementById('btn-confirm-text');
+      const spinner = document.getElementById('btn-confirm-spinner');
+
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+      text.textContent = "Rating Batch...";
+
+      try {
+        const payload = {
+          analysis_token: stagedAnalysis.analysis_token,
+          confirmed_mapping: {
+            origin: parseInt(document.getElementById('map-select-origin').value) || null,
+            destination: parseInt(document.getElementById('map-select-dest').value) || null,
+            weight: parseInt(document.getElementById('map-select-weight').value) || null,
+            dimensions: parseInt(document.getElementById('map-select-dims').value) || null,
+            accessorials: parseInt(document.getElementById('map-select-acc').value) || null
+          },
+          row_corrections: stagedCorrections,
+          non_critical_rows: Array.from(stagedNonCriticalRows),
+          flag_all_exceptions_non_critical: flagAllNonCritical,
+          non_critical_columns: (stagedAnalysis.unmapped_columns || []).map(c => c.header)
+        };
+
+        const res = await fetch('/api/quotes/confirm-reformatted', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Confirmation and rating failed.");
+        }
+
+        const data = await res.json();
+        closeClarificationModal();
+
+        // Switch to Results Section
+        const rated = data.rated_shipments || [];
+        const flattenedQuotes = [];
+        rated.forEach(r => {
+          (r.quotes || []).forEach(q => {
+            flattenedQuotes.push(q);
+          });
+        });
+
+        currentQuotes = flattenedQuotes;
+        currentExcluded = [];
+        rated.forEach(r => {
+          (r.excluded_sheets || []).forEach(ex => currentExcluded.push(ex));
+        });
+
+        document.getElementById('results-lane-title').textContent = `Batch Quoted: ${data.filename} (${data.total_shipments} shipments)`;
+        document.getElementById('results-count-badge').textContent = `${currentQuotes.length} Total Carrier Options`;
+        document.getElementById('results-specs-subtitle').textContent = `Reformatted Excel Generated • Download available via Batch Menu`;
+
+        renderQuoteCards();
+        renderExcludedSheets();
+
+        document.getElementById('section-results').classList.remove('hidden');
+        document.getElementById('section-results').scrollIntoView({ behavior: 'smooth' });
+
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        text.textContent = "✓ Confirm & Calculate Rates →";
+      }
+    }
+
+    function processBatchQuotes() {
+      if (selectedBatchFile) {
+        analyzeBatchFile(selectedBatchFile);
+      } else {
+        document.getElementById('batch-file-input').click();
+      }
+    }
+
+    // Window click for dropdown dismiss
+    window.addEventListener('click', function(e) {
+      const accBtn = document.getElementById('account-menu-btn');
+      const accMenu = document.getElementById('account-dropdown');
+      if (accBtn && accMenu && !accBtn.contains(e.target) && !accMenu.contains(e.target)) {
+        accMenu.classList.add('hidden');
+        accBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Ratesift | Instant Batch Shipping Rate Quotes from Excel Spreadsheets</title>
+  <meta name="title" content="Ratesift | Instant Batch Shipping Rate Quotes from Excel Spreadsheets">
+  <meta name="description" content="Calculate instant shipping rate quotes in bulk directly from your Excel spreadsheets (.xlsx, .xls). Automated rate engine with cell-level history and zero tracking clutter.">
+  <meta name="keywords" content="shipping quotes, Excel shipping calculator, batch rate quote, spreadsheet shipping estimator, freight rates, xlsx quotes, bulk shipping price">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="Ratesift Technologies">
+  <link rel="canonical" href="https://ratesift.io/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ratesift.io/">
+  <meta property="og:site_name" content="Ratesift">
+  <meta property="og:title" content="Ratesift | Instant Batch Shipping Rate Quotes from Excel">
+  <meta property="og:description" content="Calculate instant shipping rate quotes in bulk directly from your Excel spreadsheets (.xlsx, .xls).">
+  <meta property="og:image" content="https://ratesift.io/assets/og-image.jpg">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ratesift.io/">
+  <meta name="twitter:title" content="Ratesift | Instant Batch Shipping Rate Quotes from Excel">
+  <meta name="twitter:description" content="Automated shipping rate quoting from Excel spreadsheets with exact row and cell reference tracking.">
+  <meta name="twitter:image" content="https://ratesift.io/assets/twitter-card.jpg">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD Structured Data: SoftwareApplication & FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "RateSift",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "description": "Canadian freight rate comparison software that ingests carrier Excel rate sheets (.xlsx, .xls, .csv) and outputs instant ranked LTL and carrier rate comparisons.",
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "CAD",
+          "lowPrice": "0",
+          "highPrice": "199",
+          "offerCount": "4"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How does RateSift compare carrier freight rates from spreadsheets?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Upload your carrier rate sheets in their original Excel or CSV format. RateSift auto-normalizes CWT brackets, postal code FSA zones, minimum charges, and accessorials, ranking every carrier from lowest to highest cost for any shipment."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is my negotiated carrier rate data kept confidential?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, absolutely. Your rate sheets are strictly tenant-isolated and stored in Canada in compliance with PIPEDA. Rates are never shared, pooled into benchmarks, or accessible by competitors."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Ratesift generate shipping labels or handle tracking?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Ratesift is dedicated purely to quoting rates. We do not print labels or track deliveries, ensuring a lightning-fast quoting experience without operational overhead."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are historical quotes mapped back to spreadsheet coordinates?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Every quote stored in your History view contains an exact reference to the Excel sheet name, row number, and column identifier."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Semantic Navigation Bar -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative z-20 m-0">
+      <!-- Left: Brand Identity -->
+      <a href="#view-home" onclick="setPublicTab('home')" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Ratesift Home">
+        <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-8 md:h-9 w-auto object-contain" />
+      </a>
+
+      <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
+      <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
+        <button id="nav-home" onclick="setPublicTab('home')" aria-current="page" class="pub-tab text-red-600 font-semibold border-b-2 border-red-600 py-1 transition-all">Home</button>
+        <button id="nav-demo" onclick="setPublicTab('demo')" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Demo</button>
+        <button id="nav-pricing" onclick="setPublicTab('pricing')" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Pricing</button>
+      </nav>
+
+      <!-- Right: User Conversion CTAs -->
+      <div class="flex items-center gap-3 z-10">
+        <a href="/login" class="text-xs font-semibold text-[var(--foreground)] hover:text-red-600 transition-colors px-2 py-1" title="Log in to your Ratesift account">
+          Log in
+        </a>
+        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Create a free Ratesift account">
+          Get Started
+        </a>
+        <!-- Mobile Menu Toggle Button (Phone Only) -->
+        <button type="button" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" class="md:hidden p-1.5 rounded-lg border border-[var(--border)] text-slate-600 hover:bg-black/5 focus:outline-hidden transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Collapsible Mobile Navigation Drawer for Phones (< 768px) -->
+    <nav id="mobile-nav-drawer" aria-label="Mobile Navigation" class="hidden md:hidden border-b border-[var(--border)] bg-slate-50/95 px-4 py-3 space-y-1.5 text-xs font-medium transition-all">
+      <button onclick="setPublicTab('home'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-lg text-red-600 font-bold bg-red-50/80">Home</button>
+      <button onclick="setPublicTab('demo'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Demo</button>
+      <button onclick="setPublicTab('pricing'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Pricing</button>
+      <div class="pt-2 mt-2 border-t border-[var(--border)] flex items-center justify-between">
+        <a href="/login" class="text-xs font-semibold text-slate-700 hover:text-red-600 px-1 py-1">Log in</a>
+        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs">Get Started</a>
+      </div>
+    </nav>
+
+    <!-- Main Semantic Content Area -->
+    <main id="main-content" role="main" class="flex-1 p-6 flex flex-col justify-center">
+      
+      <!-- ================= 1. HOME SECTION ================= -->
+      <article id="view-home" class="max-w-3xl mx-auto text-center space-y-6 py-4">
+        <!-- Keyword Rich Tagline Badge -->
+        <header>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+            <span aria-hidden="true">🇨🇦</span>
+            <span>Canadian Freight & Carrier Rate Comparison Software</span>
+          </div>
+
+          <!-- Semantic H1 Title (Primary Keyword Focus) -->
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--foreground)] leading-tight mt-3">
+            Instant freight rate comparisons<br><span class="text-red-600">directly from your carrier spreadsheets.</span>
+          </h1>
+        </header>
+
+        <p class="text-sm text-[var(--muted-foreground)] max-w-2xl mx-auto leading-relaxed">
+          Upload negotiated carrier rate cards (.xlsx, .xls, .csv). RateSift normalizes CWT weight breaks, postal FSA zones, minimum charges, and accessorial footnotes—returning every carrier price ranked from cheapest to most expensive in seconds.
+        </p>
+
+        <!-- Call to Actions -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
+          <button onclick="setPublicTab('demo')" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-5 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5">
+            <span>Try Multi-Carrier Demo</span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <button onclick="setPublicTab('pricing')" class="border border-[var(--border)] hover:bg-black/5 text-[var(--foreground)] font-medium text-xs px-4 py-2.5 rounded-xl transition-colors">
+            View CAD Pricing Plans
+          </button>
+        </div>
+
+        <!-- Trust & Canadian Data Sovereignty Strip -->
+        <div class="py-2 px-3.5 rounded-xl bg-slate-50 border border-[var(--border)] flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-600">
+          <div class="flex items-center gap-1.5 font-medium">
+            <span>🍁</span>
+            <span><strong>Hosted in Canada:</strong> WHC Infrastructure • PIPEDA Compliant</span>
+          </div>
+          <span class="text-slate-300 hidden sm:inline">•</span>
+          <div class="flex items-center gap-1.5 font-medium">
+            <span>🔒</span>
+            <span><strong>Zero Rate Sharing:</strong> 100% Confidential Tenant Isolation</span>
+          </div>
+          <span class="text-slate-300 hidden sm:inline">•</span>
+          <div class="flex items-center gap-1.5 font-medium">
+            <span>⚡</span>
+            <span>Day & Ross, Manitoulin, Midland, Kindersley</span>
+          </div>
+        </div>
+
+        <!-- Semantic Value Pillars with H2 -->
+        <section aria-labelledby="features-heading" class="pt-4">
+          <h2 id="features-heading" class="sr-only">Core Features and Benefits</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+            <section class="p-4 rounded-xl border border-[var(--border)] bg-slate-50/50 space-y-1.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold" aria-hidden="true">📊</div>
+              <h3 class="text-xs font-bold text-[var(--foreground)]">Tariff Normalization</h3>
+              <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">Ingest any negotiated Excel format. Auto-maps CWT brackets, minimum charges, deficit weights, and postal FSA zones.</p>
+            </section>
+            
+            <section class="p-4 rounded-xl border border-[var(--border)] bg-slate-50/50 space-y-1.5">
+              <div class="w-8 h-8 rounded-lg bg-red-100 text-red-700 flex items-center justify-center text-sm font-bold" aria-hidden="true">⚡</div>
+              <h3 class="text-xs font-bold text-[var(--foreground)]">Multi-Carrier LTL Ranking</h3>
+              <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">Enter shipment details once to see every carrier price ranked lowest to highest with itemized fuel and accessorials.</p>
+            </section>
+
+            <section class="p-4 rounded-xl border border-[var(--border)] bg-slate-50/50 space-y-1.5">
+              <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold" aria-hidden="true">📁</div>
+              <h3 class="text-xs font-bold text-[var(--foreground)]">Cell-Level Audit Trail</h3>
+              <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">Zero black-box pricing. Every rate links directly back to the carrier spreadsheet tab, row number, and column cell coordinate.</p>
+            </section>
+          </div>
+        </section>
+
+        <!-- SEO FAQ Section for Rich Search Results -->
+        <section aria-labelledby="faq-heading" class="pt-4 border-t border-[var(--border)] text-left">
+          <h2 id="faq-heading" class="text-sm font-bold text-[var(--foreground)] mb-3">Frequently Asked Questions</h2>
+          <div class="space-y-3 text-xs">
+            <details class="group border border-[var(--border)] rounded-lg p-2.5 bg-[var(--card)] open:bg-slate-50/40">
+              <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+                <span>How does RateSift compare carrier freight rates from spreadsheets?</span>
+                <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+                Simply upload your carrier rate cards in their native Excel (.xlsx, .xls) or CSV formats. RateSift extracts base rates, CWT breaks, postal FSA zones, minimum charges, and accessorial rules into a unified schema, ranking valid carriers side-by-side.
+              </p>
+            </details>
+            <details class="group border border-[var(--border)] rounded-lg p-2.5 bg-[var(--card)] open:bg-slate-50/40">
+              <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+                <span>Are my negotiated carrier rate sheets kept confidential?</span>
+                <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+                Yes. Under our Canadian Data Sovereignty commitment (WHC hosting, PIPEDA compliance), your uploaded rate sheets are strictly tenant-isolated and encrypted. Rates are never shared, pooled into market indexes, or disclosed to other shippers.
+              </p>
+            </details>
+            <details class="group border border-[var(--border)] rounded-lg p-2.5 bg-[var(--card)] open:bg-slate-50/40">
+              <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+                <span>Does RateSift generate shipping labels or handle parcel tracking?</span>
+                <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+                No. RateSift is strictly a rate quotation and carrier comparison engine. We eliminate TMS bloat, tracking overhead, and label-printing fees so brokers can quote faster with zero operational lock-in.
+              </p>
+            </details>
+          </div>
+        </section>
+      </article>
+
+      <!-- ================= 2. DEMO VIEW ================= -->
+      <section id="view-demo" aria-labelledby="demo-heading" class="hidden max-w-2xl mx-auto w-full my-2">
+        <h2 id="demo-heading" class="sr-only">Interactive Spreadsheet Quote Demo</h2>
+        
+        <div class="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between text-xs text-red-800">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true">✨</span>
+            <span><strong>Public Preview Mode:</strong> Test how Excel quoting works. <a href="/console/new-quote" class="underline font-semibold">Log in</a> to save history.</span>
+          </div>
+          <a href="/console/new-quote" class="bg-red-600 text-white text-[11px] px-2.5 py-1 rounded-md font-medium">Log in</a>
+        </div>
+
+        <!-- Embedded Mini Rate Sheet -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-xs">
+          <h3 class="text-base font-bold tracking-tight text-[var(--foreground)] mb-4">New rate sheet</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="border-2 border-dashed border-[var(--border)] rounded-xl p-4 flex flex-col items-center justify-between text-center bg-slate-50/50 min-h-[220px]">
+              <span class="self-end text-[10px] bg-red-50 text-red-700 px-1.5 py-0.5 rounded font-semibold border border-red-200">Batch Excel Mode</span>
+              <div class="my-auto flex flex-col items-center">
+                <svg class="w-8 h-8 text-slate-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" role="img" aria-label="Spreadsheet Upload Icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p class="text-xs text-[var(--foreground)] font-medium">Drag & drop Excel files (.xlsx, .xls)</p>
+              </div>
+              <span class="text-[10px] text-red-600 underline cursor-pointer">Download sample template (.xlsx)</span>
+            </div>
+            <div class="space-y-2.5">
+              <div class="font-bold text-xs text-[var(--foreground)] border-b border-[var(--border)] pb-1">Get Quote</div>
+              <input type="text" aria-label="Origin address" placeholder="From: Origin address" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs">
+              <input type="text" aria-label="Destination recipient" placeholder="To: Destination recipient" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs">
+              <input type="text" aria-label="Street address" placeholder="Street Address" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs">
+              <input type="text" aria-label="Area code or postal code" placeholder="Area Code / Postal Code" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs">
+              <button type="button" onclick="alert('Demo rate calculated: $124.50! Log in to save to History.')" class="w-full bg-red-600 text-white font-medium text-xs py-2 rounded-lg hover:bg-red-700 transition-colors">
+                Process →
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. PRICING VIEW ================= -->
+      <section id="view-pricing" aria-labelledby="pricing-heading" class="hidden max-w-4xl mx-auto w-full py-2">
+        <header class="text-center mb-6 space-y-1">
+          <h2 id="pricing-heading" class="text-xl font-bold tracking-tight text-[var(--foreground)]">Simple, Transparent Pricing</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">Choose the plan that fits your batch shipping quote volume.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Starter Tier -->
+          <section class="border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="font-bold text-sm text-[var(--foreground)]">Starter</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">For testing & occasional quotes</p>
+              <div class="mt-3 text-2xl font-black text-[var(--foreground)]">$0 <span class="text-xs font-normal text-[var(--muted-foreground)]">/ month</span></div>
+              <ul class="mt-4 space-y-2 text-xs text-[var(--muted-foreground)]">
+                <li>✓ 100 quotes per month</li>
+                <li>✓ Single Excel file upload</li>
+                <li>✓ Standard rate calculator</li>
+                <li>✓ 7-day history storage</li>
+              </ul>
+            </div>
+            <a href="/console/new-quote" class="w-full text-center border border-[var(--border)] py-1.5 rounded-lg text-xs font-medium hover:bg-black/5 transition-colors">
+              Get Started Free
+            </a>
+          </section>
+
+          <!-- Professional Tier -->
+          <section class="border-2 border-red-600 rounded-xl p-5 bg-[var(--card)] flex flex-col justify-between space-y-4 shadow-sm">
+            <div>
+              <h3 class="font-bold text-sm text-[var(--foreground)]">Professional</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">For active logistics & sales teams</p>
+              <div class="mt-3 text-2xl font-black text-[var(--foreground)]">$49 <span class="text-xs font-normal text-[var(--muted-foreground)]">/ month</span></div>
+              <ul class="mt-4 space-y-2 text-xs text-[var(--muted-foreground)]">
+                <li>✓ Unlimited batch quotes</li>
+                <li>✓ Multi-sheet Excel parsing</li>
+                <li>✓ Custom markup & margin rules</li>
+                <li>✓ Permanent history & Excel ref export</li>
+                <li>✓ Priority support</li>
+              </ul>
+            </div>
+            <a href="/console/new-quote" class="w-full text-center bg-red-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-red-700 transition-colors shadow-xs">
+              Start 14-Day Pro Trial
+            </a>
+          </section>
+
+          <!-- Enterprise Tier -->
+          <section class="border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="font-bold text-sm text-[var(--foreground)]">Enterprise</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">Custom volumes & API access</p>
+              <div class="mt-3 text-2xl font-black text-[var(--foreground)]">$149 <span class="text-xs font-normal text-[var(--muted-foreground)]">/ month</span></div>
+              <ul class="mt-4 space-y-2 text-xs text-[var(--muted-foreground)]">
+                <li>✓ Dedicated calculation engine</li>
+                <li>✓ Automated SFTP & API ingestion</li>
+                <li>✓ Multi-user role management</li>
+                <li>✓ SLA guarantee & phone support</li>
+              </ul>
+            </div>
+            <a href="/console/new-quote" class="w-full text-center border border-[var(--border)] py-1.5 rounded-lg text-xs font-medium hover:bg-black/5 transition-colors">
+              Contact Sales
+            </a>
+          </section>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Semantic Footer with Crawlable Metadata -->
+    <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
+      <!-- Left: Logo & Direct Semantic Navigation Links -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <!-- Crawlable Footer Links -->
+        <nav aria-label="Footer Legal and Support Navigation" class="flex items-center gap-4 text-xs font-medium">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Copyright & Current Date -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        September 28, 2026
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function setPublicTab(tab) {
+      document.querySelectorAll('.pub-tab').forEach(b => {
+        b.classList.remove('text-red-600', 'font-semibold', 'border-b-2', 'border-red-600');
+        b.classList.add('text-[var(--muted-foreground)]');
+        b.removeAttribute('aria-current');
+      });
+
+      const activeBtn = document.getElementById('nav-' + tab);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-[var(--muted-foreground)]');
+        activeBtn.classList.add('text-red-600', 'font-semibold', 'border-b-2', 'border-red-600');
+        activeBtn.setAttribute('aria-current', 'page');
+      }
+
+      ['home', 'demo', 'pricing'].forEach(t => {
+        const view = document.getElementById('view-' + t);
+        if (t === tab) {
+          view.classList.remove('hidden');
+        } else {
+          view.classList.add('hidden');
+        }
+      });
+    }
+  
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+      }
+    }</script>
+</body>
+</html>

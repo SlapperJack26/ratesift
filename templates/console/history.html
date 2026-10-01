@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Ratesift | Quotes History & Spreadsheet Rate Archives</title>
+  <meta name="title" content="Ratesift | Quotes History & Spreadsheet Rate Archives">
+  <meta name="description" content="Access archived shipping rate quotes calculated from Excel spreadsheets (.xlsx, .xls) with exact sheet, row, and column references. Search and sort rate histories in Ratesift.">
+  <meta name="keywords" content="quotes history, shipping rate archive, excel quote reference, spreadsheet rate log, freight rate history">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ratesift.io/history">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ratesift.io/history">
+  <meta property="og:site_name" content="Ratesift">
+  <meta property="og:title" content="Ratesift | Quotes History & Spreadsheet Rate Archives">
+  <meta property="og:description" content="View historical shipping quotes with exact spreadsheet row and column tracking.">
+  <meta property="og:image" content="https://ratesift.io/assets/og-history.jpg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ratesift.io/history">
+  <meta name="twitter:title" content="Ratesift | Quotes History & Spreadsheet Rate Archives">
+  <meta name="twitter:description" content="Search and sort previous shipping quotes mapped to your Excel sheets.">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD: WebPage & Breadcrumb -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Quotes History - Ratesift",
+    "description": "Historical quotes storage and spreadsheet coordinate archive.",
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ratesift.io/" },
+        { "@type": "ListItem", "position": 2, "name": "History", "item": "https://ratesift.io/history" }
+      ]
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #proposal-printable-sheet, #proposal-printable-sheet * {
+        visibility: visible !important;
+      }
+      #proposal-printable-sheet {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 24px !important;
+        border: none !important;
+        box-shadow: none !important;
+        z-index: 999999 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Navigation Bar (Consistent RateSift Console Menu Bar) -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] bg-white relative z-20 m-0 shadow-2xs">
+      <div class="flex items-center justify-between w-full max-w-7xl mx-auto">
+        <!-- Left: Logo & Nav Links -->
+        <div class="flex items-center gap-6 lg:gap-8">
+          <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="RateSift Console">
+            <div class="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-xs text-xs">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13H5.5L12 6.5z"/></svg>
+            </div>
+            <span class="text-lg font-bold tracking-tight text-slate-900">RateSift</span>
+          </a>
+
+          <!-- Center/Left Navigation Links -->
+          <nav role="navigation" aria-label="Main Navigation" class="hidden sm:flex items-center gap-1.5 sm:gap-2 text-xs font-medium">
+            <a href="/console/new-quote" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>New Quote</span>
+            </a>
+            <a href="/console/history" aria-current="page" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs relative after:content-[''] after:absolute after:-bottom-3.5 after:left-3 after:right-3 after:h-0.5 after:bg-red-600">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Quotes History</span>
+            </a>
+            <a href="/console/rate-sheets" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>Carrier Tariffs</span>
+            </a>
+            <a href="/console/settings" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span>Settings</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Right: Sovereignty Badge & Actions -->
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
+            <span>🇨🇦</span>
+            <span>Hosted in Canada (WHC) • PIPEDA Compliant</span>
+          </div>
+
+          <button type="button" aria-label="Notifications" class="p-2 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer" title="System Notifications">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          </button>
+
+          <a href="/api/auth/logout" aria-label="Sign out" class="p-2 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" title="Sign out">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Tabs -->
+      <nav class="flex sm:hidden overflow-x-auto gap-2 pt-2.5 mt-2 border-t border-slate-100 text-xs font-medium px-1">
+        <a href="/console/new-quote" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">New Quote</a>
+        <a href="/console/history" class="px-3 py-1 rounded-full bg-red-50 text-red-600 font-bold whitespace-nowrap">Quotes History</a>
+        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Carrier Tariffs</a>
+        <a href="/console/settings" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Settings</a>
+      </nav>
+    </header>
+
+    <!-- Main Content Area (Semantic Main) -->
+    <main id="main-content" role="main" class="p-6 flex-1">
+      <div class="mb-4">
+        <!-- Semantic H1 -->
+        <h1 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Quotes</h1>
+      </div>
+
+      <!-- Main Storage Card -->
+      <section aria-labelledby="archive-heading" class="border border-[var(--border)] rounded-xl bg-[var(--card)] shadow-xs overflow-hidden">
+        <h2 id="archive-heading" class="sr-only">Archived Spreadsheet Quotes List</h2>
+
+        <!-- Filter Toolbar -->
+        <div role="search" aria-label="Filter and Sort Quotes" class="p-3 border-b border-[var(--border)] bg-[var(--background)] flex flex-wrap items-center justify-between gap-2.5">
+          <!-- Search Box -->
+          <div class="relative flex-1 min-w-[190px] max-w-xs">
+            <svg class="w-3.5 h-3.5 absolute left-3 top-2.5 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input id="search-input" oninput="filterQuotes()" type="text" aria-label="Search quote ID" placeholder="Search quote ID" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+          </div>
+
+          <!-- Centered Options & Dropboxes -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Date Filter (09/28/2026) -->
+            <div class="flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)]" aria-label="Current Date Filter: 09/28/2026">
+              <span>09/28/2026</span>
+              <svg class="w-3.5 h-3.5 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+
+            <!-- Recipient Filter -->
+            <div class="relative">
+              <button aria-haspopup="listbox" aria-label="Filter by Recipient" class="flex items-center gap-1.5 bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] hover:bg-black/5 transition-colors">
+                <span>Recipient</span>
+                <svg class="w-3 h-3 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+
+            <!-- General Sort Dropdown -->
+            <div class="relative">
+              <button aria-haspopup="listbox" aria-label="Sort Quotes" class="flex items-center gap-1.5 bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] hover:bg-black/5 transition-colors">
+                <span>Sort</span>
+                <svg class="w-3 h-3 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+
+            <!-- Dedicated Rate Sort Dropdown -->
+            <div class="relative">
+              <button id="rate-sort-btn" onclick="toggleRateMenu()" aria-haspopup="true" aria-expanded="false" aria-label="Sort Quotes by Rate" class="flex items-center gap-1.5 bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] hover:bg-black/5 transition-colors">
+                <span id="rate-sort-label">Sort by Rate</span>
+                <svg class="w-3 h-3 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+
+              <!-- Rate Dropdown Menu -->
+              <div id="rate-dropdown" role="menu" class="hidden absolute right-0 mt-1 w-44 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg py-1 z-30 text-xs">
+                <button onclick="sortQuotesByRate('desc')" role="menuitem" class="w-full text-left px-3 py-1.5 hover:bg-black/5 flex items-center justify-between text-[var(--foreground)]">
+                  <span>Highest to Lowest</span>
+                </button>
+                <button onclick="sortQuotesByRate('asc')" role="menuitem" class="w-full text-left px-3 py-1.5 hover:bg-black/5 flex items-center justify-between text-[var(--foreground)]">
+                  <span>Lowest to Highest</span>
+                </button>
+                <button onclick="resetSort()" role="menuitem" class="w-full text-left px-3 py-1 border-t border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                  Reset Default
+                </button>
+              </div>
+            </div>
+
+            <!-- Export to Excel Button -->
+            <a href="/api/quotes/export" download="rAtesift_Quotes_Export.xlsx" class="flex items-center gap-1.5 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors shadow-2xs">
+              <span>Export (.xlsx)</span>
+              <span aria-hidden="true">↓</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Data Table (Semantic Table with Scope and Caption) -->
+        <div class="overflow-x-auto" style="-webkit-overflow-scrolling: touch;">
+          <table class="w-full text-left text-xs" aria-label="Historical shipping rates table">
+            <caption class="sr-only">Archived quotes calculated from Excel spreadsheets with sheet, row, and column references</caption>
+            <thead>
+              <tr class="border-b border-[var(--border)] bg-slate-50/60 text-[var(--foreground)] font-bold select-none">
+                <th scope="col" onclick="toggleSort('id')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
+                  Quote ID <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                </th>
+                <th scope="col" onclick="toggleSort('carrier')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
+                  Carrier & Service <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                </th>
+                <th scope="col" class="py-2.5 px-3.5">
+                  Route & Weight (Lbs)
+                </th>
+                <th scope="col" class="py-2.5 px-3.5">
+                  Excel Reference (Sheet, Row/Col)
+                </th>
+                <th scope="col" onclick="toggleSort('date')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
+                  Date <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                </th>
+                <th scope="col" onclick="toggleSort('rate')" class="py-2.5 px-3.5 text-right cursor-pointer hover:text-red-600 transition-colors">
+                  Quoted Rate <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                </th>
+                <th scope="col" class="py-2.5 px-3.5 text-right">
+                  Client Proposal
+                </th>
+              </tr>
+            </thead>
+            <tbody id="quotes-table-body" class="divide-y divide-[var(--border)]">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CLIENT QUOTE PROPOSAL GENERATOR MODAL -->
+      <div id="proposal-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150">
+          
+          <!-- Modal Header -->
+          <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold text-slate-900">1-Click Client Quote Proposal Generator</h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">
+                  Broker Proposal Mode
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                  CAD All-In Rate
+                </span>
+              </div>
+              <p class="text-xs text-slate-500">
+                Generate clean, branded client quote proposals with margin markups from historical quotes.
+              </p>
+            </div>
+            <button type="button" onclick="closeProposalModal()" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          <!-- Modal Scrollable Content: 2-Column Split -->
+          <div class="p-4 sm:p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs flex-1">
+            
+            <!-- Left Column: Broker Configuration Controls (5 Cols) -->
+            <div class="lg:col-span-5 space-y-4">
+              
+              <!-- Client Information Form Card -->
+              <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+                <div class="font-bold text-slate-800 flex items-center justify-between">
+                  <span>Client Information</span>
+                  <span class="text-[10px] font-normal text-slate-400">Bill-To Recipient</span>
+                </div>
+                <div class="space-y-2">
+                  <div>
+                    <label for="prop-client-name" class="block text-[11px] font-semibold text-slate-600 mb-1">Client Company Name</label>
+                    <input id="prop-client-name" type="text" value="Acme Industrial Logistics" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-red-500">
+                  </div>
+                  <div>
+                    <label for="prop-client-attn" class="block text-[11px] font-semibold text-slate-600 mb-1">Attention / Contact Dept</label>
+                    <input id="prop-client-attn" type="text" value="Freight Dispatch & Shipping" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:ring-1 focus:ring-red-500">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Broker Margin & Markup Card -->
+              <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+                <div class="font-bold text-slate-800 flex items-center justify-between">
+                  <span>Broker Margin & Markup</span>
+                  <span id="prop-margin-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    +$0.00 CAD Margin
+                  </span>
+                </div>
+
+                <!-- Wholesale Cost Reference -->
+                <div class="p-2.5 rounded-lg bg-amber-50/80 border border-amber-200 text-[11px] text-amber-900 flex items-center justify-between font-mono">
+                  <span>Carrier Net Buy Cost:</span>
+                  <strong id="prop-wholesale-cost">$0.00 CAD</strong>
+                </div>
+
+                <!-- Margin Markup Inputs -->
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label for="prop-markup-pct" class="text-[11px] font-semibold text-slate-600">Markup Percentage (%)</label>
+                      <span id="prop-markup-val" class="font-bold text-red-600">15.0%</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <input id="prop-markup-pct" type="number" step="0.5" min="0" max="200" value="15.0" oninput="handleProposalMarkupChange(this.value)" class="w-24 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800">
+                      
+                      <!-- Quick Markup Chips -->
+                      <div class="flex items-center gap-1">
+                        <button type="button" onclick="setProposalMarkup(10.0)" class="px-2 py-1 rounded bg-white border border-slate-200 hover:border-red-300 text-[10px] font-semibold text-slate-700 cursor-pointer">+10%</button>
+                        <button type="button" onclick="setProposalMarkup(15.0)" class="px-2 py-1 rounded bg-white border border-slate-200 hover:border-red-300 text-[10px] font-semibold text-slate-700 cursor-pointer">+15%</button>
+                        <button type="button" onclick="setProposalMarkup(20.0)" class="px-2 py-1 rounded bg-white border border-slate-200 hover:border-red-300 text-[10px] font-semibold text-slate-700 cursor-pointer">+20%</button>
+                        <button type="button" onclick="setProposalMarkup(25.0)" class="px-2 py-1 rounded bg-white border border-slate-200 hover:border-red-300 text-[10px] font-semibold text-slate-700 cursor-pointer">+25%</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label for="prop-client-total-input" class="block text-[11px] font-semibold text-slate-600 mb-1">Total Client Price (CAD)</label>
+                    <div class="relative">
+                      <span class="absolute left-3 top-2 text-xs font-bold text-slate-400">$</span>
+                      <input id="prop-client-total-input" type="number" step="0.01" min="0" oninput="handleProposalTotalChange(this.value)" class="w-full pl-7 pr-12 bg-white border border-slate-200 rounded-lg py-1.5 text-sm font-bold text-slate-900 focus:ring-1 focus:ring-red-500">
+                      <span class="absolute right-3 top-2 text-[10px] font-bold text-slate-400">CAD</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Proposal Action Buttons -->
+              <div class="space-y-2 pt-2">
+                <button type="button" onclick="downloadProposalExcel()" class="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                  <span>Download Excel Proposal (.xlsx)</span>
+                </button>
+                <button type="button" onclick="printProposal()" class="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors cursor-pointer border border-slate-200">
+                  <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                  <span>Print to PDF / Save as PDF</span>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Right Column: Live Executive Document Preview (7 Cols) -->
+            <div class="lg:col-span-7 bg-slate-100/70 p-3 sm:p-4 rounded-xl border border-slate-200 overflow-hidden">
+              <div class="text-[10px] uppercase font-bold text-slate-400 mb-2 flex items-center justify-between">
+                <span>Client Document Live Preview</span>
+                <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-mono">Ready to Send</span>
+              </div>
+
+              <!-- Printable Proposal Sheet -->
+              <div id="proposal-printable-sheet" class="bg-white rounded-xl border border-slate-300 shadow-sm p-5 space-y-4 text-slate-800 font-sans">
+                
+                <!-- Header Banner -->
+                <div class="bg-slate-900 text-white p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h2 class="text-base font-black tracking-tight" id="prev-broker-company">TECHCORP LOGISTICS</h2>
+                    <div class="text-[11px] font-bold text-red-400 tracking-wider uppercase mt-0.5">FREIGHT RATE QUOTE PROPOSAL</div>
+                    <div class="text-[10px] text-slate-400 mt-1">Ref: <span id="prev-proposal-id" class="font-mono text-slate-200">PROP-20261001-A1B2</span></div>
+                  </div>
+                  <div class="text-left sm:text-right text-[10px] text-slate-300 space-y-0.5 font-mono">
+                    <div>Issued: <span id="prev-issue-date">October 1, 2026</span></div>
+                    <div class="text-red-300 font-bold">Lock: 7 Days (Valid Until <span id="prev-expiry-date">Oct 8, 2026</span>)</div>
+                    <div>Currency: <span class="text-white font-bold">CAD ($)</span></div>
+                  </div>
+                </div>
+
+                <!-- Client & Broker Info Cards -->
+                <div class="grid grid-cols-2 gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200 text-[11px]">
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Prepared For:</span>
+                    <strong class="text-slate-900 block" id="prev-client-name">Acme Industrial Logistics</strong>
+                    <span class="text-slate-500 text-[10px]" id="prev-client-attn">Attn: Freight Dispatch</span>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Issued By:</span>
+                    <strong class="text-slate-900 block" id="prev-broker-name">Alex Rivers</strong>
+                    <span class="text-slate-500 text-[10px]" id="prev-broker-hub">Dispatch Hub: Toronto, ON</span>
+                  </div>
+                </div>
+
+                <!-- Shipment Route Specs -->
+                <div class="p-3 rounded-lg bg-slate-50/70 border border-slate-200 space-y-2 text-[11px]">
+                  <div class="text-[10px] font-bold text-slate-500 uppercase">Shipment Route & Cargo Specifications</div>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Origin:</span>
+                      <strong class="text-slate-800" id="prev-origin">TORONTO, ON</strong>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Destination:</span>
+                      <strong class="text-slate-800" id="prev-dest">MONTREAL, QC</strong>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Billable Wt:</span>
+                      <strong class="text-slate-800" id="prev-weight">100 lbs</strong>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Transit Est:</span>
+                      <strong class="text-slate-800" id="prev-transit">3 Business Days</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Itemized Cost Schedule Table -->
+                <div class="border border-slate-200 rounded-lg overflow-hidden">
+                  <table class="w-full text-left text-[11px]">
+                    <thead class="bg-slate-800 text-white font-semibold text-[10px] uppercase">
+                      <tr>
+                        <th class="py-2 px-3">Description</th>
+                        <th class="py-2 px-3">Category</th>
+                        <th class="py-2 px-3 text-right">Amount (CAD)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="prev-line-items-tbody" class="divide-y divide-slate-100">
+                      <!-- Rendered via JS -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Grand Total Box -->
+                <div class="p-3.5 rounded-lg bg-red-50 border-2 border-red-300 flex items-center justify-between">
+                  <div>
+                    <span class="text-[10px] font-black uppercase text-red-900 tracking-wider block">Guaranteed Client Total</span>
+                    <span class="text-[10px] text-red-700">All-in Canadian freight rate (Taxes/duties extra if applicable)</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xl sm:text-2xl font-black text-red-700 tracking-tight" id="prev-total-amount">$0.00</span>
+                    <span class="text-[10px] font-bold text-red-900 block font-mono">CAD</span>
+                  </div>
+                </div>
+
+                <!-- Terms & Conditions Footer -->
+                <div class="pt-2 border-t border-slate-200 text-[9px] text-slate-500 space-y-1 italic">
+                  <div>• Quote valid for 7 calendar days from issuance. Subject to carrier equipment availability.</div>
+                  <div>• Charges subject to actual carrier scale re-weigh and cube verification upon tender.</div>
+                  <div>• Transit days are business estimates excluding weekends and statutory holidays.</div>
+                  <div class="text-slate-400 text-center not-italic pt-1 font-sans">
+                    RateSift Canada • PIPEDA Compliant • WHC Canadian Data Residency
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
+            <span class="text-slate-400 text-[11px]">RateSift Canadian Broker Proposal Engine</span>
+            <button type="button" onclick="closeProposalModal()" class="px-4 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer">
+              Close
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Semantic Footer -->
+    <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
+      <!-- Left: Logo & Links Directly Beside It -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <!-- Links beside the logo -->
+        <nav aria-label="Footer Navigation" class="flex items-center gap-4 text-xs font-medium">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Date at Bottom Right -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        September 28, 2026
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    let allQuotes = [];
+    let currentQuotes = [];
+    let sortDirection = {};
+    let activeProposalQuote = null;
+    let activeProposalData = null;
+
+    function renderTable(quotes) {
+      const tbody = document.getElementById('quotes-table-body');
+      if (!quotes.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-xs text-slate-400">No quotes match your filter or search query.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = quotes.map(q => `
+        <tr class="hover:bg-slate-50/50 transition-colors font-normal">
+          <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--foreground)]">${q.id}</td>
+          <td class="py-2.5 px-3.5 font-normal text-[var(--foreground)]">${q.carrier}</td>
+          <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--muted-foreground)]">${q.route}</td>
+          <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--muted-foreground)]">${q.sheet}</td>
+          <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--muted-foreground)]">${q.date}</td>
+          <td class="py-2.5 px-3.5 text-right font-normal font-mono text-slate-900 font-semibold">$${Number(q.rate).toFixed(2)}</td>
+          <td class="py-2.5 px-3.5 text-right">
+            <button onclick="openHistoryProposal('${q.id}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] shadow-2xs transition-all cursor-pointer hover:shadow-sm" title="Generate Client Proposal (.xlsx / Printable PDF)">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              <span>Proposal</span>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function loadQuotes() {
+      fetch('/api/quotes/history')
+        .then(r => r.json())
+        .then(data => {
+          allQuotes = (data.quotes || []).map(q => ({
+            raw: q,
+            id: q.id,
+            carrierName: q.carrier,
+            serviceName: q.service,
+            originZip: q.origin_zip,
+            destZip: q.dest_zip,
+            weightLbs: q.weight_lbs,
+            baseRate: q.base_rate,
+            markupPct: q.markup_pct,
+            finalRate: q.final_rate,
+            carrier: `${q.carrier} (${q.service})`,
+            route: `${q.origin_zip} → ${q.dest_zip} • ${q.weight_lbs} lbs`,
+            sheet: q.coordinate,
+            date: q.created_at ? q.created_at.split('T')[0] : '2026-09-28',
+            rate: q.final_rate
+          }));
+          currentQuotes = [...allQuotes];
+          renderTable(currentQuotes);
+        })
+        .catch(err => {
+          console.error("Error fetching quotes:", err);
+        });
+    }
+
+    function openHistoryProposal(quoteId) {
+      const match = allQuotes.find(q => q.id === quoteId);
+      if (!match) return;
+
+      activeProposalQuote = {
+        quote_id: match.id,
+        carrier_name: match.carrierName || match.carrier,
+        service_name: match.serviceName || "Standard LTL",
+        origin: match.originZip || "TORONTO, ON",
+        destination: match.destZip || "MONTREAL, QC",
+        actual_weight: match.weightLbs || 100.0,
+        billable_weight: match.weightLbs || 100.0,
+        base_rate: match.baseRate || match.rate,
+        total_surcharges: 0.0,
+        final_total: match.rate,
+        currency: "CAD",
+        transit_days: 3,
+        surcharges: []
+      };
+
+      const modal = document.getElementById('proposal-modal');
+      modal.classList.remove('hidden');
+
+      document.getElementById('prop-wholesale-cost').textContent = `$${activeProposalQuote.final_total.toFixed(2)} CAD`;
+      document.getElementById('prop-service-display').textContent = activeProposalQuote.service_name;
+      document.getElementById('prop-transit-display').textContent = `${activeProposalQuote.transit_days} Business Days`;
+
+      const defaultMarkup = match.markupPct || 15.0;
+      document.getElementById('prop-markup-pct').value = defaultMarkup;
+      document.getElementById('prop-markup-val').textContent = `${defaultMarkup.toFixed(1)}%`;
+
+      const clientTotal = match.rate;
+      document.getElementById('prop-client-total-input').value = clientTotal.toFixed(2);
+
+      refreshProposalPreview();
+    }
+
+    function closeProposalModal() {
+      const modal = document.getElementById('proposal-modal');
+      modal.classList.add('hidden');
+    }
+
+    function setProposalMarkup(pct) {
+      document.getElementById('prop-markup-pct').value = pct;
+      handleProposalMarkupChange(pct);
+    }
+
+    function handleProposalMarkupChange(val) {
+      if (!activeProposalQuote) return;
+      const markup = Math.max(0, parseFloat(val) || 0);
+      document.getElementById('prop-markup-val').textContent = `${markup.toFixed(1)}%`;
+
+      const baseCost = activeProposalQuote.base_rate;
+      const clientTotal = baseCost * (1 + markup / 100.0);
+      document.getElementById('prop-client-total-input').value = clientTotal.toFixed(2);
+      refreshProposalPreview();
+    }
+
+    function handleProposalTotalChange(val) {
+      if (!activeProposalQuote) return;
+      const clientTotal = Math.max(0, parseFloat(val) || 0);
+      const baseCost = activeProposalQuote.base_rate;
+      const markup = baseCost > 0 ? Math.max(0, ((clientTotal - baseCost) / baseCost) * 100.0) : 0.0;
+      document.getElementById('prop-markup-pct').value = markup.toFixed(1);
+      document.getElementById('prop-markup-val').textContent = `${markup.toFixed(1)}%`;
+      refreshProposalPreview();
+    }
+
+    async function refreshProposalPreview() {
+      if (!activeProposalQuote) return;
+
+      const clientName = document.getElementById('prop-client-name').value || "Acme Industrial Logistics";
+      const clientAttn = document.getElementById('prop-client-attn').value || "Freight Dispatch";
+      const markupPct = parseFloat(document.getElementById('prop-markup-pct').value) || 15.0;
+      const customTotal = parseFloat(document.getElementById('prop-client-total-input').value) || null;
+
+      const payload = {
+        quote_id: activeProposalQuote.quote_id || null,
+        carrier_name: activeProposalQuote.carrier_name,
+        service_name: activeProposalQuote.service_name,
+        origin: activeProposalQuote.origin,
+        destination: activeProposalQuote.destination,
+        weight_lbs: activeProposalQuote.billable_weight || activeProposalQuote.actual_weight,
+        base_rate: activeProposalQuote.base_rate,
+        total_surcharges: 0.0,
+        surcharges: [],
+        transit_days: activeProposalQuote.transit_days || 3,
+        currency: "CAD",
+        client_name: clientName,
+        markup_pct: markupPct,
+        custom_total: customTotal
+      };
+
+      try {
+        const res = await fetch('/api/quotes/client-proposal/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Failed to generate proposal preview");
+        const data = await res.json();
+        activeProposalData = data.proposal;
+
+        document.getElementById('prev-broker-company').textContent = activeProposalData.broker.company.toUpperCase();
+        document.getElementById('prev-proposal-id').textContent = activeProposalData.proposal_id;
+        document.getElementById('prev-issue-date').textContent = activeProposalData.issue_date;
+        document.getElementById('prev-expiry-date').textContent = activeProposalData.expiry_date;
+        document.getElementById('prev-client-name').textContent = activeProposalData.client.name;
+        document.getElementById('prev-client-attn').textContent = `Attn: ${clientAttn}`;
+        document.getElementById('prev-broker-name').textContent = activeProposalData.broker.agent_name;
+        document.getElementById('prev-broker-hub').textContent = `Dispatch Hub: ${activeProposalData.broker.origin_hub}`;
+
+        document.getElementById('prev-origin').textContent = activeProposalData.shipment.origin;
+        document.getElementById('prev-dest').textContent = activeProposalData.shipment.destination;
+        document.getElementById('prev-weight').textContent = `${Number(activeProposalData.shipment.billable_weight).toLocaleString()} lbs`;
+        document.getElementById('prev-transit').textContent = `${activeProposalData.shipment.transit_days} Business Days`;
+
+        const tbody = document.getElementById('prev-line-items-tbody');
+        tbody.innerHTML = activeProposalData.line_items.map(item => `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2 px-3 font-medium text-slate-800">${item.description}</td>
+            <td class="py-2 px-3 text-[10px] text-slate-500 font-mono">${item.category}</td>
+            <td class="py-2 px-3 text-right font-bold text-slate-900">$${item.amount.toFixed(2)}</td>
+          </tr>
+        `).join('');
+
+        document.getElementById('prev-total-amount').textContent = `$${activeProposalData.pricing.client_total.toFixed(2)}`;
+
+        const marginDollars = activeProposalData.pricing.broker_margin_dollars;
+        const marginPct = activeProposalData.pricing.effective_markup_pct;
+        const badge = document.getElementById('prop-margin-badge');
+        badge.textContent = `+$${marginDollars.toFixed(2)} CAD Margin (+${marginPct}%)`;
+
+      } catch (err) {
+        console.error("Proposal preview error:", err);
+      }
+    }
+
+    async function downloadProposalExcel() {
+      if (!activeProposalQuote) return;
+
+      const clientName = document.getElementById('prop-client-name').value || "Client Partner";
+      const markupPct = parseFloat(document.getElementById('prop-markup-pct').value) || 15.0;
+      const customTotal = parseFloat(document.getElementById('prop-client-total-input').value) || null;
+
+      const payload = {
+        quote_id: activeProposalQuote.quote_id || null,
+        carrier_name: activeProposalQuote.carrier_name,
+        service_name: activeProposalQuote.service_name,
+        origin: activeProposalQuote.origin,
+        destination: activeProposalQuote.destination,
+        weight_lbs: activeProposalQuote.billable_weight || activeProposalQuote.actual_weight,
+        base_rate: activeProposalQuote.base_rate,
+        total_surcharges: 0.0,
+        surcharges: [],
+        transit_days: activeProposalQuote.transit_days || 3,
+        currency: "CAD",
+        client_name: clientName,
+        markup_pct: markupPct,
+        custom_total: customTotal
+      };
+
+      try {
+        const res = await fetch('/api/quotes/client-proposal/excel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Failed to generate Excel proposal");
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        const propId = (activeProposalData && activeProposalData.proposal_id) ? activeProposalData.proposal_id : 'Proposal';
+        a.download = `RateSift_Client_Proposal_${propId}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        alert("Error generating proposal workbook: " + err.message);
+      }
+    }
+
+    function printProposal() {
+      window.print();
+    }
+
+    function toggleAccountMenu() {
+      const menu = document.getElementById('account-dropdown');
+      const btn = document.getElementById('account-menu-btn');
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !isExpanded);
+      menu.classList.toggle('hidden');
+    }
+
+    function toggleRateMenu() {
+      const menu = document.getElementById('rate-dropdown');
+      const btn = document.getElementById('rate-sort-btn');
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !isExpanded);
+      menu.classList.toggle('hidden');
+    }
+
+    function sortQuotesByRate(direction) {
+      const menu = document.getElementById('rate-dropdown');
+      menu.classList.add('hidden');
+      document.getElementById('rate-sort-btn').setAttribute('aria-expanded', 'false');
+      const label = document.getElementById('rate-sort-label');
+      
+      if (direction === 'desc') {
+        currentQuotes.sort((a, b) => b.rate - a.rate);
+        label.textContent = "Rate: High to Low";
+      } else {
+        currentQuotes.sort((a, b) => a.rate - b.rate);
+        label.textContent = "Rate: Low to High";
+      }
+      renderTable(currentQuotes);
+    }
+
+    function resetSort() {
+      document.getElementById('rate-dropdown').classList.add('hidden');
+      document.getElementById('rate-sort-btn').setAttribute('aria-expanded', 'false');
+      document.getElementById('rate-sort-label').textContent = "Sort by Rate";
+      currentQuotes = [...allQuotes];
+      renderTable(currentQuotes);
+    }
+
+    function toggleSort(field) {
+      sortDirection[field] = !sortDirection[field];
+      currentQuotes.sort((a, b) => {
+        let valA = a[field];
+        let valB = b[field];
+        if (typeof valA === 'string') {
+          return sortDirection[field] ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        return sortDirection[field] ? valA - valB : valB - valA;
+      });
+      renderTable(currentQuotes);
+    }
+
+    function filterQuotes() {
+      const query = document.getElementById('search-input').value.toLowerCase().trim();
+      if (!query) {
+        currentQuotes = [...allQuotes];
+      } else {
+        currentQuotes = allQuotes.filter(q => 
+          q.id.toLowerCase().includes(query) || 
+          q.carrier.toLowerCase().includes(query) || 
+          q.route.toLowerCase().includes(query) ||
+          q.sheet.toLowerCase().includes(query)
+        );
+      }
+      renderTable(currentQuotes);
+    }
+
+    window.addEventListener('click', function(e) {
+      const btn = document.getElementById('rate-sort-btn');
+      const menu = document.getElementById('rate-dropdown');
+      if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+
+      const accBtn = document.getElementById('account-menu-btn');
+      const accMenu = document.getElementById('account-dropdown');
+      if (accBtn && accMenu && !accBtn.contains(e.target) && !accMenu.contains(e.target)) {
+        accMenu.classList.add('hidden');
+        accBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    loadQuotes();
+  </script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Ratesift | System & Quoting Calculation Settings</title>
+  <meta name="title" content="Ratesift | System & Quoting Calculation Settings">
+  <meta name="description" content="Configure system-wide quoting calculation rules, currency, imperial/metric measurement units, and Excel batch parser automation settings in Ratesift.">
+  <meta name="keywords" content="shipping settings, quote calculation rules, excel parser settings, batch quote configuration">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ratesift.io/settings">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ratesift.io/settings">
+  <meta property="og:site_name" content="Ratesift">
+  <meta property="og:title" content="Ratesift | System & Quoting Calculation Settings">
+  <meta property="og:description" content="Configure calculation parameters, margin percentages, and spreadsheet ingestion rules.">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ratesift.io/settings">
+  <meta name="twitter:title" content="Ratesift | System & Quoting Calculation Settings">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD: WebPage & Breadcrumb -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "System & Quoting Settings - Ratesift",
+    "description": "System-wide freight and parcel quoting calculation configuration.",
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ratesift.io/" },
+        { "@type": "ListItem", "position": 2, "name": "Settings", "item": "https://ratesift.io/settings" }
+      ]
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Navigation Bar (Consistent RateSift Console Menu Bar) -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] bg-white relative z-20 m-0 shadow-2xs">
+      <div class="flex items-center justify-between w-full max-w-7xl mx-auto">
+        <!-- Left: Logo & Nav Links -->
+        <div class="flex items-center gap-6 lg:gap-8">
+          <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="RateSift Console">
+            <div class="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-xs text-xs">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13H5.5L12 6.5z"/></svg>
+            </div>
+            <span class="text-lg font-bold tracking-tight text-slate-900">RateSift</span>
+          </a>
+
+          <!-- Center/Left Navigation Links -->
+          <nav role="navigation" aria-label="Main Navigation" class="hidden sm:flex items-center gap-1.5 sm:gap-2 text-xs font-medium">
+            <a href="/console/new-quote" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>New Quote</span>
+            </a>
+            <a href="/console/history" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Quotes History</span>
+            </a>
+            <a href="/console/rate-sheets" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>Carrier Tariffs</span>
+            </a>
+            <a href="/console/settings" aria-current="page" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs relative after:content-[''] after:absolute after:-bottom-3.5 after:left-3 after:right-3 after:h-0.5 after:bg-red-600">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span>Settings</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Right: Sovereignty Badge & Actions -->
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
+            <span>🇨🇦</span>
+            <span>Hosted in Canada (WHC) • PIPEDA Compliant</span>
+          </div>
+
+          <button type="button" aria-label="Notifications" class="p-2 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer" title="System Notifications">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          </button>
+
+          <a href="/api/auth/logout" aria-label="Sign out" class="p-2 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" title="Sign out">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Tabs -->
+      <nav class="flex sm:hidden overflow-x-auto gap-2 pt-2.5 mt-2 border-t border-slate-100 text-xs font-medium px-1">
+        <a href="/console/new-quote" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">New Quote</a>
+        <a href="/console/history" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Quotes History</a>
+        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Carrier Tariffs</a>
+        <a href="/console/settings" class="px-3 py-1 rounded-full bg-red-50 text-red-600 font-bold whitespace-nowrap">Settings</a>
+      </nav>
+    </header>
+
+    <!-- Main Content (Semantic Main) -->
+    <main id="main-content" role="main" class="p-6 flex-1 max-w-4xl mx-auto w-full">
+      <header class="mb-5">
+        <!-- Semantic H1 -->
+        <h1 class="text-xl font-bold tracking-tight text-[var(--foreground)]">System & Quoting Settings</h1>
+        <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Configure default rate calculations, Excel spreadsheet parser rules, and system behavior.</p>
+      </header>
+
+      <form onsubmit="savePreferences(event);" class="space-y-5">
+        
+        <!-- 1. Quoting Calculation Parameters -->
+        <section aria-labelledby="calc-rules-heading" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs">
+          <div class="flex items-center gap-2 mb-3 pb-2 border-b border-[var(--border)]">
+            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            <h2 id="calc-rules-heading" class="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">Quote Calculation Rules</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="currency-select" class="block text-xs font-bold text-[var(--foreground)] mb-1">Currency</label>
+              <select id="currency-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+                <option selected>CAD ($) - Canadian Dollar</option>
+                <option>USD ($) - United States Dollar</option>
+                <option>EUR (€) - Euro</option>
+                <option>GBP (£) - British Pound</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="unit-select" class="block text-xs font-bold text-[var(--foreground)] mb-1">Measurement System</label>
+              <select id="unit-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+                <option selected>Imperial (lbs, inches)</option>
+                <option>Metric (kg, cm)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="markup-input" class="block text-xs font-bold text-[var(--foreground)] mb-1">Standard Markup / Margin</label>
+              <div class="relative">
+                <input id="markup-input" type="text" value="+ 10.0%" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Excel Parsing & Ingestion Rules -->
+        <section aria-labelledby="excel-parser-heading" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs">
+          <div class="flex items-center gap-2 mb-3 pb-2 border-b border-[var(--border)]">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <h2 id="excel-parser-heading" class="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">Excel Batch Parser Rules</h2>
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex items-center justify-between py-1.5">
+              <div>
+                <label for="auto-header" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Auto-Detect Header Row</label>
+                <p class="text-[11px] text-[var(--muted-foreground)]">Automatically match columns labeled "Address", "ZIP", "Area Code", and "Recipient".</p>
+              </div>
+              <input id="auto-header" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
+            </div>
+
+            <div class="flex items-center justify-between py-1.5 border-t border-[var(--border)]">
+              <div>
+                <label for="skip-empty" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Skip Empty / Malformed Rows</label>
+                <p class="text-[11px] text-[var(--muted-foreground)]">Ignore empty spreadsheet rows without interrupting batch quote generation.</p>
+              </div>
+              <input id="skip-empty" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
+            </div>
+
+            <div class="flex items-center justify-between py-1.5 border-t border-[var(--border)]">
+              <div>
+                <label for="strict-zip" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Strict Area Code Validation</label>
+                <p class="text-[11px] text-[var(--muted-foreground)]">Flag quotes that contain invalid or missing postal codes before finalizing rates.</p>
+              </div>
+              <input id="strict-zip" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
+            </div>
+          </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="alert('Settings reset to default.');" class="px-3 py-1.5 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+            Reset to Defaults
+          </button>
+          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-4 py-1.5 rounded-lg transition-colors shadow-xs">
+            Save Preferences
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <!-- Semantic Footer -->
+    <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
+      <!-- Left: Logo & Links Directly Beside It -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <!-- Links beside the logo -->
+        <nav aria-label="Footer Navigation" class="flex items-center gap-4 text-xs font-medium">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Date at Bottom Right -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        September 28, 2026
+      </div>
+    </footer>
+  </div>
+
+    function loadSettings() {
+      fetch('/api/user/profile')
+        .then(r => r.json())
+        .then(data => {
+          if (data) {
+            document.getElementById('markup-input').value = `+ ${(data.markup_pct || 10.0).toFixed(1)}%`;
+            document.getElementById('auto-header').checked = Boolean(data.auto_detect_headers);
+            document.getElementById('skip-empty').checked = Boolean(data.skip_blank_rows);
+          }
+        })
+        .catch(err => console.error("Error loading settings:", err));
+    }
+
+    function savePreferences(e) {
+      if (e) e.preventDefault();
+      const markupRaw = document.getElementById('markup-input').value;
+      const cleanMarkup = parseFloat(markupRaw.replace(/[^0-9.]/g, '')) || 10.0;
+      const currency = document.getElementById('currency-select').value.includes('USD') ? 'USD' : 'EUR';
+      const units = document.getElementById('unit-select').value.includes('Metric') ? 'kg' : 'lbs';
+      const autoHeader = document.getElementById('auto-header').checked ? 1 : 0;
+      const skipEmpty = document.getElementById('skip-empty').checked ? 1 : 0;
+
+      const formData = new FormData();
+      formData.append('currency', currency);
+      formData.append('units', units);
+      formData.append('markup_pct', cleanMarkup);
+      formData.append('auto_detect_headers', autoHeader);
+      formData.append('skip_blank_rows', skipEmpty);
+
+      fetch('/api/settings/update', {
+        method: 'POST',
+        body: formData
+      })
+      .then(r => r.json())
+      .then(data => {
+        alert("✓ Quoting settings and Excel parser rules saved successfully!");
+      })
+      .catch(err => {
+        alert("Error saving settings. Please try again.");
+      });
+    }
+
+    window.addEventListener('click', function(e) {
+      const accBtn = document.getElementById('account-menu-btn');
+      const accMenu = document.getElementById('account-dropdown');
+      if (accBtn && accMenu && !accBtn.contains(e.target) && !accMenu.contains(e.target)) {
+        accMenu.classList.add('hidden');
+        accBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    loadSettings();
+  </script>
+</body>
+</html>

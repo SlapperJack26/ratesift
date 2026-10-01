@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Ratesift Pricing | Simple, Scalable Shipping Rate Quoting Plans</title>
+  <meta name="title" content="Ratesift Pricing | Simple, Scalable Shipping Rate Quoting Plans">
+  <meta name="description" content="Transparent pricing for Ratesift batch Excel shipping rate quoting. Free tier to validate real spreadsheet data, flexible broker tiers, and embedded quoting APIs for 3PLs.">
+  <meta name="keywords" content="Ratesift pricing, shipping quote calculator plans, freight broker software pricing, spreadsheet shipping rates cost, freemium logistics SaaS, embedded quoting API, 3PL rate engine">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="Ratesift Technologies">
+  <link rel="canonical" href="https://ratesift.io/pricing">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ratesift.io/pricing">
+  <meta property="og:site_name" content="Ratesift">
+  <meta property="og:title" content="Ratesift Pricing | Transparent Rate Quoting Plans">
+  <meta property="og:description" content="Start free with your real Excel rate sheets. Scale from small broker tiers to high-throughput embedded quoting APIs for 3PLs.">
+  <meta property="og:image" content="https://ratesift.io/assets/og-pricing.jpg">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ratesift.io/pricing">
+  <meta name="twitter:title" content="Ratesift Pricing | Scalable Rate Quoting Plans">
+  <meta name="twitter:description" content="Freemium SaaS for batch Excel rate quotes, broker tiers, and developer APIs. No carrier booking baggage.">
+  <meta name="twitter:image" content="https://ratesift.io/assets/twitter-pricing.jpg">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD Structured Data: SoftwareApplication with AggregateOffer & FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "RateSift Rate Quoting Engine",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "url": "https://ratesift.io/pricing",
+        "description": "Deterministic Canadian freight rate comparison engine with freemium tiers, broker plans, deficit rating, fuel index manager, and embedded REST APIs.",
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "CAD",
+          "lowPrice": "0",
+          "highPrice": "199",
+          "offerCount": "4",
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Free Starter",
+              "price": "0",
+              "priceCurrency": "CAD",
+              "description": "Freemium tier supporting up to 3 connected rate sheets and 50 monthly quotes to compare real carrier data with Canadian FSA resolution."
+            },
+            {
+              "@type": "Offer",
+              "name": "Broker Pro",
+              "price": "79",
+              "priceCurrency": "CAD",
+              "description": "Up to 10 rate sheets, 2,500 quotes per month, SMC3 CzarLite deficit rating, weekly OTA fuel index, and 1-click client proposal generation."
+            },
+            {
+              "@type": "Offer",
+              "name": "Broker Team",
+              "price": "199",
+              "priceCurrency": "CAD",
+              "description": "Unlimited rate sheets, 15,000 quotes per month, 5 broker seats, Canadian Pre-Authorized Debit (PAD) billing, and shared tariff warehouse."
+            },
+            {
+              "@type": "Offer",
+              "name": "Business",
+              "price": "0",
+              "priceCurrency": "CAD",
+              "description": "Custom enterprise quoting volume, full embedded REST API, sub-second latency SLA, and dedicated Canadian cloud tenant."
+            }
+          ]
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ratesift.io/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Pricing",
+            "item": "https://ratesift.io/pricing"
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Can I test RateSift with my real business Excel data before paying?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! Our Free Starter tier allows you to connect up to 3 live rate sheets and process 50 quotes per month so you can validate rate calculation accuracy, FSA resolution, and cell coordinates with zero credit card required."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does RateSift provide high quote volumes without AI token fees?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "RateSift's rating engine is 100% deterministic Python code that runs in local memory in under 20 milliseconds. We never use generative AI to guess prices, eliminating expensive per-token surcharges and hallucination risks."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What payment methods are supported for Canadian freight brokerages?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We accept major credit cards on all paid tiers. For Broker Team and Business accounts, we also support Canadian Pre-Authorized Debit (PAD) and EFT direct bank transfers to eliminate merchant fees."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is SMC3 CzarLite & Deficit Weight Rating?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Deficit rating is an automated algorithm that tests if bumping your shipment weight to the minimum of the next hundredweight bracket yields a lower total price, automatically passing on savings to your clients."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the Embedded Quoting API for 3PLs and brokers?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The Embedded Quoting API allows brokers and 3PLs to programmatically submit spreadsheet data or rate calculation requests from their own customer-facing portals, ERPs, or internal TMS with sub-second latency."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does RateSift require carrier booking credentials or print labels?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. RateSift is dedicated purely to quoting rates and spreadsheet coordinate archiving. We do not generate tracking numbers or print shipping labels, which eliminates operational clutter."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
+    
+    <!-- Top Semantic Navigation Bar (Identical to Public Landing & Demo) -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative z-20 m-0">
+      <!-- Left: Brand Identity -->
+      <a href="/" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Ratesift Home">
+        <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-8 md:h-9 w-auto object-contain" />
+      </a>
+
+      <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
+      <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
+        <a href="/" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Home</a>
+        <a href="/demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Demo</a>
+        <a href="/pricing" aria-current="page" class="pub-tab text-red-600 font-semibold border-b-2 border-red-600 py-1 transition-all">Pricing</a>
+      </nav>
+
+      <!-- Right: User Conversion CTAs -->
+      <div class="flex items-center gap-3 z-10">
+        <a href="/login" class="text-xs font-semibold text-[var(--foreground)] hover:text-red-600 transition-colors px-2 py-1" title="Log in to your Ratesift account">
+          Log in
+        </a>
+        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Create a free Ratesift account">
+          Get Started
+        </a>
+        <!-- Mobile Menu Toggle Button (Phone Only) -->
+        <button type="button" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" class="md:hidden p-1.5 rounded-lg border border-[var(--border)] text-slate-600 hover:bg-black/5 focus:outline-hidden transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Collapsible Mobile Navigation Drawer for Phones (< 768px) -->
+    <nav id="mobile-nav-drawer" aria-label="Mobile Navigation" class="hidden md:hidden border-b border-[var(--border)] bg-slate-50/95 px-4 py-3 space-y-1.5 text-xs font-medium transition-all">
+      <a href="/" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Home</a>
+      <a href="/demo" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Demo</a>
+      <a href="/pricing" class="block px-3 py-2 rounded-lg text-red-600 font-bold bg-red-50/80">Pricing</a>
+      <div class="pt-2 mt-2 border-t border-[var(--border)] flex items-center justify-between">
+        <a href="/login" class="text-xs font-semibold px-2 py-1 rounded text-slate-700 hover:text-red-600">Log in</a>
+        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs ">Get Started</a>
+      </div>
+    </nav>
+
+    <!-- Main Content Area: Accessible Landmark -->
+    <main id="main-content" role="main" class="flex-1 p-6 md:p-8 space-y-10">
+      
+      <!-- 1. Hero Title & Billing Cycle Switcher -->
+      <section aria-labelledby="pricing-heading" class="max-w-3xl mx-auto text-center space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+          <span>💳 Transparent, Usage-Aligned Quoting Plans</span>
+        </div>
+        <h1 id="pricing-heading" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--foreground)] leading-tight">
+          Start Free with Real Data.<br>Scale as Your Quote Volume Expands.
+        </h1>
+        <p class="text-sm text-[var(--muted-foreground)] max-w-2xl mx-auto leading-relaxed">
+          From solo freight brokers evaluating spreadsheets to high-volume 3PLs calling our embedded quoting API. Pay strictly for rate computation intelligence without booking or label printing bloat.
+        </p>
+
+        <!-- Billing Period Toggle Switch -->
+        <div class="pt-2 flex items-center justify-center gap-3 text-xs">
+          <span id="label-monthly" class="font-semibold text-[var(--foreground)]">Monthly Billing</span>
+          <button type="button" role="switch" aria-checked="false" aria-label="Toggle annual billing discount" onclick="toggleBillingCycle()" id="billing-switch" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-300 transition-colors duration-200 ease-in-out focus:outline-hidden focus:ring-2 focus:ring-red-600">
+            <span id="switch-thumb" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+          </button>
+          <span id="label-annual" class="text-[var(--muted-foreground)] font-medium flex items-center gap-1.5">
+            <span>Annual Billing</span>
+            <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-1.5 py-0.5 rounded-full">Save 20%</span>
+          </span>
+        </div>
+      </section>
+
+      <!-- 2. The 4 Tier Pricing Grid -->
+      <section aria-label="Subscription Plans Grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- Card 1: Freemium Tier (Validate Real Data) -->
+        <div class="border border-[var(--border)] rounded-2xl bg-[var(--background)] p-5 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-all">
+          <div class="space-y-4">
+            <div>
+              <h2 class="text-lg font-bold text-[var(--foreground)]">Free Starter</h2>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">Validate multi-carrier ranking directly with real Excel tariffs.</p>
+            </div>
+            <div class="pt-2">
+              <div class="flex items-baseline gap-1">
+                <span class="text-3xl font-extrabold text-[var(--foreground)] font-mono">$0</span>
+                <span class="text-xs text-[var(--muted-foreground)]">CAD / mo</span>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-1">No credit card required</div>
+            </div>
+
+            <!-- Features -->
+            <ul class="text-xs space-y-2.5 pt-4 border-t border-[var(--border)] text-slate-600">
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>Up to 3 Rate Sheets</strong> connected</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>50 Batch Quotes</strong> / month</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span>Side-by-side multi-carrier price ranking</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span>Canadian Postal FSA Resolver (1,600+ FSAs)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span>CWT break & minimum charge comparison</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span>Cell coordinate back-referencing</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span>Canadian data residency (WHC / PIPEDA)</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-6">
+            <a href="/console/new-quote" class="block w-full text-center py-2.5 px-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs transition-colors shadow-2xs">
+              Start Free (No Card) →
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 2: Broker Pro (Small Brokers Target) -->
+        <div class="border-2 border-red-600 rounded-2xl bg-[var(--card)] p-5 flex flex-col justify-between shadow-md">
+          <div class="space-y-4">
+            <div>
+              <div class="inline-block px-2 py-0.5 mb-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700">
+                Most Popular
+              </div>
+              <h2 class="text-lg font-bold text-[var(--foreground)]">Broker Pro</h2>
+              <p class="text-xs text-[var(--muted-foreground)] mt-0.5">For active brokers quoting multiple Canadian carriers daily.</p>
+            </div>
+            <div class="pt-2">
+              <div class="flex items-baseline gap-1">
+                <span id="price-pro" class="text-3xl font-extrabold text-[var(--foreground)] font-mono">$79</span>
+                <span class="text-xs text-[var(--muted-foreground)]">CAD / mo</span>
+              </div>
+              <div id="sub-pro" class="text-[11px] text-slate-500 mt-1">Billed monthly • Cancel anytime</div>
+            </div>
+
+            <!-- Features -->
+            <ul class="text-xs space-y-2.5 pt-4 border-t border-[var(--border)] text-slate-600">
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>Up to 10 Rate Sheets</strong> connected</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>2,500 Batch Quotes</strong> / month</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>Canadian Fleets</strong> (Day & Ross, Manitoulin, Midland, Bison)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>SMC3 CzarLite & Deficit Rating</strong></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>Weekly Fuel Index Manager</strong> (OTA Baseline)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>1-Click Client Proposals</strong> (PDF & Excel)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>Rate Sheet Masker & Redactor</strong></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span>Searchable History archive (Sheet, Row, Col)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span>Priority broker support (< 2hr turnaround)</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-6">
+            <a href="/console/new-quote" class="block w-full text-center py-2.5 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition-colors shadow-xs">
+              Start 14-Day Free Trial →
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 3: Broker Team / Scale (Per-Seat & Usage Scaling) -->
+        <div class="border border-[var(--border)] rounded-2xl bg-[var(--background)] p-5 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-all">
+          <div class="space-y-4">
+            <div>
+              <h2 class="text-lg font-bold text-[var(--foreground)]">Broker Team</h2>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">Multi-dispatcher freight desks scaling with load volume.</p>
+            </div>
+            <div class="pt-2">
+              <div class="flex items-baseline gap-1">
+                <span id="price-team" class="text-3xl font-extrabold text-[var(--foreground)] font-mono">$199</span>
+                <span class="text-xs text-[var(--muted-foreground)]">CAD / mo</span>
+              </div>
+              <div id="sub-team" class="text-[11px] text-slate-500 mt-1">Includes 5 seats (+$25/seat add-on)</div>
+            </div>
+
+            <!-- Features -->
+            <ul class="text-xs space-y-2.5 pt-4 border-t border-[var(--border)] text-slate-600">
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>Unlimited Rate Sheets</strong></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>15,000 Batch Quotes</strong> / month</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>5 Dispatcher team seats</strong> included</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span><strong>All Canadian & Cross-Border LTL</strong></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span>Shared team tariff warehouse & presets</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span>Pre-Authorized Debit (PAD) / EFT bank billing</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-600 font-bold">✓</span>
+                <span>Dedicated account manager & SLA</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-6">
+            <a href="/console/new-quote" class="block w-full text-center py-2.5 px-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs transition-colors shadow-2xs">
+              Start Free Team Trial →
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 4: Business Tier (Embedded API & 3PL Enterprise) -->
+        <div class="border border-slate-300 bg-gradient-to-b from-slate-50 to-white rounded-2xl p-5 flex flex-col justify-between shadow-2xs hover:border-red-400 transition-all">
+          <div class="space-y-4">
+            <div>
+              <h2 class="text-lg font-bold text-[var(--foreground)]">Business</h2>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">Brokers or 3PLs calling quotes from customer-facing portals.</p>
+            </div>
+            <div class="pt-2">
+              <div class="flex items-baseline gap-1">
+                <span id="price-api" class="text-3xl font-extrabold text-[var(--foreground)] font-mono">Get Quote</span>
+              </div>
+              <div id="sub-api" class="text-[11px] text-slate-500 mt-1">High-volume usage & embedded API billing</div>
+            </div>
+
+            <!-- Features -->
+            <ul class="text-xs space-y-2.5 pt-4 border-t border-[var(--border)] text-slate-600">
+              <li class="flex items-start gap-2">
+                <span class="text-indigo-600 font-bold">✓</span>
+                <span><strong>Embedded Quoting REST API</strong></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-indigo-600 font-bold">✓</span>
+                <span><strong>50,000+ API Quotes</strong> / month</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-indigo-600 font-bold">✓</span>
+                <span>Sub-second quote latency SLA (< 350ms)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-indigo-600 font-bold">✓</span>
+                <span>Webhooks for batch calculation events</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-indigo-600 font-bold">✓</span>
+                <span>Custom carrier tariffs & private formulas</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-indigo-600 font-bold">✓</span>
+                <span>Dedicated Canadian cloud tenant (WHC)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-indigo-600 font-bold">✓</span>
+                <span>Direct developer engineering support</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-6">
+            <a href="/console/new-quote" class="block w-full text-center py-2.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-xs">
+              Get a Custom Quote →
+            </a>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Architectural Advantage Callout Banner -->
+      <section aria-label="Cost Advantage Architecture" class="border border-slate-200 rounded-2xl bg-slate-50/70 p-5 md:p-6 shadow-2xs">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                ⚡ Pure Software Efficiency
+              </span>
+              <span class="text-xs font-bold text-slate-800">Why Our Pricing Is Unbeatable</span>
+            </div>
+            <p class="text-xs text-slate-600 max-w-2xl leading-relaxed">
+              RateSift is built on 100% deterministic Python algorithms and in-memory Canadian FSA geocoding. <strong>Zero LLM token markups. Zero Google Maps lookup fees.</strong> You get penny-perfect calculations at pure software pricing.
+            </p>
+          </div>
+          <div class="flex items-center gap-4 text-xs font-semibold text-slate-700 shrink-0">
+            <div class="flex items-center gap-1.5">
+              <span class="text-emerald-600 font-bold">✓</span>
+              <span>$0 AI Token Surcharges</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-emerald-600 font-bold">✓</span>
+              <span>Local 1,600+ Canadian FSAs</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-emerald-600 font-bold">✓</span>
+              <span>Hosted in Canada (WHC)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Longer-term Expansion Spotlight: Embedded Quoting API for Brokers & 3PLs -->
+      <section id="embedded-api-details" aria-labelledby="api-heading" class="border border-indigo-100 rounded-2xl bg-indigo-50/30 p-6 md:p-8 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="space-y-1.5 max-w-xl">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700">
+              ⚡ Longer-Term Expansion Architecture
+            </div>
+            <h2 id="api-heading" class="text-xl font-bold tracking-tight text-[var(--foreground)]">
+              Embedded Quoting API for Freight Brokers & 3PLs
+            </h2>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              Don't build rating engines from scratch. Call Ratesift directly from your customer-facing web portal, proprietary dispatch software, or enterprise TMS to quote bulk rates on the fly.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="/demo" class="px-3.5 py-2 rounded-lg bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-semibold text-xs transition-colors shadow-2xs">
+              Test Live Simulator ↗
+            </a>
+            <a href="/console/new-quote" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-xs">
+              Request API Access →
+            </a>
+          </div>
+        </div>
+
+        <!-- Clean API Integration Highlights (Code block removed) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+          <div class="p-4 rounded-xl border border-indigo-100 bg-white space-y-1.5 shadow-2xs">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
+              🔌
+            </div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Customer-Facing Web Portals</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              Embed instant shipping rate estimates into client ordering forms or quote-request pages without maintaining carrier rating tables.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-indigo-100 bg-white space-y-1.5 shadow-2xs">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
+              🏢
+            </div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Proprietary TMS & ERPs</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              Programmatically submit spreadsheet batches and ingest multi-carrier rate options directly into dispatch and billing software.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-indigo-100 bg-white space-y-1.5 shadow-2xs">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
+              ⚡
+            </div>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">Sub-Second Rating SLA</h3>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              High-concurrency calculations with guaranteed uptime, retaining spreadsheet cell coordinates for accounting audits.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs text-slate-600">
+          <div class="flex items-center gap-2">
+            <span class="text-indigo-600 font-bold">✓</span>
+            <span>Zero label/booking baggage overhead</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-indigo-600 font-bold">✓</span>
+            <span>Sub-second algorithmic latency</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-indigo-600 font-bold">✓</span>
+            <span>Preserves exact Excel cell references</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Detailed Plan Comparison Matrix -->
+      <section aria-labelledby="matrix-heading" class="space-y-4">
+        <div class="text-center space-y-1">
+          <h2 id="matrix-heading" class="text-lg font-bold text-[var(--foreground)] tracking-tight">
+            Detailed Capability Comparison
+          </h2>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Explore features, quote limits, and integration options across all tiers.
+          </p>
+        </div>
+
+        <div class="border border-[var(--border)] rounded-xl overflow-hidden bg-[var(--card)] shadow-2xs">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse" aria-label="Feature Comparison Matrix">
+              <thead>
+                <tr class="bg-slate-50 border-b border-[var(--border)]">
+                  <th scope="col" class="py-3 px-4 font-bold text-slate-700 w-1/3">Feature Capability</th>
+                  <th scope="col" class="py-3 px-3 font-bold text-slate-700 text-center">Free Starter</th>
+                  <th scope="col" class="py-3 px-3 font-bold text-red-700 text-center bg-red-50/50">Broker Pro</th>
+                  <th scope="col" class="py-3 px-3 font-bold text-slate-700 text-center">Broker Team</th>
+                  <th scope="col" class="py-3 px-3 font-bold text-indigo-700 text-center">Business</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <!-- Group 1: Core Capacity -->
+                <tr class="bg-slate-50/80 font-bold text-[11px] text-slate-600">
+                  <td colspan="5" class="py-1.5 px-4 uppercase tracking-wider">Quoting Volume & Spreadsheets</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Active Rate Sheets (.xlsx/.xls)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">Up to 3 Sheets</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">Up to 10</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">Unlimited</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">Unlimited</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Monthly Quoted Volume</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">50 Quotes</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">2,500 Quotes</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">15,000 Quotes</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">50,000+ Quotes</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Team Dispatcher Seats</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">1 Seat</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">1 Seat</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">5 Seats Included (+$25/extra)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">Unlimited API Keys</td>
+                </tr>
+
+                <!-- Group 2: Rating & Routing Features -->
+                <tr class="bg-slate-50/80 font-bold text-[11px] text-slate-600">
+                  <td colspan="5" class="py-1.5 px-4 uppercase tracking-wider">Rating Intelligence & Automation</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Automated Excel Column Parsing</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Cell-Level Coordinate Traceability</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Canadian Postal FSA Resolver (1,600+ FSAs)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ Dedicated API</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">SMC3 CzarLite & Deficit Weight Rating</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">✓ Automatic</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ Automatic</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ Automatic</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Weekly Fuel Surcharge (FSC) Index Manager</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">✓ OTA Baseline</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ OTA & Custom</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ Multi-Index API</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">1-Click Client Proposal Generator (PDF / Excel)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">✓ Included</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ Included</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ White-Label API</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Rate Sheet Masker & Redaction Tool</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">✓ Included</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ Included</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ Included</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Custom Margin / Markup Engine</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">✓ (+10% / custom)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ (Per-customer rules)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓ (Dynamic API payload)</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Carrier Connections</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">Standard Domestic</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">5 Major Fleets</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">All + Regional LTL</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">All + Custom Tariffs</td>
+                </tr>
+
+                <!-- Group 3: Integration & APIs -->
+                <tr class="bg-slate-50/80 font-bold text-[11px] text-slate-600">
+                  <td colspan="5" class="py-1.5 px-4 uppercase tracking-wider">Developer, Billing & Infrastructure</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Excel / CSV Spreadsheet Export</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">✓</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Embedded REST API & Webhooks</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center bg-red-50/20">—</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-indigo-700 font-semibold text-center">✓ Full Access</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Pre-Authorized Debit (PAD) / EFT Billing</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center bg-red-50/20">Card Only</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">✓ Supported</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">✓ Supported</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">AI LLM Token Fees / Surcharges</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">$0.00 (Zero)</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center bg-red-50/20">$0.00 (Zero)</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">$0.00 (Zero)</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">$0.00 (Zero)</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Carrier Booking or Label Printing</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-500 text-center">Excluded (No Bloat)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-500 text-center bg-red-50/20">Excluded (No Bloat)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-500 text-center">Excluded (No Bloat)</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-500 text-center">Excluded (No Bloat)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Frequently Asked Questions (FAQ) Section -->
+      <section aria-labelledby="faq-heading" class="border-t border-[var(--border)] pt-8 space-y-4 max-w-3xl mx-auto">
+        <h2 id="faq-heading" class="text-base font-bold text-[var(--foreground)] tracking-tight text-center">
+          Frequently Asked Questions About RateSift Pricing
+        </h2>
+        <div class="space-y-2.5 text-xs">
+          <details class="group border border-[var(--border)] rounded-xl p-3 bg-[var(--card)] open:bg-slate-50/40">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+              <span>Can I validate RateSift with my real Excel data before committing?</span>
+              <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+              Yes, absolutely. Our Free Starter tier is deliberately designed to let prospective brokers and shipping teams upload up to 3 live rate sheets and generate up to 50 quotes per month with zero credit card required. You can test your actual carrier contracts and inspect cell coordinates immediately.
+            </p>
+          </details>
+
+          <details class="group border border-[var(--border)] rounded-xl p-3 bg-[var(--card)] open:bg-slate-50/40">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+              <span>How does RateSift offer high quote quotas without per-token AI surcharges?</span>
+              <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+              Unlike generic AI rater wrappers that incur costly LLM API fees on every calculation, RateSift runs on a 100% deterministic mathematical Python engine in under 20 milliseconds. We also use an embedded local database of 1,600+ Canadian Postal FSAs, completely bypassing expensive third-party geocoding fees. We pass these architectural savings directly to you.
+            </p>
+          </details>
+
+          <details class="group border border-[var(--border)] rounded-xl p-3 bg-[var(--card)] open:bg-slate-50/40">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+              <span>What payment options are available for Canadian freight brokerages?</span>
+              <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+              We support standard Visa, Mastercard, and American Express. On Broker Team and Business tiers, we also support Canadian Pre-Authorized Debit (PAD) and direct EFT bank invoicing to help your accounting team streamline accounts payable without card limits.
+            </p>
+          </details>
+
+          <details class="group border border-[var(--border)] rounded-xl p-3 bg-[var(--card)] open:bg-slate-50/40">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+              <span>What is Deficit Weight Rating and is it included on all plans?</span>
+              <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+              Deficit rating is an automated pricing optimization implementing SMC3 CzarLite algorithms. When a shipment weight approaches a tier boundary (e.g. 880 lbs in the 5C bracket), the engine tests if bumping to 1,000 lbs in the 1M bracket produces a cheaper total rate. If so, it bills the lower cost and logs the exact client savings automatically. Deficit rating is active on Broker Pro, Broker Team, and Business tiers.
+            </p>
+          </details>
+
+          <details class="group border border-[var(--border)] rounded-xl p-3 bg-[var(--card)] open:bg-slate-50/40">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+              <span>How does the 1-Click Client Proposal Generator and Rate Sheet Masker work?</span>
+              <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+              The Rate Sheet Masker scrubs proprietary discounts, carrier account numbers, and sales contacts before file sharing. The 1-Click Client Proposal Generator converts winning wholesale rates into formal client quotes (`PROP-YYYYMMDD-XXXXX`) with custom broker margin markups (+10%, +15%), ready to print or email as formatted Excel workbooks while completely hiding carrier net costs.
+            </p>
+          </details>
+
+          <details class="group border border-[var(--border)] rounded-xl p-3 bg-[var(--card)] open:bg-slate-50/40">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+              <span>What happens if my brokerage exceeds its monthly quote quota?</span>
+              <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+              We never hard-stop your business mid-calculation. On Broker Pro and Broker Team tiers, additional quote bundles can be enabled seamlessly at low fractional-cent rates, or you can upgrade tiers at any time with prorated billing.
+            </p>
+          </details>
+
+          <details class="group border border-[var(--border)] rounded-xl p-3 bg-[var(--card)] open:bg-slate-50/40">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+              <span>How does the Embedded Quoting API work for 3PLs and software platforms?</span>
+              <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+              The Embedded API provides direct REST endpoints (`POST /api/v1/quotes/batch`) allowing 3PLs and freight brokers to send origin/destination postal codes and weights from customer portals, TMS, or shopping carts to receive instant comparative carrier rates in under 350ms without building rating logic in-house.
+            </p>
+          </details>
+
+          <details class="group border border-[var(--border)] rounded-xl p-3 bg-[var(--card)] open:bg-slate-50/40">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer flex justify-between items-center select-none">
+              <span>Why doesn't RateSift include shipping label printing or tracking numbers?</span>
+              <span class="text-red-600 text-sm group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <p class="mt-2 text-[var(--muted-foreground)] leading-relaxed">
+              By focusing 100% on rate calculation and spreadsheet coordinate mapping, RateSift remains blazing fast and free from carrier API downtime, label formatting issues, or printer drivers. It's a pure calculation engine for quoting and billing teams.
+            </p>
+          </details>
+        </div>
+      </section>
+
+      <!-- 6. Bottom Conversion CTA -->
+      <section aria-labelledby="cta-heading" class="p-6 rounded-2xl bg-gradient-to-r from-red-600 to-indigo-600 text-white text-center space-y-3 shadow-sm">
+        <h2 id="cta-heading" class="text-xl sm:text-2xl font-bold tracking-tight">
+          Ready to Test Your Spreadsheets with Ratesift?
+        </h2>
+        <p class="text-xs text-red-100 max-w-lg mx-auto leading-relaxed">
+          Upload your live Excel rate sheets right now on the Free Starter tier. Validate calculation accuracy in seconds.
+        </p>
+        <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+          <a href="/console/new-quote" class="px-5 py-2.5 bg-white text-red-600 font-bold text-xs rounded-lg shadow-sm hover:bg-red-50 transition-colors">
+            Start Free Starter Plan →
+          </a>
+          <a href="/demo" class="px-4 py-2.5 bg-red-700/60 hover:bg-red-700 text-white font-semibold text-xs rounded-lg transition-colors border border-white/20">
+            Open Interactive Demo Sandbox
+          </a>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Semantic Footer (Identical to Landing & Demo Pages) -->
+    <footer role="contentinfo" class="mt-12 px-6 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-4 bg-[var(--card)]">
+      <!-- Left: Logo & Crawlable Navigation Links -->
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <!-- Crawlable Footer Links -->
+        <nav aria-label="Footer Legal and Support Navigation" class="flex items-center gap-4 text-xs font-medium text-[var(--muted-foreground)]">
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <!-- Right: Copyright & Current Date -->
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        October 1, 2026
+      </div>
+    </footer>
+  </div>
+
+  <!-- Interactive Pricing JavaScript Logic -->
+  <script>
+    let isAnnual = false;
+
+    function toggleBillingCycle() {
+      isAnnual = !isAnnual;
+      const toggle = document.getElementById('billing-switch');
+      const thumb = document.getElementById('switch-thumb');
+      const labelMonthly = document.getElementById('label-monthly');
+      const labelAnnual = document.getElementById('label-annual');
+
+      const pricePro = document.getElementById('price-pro');
+      const subPro = document.getElementById('sub-pro');
+      const priceTeam = document.getElementById('price-team');
+      const subTeam = document.getElementById('sub-team');
+      const priceApi = document.getElementById('price-api');
+      const subApi = document.getElementById('sub-api');
+
+      if (isAnnual) {
+        toggle.setAttribute('aria-checked', 'true');
+        toggle.classList.remove('bg-slate-300');
+        toggle.classList.add('bg-red-600');
+        thumb.classList.remove('translate-x-0');
+        thumb.classList.add('translate-x-5');
+
+        labelMonthly.classList.remove('font-semibold', 'text-[var(--foreground)]');
+        labelMonthly.classList.add('text-[var(--muted-foreground)]', 'font-medium');
+        labelAnnual.classList.remove('text-[var(--muted-foreground)]', 'font-medium');
+        labelAnnual.classList.add('font-semibold', 'text-[var(--foreground)]');
+
+        // Discounted Annual Pricing (20% off)
+        pricePro.textContent = "$63";
+        subPro.textContent = "Billed annually ($756 CAD/yr) • Save 20%";
+        priceTeam.textContent = "$159";
+        subTeam.textContent = "Billed annually ($1,908 CAD/yr) • Save 20%";
+        priceApi.textContent = "Get Quote";
+        subApi.textContent = "Tailored annual volume & SLAs";
+      } else {
+        toggle.setAttribute('aria-checked', 'false');
+        toggle.classList.remove('bg-red-600');
+        toggle.classList.add('bg-slate-300');
+        thumb.classList.remove('translate-x-5');
+        thumb.classList.add('translate-x-0');
+
+        labelAnnual.classList.remove('font-semibold', 'text-[var(--foreground)]');
+        labelAnnual.classList.add('text-[var(--muted-foreground)]', 'font-medium');
+        labelMonthly.classList.remove('text-[var(--muted-foreground)]', 'font-medium');
+        labelMonthly.classList.add('font-semibold', 'text-[var(--foreground)]');
+
+        // Standard Monthly Pricing
+        pricePro.textContent = "$79";
+        subPro.textContent = "Billed monthly • Cancel anytime";
+        priceTeam.textContent = "$199";
+        subTeam.textContent = "Includes 5 seats (+$25/seat add-on)";
+        priceApi.textContent = "Get Quote";
+        subApi.textContent = "High-volume usage & embedded API billing";
+      }
+    }
+  
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+      }
+    }</script>
+</body>
+</html>
