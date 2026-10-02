@@ -57,11 +57,21 @@ def init_ratesift_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_rs_sheets_carrier ON rs_rate_sheets (user_id, carrier_name)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_rs_sheets_status ON rs_rate_sheets (user_id, confirmation_status)")
 
-    # Auto-migrate is_benchmark column if table already exists
+    # Auto-migrate columns if table already exists
     cursor.execute("PRAGMA table_info(rs_rate_sheets)")
     rs_cols = [r["name"] for r in cursor.fetchall()]
     if "is_benchmark" not in rs_cols:
         cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN is_benchmark INTEGER DEFAULT 0")
+    if "markup_mode" not in rs_cols:
+        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN markup_mode TEXT DEFAULT 'PERCENTAGE'")
+    if "markup_value" not in rs_cols:
+        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN markup_value REAL DEFAULT 0.0")
+    if "fsc_passthrough" not in rs_cols:
+        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN fsc_passthrough INTEGER DEFAULT 1")
+    if "accessorial_markup_pct" not in rs_cols:
+        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN accessorial_markup_pct REAL DEFAULT 0.0")
+    if "manual_override" not in rs_cols:
+        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN manual_override INTEGER DEFAULT 0")
 
     # 2. Rate Sheet Cell Coordinates Traceability Table (Rule 3, 6, 28)
     cursor.execute("""
@@ -233,42 +243,194 @@ def create_rate_sheet(
     return sheet_id
 
 def get_rate_sheet(sheet_id: str, user_id: str) -> Optional[Dict[str, Any]]:
-    """Fetches a rate sheet by ID, strictly verifying ownership (Rule 28)."""
+    """Fetches a rate sheet by ID, strictly verifying ownership and excluding sample/benchmark sheets (Rule 28)."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-    SELECT * FROM rs_rate_sheets WHERE id = ? AND user_id = ?
+    SELECT * FROM rs_rate_sheets 
+    WHERE id = ? AND user_id = ? AND (is_benchmark = 0 OR is_benchmark IS NULL)
     """, (sheet_id, user_id))
     row = cursor.fetchone()
     conn.close()
     return dict(row) if row else None
 
 def list_rate_sheets(user_id: str, status: Optional[str] = None) -> List[Dict[str, Any]]:
-    """Lists all rate sheets owned by user_id, optionally filtered by status."""
+    """Lists all rate sheets uploaded by user_id, strictly excluding benchmark/sample sheets (Rule 28)."""
     conn = get_connection()
     cursor = conn.cursor()
     if status:
         cursor.execute("""
-        SELECT * FROM rs_rate_sheets WHERE user_id = ? AND confirmation_status = ? ORDER BY created_at DESC
+        SELECT * FROM rs_rate_sheets 
+        WHERE user_id = ? AND (is_benchmark = 0 OR is_benchmark IS NULL) AND confirmation_status = ? 
+        ORDER BY created_at DESC
         """, (user_id, status.upper()))
     else:
         cursor.execute("""
-        SELECT * FROM rs_rate_sheets WHERE user_id = ? ORDER BY created_at DESC
+        SELECT * FROM rs_rate_sheets 
+        WHERE user_id = ? AND (is_benchmark = 0 OR is_benchmark IS NULL) 
+        ORDER BY created_at DESC
         """, (user_id,))
     rows = cursor.fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
-def confirm_rate_sheet(sheet_id: str, user_id: str, confirmed_by: str) -> bool:
-    """Enforces human confirmation gate (Rule 7, 19)."""
+def confirm_rate_sheet(
+    sheet_id: str,
+    user_id: str,
+    confirmed_by: str,
+    currency: Optional[str] = None,
+    weight_unit: Optional[str] = None,
+    dim_divisor: Optional[float] = None,
+    effective_date: Optional[str] = None,
+    expiry_date: Optional[str] = None,
+    rounding_rule: Optional[str] = None,
+    markup_mode: str = "PERCENTAGE",
+    markup_value: float = 0.0,
+    fsc_passthrough: bool = True,
+    accessorial_markup_pct: float = 0.0,
+    manual_override: bool = False,
+    resolve_flags: bool = False
+) -> bool:
+    """Enforces human confirmation gate (Rule 7, 19), confirms core rules (Rule 5, 15, 16), and stores broker markup settings."""
     now_ts = datetime.utcnow().isoformat()
     conn = get_connection()
     cursor = conn.cursor()
+    
+    # Build dynamic update query to preserve existing values if not explicitly overwritten
+    updates = [
+        "confirmation_status = 'CONFIRMED'",
+        "confirmed_by = ?",
+        "confirmed_at = ?",
+        "markup_mode = ?",
+        "markup_value = ?",
+        "fsc_passthrough = ?",
+        "accessorial_markup_pct = ?",
+        "manual_override = ?"
+    ]
+    params = [
+        confirmed_by,
+        now_ts,
+        markup_mode,
+        float(markup_value or 0.0),
+        1 if fsc_passthrough else 0,
+        float(accessorial_markup_pct or 0.0),
+        1 if manual_override else 0
+    ]
+    
+    if currency:
+        updates.append("currency = ?")
+        params.append(currency.strip().upper())
+    if weight_unit:
+        updates.append("weight_unit = ?")
+        params.append(weight_unit.strip().lower())
+    if dim_divisor is not None and float(dim_divisor) > 0:
+        updates.append("dim_divisor = ?")
+        params.append(float(dim_divisor))
+    if effective_date is not None:
+        updates.append("effective_date = ?")
+        params.append(effective_date.strip() if effective_date else None)
+    if expiry_date is not None:
+        updates.append("expiry_date = ?")
+        params.append(expiry_date.strip() if expiry_date else None)
+    if rounding_rule:
+        updates.append("rounding_rule = ?")
+        params.append(rounding_rule.strip())
+
+    params.extend([sheet_id, user_id])
+    sql = f"UPDATE rs_rate_sheets SET {', '.join(updates)} WHERE id = ? AND user_id = ?"
+    cursor.execute(sql, params)
+    affected = cursor.rowcount > 0
+    
+    # Resolve review flags if requested
+    if resolve_flags and affected:
+        cursor.execute("UPDATE rs_rate_sheet_cells SET needs_review = 0 WHERE sheet_id = ? AND user_id = ?", (sheet_id, user_id))
+
+    conn.commit()
+    conn.close()
+    return affected
+
+def update_rate_sheet_markup(
+    sheet_id: str,
+    user_id: str,
+    currency: Optional[str] = None,
+    weight_unit: Optional[str] = None,
+    dim_divisor: Optional[float] = None,
+    effective_date: Optional[str] = None,
+    expiry_date: Optional[str] = None,
+    rounding_rule: Optional[str] = None,
+    markup_mode: str = "PERCENTAGE",
+    markup_value: float = 0.0,
+    fsc_passthrough: bool = True,
+    accessorial_markup_pct: float = 0.0,
+    manual_override: bool = False
+) -> bool:
+    """Updates markup rules and confirmed rules on a rate sheet without changing confirmation status."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    updates = [
+        "markup_mode = ?",
+        "markup_value = ?",
+        "fsc_passthrough = ?",
+        "accessorial_markup_pct = ?",
+        "manual_override = ?"
+    ]
+    params = [
+        markup_mode,
+        float(markup_value or 0.0),
+        1 if fsc_passthrough else 0,
+        float(accessorial_markup_pct or 0.0),
+        1 if manual_override else 0
+    ]
+    if currency:
+        updates.append("currency = ?")
+        params.append(currency.strip().upper())
+    if weight_unit:
+        updates.append("weight_unit = ?")
+        params.append(weight_unit.strip().lower())
+    if dim_divisor is not None and float(dim_divisor) > 0:
+        updates.append("dim_divisor = ?")
+        params.append(float(dim_divisor))
+    if effective_date is not None:
+        updates.append("effective_date = ?")
+        params.append(effective_date.strip() if effective_date else None)
+    if expiry_date is not None:
+        updates.append("expiry_date = ?")
+        params.append(expiry_date.strip() if expiry_date else None)
+    if rounding_rule:
+        updates.append("rounding_rule = ?")
+        params.append(rounding_rule.strip())
+
+    params.extend([sheet_id, user_id])
+    sql = f"UPDATE rs_rate_sheets SET {', '.join(updates)} WHERE id = ? AND user_id = ?"
+    cursor.execute(sql, params)
+    affected = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return affected
+
+def toggle_surcharge_waived(sheet_id: str, user_id: str, surcharge_code: str, is_waived: bool) -> bool:
+    """Toggles waived fee status for a surcharge (Rule 4 & 11)."""
+    conn = get_connection()
+    cursor = conn.cursor()
     cursor.execute("""
-    UPDATE rs_rate_sheets
-    SET confirmation_status = 'CONFIRMED', confirmed_by = ?, confirmed_at = ?
-    WHERE id = ? AND user_id = ?
-    """, (confirmed_by, now_ts, sheet_id, user_id))
+    UPDATE rs_carrier_surcharges
+    SET is_waived = ?
+    WHERE sheet_id = ? AND user_id = ? AND surcharge_code = ?
+    """, (1 if is_waived else 0, sheet_id, user_id, surcharge_code))
+    affected = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return affected
+
+def resolve_flagged_cell(sheet_id: str, user_id: str, cell_coord: str) -> bool:
+    """Marks a flagged coordinate as verified and resolved by human broker (Rule 6)."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE rs_rate_sheet_cells
+    SET needs_review = 0, review_notes = review_notes || ' [Verified by broker]'
+    WHERE sheet_id = ? AND user_id = ? AND cell_coord = ?
+    """, (sheet_id, user_id, cell_coord))
     affected = cursor.rowcount > 0
     conn.commit()
     conn.close()
@@ -472,8 +634,8 @@ def insert_carrier_surcharges(sheet_id: str, user_id: str, surcharges: List[Dict
     conn.commit()
     conn.close()
 
-def get_sheet_full_rules(sheet_id: str, user_id: str) -> Dict[str, Any]:
-    """Retrieves all associated rules for a rate sheet (breaks, zones, surcharges, minimums)."""
+def get_sheet_full_rules(sheet_id: str, user_id: str, limit: Optional[int] = None, offset: int = 0) -> Dict[str, Any]:
+    """Retrieves all associated rules for a rate sheet (breaks, zones, surcharges, minimums). Supports optional break pagination."""
     sheet = get_rate_sheet(sheet_id, user_id)
     if not sheet:
         return {}
@@ -483,7 +645,13 @@ def get_sheet_full_rules(sheet_id: str, user_id: str) -> Dict[str, Any]:
     cursor.execute("SELECT * FROM rs_carrier_zones WHERE sheet_id = ? AND user_id = ?", (sheet_id, user_id))
     zones = [dict(r) for r in cursor.fetchall()]
     
-    cursor.execute("SELECT * FROM rs_weight_breaks WHERE sheet_id = ? AND user_id = ?", (sheet_id, user_id))
+    cursor.execute("SELECT COUNT(*) FROM rs_weight_breaks WHERE sheet_id = ? AND user_id = ?", (sheet_id, user_id))
+    total_breaks_count = cursor.fetchone()[0]
+    
+    if limit is not None:
+        cursor.execute("SELECT * FROM rs_weight_breaks WHERE sheet_id = ? AND user_id = ? ORDER BY id ASC LIMIT ? OFFSET ?", (sheet_id, user_id, limit, offset))
+    else:
+        cursor.execute("SELECT * FROM rs_weight_breaks WHERE sheet_id = ? AND user_id = ? ORDER BY id ASC", (sheet_id, user_id))
     breaks = [dict(r) for r in cursor.fetchall()]
     
     cursor.execute("SELECT * FROM rs_carrier_minimums WHERE sheet_id = ? AND user_id = ?", (sheet_id, user_id))
@@ -497,8 +665,45 @@ def get_sheet_full_rules(sheet_id: str, user_id: str) -> Dict[str, Any]:
         "sheet": sheet,
         "zones": zones,
         "breaks": breaks,
+        "total_breaks_count": total_breaks_count,
         "minimums": minimums,
         "surcharges": surcharges
+    }
+
+def get_sheet_breaks_paginated(
+    sheet_id: str,
+    user_id: str,
+    page: int = 1,
+    limit: int = 50,
+    query: Optional[str] = None
+) -> Dict[str, Any]:
+    """Retrieves weight breaks with high-performance server-side pagination and search."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    base_sql = "FROM rs_weight_breaks WHERE sheet_id = ? AND user_id = ?"
+    params = [sheet_id, user_id]
+    
+    if query and query.strip():
+        q_wild = f"%{query.strip().upper()}%"
+        base_sql += " AND (origin_spec LIKE ? OR dest_spec LIKE ? OR zone_code LIKE ? OR break_name LIKE ? OR source_cell LIKE ?)"
+        params.extend([q_wild, q_wild, q_wild, q_wild, q_wild])
+        
+    cursor.execute(f"SELECT COUNT(*) {base_sql}", params)
+    total_count = cursor.fetchone()[0]
+    
+    offset = max(0, (page - 1) * limit)
+    cursor.execute(f"SELECT * {base_sql} ORDER BY id ASC LIMIT ? OFFSET ?", params + [limit, offset])
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    
+    total_pages = max(1, (total_count + limit - 1) // limit)
+    return {
+        "breaks": rows,
+        "total_count": total_count,
+        "page": page,
+        "limit": limit,
+        "total_pages": total_pages
     }
 
 # ==============================================================================

@@ -43,6 +43,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Active in-memory client proposal drafts: {user_id: proposal_dict}
+# Purged automatically when the user calculates their next quote
+_active_proposal_memory: Dict[str, Any] = {}
+
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 app.add_middleware(
@@ -254,6 +258,90 @@ def api_user_quota(request: Request):
         raise HTTPException(status_code=404, detail="User quota record not found")
     return quota
 
+class UpgradeTierPayload(BaseModel):
+    tier: str
+
+@app.post("/api/user/upgrade-tier", tags=["Subscription & Quotas"])
+def api_upgrade_tier(payload: UpgradeTierPayload, request: Request):
+    """Upgrades or modifies subscription tier (e.g. FREE -> PRO -> TEAM -> BUSINESS)."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    from services.db_service import update_user_tier
+    success = update_user_tier(user_id, payload.tier)
+    if not success:
+        raise HTTPException(status_code=400, detail="Invalid tier or update failed.")
+    return {"status": "success", "new_tier": payload.tier.upper(), "quota": get_user_quota_info(user_id)}
+
+@app.get("/api/user/bottlenecks", tags=["Subscription & Quotas"])
+def api_user_bottlenecks(request: Request, limit: int = 50):
+    """Retrieves logged bottleneck incidents for the active user."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    from services.db_service import list_bottleneck_events
+    events = list_bottleneck_events(user_id=user_id, limit=limit)
+    return {"bottlenecks": events, "total": len(events)}
+
+@app.get("/api/admin/bottlenecks", tags=["Subscription & Quotas"])
+def api_admin_bottlenecks(limit: int = 100):
+    """Global bottleneck telemetry across tenants to identify upgrade triggers."""
+    from services.db_service import list_bottleneck_events
+    events = list_bottleneck_events(user_id=None, limit=limit)
+    return {"bottlenecks": events, "total": len(events)}
+
+class TeamInvitePayload(BaseModel):
+    email: str
+    name: Optional[str] = ""
+    role: Optional[str] = "DISPATCHER"
+
+@app.get("/api/team/members", tags=["Team & Seats"])
+def api_list_team_members(request: Request):
+    """Lists team dispatcher seats for this organization."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    from services.db_service import list_organization_members
+    members = list_organization_members(user_id)
+    quota = get_user_quota_info(user_id)
+    return {
+        "members": members,
+        "max_seats": quota["max_seats"] if quota else 1,
+        "active_seats": quota["active_seats"] if quota else 1,
+        "seats_remaining": quota["seats_remaining"] if quota else 0,
+        "can_invite_seat": quota["can_invite_seat"] if quota else False
+    }
+
+@app.post("/api/team/invite", tags=["Team & Seats"])
+def api_invite_team_member(payload: TeamInvitePayload, request: Request):
+    """Invites a new team member/dispatcher if seats are available."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    from services.db_service import add_organization_member
+    success, msg, member_data = add_organization_member(
+        organization_id=user_id,
+        email=payload.email,
+        name=payload.name or "",
+        role=payload.role or "DISPATCHER"
+    )
+    if not success:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "code": "TIER_SEAT_LIMIT_EXCEEDED",
+                "message": msg
+            }
+        )
+    return {"status": "success", "message": msg, "member": member_data}
+
+@app.delete("/api/team/members/{member_id}", tags=["Team & Seats"])
+def api_remove_team_member(member_id: str, request: Request):
+    """Revokes a seat / removes a team member."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    from services.db_service import remove_organization_member
+    success = remove_organization_member(user_id, member_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Member not found or unauthorized.")
+    return {"status": "success", "message": "Member seat revoked."}
+
 @app.get("/api/user/profile", tags=["User Profile"])
 def api_profile(request: Request):
     user = get_current_user_from_request(request)
@@ -275,6 +363,15 @@ async def api_upload_rate_sheet(
     # 1. Enforce Subscription Quotas
     quota = get_user_quota_info(user_id)
     if quota and not quota["can_upload_sheet"]:
+        from services.db_service import log_bottleneck_event
+        log_bottleneck_event(
+            user_id=user_id,
+            bottleneck_type="LIMIT_BLOCKED_SHEETS",
+            attempted_action=f"Upload batch sheet: {file.filename}",
+            current_usage=quota["sheets_uploaded"],
+            max_limit=quota["max_sheets"],
+            details={"filename": file.filename, "tier": quota["tier"]}
+        )
         raise HTTPException(
             status_code=403, 
             detail=f"Tier limit exceeded: {quota['tier_name']} allows a maximum of {quota['max_sheets']} uploaded rate sheet. Please upgrade to Pro for additional sheets."
@@ -291,6 +388,15 @@ async def api_upload_rate_sheet(
         
     if quota and quota["max_quotes_per_month"] > 0:
         if quota["monthly_quotes_used"] + parsed_data["total_parsed_rows"] > quota["max_quotes_per_month"]:
+            from services.db_service import log_bottleneck_event
+            log_bottleneck_event(
+                user_id=user_id,
+                bottleneck_type="LIMIT_BLOCKED_QUOTES",
+                attempted_action=f"Batch quote batch ({parsed_data['total_parsed_rows']} rows)",
+                current_usage=quota["monthly_quotes_used"],
+                max_limit=quota["max_quotes_per_month"],
+                details={"batch_rows": parsed_data["total_parsed_rows"], "tier": quota["tier"]}
+            )
             raise HTTPException(
                 status_code=403,
                 detail=f"Quote volume limit exceeded: This batch requires {parsed_data['total_parsed_rows']} quotes, but you only have {quota['quotes_remaining']} quotes remaining this month on {quota['tier_name']}."
@@ -299,6 +405,9 @@ async def api_upload_rate_sheet(
     profile = get_user_profile(user_id)
     markup = profile.get("markup_pct", 10.0)
     
+    # Purge any previous client proposal from memory upon generating next quote
+    _active_proposal_memory.pop(user_id, None)
+
     quoted_items = calculate_batch_quotes(parsed_data["rows"], markup_pct=markup)
     
     # Save to SQLite
@@ -590,6 +699,23 @@ async def api_ratesift_upload_sheet(
     user = get_current_user_from_request(request)
     user_id = user["id"] if user else "usr_alex_rivers"
 
+    # Enforce Subscription Tier Sheet Limits & Track Bottlenecks
+    quota = get_user_quota_info(user_id)
+    if quota and not quota["can_upload_sheet"]:
+        from services.db_service import log_bottleneck_event
+        log_bottleneck_event(
+            user_id=user_id,
+            bottleneck_type="LIMIT_BLOCKED_SHEETS",
+            attempted_action=f"Upload rate sheet: {file.filename}",
+            current_usage=quota["sheets_uploaded"],
+            max_limit=quota["max_sheets"],
+            details={"filename": file.filename, "tier": quota["tier"]}
+        )
+        raise HTTPException(
+            status_code=403,
+            detail=f"Tier limit exceeded: {quota['tier_name']} allows a maximum of {quota['max_sheets']} uploaded rate sheets ({quota['sheets_uploaded']} active). Please upgrade to Pro or Team for additional sheets."
+        )
+
     if not (file.filename.endswith(".xlsx") or file.filename.endswith(".xls") or file.filename.endswith(".csv")):
         raise HTTPException(status_code=400, detail="Only Excel (.xlsx, .xls) and CSV (.csv) rate sheets are supported.")
 
@@ -612,29 +738,214 @@ def api_ratesift_list_sheets(request: Request, status: Optional[str] = None):
     return {"sheets": sheets}
 
 @app.get("/api/ratesift/sheets/{sheet_id}", tags=["RateSift Rate Sheets"])
-def api_ratesift_get_sheet(sheet_id: str, request: Request):
-    """Retrieves full sheet rules, accessorials, breaks, minimums, and review flags."""
+def api_ratesift_get_sheet(sheet_id: str, request: Request, limit: Optional[int] = None, offset: int = 0):
+    """Retrieves sheet rules, accessorials, breaks (optionally paginated for speed), minimums, and review flags."""
     user = get_current_user_from_request(request)
     user_id = user["id"] if user else "usr_alex_rivers"
     from services.ratesift_db_service import get_sheet_full_rules, get_rate_sheet_cells
-    full_rules = get_sheet_full_rules(sheet_id, user_id)
+    full_rules = get_sheet_full_rules(sheet_id, user_id, limit=limit, offset=offset)
     if not full_rules or not full_rules.get("sheet"):
         raise HTTPException(status_code=404, detail="Rate sheet not found or unauthorized.")
     flagged_cells = get_rate_sheet_cells(sheet_id, user_id, needs_review_only=True)
     full_rules["flagged_cells"] = flagged_cells
     return full_rules
 
+@app.get("/api/ratesift/sheets/{sheet_id}/breaks", tags=["RateSift Rate Sheets"])
+def api_ratesift_get_sheet_breaks(
+    sheet_id: str,
+    request: Request,
+    page: int = 1,
+    limit: int = 50,
+    query: Optional[str] = None
+):
+    """Returns weight breaks with high-performance server-side pagination and real-time search."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    from services.ratesift_db_service import get_sheet_breaks_paginated
+    return get_sheet_breaks_paginated(sheet_id, user_id, page=page, limit=limit, query=query)
+
 @app.post("/api/ratesift/sheets/{sheet_id}/confirm", tags=["RateSift Rate Sheets"])
-def api_ratesift_confirm_sheet(sheet_id: str, request: Request):
-    """Enforces human confirmation gate (Rule 7, 19)."""
+async def api_ratesift_confirm_sheet(sheet_id: str, request: Request):
+    """Enforces human confirmation gate (Rule 7, 19) confirming core rules (Rule 5, 15, 16) and broker markup."""
     user = get_current_user_from_request(request)
     user_id = user["id"] if user else "usr_alex_rivers"
     confirmed_by = user["name"] if user else "Alex Rivers"
+    
+    markup_mode = "PERCENTAGE"
+    markup_value = 0.0
+    fsc_passthrough = True
+    accessorial_markup_pct = 0.0
+    manual_override = False
+    currency = None
+    weight_unit = None
+    dim_divisor = None
+    effective_date = None
+    expiry_date = None
+    rounding_rule = None
+    resolve_flags = False
+    
+    try:
+        body = await request.json()
+        if isinstance(body, dict):
+            markup_mode = body.get("markup_mode", "PERCENTAGE")
+            markup_value = float(body.get("markup_value", 0.0) or 0.0)
+            fsc_passthrough = bool(body.get("fsc_passthrough", True))
+            accessorial_markup_pct = float(body.get("accessorial_markup_pct", 0.0) or 0.0)
+            manual_override = bool(body.get("manual_override", False))
+            currency = body.get("currency")
+            weight_unit = body.get("weight_unit")
+            dim_divisor = float(body["dim_divisor"]) if body.get("dim_divisor") is not None else None
+            effective_date = body.get("effective_date")
+            expiry_date = body.get("expiry_date")
+            rounding_rule = body.get("rounding_rule")
+            resolve_flags = bool(body.get("resolve_flags", False))
+    except Exception:
+        pass
+        
     from services.ratesift_db_service import confirm_rate_sheet
-    success = confirm_rate_sheet(sheet_id, user_id, confirmed_by=confirmed_by)
+    success = confirm_rate_sheet(
+        sheet_id=sheet_id,
+        user_id=user_id,
+        confirmed_by=confirmed_by,
+        currency=currency,
+        weight_unit=weight_unit,
+        dim_divisor=dim_divisor,
+        effective_date=effective_date,
+        expiry_date=expiry_date,
+        rounding_rule=rounding_rule,
+        markup_mode=markup_mode,
+        markup_value=markup_value,
+        fsc_passthrough=fsc_passthrough,
+        accessorial_markup_pct=accessorial_markup_pct,
+        manual_override=manual_override,
+        resolve_flags=resolve_flags
+    )
     if not success:
         raise HTTPException(status_code=404, detail="Rate sheet not found or confirmation failed.")
-    return {"status": "success", "message": "Rate sheet confirmed successfully. It is now enabled for live quoting."}
+    return {
+        "status": "success",
+        "message": "Rate sheet and tariff rules confirmed successfully. It is now enabled for live quoting.",
+        "manual_override": manual_override,
+        "markup_mode": markup_mode,
+        "markup_value": markup_value,
+        "currency": currency
+    }
+
+@app.post("/api/ratesift/sheets/{sheet_id}/markup", tags=["RateSift Rate Sheets"])
+async def api_ratesift_update_markup(sheet_id: str, request: Request):
+    """Updates broker margin markup rules and confirmed rules on a rate sheet."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+        
+    markup_mode = body.get("markup_mode", "PERCENTAGE")
+    markup_value = float(body.get("markup_value", 0.0) or 0.0)
+    fsc_passthrough = bool(body.get("fsc_passthrough", True))
+    accessorial_markup_pct = float(body.get("accessorial_markup_pct", 0.0) or 0.0)
+    manual_override = bool(body.get("manual_override", False))
+    currency = body.get("currency")
+    weight_unit = body.get("weight_unit")
+    dim_divisor = float(body["dim_divisor"]) if body.get("dim_divisor") is not None else None
+    effective_date = body.get("effective_date")
+    expiry_date = body.get("expiry_date")
+    rounding_rule = body.get("rounding_rule")
+    
+    from services.ratesift_db_service import update_rate_sheet_markup
+    success = update_rate_sheet_markup(
+        sheet_id=sheet_id,
+        user_id=user_id,
+        currency=currency,
+        weight_unit=weight_unit,
+        dim_divisor=dim_divisor,
+        effective_date=effective_date,
+        expiry_date=expiry_date,
+        rounding_rule=rounding_rule,
+        markup_mode=markup_mode,
+        markup_value=markup_value,
+        fsc_passthrough=fsc_passthrough,
+        accessorial_markup_pct=accessorial_markup_pct,
+        manual_override=manual_override
+    )
+    if not success:
+        raise HTTPException(status_code=404, detail="Rate sheet not found or markup update failed.")
+    return {
+        "status": "success",
+        "message": "Rate sheet rules updated successfully.",
+        "manual_override": manual_override
+    }
+
+@app.post("/api/ratesift/sheets/{sheet_id}/surcharges/{surcharge_code}/waive", tags=["RateSift Rate Sheets"])
+async def api_ratesift_toggle_surcharge_waive(sheet_id: str, surcharge_code: str, request: Request):
+    """Toggles waived fee status for a carrier surcharge (Rule 4 & 11)."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    try:
+        body = await request.json()
+        is_waived = bool(body.get("is_waived", True))
+    except Exception:
+        is_waived = True
+    from services.ratesift_db_service import toggle_surcharge_waived
+    success = toggle_surcharge_waived(sheet_id, user_id, surcharge_code, is_waived)
+    if not success:
+        raise HTTPException(status_code=404, detail="Surcharge not found.")
+    return {"status": "success", "is_waived": is_waived}
+
+@app.post("/api/ratesift/sheets/{sheet_id}/cells/resolve", tags=["RateSift Rate Sheets"])
+async def api_ratesift_resolve_cell(sheet_id: str, request: Request):
+    """Marks a flagged cell coordinate as verified by human broker (Rule 6)."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    body = await request.json()
+    cell_coord = body.get("cell_coord")
+    if not cell_coord:
+        raise HTTPException(status_code=400, detail="cell_coord required")
+    from services.ratesift_db_service import resolve_flagged_cell
+    success = resolve_flagged_cell(sheet_id, user_id, cell_coord)
+    return {"status": "success", "cell_coord": cell_coord}
+
+@app.get("/api/ratesift/sheets/{sheet_id}/formatted-matrix", tags=["RateSift Rate Sheets"])
+def api_ratesift_formatted_matrix(
+    sheet_id: str,
+    request: Request,
+    page: int = 1,
+    limit: int = 50,
+    query: Optional[str] = None
+):
+    """
+    Returns normalized matrix data for in-browser visual inspection only.
+    Downloads are permanently disabled per strict security policy (Rule 3 & Invariant).
+    """
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    from services.ratesift_db_service import get_rate_sheet, get_sheet_breaks_paginated
+    
+    sheet = get_rate_sheet(sheet_id, user_id)
+    if not sheet:
+        raise HTTPException(status_code=404, detail="Rate sheet not found or unauthorized.")
+        
+    breaks_res = get_sheet_breaks_paginated(sheet_id, user_id, page=page, limit=limit, query=query)
+    return {
+        "sheet": sheet,
+        "breaks": breaks_res["breaks"],
+        "total_breaks": breaks_res["total_count"],
+        "page": breaks_res["page"],
+        "limit": breaks_res["limit"],
+        "total_pages": breaks_res["total_pages"],
+        "download_disabled": True,
+        "security_badge": "🔒 In-Browser Inspection Only • Downloads Disabled"
+    }
+
+@app.get("/api/ratesift/sheets/{sheet_id}/download-formatted", tags=["RateSift Rate Sheets"])
+def api_ratesift_block_download(sheet_id: str):
+    """Permanently blocked endpoint for formatted rate sheets."""
+    raise HTTPException(
+        status_code=403,
+        detail="Security Policy Violation: Rate sheet downloads are permanently disabled. Tariffs may only be inspected in-browser (Rule 3 & Invariant)."
+    )
 
 @app.post("/api/ratesift/sheets/{sheet_id}/archive", tags=["RateSift Rate Sheets"])
 def api_ratesift_archive_sheet(sheet_id: str, request: Request):
@@ -695,6 +1006,26 @@ def api_ratesift_calculate_quote(
     user = get_current_user_from_request(request)
     user_id = user["id"] if user else "usr_alex_rivers"
 
+    # Enforce Monthly Quoting Quotas & Track Bottlenecks
+    quota = get_user_quota_info(user_id)
+    if quota and not quota["can_quote"]:
+        from services.db_service import log_bottleneck_event
+        log_bottleneck_event(
+            user_id=user_id,
+            bottleneck_type="LIMIT_BLOCKED_QUOTES",
+            attempted_action=f"Deterministic quote calculation: {payload.origin} -> {payload.destination}",
+            current_usage=quota["monthly_quotes_used"],
+            max_limit=quota["max_quotes_per_month"],
+            details={"origin": payload.origin, "destination": payload.destination, "tier": quota["tier"]}
+        )
+        raise HTTPException(
+            status_code=403,
+            detail=f"Quote volume limit exceeded: You have reached your monthly limit of {quota['max_quotes_per_month']} quotes on {quota['tier_name']}. Please upgrade to Pro or Team to continue quoting."
+        )
+
+    # Purge any previous client proposal from memory upon generating next quote
+    _active_proposal_memory.pop(user_id, None)
+
     if payload.actual_weight <= 0:
         raise HTTPException(status_code=400, detail="Shipment weight must be greater than 0.")
     if not payload.origin or not payload.destination:
@@ -738,26 +1069,37 @@ def api_ratesift_list_audit_logs(request: Request, limit: int = 50):
     return {"audit_logs": logs}
 
 @app.post("/api/settings/update", tags=["System Settings"])
-
-
-def api_update_settings(
-    request: Request,
-    currency: str = Form("USD"),
-    units: str = Form("lbs"),
-    markup_pct: float = Form(10.0),
-    auto_detect_headers: int = Form(1),
-    skip_blank_rows: int = Form(1)
-):
+async def api_update_settings(request: Request):
     user = get_current_user_from_request(request)
     user_id = user["id"] if user else "usr_alex_rivers"
     
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        body = await request.json()
+        currency = body.get("currency", "CAD")
+        units = body.get("units", "lbs")
+        markup_pct = float(body.get("markup_pct", 10.0))
+        markup_mode = body.get("markup_mode", "percent")
+        fsc_passthrough = int(body.get("fsc_passthrough", 1))
+        auto_detect_headers = int(body.get("auto_detect_headers", 1))
+        skip_blank_rows = int(body.get("skip_blank_rows", 1))
+    else:
+        form = await request.form()
+        currency = form.get("currency", "CAD")
+        units = form.get("units", "lbs")
+        markup_pct = float(form.get("markup_pct", 10.0))
+        markup_mode = form.get("markup_mode", "percent")
+        fsc_passthrough = int(form.get("fsc_passthrough", 1))
+        auto_detect_headers = int(form.get("auto_detect_headers", 1))
+        skip_blank_rows = int(form.get("skip_blank_rows", 1))
+        
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
     UPDATE user_settings
-    SET currency = ?, units = ?, markup_pct = ?, auto_detect_headers = ?, skip_blank_rows = ?
+    SET currency = ?, units = ?, markup_pct = ?, markup_mode = ?, fsc_passthrough = ?, auto_detect_headers = ?, skip_blank_rows = ?
     WHERE user_id = ?
-    """, (currency, units, markup_pct, auto_detect_headers, skip_blank_rows, user_id))
+    """, (currency, units, markup_pct, markup_mode, fsc_passthrough, auto_detect_headers, skip_blank_rows, user_id))
     conn.commit()
     conn.close()
     return {"status": "success", "message": "Settings updated successfully."}
@@ -862,7 +1204,37 @@ def api_quote_client_proposal_preview(
         markup_pct=markup,
         custom_total=payload.custom_total
     )
+    # Cache in active session memory until next quote calculation
+    _active_proposal_memory[user_id] = proposal
+
     return {"status": "success", "proposal": proposal}
+
+@app.get("/api/quotes/client-proposal/memory", tags=["Client Proposal Generator"])
+def api_get_client_proposal_memory(request: Request):
+    """
+    Returns the currently active client proposal stored in memory for the user session, if any.
+    Will return has_active_proposal: false once the user calculates their next quote.
+    """
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    active = _active_proposal_memory.get(user_id)
+    return {
+        "status": "success",
+        "has_active_proposal": active is not None,
+        "proposal": active
+    }
+
+@app.delete("/api/quotes/client-proposal/memory", tags=["Client Proposal Generator"])
+def api_clear_client_proposal_memory(request: Request):
+    """Explicitly purges any client proposal from memory."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    deleted = _active_proposal_memory.pop(user_id, None) is not None
+    return {
+        "status": "success",
+        "purged": deleted,
+        "message": "Client proposal purged from memory"
+    }
 
 @app.post("/api/quotes/client-proposal/excel", tags=["Client Proposal Generator"])
 def api_quote_client_proposal_excel(
@@ -894,6 +1266,8 @@ def api_quote_client_proposal_excel(
         markup_pct=markup,
         custom_total=payload.custom_total
     )
+    _active_proposal_memory[user_id] = proposal
+
     wb_bytes = generate_proposal_excel_workbook(proposal)
     clean_id = proposal["proposal_id"].replace(" ", "_")
 
@@ -904,16 +1278,61 @@ def api_quote_client_proposal_excel(
     )
 
 @app.post("/api/user/account/update", tags=["User Profile"])
-def api_update_account(
-    request: Request,
-    name: str = Form(...),
-    company: str = Form(...),
-    origin_zip: str = Form("94103")
-):
+async def api_update_account(request: Request):
+    """Updates user profile details, contact phone, and quoting origin defaults."""
     user = get_current_user_from_request(request)
     user_id = user["id"] if user else "usr_alex_rivers"
+    
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        body = await request.json()
+        name = body.get("name", "")
+        company = body.get("company", "")
+        origin_zip = body.get("origin_zip", "94103")
+        origin_address = body.get("origin_address", "")
+        phone = body.get("phone", "")
+    else:
+        form = await request.form()
+        name = form.get("name", "")
+        company = form.get("company", "")
+        origin_zip = form.get("origin_zip", "94103")
+        origin_address = form.get("origin_address", "")
+        phone = form.get("phone", "")
+        
+    if not name or not company:
+        raise HTTPException(status_code=400, detail="Name and company are required.")
+        
     from services.db_service import update_user_account
-    return update_user_account(user_id, name, company, origin_zip)
+    return update_user_account(user_id, str(name), str(company), str(origin_zip), str(origin_address or ""), str(phone or ""))
+
+@app.post("/api/user/password", tags=["User Profile"])
+async def api_update_password(request: Request):
+    """Updates user password after verifying current password hash."""
+    user = get_current_user_from_request(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    user_id = user["id"]
+    
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        body = await request.json()
+        current_password = body.get("current_password", "")
+        new_password = body.get("new_password", "")
+    else:
+        form = await request.form()
+        current_password = form.get("current_password", "")
+        new_password = form.get("new_password", "")
+        
+    if not current_password:
+        raise HTTPException(status_code=400, detail="Current password is required.")
+    if not new_password or len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters long.")
+        
+    from services.db_service import update_user_password
+    success, message = update_user_password(user_id, str(current_password), str(new_password))
+    if not success:
+        raise HTTPException(status_code=400, detail=message)
+    return {"status": "success", "message": message}
 
 @app.post("/api/user/api-key/generate", tags=["Business API"])
 def api_generate_key(request: Request, name: str = Form("Production Key")):
@@ -951,6 +1370,9 @@ def api_v1_embedded_batch_quotes(
     profile = get_user_profile(user["id"])
     markup = profile.get("markup_pct", 10.0)
     
+    # Purge any previous client proposal from memory upon generating next quote
+    _active_proposal_memory.pop(user["id"], None)
+
     parsed_rows = []
     for idx, s in enumerate(shipments):
         parsed_rows.append({

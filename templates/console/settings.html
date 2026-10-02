@@ -139,22 +139,30 @@
             <h2 id="calc-rules-heading" class="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">Quote Calculation Rules</h2>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
               <label for="currency-select" class="block text-xs font-bold text-[var(--foreground)] mb-1">Currency</label>
               <select id="currency-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
-                <option selected>CAD ($) - Canadian Dollar</option>
-                <option>USD ($) - United States Dollar</option>
-                <option>EUR (€) - Euro</option>
-                <option>GBP (£) - British Pound</option>
+                <option value="CAD" selected>CAD ($) - Canadian Dollar</option>
+                <option value="USD">USD ($) - United States Dollar</option>
+                <option value="EUR">EUR (€) - Euro</option>
+                <option value="GBP">GBP (£) - British Pound</option>
               </select>
             </div>
 
             <div>
               <label for="unit-select" class="block text-xs font-bold text-[var(--foreground)] mb-1">Measurement System</label>
               <select id="unit-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
-                <option selected>Imperial (lbs, inches)</option>
-                <option>Metric (kg, cm)</option>
+                <option value="lbs" selected>Imperial (lbs, inches)</option>
+                <option value="kg">Metric (kg, cm)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="markup-mode-select" class="block text-xs font-bold text-[var(--foreground)] mb-1">Markup Mode</label>
+              <select id="markup-mode-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+                <option value="percent" selected>Percentage Markup (+X%)</option>
+                <option value="flat">Flat Dollar Add-on (+$)</option>
               </select>
             </div>
 
@@ -164,6 +172,14 @@
                 <input id="markup-input" type="text" value="+ 10.0%" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
               </div>
             </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-[var(--border)] flex items-center justify-between">
+            <div>
+              <label for="fsc-passthrough" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Fuel Surcharge (FSC) Passthrough</label>
+              <p class="text-[11px] text-[var(--muted-foreground)]">Pass carrier fuel surcharge directly into client proposals and calculations.</p>
+            </div>
+            <input id="fsc-passthrough" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
           </div>
         </section>
 
@@ -235,6 +251,7 @@
     </footer>
   </div>
 
+  <script>
     function loadSettings() {
       fetch('/api/user/profile')
         .then(r => r.json())
@@ -243,6 +260,31 @@
             document.getElementById('markup-input').value = `+ ${(data.markup_pct || 10.0).toFixed(1)}%`;
             document.getElementById('auto-header').checked = Boolean(data.auto_detect_headers);
             document.getElementById('skip-empty').checked = Boolean(data.skip_blank_rows);
+
+            if (data.currency) {
+              const curSel = document.getElementById('currency-select');
+              for (let i = 0; i < curSel.options.length; i++) {
+                if (curSel.options[i].value === data.currency || curSel.options[i].text.includes(data.currency)) {
+                  curSel.selectedIndex = i;
+                  break;
+                }
+              }
+            }
+            if (data.units) {
+              const unitSel = document.getElementById('unit-select');
+              for (let i = 0; i < unitSel.options.length; i++) {
+                if (unitSel.options[i].value === data.units || unitSel.options[i].text.toLowerCase().includes(data.units.toLowerCase())) {
+                  unitSel.selectedIndex = i;
+                  break;
+                }
+              }
+            }
+            if (document.getElementById('markup-mode-select') && data.markup_mode) {
+              document.getElementById('markup-mode-select').value = data.markup_mode;
+            }
+            if (document.getElementById('fsc-passthrough') && data.fsc_passthrough !== undefined) {
+              document.getElementById('fsc-passthrough').checked = Boolean(data.fsc_passthrough);
+            }
           }
         })
         .catch(err => console.error("Error loading settings:", err));
@@ -252,15 +294,21 @@
       if (e) e.preventDefault();
       const markupRaw = document.getElementById('markup-input').value;
       const cleanMarkup = parseFloat(markupRaw.replace(/[^0-9.]/g, '')) || 10.0;
-      const currency = document.getElementById('currency-select').value.includes('USD') ? 'USD' : 'EUR';
-      const units = document.getElementById('unit-select').value.includes('Metric') ? 'kg' : 'lbs';
+      const curVal = document.getElementById('currency-select').value;
+      const currency = curVal.includes('USD') ? 'USD' : (curVal.includes('EUR') ? 'EUR' : (curVal.includes('GBP') ? 'GBP' : 'CAD'));
+      const unitVal = document.getElementById('unit-select').value;
+      const units = unitVal.includes('Metric') || unitVal === 'kg' ? 'kg' : 'lbs';
       const autoHeader = document.getElementById('auto-header').checked ? 1 : 0;
       const skipEmpty = document.getElementById('skip-empty').checked ? 1 : 0;
+      const markupMode = document.getElementById('markup-mode-select') ? document.getElementById('markup-mode-select').value : 'percent';
+      const fscPassthrough = document.getElementById('fsc-passthrough') ? (document.getElementById('fsc-passthrough').checked ? 1 : 0) : 1;
 
       const formData = new FormData();
       formData.append('currency', currency);
       formData.append('units', units);
       formData.append('markup_pct', cleanMarkup);
+      formData.append('markup_mode', markupMode);
+      formData.append('fsc_passthrough', fscPassthrough);
       formData.append('auto_detect_headers', autoHeader);
       formData.append('skip_blank_rows', skipEmpty);
 
@@ -270,7 +318,7 @@
       })
       .then(r => r.json())
       .then(data => {
-        alert("✓ Quoting settings and Excel parser rules saved successfully!");
+        alert("✓ Quoting settings and preferences saved successfully!");
       })
       .catch(err => {
         alert("Error saving settings. Please try again.");

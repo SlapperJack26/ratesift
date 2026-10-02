@@ -5,44 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   
   <!-- Primary SEO Meta Tags -->
-  <title>Ratesift | Account Settings & Quoting Origin Configuration</title>
-  <meta name="title" content="Ratesift | Account Settings & Quoting Origin Configuration">
-  <meta name="description" content="Manage your personal profile, company details, and default quoting origin addresses in Ratesift. Configure default 'From' addresses for automated batch rate calculations.">
-  <meta name="keywords" content="account settings, shipping profile, quoting origin default, company shipping settings">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://ratesift.io/account">
-
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://ratesift.io/account">
-  <meta property="og:site_name" content="Ratesift">
-  <meta property="og:title" content="Ratesift | Account Settings & Quoting Origin Configuration">
-  <meta property="og:description" content="Manage your profile and default quoting origin parameters in Ratesift.">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://ratesift.io/account">
-  <meta name="twitter:title" content="Ratesift | Account Settings & Quoting Origin Configuration">
+  <title>RateSift | Account Settings, Subscription Quotas & Dispatcher Seats</title>
+  <meta name="title" content="RateSift | Account Settings, Subscription Quotas & Dispatcher Seats">
+  <meta name="description" content="Manage your RateSift account profile, subscription plan, quote & rate sheet limits, team dispatcher seats, and track operational bottlenecks.">
+  <meta name="robots" content="noindex, nofollow">
 
   <!-- Tailwind CSS Framework -->
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 
-  <!-- Schema.org JSON-LD: WebPage & Breadcrumb -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Account Settings - Ratesift",
-    "description": "User profile and default origin location configuration.",
-    "breadcrumb": {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ratesift.io/" },
-        { "@type": "ListItem", "position": 2, "name": "Account Settings", "item": "https://ratesift.io/account" }
-      ]
-    }
-  }
-  </script>
   <style>
     :root {
       --background: #ffffff;
@@ -63,7 +33,7 @@
 
   <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
     
-    <!-- Top Navigation Bar (Consistent RateSift Console Menu Bar) -->
+    <!-- Top Navigation Bar -->
     <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] bg-white relative z-20 m-0 shadow-2xs">
       <div class="flex items-center justify-between w-full max-w-7xl mx-auto">
         <!-- Left: Logo & Nav Links -->
@@ -82,7 +52,7 @@
               <span>New Quote</span>
             </a>
             <a href="/console/history" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               <span>Quotes History</span>
             </a>
             <a href="/console/rate-sheets" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
@@ -93,19 +63,30 @@
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
               <span>Settings</span>
             </a>
+            <a href="/console/account" aria-current="page" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs relative">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+              <span>Account</span>
+            </a>
           </nav>
         </div>
 
-        <!-- Right: Sovereignty Badge & Actions -->
+        <!-- Right: Quota Pill & Sovereignty Badge & Actions -->
         <div class="flex items-center gap-2.5 sm:gap-3">
-          <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
-            <span>🇨🇦</span>
-            <span>Hosted in Canada (WHC) • PIPEDA Compliant</span>
+          <!-- Live Quota Status Pill -->
+          <div id="header-quota-pill" class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="pill-tier-name">Free Starter</span>
+            <span class="text-slate-300">•</span>
+            <span id="pill-quotes-info" class="text-slate-600">50 quotes left</span>
+            <button type="button" onclick="openUpgradeModal()" class="ml-1 text-[11px] font-bold text-red-600 hover:text-red-700 underline cursor-pointer">
+              Upgrade
+            </button>
           </div>
 
-          <button type="button" aria-label="Notifications" class="p-2 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer" title="System Notifications">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-          </button>
+          <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
+            <span>🇨🇦</span>
+            <span>Hosted in Canada (WHC) • PIPEDA</span>
+          </div>
 
           <a href="/api/auth/logout" aria-label="Sign out" class="p-2 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" title="Sign out">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -118,122 +99,459 @@
         <a href="/console/new-quote" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">New Quote</a>
         <a href="/console/history" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Quotes History</a>
         <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Carrier Tariffs</a>
-        <a href="/console/settings" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Settings</a>
+        <a href="/console/account" class="px-3 py-1 rounded-full bg-red-50 text-red-600 font-bold whitespace-nowrap">Account</a>
       </nav>
     </header>
 
-    <!-- Main Content Area (Semantic Main) -->
-    <main id="main-content" role="main" class="p-6 flex-1 max-w-4xl mx-auto w-full">
-      <header class="mb-5">
-        <!-- Semantic H1 -->
-        <h1 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Account Settings</h1>
-        <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Manage your personal profile, company details, and default quoting configurations.</p>
+    <!-- Main Content Area -->
+    <main id="main-content" role="main" class="p-6 flex-1 max-w-5xl mx-auto w-full">
+      <header class="mb-5 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Account & Subscription Center</h1>
+          <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Manage your organization profile, track usage limits, control dispatcher seats, and audit operational bottlenecks.</p>
+        </div>
+        <button type="button" onclick="openUpgradeModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>Change Subscription Plan</span>
+        </button>
       </header>
 
       <!-- Settings Layout Grid -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         
-        <!-- Left Sidebar Navigation -->
+        <!-- Left Sidebar Navigation Tabs -->
         <nav aria-label="Settings Categories" class="space-y-1">
-          <button aria-current="true" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-200 flex items-center gap-2 transition-colors">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+          <button id="tab-btn-profile" onclick="switchTab('profile')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-200 flex items-center gap-2 transition-colors cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <span>Profile & Company</span>
           </button>
-          <button class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-black/5 flex items-center gap-2 transition-colors">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          
+          <button id="tab-btn-subscription" onclick="switchTab('subscription')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-black/5 flex items-center justify-between gap-2 transition-colors cursor-pointer">
+            <div class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              <span>Subscription & Limits</span>
+            </div>
+            <span id="nav-tier-badge" class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-slate-100 text-slate-700">FREE</span>
+          </button>
+
+          <button id="tab-btn-team" onclick="switchTab('team')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-black/5 flex items-center justify-between gap-2 transition-colors cursor-pointer">
+            <div class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+              <span>Team & Seats</span>
+            </div>
+            <span id="nav-seats-count" class="px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-100 text-slate-600">1/1</span>
+          </button>
+
+          <button id="tab-btn-bottlenecks" onclick="switchTab('bottlenecks')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-black/5 flex items-center justify-between gap-2 transition-colors cursor-pointer">
+            <div class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <span>Bottleneck Tracking</span>
+            </div>
+            <span id="nav-bottlenecks-count" class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-slate-100 text-slate-700">0</span>
+          </button>
+
+          <button id="tab-btn-origin" onclick="switchTab('origin')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-black/5 flex items-center gap-2 transition-colors cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             <span>Origin Defaults</span>
           </button>
-          <button class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-black/5 flex items-center gap-2 transition-colors">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <span>Quote Preferences</span>
-          </button>
-          <button class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-black/5 flex items-center gap-2 transition-colors">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+
+          <button id="tab-btn-security" onclick="switchTab('security')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-black/5 flex items-center gap-2 transition-colors cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             <span>Security</span>
           </button>
         </nav>
 
-        <!-- Right Main Settings Form Card -->
-        <form onsubmit="event.preventDefault(); saveSettings();" class="md:col-span-3 bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs space-y-6">
-          
-          <!-- Avatar & Identity Section -->
-          <section aria-labelledby="profile-heading">
-            <h2 id="profile-heading" class="text-xs font-bold text-[var(--foreground)] mb-3 pb-1 border-b border-[var(--border)]">Profile Details</h2>
-            <div class="flex items-center gap-4">
-              <div class="w-14 h-14 rounded-full bg-slate-200 border-2 border-[var(--border)] flex items-center justify-center font-bold text-slate-700 text-sm shadow-inner" aria-hidden="true">
-                AR
-              </div>
-              <div class="space-y-1">
-                <div class="flex gap-2">
-                  <button type="button" class="px-2.5 py-1 text-[11px] font-medium rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-black/5 text-[var(--foreground)] transition-colors">
-                    Upload new photo
-                  </button>
-                  <button type="button" class="px-2 py-1 text-[11px] text-[var(--muted-foreground)] hover:text-red-600 transition-colors">
-                    Remove
-                  </button>
+        <!-- Right Content Panels -->
+        <div class="md:col-span-3 space-y-6">
+
+          <!-- 1. PROFILE & COMPANY TAB -->
+          <div id="panel-profile" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs space-y-6">
+            <form onsubmit="event.preventDefault(); saveSettings();">
+              <section aria-labelledby="profile-heading">
+                <h2 id="profile-heading" class="text-xs font-bold text-[var(--foreground)] mb-3 pb-1 border-b border-[var(--border)]">Profile Details</h2>
+                <div class="flex items-center gap-4 mb-5">
+                  <div id="profile-avatar" class="w-14 h-14 rounded-full bg-red-100 border-2 border-red-200 flex items-center justify-center font-bold text-red-700 text-sm shadow-inner">
+                    AR
+                  </div>
+                  <div class="space-y-1">
+                    <p id="profile-display-name" class="text-xs font-bold text-slate-800">Alex Rivers</p>
+                    <p id="profile-display-company" class="text-[11px] text-slate-500">TechCorp Logistics</p>
+                  </div>
                 </div>
-                <p class="text-[10px] text-[var(--muted-foreground)]">JPG, PNG or GIF. Max size 2MB.</p>
-              </div>
-            </div>
-          </section>
 
-          <!-- Name & Contact Inputs -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label for="first-name" class="block text-xs font-bold text-[var(--foreground)] mb-1">First Name</label>
-              <input id="first-name" type="text" value="Alex" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
-            </div>
-            <div>
-              <label for="last-name" class="block text-xs font-bold text-[var(--foreground)] mb-1">Last Name</label>
-              <input id="last-name" type="text" value="Rivers" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
-            </div>
-            <div>
-              <label for="work-email" class="block text-xs font-bold text-[var(--foreground)] mb-1">Email Address</label>
-              <input id="work-email" type="email" value="alex.rivers@ratesift.io" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
-            </div>
-            <div>
-              <label for="company-name" class="block text-xs font-bold text-[var(--foreground)] mb-1">Company / Organization</label>
-              <input id="company-name" type="text" value="TechCorp Logistics" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
-            </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label for="first-name" class="block text-xs font-bold text-[var(--foreground)] mb-1">First Name</label>
+                    <input id="first-name" type="text" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                  </div>
+                  <div>
+                    <label for="last-name" class="block text-xs font-bold text-[var(--foreground)] mb-1">Last Name</label>
+                    <input id="last-name" type="text" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                  </div>
+                  <div>
+                    <label for="work-email" class="block text-xs font-bold text-[var(--foreground)] mb-1">Email Address</label>
+                    <input id="work-email" type="email" readonly class="w-full bg-slate-50 border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-slate-500 cursor-not-allowed">
+                  </div>
+                  <div>
+                    <label for="company-name" class="block text-xs font-bold text-[var(--foreground)] mb-1">Company / Organization</label>
+                    <input id="company-name" type="text" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label for="phone-number" class="block text-xs font-bold text-[var(--foreground)] mb-1">Direct Phone / Dispatch Hotline</label>
+                    <input id="phone-number" type="tel" placeholder="+1 (416) 555-0199" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                  </div>
+                </div>
+              </section>
+
+              <div class="pt-4 mt-4 border-t border-[var(--border)] flex items-center justify-end gap-2.5">
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-4 py-1.5 rounded-lg transition-colors shadow-xs cursor-pointer">
+                  Save Profile Changes
+                </button>
+              </div>
+            </form>
           </div>
 
-          <!-- Quoting Defaults Section -->
-          <section aria-labelledby="origin-heading">
-            <h2 id="origin-heading" class="text-xs font-bold text-[var(--foreground)] mb-3 pb-1 border-b border-[var(--border)]">Default Quoting Origin</h2>
-            <p class="text-[11px] text-[var(--muted-foreground)] mb-3">Pre-populate the "From" address fields during new quote calculations.</p>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-              <div class="sm:col-span-2">
-                <label for="origin-address" class="block text-xs font-bold text-[var(--foreground)] mb-1">Default Origin Street Address</label>
-                <input id="origin-address" type="text" value="5500 Logistics Way, Bay 12" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
-              </div>
+          <!-- 2. SUBSCRIPTION & USAGE LIMITS TAB -->
+          <div id="panel-subscription" class="hidden space-y-5">
+            <!-- Active Plan Banner -->
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
               <div>
-                <label for="origin-zip" class="block text-xs font-bold text-[var(--foreground)] mb-1">Origin City / Postal FSA</label>
-                <input id="origin-zip" type="text" value="TORONTO, ON" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs uppercase tracking-wider font-semibold text-slate-400">Current Plan</span>
+                  <span id="plan-badge-pill" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-red-600 text-white">Free Starter</span>
+                </div>
+                <h3 id="plan-headline" class="text-lg font-bold mt-1 text-white">Validating Live Freight Rates</h3>
+                <p id="plan-subline" class="text-xs text-slate-300 mt-0.5">Includes deterministic pricing engine, FSA resolver, and multi-carrier comparison.</p>
+              </div>
+              <button type="button" onclick="openUpgradeModal()" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-lg transition-all shadow-xs cursor-pointer">
+                Change Plan →
+              </button>
+            </div>
+
+            <!-- 3 Operational Bottleneck Counters -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              <!-- Counter 1: Monthly Quotes -->
+              <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1.5">
+                    <span class="font-bold text-slate-700">Monthly Quotes</span>
+                    <span id="counter-quotes-pct" class="font-mono text-[11px] text-slate-500 font-semibold">0%</span>
+                  </div>
+                  <div class="text-xl font-mono font-bold text-slate-900" id="counter-quotes-val">
+                    0 <span class="text-xs font-normal text-slate-500">/ 50 quotes</span>
+                  </div>
+                  <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-3">
+                    <div id="bar-quotes" class="bg-red-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+                  <span id="counter-quotes-rem">50 remaining</span>
+                  <span>Resets 1st of month</span>
+                </div>
+              </div>
+
+              <!-- Counter 2: Rate Sheets -->
+              <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1.5">
+                    <span class="font-bold text-slate-700">Connected Tariffs</span>
+                    <span id="counter-sheets-pct" class="font-mono text-[11px] text-slate-500 font-semibold">0%</span>
+                  </div>
+                  <div class="text-xl font-mono font-bold text-slate-900" id="counter-sheets-val">
+                    0 <span class="text-xs font-normal text-slate-500">/ 3 sheets</span>
+                  </div>
+                  <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-3">
+                    <div id="bar-sheets" class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+                  <span id="counter-sheets-rem">3 slots available</span>
+                  <a href="/console/rate-sheets" class="text-red-600 hover:underline">Manage Sheets →</a>
+                </div>
+              </div>
+
+              <!-- Counter 3: Dispatcher Seats -->
+              <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1.5">
+                    <span class="font-bold text-slate-700">Dispatcher Seats</span>
+                    <span id="counter-seats-pct" class="font-mono text-[11px] text-slate-500 font-semibold">100%</span>
+                  </div>
+                  <div class="text-xl font-mono font-bold text-slate-900" id="counter-seats-val">
+                    1 <span class="text-xs font-normal text-slate-500">/ 1 seat</span>
+                  </div>
+                  <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-3">
+                    <div id="bar-seats" class="bg-emerald-600 h-full rounded-full transition-all duration-500" style="width: 100%"></div>
+                  </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+                  <span id="counter-seats-rem">0 seats left</span>
+                  <button type="button" onclick="switchTab('team')" class="text-red-600 hover:underline">View Team →</button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Bottleneck Prevention Notice -->
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800 flex items-start gap-3">
+              <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <div>
+                <p class="font-bold">Automated Bottleneck Protection</p>
+                <p class="mt-0.5 text-amber-700">When your quote calculations, rate sheet ingestion, or team seats hit plan ceilings, RateSift halts execution safely to prevent unauthorized billing spikes and records the event in your Bottleneck Ledger.</p>
               </div>
             </div>
-          </section>
-
-          <!-- Actions Bar -->
-          <div class="pt-3 border-t border-[var(--border)] flex items-center justify-end gap-2.5">
-            <a href="/console/new-quote" class="px-3 py-1.5 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-              Cancel
-            </a>
-            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-4 py-1.5 rounded-lg transition-colors shadow-xs">
-              Save Changes
-            </button>
           </div>
-        </form>
+
+          <!-- 3. TEAM & DISPATCHER SEATS TAB -->
+          <div id="panel-team" class="hidden space-y-5">
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs">
+              <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
+                <div>
+                  <h2 class="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">Team Dispatcher Seats</h2>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Allocate seats to dispatchers, pricing analysts, and audit teams.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold text-slate-600">Seat Capacity:</span>
+                  <span id="team-seats-pill" class="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800">1 / 1 Seats</span>
+                </div>
+              </div>
+
+              <!-- Seat Limit Alert (shows if at limit) -->
+              <div id="team-limit-alert" class="hidden my-4 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <span>Seat limit reached on current plan. Upgrade to <strong>Broker Team (5 seats included)</strong> to add team members.</span>
+                </div>
+                <button type="button" onclick="openUpgradeModal()" class="px-2.5 py-1 bg-red-600 text-white rounded text-[11px] font-bold hover:bg-red-700 whitespace-nowrap cursor-pointer">
+                  Upgrade to Team
+                </button>
+              </div>
+
+              <!-- Invite Dispatcher Form -->
+              <form id="invite-seat-form" onsubmit="event.preventDefault(); inviteTeamMember();" class="my-4 p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
+                <h3 class="text-xs font-bold text-slate-800 mb-2">Invite Dispatcher to RateSift</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Email Address</label>
+                    <input id="invite-email" type="email" placeholder="dispatcher@brokerage.ca" required class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:ring-1 focus:ring-red-500">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Full Name</label>
+                    <input id="invite-name" type="text" placeholder="Sarah Connor" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:ring-1 focus:ring-red-500">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Role</label>
+                    <div class="flex gap-2">
+                      <select id="invite-role" class="w-full bg-white border border-slate-300 rounded px-2 py-1.5 text-xs text-slate-900">
+                        <option value="DISPATCHER">Dispatcher</option>
+                        <option value="AUDITOR">Billing Auditor</option>
+                      </select>
+                      <button id="invite-btn-submit" type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-3 py-1.5 rounded transition-colors shadow-2xs whitespace-nowrap cursor-pointer">
+                        Send Invite
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              <!-- Team Members Table -->
+              <div class="mt-4 overflow-x-auto">
+                <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+                  <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider">
+                    <tr>
+                      <th class="py-2.5 px-3">Member</th>
+                      <th class="py-2.5 px-3">Role</th>
+                      <th class="py-2.5 px-3">Status</th>
+                      <th class="py-2.5 px-3">Added</th>
+                      <th class="py-2.5 px-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="team-table-body" class="divide-y divide-slate-200 bg-white text-slate-800">
+                    <!-- Populated dynamically via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. BOTTLENECK TRACKING & TELEMETRY TAB -->
+          <div id="panel-bottlenecks" class="hidden space-y-5">
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs">
+              <div class="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[var(--border)]">
+                <div>
+                  <h2 class="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">Operational Bottlenecks Ledger</h2>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Audit log of limits hit across rate sheets, quotes, and dispatcher seats.</p>
+                </div>
+                <button type="button" onclick="loadBottlenecks()" class="px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                  ↻ Refresh Ledger
+                </button>
+              </div>
+
+              <!-- Bottleneck Log Table -->
+              <div class="mt-4 overflow-x-auto">
+                <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+                  <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider">
+                    <tr>
+                      <th class="py-2.5 px-3">Timestamp</th>
+                      <th class="py-2.5 px-3">Bottleneck Type</th>
+                      <th class="py-2.5 px-3">Attempted Action</th>
+                      <th class="py-2.5 px-3">Usage vs Limit</th>
+                      <th class="py-2.5 px-3 text-right">Action Required</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bottleneck-table-body" class="divide-y divide-slate-200 bg-white text-slate-800">
+                    <!-- Populated dynamically via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. ORIGIN DEFAULTS TAB -->
+          <div id="panel-origin" class="hidden bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs space-y-6">
+            <form onsubmit="event.preventDefault(); saveSettings();">
+              <section aria-labelledby="origin-heading">
+                <h2 id="origin-heading" class="text-xs font-bold text-[var(--foreground)] mb-3 pb-1 border-b border-[var(--border)]">Default Quoting Origin</h2>
+                <p class="text-[11px] text-[var(--muted-foreground)] mb-3">Pre-populate the "From" address fields during new quote calculations.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <div class="sm:col-span-2">
+                    <label for="origin-address" class="block text-xs font-bold text-[var(--foreground)] mb-1">Default Origin Street Address</label>
+                    <input id="origin-address" type="text" value="5500 Logistics Way, Bay 12" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                  </div>
+                  <div>
+                    <label for="origin-zip" class="block text-xs font-bold text-[var(--foreground)] mb-1">Origin City / Postal FSA</label>
+                    <input id="origin-zip" type="text" value="TORONTO, ON" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                  </div>
+                </div>
+              </section>
+
+              <div class="pt-4 border-t border-[var(--border)] flex items-center justify-end gap-2.5">
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-4 py-1.5 rounded-lg transition-colors shadow-xs cursor-pointer">
+                  Save Origin Defaults
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 6. SECURITY TAB -->
+          <div id="panel-security" class="hidden bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs space-y-6">
+            <form onsubmit="event.preventDefault(); updatePassword();">
+              <h2 class="text-xs font-bold text-[var(--foreground)] mb-3 pb-1 border-b border-[var(--border)]">Change Password</h2>
+              <div class="space-y-3 max-w-md">
+                <div>
+                  <label for="pwd-current" class="block text-xs font-bold text-[var(--foreground)] mb-1">Current Password</label>
+                  <input id="pwd-current" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500" placeholder="••••••••">
+                </div>
+                <div>
+                  <label for="pwd-new" class="block text-xs font-bold text-[var(--foreground)] mb-1">New Password (min. 6 characters)</label>
+                  <input id="pwd-new" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500" placeholder="••••••••">
+                </div>
+                <div>
+                  <label for="pwd-confirm" class="block text-xs font-bold text-[var(--foreground)] mb-1">Confirm New Password</label>
+                  <input id="pwd-confirm" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500" placeholder="••••••••">
+                </div>
+              </div>
+              <div class="pt-4 border-t border-[var(--border)] flex items-center justify-end">
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-4 py-1.5 rounded-lg transition-colors shadow-xs cursor-pointer">
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </div>
       </div>
     </main>
 
+    <!-- Plan Upgrade Modal -->
+    <div id="upgrade-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl relative border border-slate-200 overflow-hidden">
+        <button onclick="closeUpgradeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+
+        <div class="text-center max-w-xl mx-auto mb-6">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700 mb-1">
+            Subscription Scaling
+          </span>
+          <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Upgrade Your Quoting Capacity</h2>
+          <p class="text-xs text-slate-600 mt-1">Select a plan to unlock higher quote volume, unlimited rate sheets, and multi-seat dispatching.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <!-- Tier 1: Free Starter -->
+          <div class="border border-slate-200 rounded-xl p-4 flex flex-col justify-between bg-slate-50/50">
+            <div>
+              <h3 class="font-bold text-sm text-slate-900">Free Starter</h3>
+              <div class="mt-2 flex items-baseline gap-1">
+                <span class="text-2xl font-black font-mono text-slate-900">$0</span>
+                <span class="text-xs text-slate-500">CAD / mo</span>
+              </div>
+              <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> Up to 3 Rate Sheets</li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> 50 Quotes / month</li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> 1 Dispatcher Seat</li>
+              </ul>
+            </div>
+            <button onclick="switchPlanTo('FREE')" class="mt-4 w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-lg transition-colors cursor-pointer">
+              Select Free
+            </button>
+          </div>
+
+          <!-- Tier 2: Broker Pro -->
+          <div class="border-2 border-red-600 rounded-xl p-4 flex flex-col justify-between bg-white shadow-md relative">
+            <span class="absolute -top-2.5 right-4 bg-red-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
+              Most Popular
+            </span>
+            <div>
+              <h3 class="font-bold text-sm text-slate-900">Broker Pro</h3>
+              <div class="mt-2 flex items-baseline gap-1">
+                <span class="text-2xl font-black font-mono text-slate-900">$79</span>
+                <span class="text-xs text-slate-500">CAD / mo</span>
+              </div>
+              <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                <li class="flex items-center gap-1.5"><span class="text-red-600 font-bold">✓</span> Up to 10 Rate Sheets</li>
+                <li class="flex items-center gap-1.5"><span class="text-red-600 font-bold">✓</span> 2,500 Quotes / month</li>
+                <li class="flex items-center gap-1.5"><span class="text-red-600 font-bold">✓</span> 1 Dispatcher Seat</li>
+                <li class="flex items-center gap-1.5"><span class="text-red-600 font-bold">✓</span> 1-Click Client Proposals</li>
+              </ul>
+            </div>
+            <button onclick="switchPlanTo('PRO')" class="mt-4 w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer">
+              Upgrade to Pro ($79/mo)
+            </button>
+          </div>
+
+          <!-- Tier 3: Broker Team -->
+          <div class="border border-slate-200 rounded-xl p-4 flex flex-col justify-between bg-slate-50/50">
+            <div>
+              <h3 class="font-bold text-sm text-slate-900">Broker Team</h3>
+              <div class="mt-2 flex items-baseline gap-1">
+                <span class="text-2xl font-black font-mono text-slate-900">$199</span>
+                <span class="text-xs text-slate-500">CAD / mo</span>
+              </div>
+              <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> <strong>Unlimited</strong> Rate Sheets</li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> 15,000 Quotes / month</li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> <strong>5 Dispatcher Seats</strong></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> Centralized Team History</li>
+              </ul>
+            </div>
+            <button onclick="switchPlanTo('TEAM')" class="mt-4 w-full py-2 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-lg transition-colors cursor-pointer">
+              Upgrade to Team ($199/mo)
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <!-- Semantic Footer -->
     <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
-      <!-- Left: Logo & Links Directly Beside It -->
       <div class="flex flex-wrap items-center gap-6">
         <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
-
-        <!-- Links beside the logo -->
         <nav aria-label="Footer Navigation" class="flex items-center gap-4 text-xs font-medium">
           <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
           <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
@@ -241,21 +559,305 @@
           <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
         </nav>
       </div>
-
-      <!-- Right: Date at Bottom Right -->
       <div class="text-xs text-[var(--muted-foreground)] font-medium">
-        September 28, 2026
+        October 2026 • WHC Canadian Cloud Tenant
       </div>
     </footer>
   </div>
 
   <script>
-    function toggleAccountMenu() {
-      const menu = document.getElementById('account-dropdown');
-      const btn = document.getElementById('account-menu-btn');
-      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', !isExpanded);
-      menu.classList.toggle('hidden');
+    let currentQuota = null;
+
+    function switchTab(tabName) {
+      const tabs = ['profile', 'subscription', 'team', 'bottlenecks', 'origin', 'security'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const panel = document.getElementById(`panel-${t}`);
+        if (t === tabName) {
+          btn.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-200 flex items-center justify-between gap-2 transition-colors cursor-pointer";
+          panel.classList.remove('hidden');
+        } else {
+          btn.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-black/5 flex items-center justify-between gap-2 transition-colors cursor-pointer";
+          panel.classList.add('hidden');
+        }
+      });
+      if (tabName === 'subscription' || tabName === 'team') loadQuota();
+      if (tabName === 'team') loadTeamMembers();
+      if (tabName === 'bottlenecks') loadBottlenecks();
+    }
+
+    function openUpgradeModal() {
+      document.getElementById('upgrade-modal').classList.remove('hidden');
+      document.getElementById('upgrade-modal').classList.add('flex');
+    }
+
+    function closeUpgradeModal() {
+      document.getElementById('upgrade-modal').classList.add('hidden');
+      document.getElementById('upgrade-modal').classList.remove('flex');
+    }
+
+    function loadQuota() {
+      fetch('/api/user/quota')
+        .then(r => r.json())
+        .then(q => {
+          currentQuota = q;
+          renderQuotaUI(q);
+        })
+        .catch(err => console.error("Error loading quota:", err));
+    }
+
+    function renderQuotaUI(q) {
+      if (!q) return;
+
+      // Update Header Pill
+      document.getElementById('pill-tier-name').textContent = q.tier_name || q.tier;
+      if (q.max_quotes_per_month > 0) {
+        document.getElementById('pill-quotes-info').textContent = `${q.quotes_remaining} quotes left`;
+      } else {
+        document.getElementById('pill-quotes-info').textContent = `Unlimited quotes`;
+      }
+
+      // Update Nav Badges
+      document.getElementById('nav-tier-badge').textContent = q.tier;
+      const seatStr = q.max_seats > 0 ? `${q.active_seats}/${q.max_seats}` : `${q.active_seats}/∞`;
+      document.getElementById('nav-seats-count').textContent = seatStr;
+
+      // Update Subscription Tab Banner
+      document.getElementById('plan-badge-pill').textContent = q.tier_name || q.tier;
+      if (q.tier === 'FREE') {
+        document.getElementById('plan-headline').textContent = "Free Starter Plan";
+        document.getElementById('plan-subline').textContent = "Validating deterministic rate calculations and FSA resolution.";
+      } else if (q.tier === 'PRO') {
+        document.getElementById('plan-headline').textContent = "Broker Pro Active ($79 CAD / mo)";
+        document.getElementById('plan-subline').textContent = "Up to 10 carrier tariffs, 2,500 monthly quotes, and branded client proposals.";
+      } else if (q.tier === 'TEAM') {
+        document.getElementById('plan-headline').textContent = "Broker Team Active ($199 CAD / mo)";
+        document.getElementById('plan-subline').textContent = "Unlimited carrier tariffs, 15,000 monthly quotes, and 5 dispatcher seats included.";
+      }
+
+      // Counter 1: Monthly Quotes
+      const quoteMaxStr = q.max_quotes_per_month > 0 ? `/ ${q.max_quotes_per_month} quotes` : `/ Unlimited`;
+      document.getElementById('counter-quotes-val').innerHTML = `${q.monthly_quotes_used} <span class="text-xs font-normal text-slate-500">${quoteMaxStr}</span>`;
+      let quotePct = 0;
+      if (q.max_quotes_per_month > 0) {
+        quotePct = Math.min(100, Math.round((q.monthly_quotes_used / q.max_quotes_per_month) * 100));
+        document.getElementById('counter-quotes-rem').textContent = `${q.quotes_remaining} remaining`;
+      } else {
+        document.getElementById('counter-quotes-rem').textContent = `Unlimited volume`;
+      }
+      document.getElementById('counter-quotes-pct').textContent = `${quotePct}%`;
+      const barQuotes = document.getElementById('bar-quotes');
+      barQuotes.style.width = `${quotePct}%`;
+      barQuotes.className = quotePct >= 100 ? "bg-red-600 h-full rounded-full" : (quotePct >= 80 ? "bg-amber-500 h-full rounded-full" : "bg-emerald-600 h-full rounded-full");
+
+      // Counter 2: Rate Sheets
+      const sheetMaxStr = q.max_sheets > 0 ? `/ ${q.max_sheets} sheets` : `/ Unlimited`;
+      document.getElementById('counter-sheets-val').innerHTML = `${q.sheets_uploaded} <span class="text-xs font-normal text-slate-500">${sheetMaxStr}</span>`;
+      let sheetPct = 0;
+      if (q.max_sheets > 0) {
+        sheetPct = Math.min(100, Math.round((q.sheets_uploaded / q.max_sheets) * 100));
+        document.getElementById('counter-sheets-rem').textContent = `${q.sheets_remaining} slots available`;
+      } else {
+        document.getElementById('counter-sheets-rem').textContent = `Unlimited sheets`;
+      }
+      document.getElementById('counter-sheets-pct').textContent = `${sheetPct}%`;
+      const barSheets = document.getElementById('bar-sheets');
+      barSheets.style.width = `${sheetPct}%`;
+      barSheets.className = sheetPct >= 100 ? "bg-red-600 h-full rounded-full" : "bg-blue-600 h-full rounded-full";
+
+      // Counter 3: Seats
+      const seatMaxStr = q.max_seats > 0 ? `/ ${q.max_seats} seat${q.max_seats === 1 ? '' : 's'}` : `/ Unlimited`;
+      document.getElementById('counter-seats-val').innerHTML = `${q.active_seats} <span class="text-xs font-normal text-slate-500">${seatMaxStr}</span>`;
+      let seatPct = 0;
+      if (q.max_seats > 0) {
+        seatPct = Math.min(100, Math.round((q.active_seats / q.max_seats) * 100));
+        document.getElementById('counter-seats-rem').textContent = `${q.seats_remaining} seats left`;
+      } else {
+        document.getElementById('counter-seats-rem').textContent = `Unlimited seats`;
+      }
+      document.getElementById('counter-seats-pct').textContent = `${seatPct}%`;
+      document.getElementById('bar-seats').style.width = `${seatPct}%`;
+
+      // Team View Pill & Warning
+      document.getElementById('team-seats-pill').textContent = `${q.active_seats} / ${q.max_seats > 0 ? q.max_seats : '∞'} Seats`;
+      const limitAlert = document.getElementById('team-limit-alert');
+      const submitBtn = document.getElementById('invite-btn-submit');
+      if (!q.can_invite_seat) {
+        limitAlert.classList.remove('hidden');
+        submitBtn.disabled = true;
+        submitBtn.className = "bg-slate-300 text-slate-500 font-semibold text-xs px-3 py-1.5 rounded cursor-not-allowed whitespace-nowrap";
+        submitBtn.title = "Seat quota reached. Upgrade to Team to add more dispatchers.";
+      } else {
+        limitAlert.classList.add('hidden');
+        submitBtn.disabled = false;
+        submitBtn.className = "bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-3 py-1.5 rounded transition-colors shadow-2xs whitespace-nowrap cursor-pointer";
+        submitBtn.title = "";
+      }
+    }
+
+    function switchPlanTo(tierName) {
+      fetch('/api/user/upgrade-tier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier: tierName })
+      })
+      .then(r => r.json())
+      .then(res => {
+        closeUpgradeModal();
+        alert(`✓ Plan successfully switched to ${res.new_tier}! Your new limits and counters are now active.`);
+        loadQuota();
+      })
+      .catch(err => alert("Error upgrading tier."));
+    }
+
+    function loadTeamMembers() {
+      fetch('/api/team/members')
+        .then(r => r.json())
+        .then(data => {
+          const tbody = document.getElementById('team-table-body');
+          tbody.innerHTML = '';
+
+          // Add primary account owner row
+          const ownerRow = document.createElement('tr');
+          ownerRow.innerHTML = `
+            <td class="py-2.5 px-3 font-semibold text-slate-900">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-bold text-[10px]">AR</span>
+                <div>
+                  <div>Alex Rivers (You)</div>
+                  <div class="text-[11px] text-slate-400">alex.rivers@techcorp.io</div>
+                </div>
+              </div>
+            </td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">Account Owner</span></td>
+            <td class="py-2.5 px-3"><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">● Active</span></td>
+            <td class="py-2.5 px-3 text-slate-500">Primary Seat</td>
+            <td class="py-2.5 px-3 text-right text-slate-400 text-[11px]">Default</td>
+          `;
+          tbody.appendChild(ownerRow);
+
+          // Add team members
+          if (data.members && data.members.length > 0) {
+            data.members.forEach(m => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td class="py-2.5 px-3 font-medium text-slate-900">
+                  <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-[10px]">${(m.name || m.invited_email).substring(0, 2).toUpperCase()}</span>
+                    <div>
+                      <div>${m.name || 'Dispatcher'}</div>
+                      <div class="text-[11px] text-slate-500">${m.invited_email}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700">${m.role}</span></td>
+                <td class="py-2.5 px-3"><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">● Active</span></td>
+                <td class="py-2.5 px-3 text-slate-500">${new Date(m.created_at).toLocaleDateString()}</td>
+                <td class="py-2.5 px-3 text-right">
+                  <button type="button" onclick="revokeTeamMember('${m.id}')" class="text-red-600 hover:text-red-800 font-semibold text-[11px] cursor-pointer">Revoke</button>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          }
+        })
+        .catch(err => console.error("Error loading team:", err));
+    }
+
+    function inviteTeamMember() {
+      const email = document.getElementById('invite-email').value.trim();
+      const name = document.getElementById('invite-name').value.trim();
+      const role = document.getElementById('invite-role').value;
+
+      fetch('/api/team/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, role })
+      })
+      .then(async r => {
+        const body = await r.json();
+        if (!r.ok) {
+          alert(`⚠️ ${body.detail ? (body.detail.message || body.detail) : 'Could not invite dispatcher.'}`);
+          loadQuota();
+          return;
+        }
+        alert(`✓ Seat allocated and invitation sent to ${email}!`);
+        document.getElementById('invite-email').value = '';
+        document.getElementById('invite-name').value = '';
+        loadTeamMembers();
+        loadQuota();
+      })
+      .catch(err => alert("Error communicating with seat manager."));
+    }
+
+    function revokeTeamMember(memberId) {
+      if (!confirm("Revoke this dispatcher seat and free up quota?")) return;
+      fetch(`/api/team/members/${memberId}`, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(res => {
+          alert("✓ Seat revoked and capacity freed.");
+          loadTeamMembers();
+          loadQuota();
+        })
+        .catch(err => alert("Error revoking member."));
+    }
+
+    function loadBottlenecks() {
+      fetch('/api/user/bottlenecks')
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('nav-bottlenecks-count').textContent = data.total || 0;
+          const tbody = document.getElementById('bottleneck-table-body');
+          tbody.innerHTML = '';
+          if (!data.bottlenecks || data.bottlenecks.length === 0) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="5" class="py-8 text-center text-slate-500">
+                  <div class="flex flex-col items-center justify-center gap-1.5">
+                    <span class="text-emerald-500 font-bold text-sm">✓ No Operational Bottlenecks Detected</span>
+                    <span class="text-[11px] text-slate-400">All rate sheet uploads, quote volumes, and seats are operating safely within your subscription thresholds.</span>
+                  </div>
+                </td>
+              </tr>
+            `;
+            return;
+          }
+
+          data.bottlenecks.forEach(b => {
+            const tr = document.createElement('tr');
+            let badgeClass = "bg-amber-100 text-amber-800";
+            let typeLabel = b.bottleneck_type;
+            let actionHint = "Upgrade to Pro";
+
+            if (b.bottleneck_type === 'LIMIT_BLOCKED_SHEETS') {
+              badgeClass = "bg-blue-100 text-blue-800";
+              typeLabel = "Rate Sheet Limit Ceiling";
+              actionHint = "Upgrade for +10 Sheets";
+            } else if (b.bottleneck_type === 'LIMIT_BLOCKED_QUOTES') {
+              badgeClass = "bg-red-100 text-red-800";
+              typeLabel = "Monthly Quotes Exhausted";
+              actionHint = "Upgrade for 2,500 Quotes";
+            } else if (b.bottleneck_type === 'LIMIT_BLOCKED_SEATS') {
+              badgeClass = "bg-purple-100 text-purple-800";
+              typeLabel = "Seat Capacity Reached";
+              actionHint = "Upgrade to Team (5 Seats)";
+            }
+
+            tr.innerHTML = `
+              <td class="py-2.5 px-3 text-slate-500 font-mono text-[11px]">${new Date(b.created_at).toLocaleString()}</td>
+              <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}">${typeLabel}</span></td>
+              <td class="py-2.5 px-3 font-semibold text-slate-800">${b.attempted_action}</td>
+              <td class="py-2.5 px-3 font-mono text-[11px] text-slate-600">${b.current_usage} used / ${b.max_limit} limit</td>
+              <td class="py-2.5 px-3 text-right">
+                <button type="button" onclick="openUpgradeModal()" class="text-red-600 font-bold hover:underline text-[11px] cursor-pointer">
+                  ${actionHint} →
+                </button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(err => console.error("Error loading bottlenecks:", err));
     }
 
     function loadProfile() {
@@ -268,7 +870,22 @@
             document.getElementById('last-name').value = parts.slice(1).join(" ") || "Rivers";
             document.getElementById('work-email').value = data.email || "alex.rivers@techcorp.io";
             document.getElementById('company-name').value = data.company || "TechCorp Logistics";
-            document.getElementById('origin-zip').value = data.origin_zip || "94103";
+            
+            if (document.getElementById('phone-number')) {
+              document.getElementById('phone-number').value = data.phone || "+1 (416) 555-0199";
+            }
+            if (document.getElementById('origin-address')) {
+              document.getElementById('origin-address').value = data.origin_address || "5500 Logistics Way, Bay 12";
+            }
+            if (document.getElementById('origin-zip')) {
+              document.getElementById('origin-zip').value = data.origin_zip || "TORONTO, ON";
+            }
+
+            document.getElementById('profile-display-name').textContent = data.name || "Alex Rivers";
+            document.getElementById('profile-display-company').textContent = data.company || "TechCorp Logistics";
+            
+            const initials = parts.map(p => p[0]).join("").substring(0, 2).toUpperCase() || "AR";
+            document.getElementById('profile-avatar').textContent = initials;
           }
         })
         .catch(err => console.error("Error loading profile:", err));
@@ -279,12 +896,16 @@
       const lastName = document.getElementById('last-name').value.trim();
       const fullName = `${firstName} ${lastName}`.trim();
       const company = document.getElementById('company-name').value.trim();
-      const originZip = document.getElementById('origin-zip').value.trim();
+      const originZip = document.getElementById('origin-zip') ? document.getElementById('origin-zip').value.trim() : "TORONTO, ON";
+      const originAddress = document.getElementById('origin-address') ? document.getElementById('origin-address').value.trim() : "";
+      const phone = document.getElementById('phone-number') ? document.getElementById('phone-number').value.trim() : "";
 
       const formData = new FormData();
       formData.append('name', fullName);
       formData.append('company', company);
       formData.append('origin_zip', originZip);
+      formData.append('origin_address', originAddress);
+      formData.append('phone', phone);
 
       fetch('/api/user/account/update', {
         method: 'POST',
@@ -292,23 +913,60 @@
       })
       .then(res => res.json())
       .then(data => {
-        alert("✓ Account profile and quoting origin defaults saved successfully!");
+        alert("✓ Profile and quoting origin defaults saved successfully!");
+        loadProfile();
+      })
+      .catch(err => alert("Error updating profile."));
+    }
+
+    function updatePassword() {
+      const currentPassword = document.getElementById('pwd-current').value;
+      const newPassword = document.getElementById('pwd-new').value;
+      const confirmPassword = document.getElementById('pwd-confirm') ? document.getElementById('pwd-confirm').value : newPassword;
+
+      if (!currentPassword) {
+        alert("Please enter your current password.");
+        return;
+      }
+      if (!newPassword || newPassword.length < 6) {
+        alert("New password must be at least 6 characters long.");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        alert("New password and confirmation do not match.");
+        return;
+      }
+
+      fetch('/api/user/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword
+        })
+      })
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || data.message || "Failed to update password");
+        }
+        return data;
+      })
+      .then(data => {
+        alert("✓ " + (data.message || "Password updated successfully."));
+        document.getElementById('pwd-current').value = '';
+        document.getElementById('pwd-new').value = '';
+        if (document.getElementById('pwd-confirm')) document.getElementById('pwd-confirm').value = '';
       })
       .catch(err => {
-        alert("Error updating profile. Please try again.");
+        alert("Error: " + err.message);
       });
     }
 
-    window.addEventListener('click', function(e) {
-      const accBtn = document.getElementById('account-menu-btn');
-      const accMenu = document.getElementById('account-dropdown');
-      if (accBtn && accMenu && !accBtn.contains(e.target) && !accMenu.contains(e.target)) {
-        accMenu.classList.add('hidden');
-        accBtn.setAttribute('aria-expanded', 'false');
-      }
-    });
-
+    // Initialize on page load
     loadProfile();
+    loadQuota();
+    loadBottlenecks();
   </script>
 </body>
 </html>

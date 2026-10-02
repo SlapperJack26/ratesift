@@ -60,8 +60,15 @@
           </nav>
         </div>
 
-        <!-- Right: Sovereignty Badge & Actions -->
+        <!-- Right: Quota Pill & Sovereignty Badge & Actions -->
         <div class="flex items-center gap-2.5 sm:gap-3">
+          <a href="/console/account" id="header-quota-pill" class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors shadow-2xs" title="View Plan & Quotas">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="pill-tier-name">Free Starter</span>
+            <span class="text-slate-300">•</span>
+            <span id="pill-quotes-info" class="text-slate-600">50 quotes left</span>
+          </a>
+
           <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
             <span>🇨🇦</span>
             <span>Hosted in Canada (WHC) • PIPEDA Compliant</span>
@@ -158,118 +165,453 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- Human Confirmation Gate Modal (Rules 6 & 7) -->
+  <!-- Rate Sheet Review, Broker Markup & Human Confirmation Studio (Rules 1, 6, 7 & 19) -->
   <!-- ===================================================================== -->
-  <div id="confirm-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-[var(--border)] shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+  <div id="confirm-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div class="bg-white rounded-2xl border border-[var(--border)] shadow-2xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
       
       <!-- Modal Header -->
-      <div class="p-5 border-b border-[var(--border)] flex items-center justify-between bg-slate-50/70">
+      <div class="p-5 border-b border-[var(--border)] flex items-center justify-between bg-slate-50/80">
         <div>
-          <div class="flex items-center gap-2">
-            <h2 class="text-base font-bold text-slate-900" id="modal-carrier-title">Review Rate Sheet</h2>
-            <span id="modal-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"></span>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <h2 class="text-base font-bold text-slate-900" id="modal-carrier-title">Review Rate Sheet & Broker Markup</h2>
+            <span id="modal-status-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"></span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-700 border border-red-200">
+              WHC Canada Hosting • Rule 29
+            </span>
           </div>
-          <p class="text-xs text-slate-500 mt-0.5">Strict Human Confirmation Gate (Rule 7 & 19). Verify parsed rules before live quoting.</p>
+          <p class="text-xs text-slate-500 mt-0.5">Rate Sheet Review, Broker Markup & Human Confirmation Gate (Rules 1, 6, 7 & 19). Verify parsed rules before live quoting.</p>
         </div>
-        <button onclick="closeConfirmModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+        <button onclick="closeConfirmModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
 
-      <!-- Modal Body (Scrollable) -->
-      <div class="p-6 overflow-y-auto space-y-5 text-xs flex-1">
+      <!-- Modal Body (Scrollable Studio) -->
+      <div class="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs flex-1">
         
-        <!-- Metadata Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
-          <div>
-            <div class="text-[10px] font-semibold text-slate-500 uppercase">Tariff Reference</div>
-            <div class="font-bold text-slate-800 mt-0.5" id="modal-tariff-ref">-</div>
+        <!-- Human Confirmation & Tariff Rule Verification Panel (Rules 1, 5, 6, 15, 16) -->
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/90 shadow-2xs space-y-3.5">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-900 uppercase tracking-wide">Tariff Rules & Human Confirmation Gate</span>
+              <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-red-100 text-red-700">Rules 1, 5, 6, 15 & 16</span>
+            </div>
+            <div class="text-[11px] font-semibold text-slate-600 font-mono" id="rule-confirmed-status-text">Pending User Confirmation</div>
           </div>
-          <div>
-            <div class="text-[10px] font-semibold text-slate-500 uppercase">Validity Dates</div>
-            <div class="font-bold text-slate-800 mt-0.5" id="modal-dates">-</div>
+
+          <!-- 4-Column Controls: Currency, Weight Unit, DIM Divisor, Rounding Rule -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            
+            <!-- 1. Currency Confirmation (Rule 5 & 6) -->
+            <div class="space-y-1">
+              <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                Tariff Currency (Rule 5)
+              </label>
+              <div class="grid grid-cols-2 gap-1 p-1 bg-white border border-slate-200 rounded-xl shadow-2xs">
+                <button type="button" id="btn-currency-cad" onclick="setTariffCurrency('CAD')" class="py-1 px-2 rounded-lg text-xs font-bold text-center transition-all cursor-pointer bg-red-600 text-white shadow-2xs">
+                  🇨🇦 CAD
+                </button>
+                <button type="button" id="btn-currency-usd" onclick="setTariffCurrency('USD')" class="py-1 px-2 rounded-lg text-xs font-semibold text-center text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
+                  🇺🇸 USD
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Weight Unit Confirmation (Rule 5 & 6) -->
+            <div class="space-y-1">
+              <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                Weight Unit (Rule 5)
+              </label>
+              <div class="grid grid-cols-2 gap-1 p-1 bg-white border border-slate-200 rounded-xl shadow-2xs">
+                <button type="button" id="btn-weight-lb" onclick="setTariffWeightUnit('lb')" class="py-1 px-2 rounded-lg text-xs font-bold text-center transition-all cursor-pointer bg-red-600 text-white shadow-2xs">
+                  Pounds (lb)
+                </button>
+                <button type="button" id="btn-weight-kg" onclick="setTariffWeightUnit('kg')" class="py-1 px-2 rounded-lg text-xs font-semibold text-center text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
+                  Kilograms (kg)
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. DIM Divisor (Rule 1 & 6) -->
+            <div class="space-y-1">
+              <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                DIM Divisor (Rule 1)
+              </label>
+              <div class="flex items-center gap-1.5">
+                <select id="select-dim-preset" onchange="onDimPresetChange(this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
+                  <option value="139.0">139.0 (Domestic Express / Air)</option>
+                  <option value="166.0">166.0 (Standard Domestic LTL)</option>
+                  <option value="250.0">250.0 (Metric / Heavy)</option>
+                  <option value="custom">Custom Divisor...</option>
+                </select>
+                <input id="input-dim-custom" type="number" step="0.5" min="1" value="139.0" oninput="onCustomDimInput(this.value)" class="w-16 hidden bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs font-bold text-slate-800 text-center shadow-2xs">
+              </div>
+            </div>
+
+            <!-- 4. Rounding Rule (Rule 15) -->
+            <div class="space-y-1">
+              <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                Rounding Logic (Rule 15)
+              </label>
+              <select id="select-rounding-rule" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
+                <option value="standard_2dp">Standard (2 Decimal Places)</option>
+                <option value="ceil_whole_dollar">Ceil to Next Whole Dollar ($)</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <div class="text-[10px] font-semibold text-slate-500 uppercase">Currency & Weight</div>
-            <div class="font-bold text-slate-800 mt-0.5" id="modal-units">-</div>
-          </div>
-          <div>
-            <div class="text-[10px] font-semibold text-slate-500 uppercase">DIM Divisor</div>
-            <div class="font-bold text-slate-800 mt-0.5" id="modal-dim-divisor">139.0</div>
+
+          <!-- Second Row: Validity Dates (Rule 16) & Tariff Reference -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2 border-t border-slate-200/70">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tariff / Account Reference</label>
+              <div id="modal-tariff-ref" class="font-bold text-slate-800 text-xs mt-1.5 font-mono truncate">-</div>
+            </div>
+            <div>
+              <label for="input-effective-date" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Effective Date (Rule 16)</label>
+              <input id="input-effective-date" type="date" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-mono font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
+            </div>
+            <div>
+              <label for="input-expiry-date" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Expiry Date (Rule 16)</label>
+              <input id="input-expiry-date" type="date" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-mono font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
+            </div>
           </div>
         </div>
 
         <!-- Needs Review Warning Banner (Rule 6) -->
-        <div id="modal-review-banner" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 space-y-2">
-          <div class="flex items-center gap-2 font-bold text-xs">
-            <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <span>Items Needing Verification (Rule 6)</span>
+        <div id="modal-review-banner" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 space-y-2.5">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2 font-bold text-xs">
+              <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              <span>Items Needing Human Verification (<span id="modal-flagged-count">0</span>) (Rule 6)</span>
+            </div>
+            <button type="button" onclick="resolveAllFlags()" class="px-2.5 py-1 rounded-lg bg-amber-200 hover:bg-amber-300 text-amber-900 text-[11px] font-bold transition-colors cursor-pointer shadow-2xs">
+              ✓ Verify & Clear All Flags
+            </button>
           </div>
-          <div id="modal-flagged-list" class="space-y-1.5 pl-6 text-[11px]"></div>
+          <div id="modal-flagged-list" class="space-y-1.5 text-[11px]"></div>
         </div>
 
-        <!-- Surcharges Section (Rule 4, 11) -->
-        <div>
-          <div class="font-bold text-slate-800 mb-2 flex items-center justify-between">
-            <span>Extracted Surcharges & Accessorials (<span id="modal-surcharges-count">0</span>)</span>
-            <span class="text-[10px] font-normal text-slate-500">Every item traced to source cell (Rule 3)</span>
+        <!-- Banner when all review items are clean -->
+        <div id="modal-review-clean-banner" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-600 font-bold text-sm">✓</span>
+            <span class="font-medium">All cell coordinates, footnotes, and tariff terms verified. No caution flags.</span>
           </div>
-          <div class="border border-[var(--border)] rounded-xl overflow-hidden max-h-48 overflow-y-auto">
-            <table class="w-full text-left text-[11px]">
-              <thead class="bg-slate-50 border-b border-[var(--border)] font-bold text-slate-600">
-                <tr>
-                  <th class="py-2 px-3">Surcharge Code</th>
-                  <th class="py-2 px-3">Fee Structure</th>
-                  <th class="py-2 px-3">Waived?</th>
-                  <th class="py-2 px-3">Source Coordinate</th>
-                </tr>
-              </thead>
-              <tbody id="modal-surcharges-tbody" class="divide-y divide-slate-100"></tbody>
-            </table>
-          </div>
+          <span class="font-mono text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-bold">Rule 6 Verified</span>
         </div>
 
-        <!-- Sample Rate Breaks Preview (Rule 1, 8) -->
-        <div>
-          <div class="font-bold text-slate-800 mb-2 flex items-center justify-between">
-            <span>Rate Matrix Sample (<span id="modal-breaks-count">0</span> total breaks)</span>
-            <span class="text-[10px] font-normal text-slate-500">Strictly explicit rates; no interpolated estimates</span>
+        <!-- Two-Column Studio Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- LEFT COLUMN: Agent Extraction & Cell Traceability (Rule 3 & 6) -->
+          <div class="lg:col-span-7 space-y-4">
+            
+            <!-- Action Bar directly above table: Button sized to span the first 2 columns -->
+            <div class="flex items-center justify-between gap-3">
+              <button type="button" onclick="openFormattedSheetModal()" class="w-[52%] inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer text-center">
+                <span>👁️ View Formatted Sheet</span>
+              </button>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs shrink-0">
+                <span>🔒 In-Browser Inspection Only • Downloads Disabled</span>
+              </span>
+            </div>
+
+            <!-- Agent Extraction Card -->
+            <div class="border border-[var(--border)] rounded-xl p-4 bg-white shadow-2xs space-y-3">
+              <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span class="font-bold text-slate-800 text-xs">Agent Extraction & Cell Traceability (Rule 3 & 6)</span>
+                <span class="text-[11px] text-slate-500 font-mono"><span id="modal-breaks-count">0</span> breaks extracted</span>
+              </div>
+
+              <!-- Search Bar for Extraction Table -->
+              <div class="flex items-center gap-2">
+                <div class="relative flex-1">
+                  <input id="extraction-search-input" type="text" placeholder="Search lane, city, zone, bracket, or coordinate..." oninput="onSearchExtractionDebounced(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-red-500 focus:bg-white shadow-2xs">
+                </div>
+                <button type="button" onclick="clearExtractionSearch()" class="px-2 py-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 text-xs cursor-pointer">
+                  Clear
+                </button>
+              </div>
+
+              <!-- 5-Column Table -->
+              <div class="border border-[var(--border)] rounded-xl overflow-hidden shadow-2xs">
+                <div class="max-h-64 overflow-y-auto">
+                  <table class="w-full text-left text-[11px] border-collapse">
+                    <thead class="bg-slate-50 border-b border-[var(--border)] font-bold text-slate-700 sticky top-0 z-10">
+                      <tr>
+                        <th class="py-2.5 px-3 w-[32%]">Lane / Zone</th>
+                        <th class="py-2.5 px-3 w-[20%]">Weight Bracket</th>
+                        <th class="py-2.5 px-3 w-[16%]">Wholesale Net Rate</th>
+                        <th class="py-2.5 px-3 w-[16%]">Source Cell Coordinate</th>
+                        <th class="py-2.5 px-3 w-[16%] text-center">Verification</th>
+                      </tr>
+                    </thead>
+                    <tbody id="modal-breaks-tbody" class="divide-y divide-slate-100 font-mono">
+                      <!-- Populated via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Pagination Controls for Extraction Table -->
+              <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px] text-slate-500">
+                <div id="extraction-pagination-summary">Showing 0 breaks</div>
+                <div class="flex items-center gap-1.5">
+                  <button id="extraction-prev-btn" onclick="goToExtractionPage(-1)" class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">‹ Prev</button>
+                  <span id="extraction-page-indicator" class="font-mono font-bold text-slate-800 px-1">1 / 1</span>
+                  <button id="extraction-next-btn" onclick="goToExtractionPage(1)" class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">Next ›</button>
+                </div>
+              </div>
+
+              <div class="text-[10px] text-slate-400 italic">100% cell traceability preserved. Direct link to source workbook coordinate.</div>
+            </div>
+
+            <!-- Extracted Surcharges Section -->
+            <div class="border border-[var(--border)] rounded-xl p-3.5 space-y-2.5 bg-slate-50/40">
+              <div class="font-bold text-slate-800 flex items-center justify-between text-xs">
+                <span>Extracted Surcharges & Accessorials (<span id="modal-surcharges-count">0</span>)</span>
+                <span class="text-[10px] font-normal text-slate-500">Traced to source cell (Rule 3)</span>
+              </div>
+              <div class="border border-slate-200 rounded-lg overflow-hidden max-h-36 overflow-y-auto bg-white">
+                <table class="w-full text-left text-[11px]">
+                  <thead class="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
+                    <tr>
+                      <th class="py-2 px-3">Surcharge Code</th>
+                      <th class="py-2 px-3">Fee Structure</th>
+                      <th class="py-2 px-3">Waived?</th>
+                      <th class="py-2 px-3">Source Coordinate</th>
+                      <th class="py-2 px-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="modal-surcharges-tbody" class="divide-y divide-slate-100"></tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
-          <div class="border border-[var(--border)] rounded-xl overflow-hidden max-h-44 overflow-y-auto">
-            <table class="w-full text-left text-[11px]">
-              <thead class="bg-slate-50 border-b border-[var(--border)] font-bold text-slate-600">
-                <tr>
-                  <th class="py-2 px-3">Lane / Zone</th>
-                  <th class="py-2 px-3">Bracket</th>
-                  <th class="py-2 px-3">Base Rate</th>
-                  <th class="py-2 px-3">Type</th>
-                  <th class="py-2 px-3">Cell Source</th>
-                </tr>
-              </thead>
-              <tbody id="modal-breaks-tbody" class="divide-y divide-slate-100 font-mono"></tbody>
-            </table>
+
+          <!-- RIGHT COLUMN: Broker Margin & Markup Rules + Manual Approval Switch -->
+          <div class="lg:col-span-5 space-y-4">
+            
+            <!-- Broker Margin & Markup Rules Card -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-3.5">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <div>
+                  <h3 class="text-xs font-bold text-slate-900">Broker Margin & Markup Rules</h3>
+                  <p class="text-[11px] text-slate-500">Automated markup applied to wholesale carrier rates.</p>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">Client Quotes</span>
+              </div>
+
+              <!-- Markup Mode Selector -->
+              <div class="space-y-1.5">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Markup Mode</label>
+                <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+                  <button type="button" id="btn-mode-pct" onclick="setMarkupMode('PERCENTAGE')" class="py-1.5 px-2 rounded-lg bg-white text-red-600 shadow-2xs text-center transition-all cursor-pointer">
+                    % Percentage
+                  </button>
+                  <button type="button" id="btn-mode-flat" onclick="setMarkupMode('FLAT')" class="py-1.5 px-2 rounded-lg text-slate-600 hover:text-slate-900 text-center transition-all cursor-pointer">
+                    $ Flat / Load
+                  </button>
+                  <button type="button" id="btn-mode-cwt" onclick="setMarkupMode('CWT')" class="py-1.5 px-2 rounded-lg text-slate-600 hover:text-slate-900 text-center transition-all cursor-pointer">
+                    $ / CWT
+                  </button>
+                </div>
+              </div>
+
+              <!-- Markup Value Input -->
+              <div class="space-y-1">
+                <label for="input-markup-val" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Markup Margin Value</label>
+                <div class="relative flex items-center">
+                  <input id="input-markup-val" type="number" step="0.1" min="0" value="15.0" oninput="updateMarkupPreview()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+                  <span id="markup-unit-badge" class="absolute right-3 text-xs font-bold text-slate-500">% margin</span>
+                </div>
+              </div>
+
+              <!-- Checkbox Toggles -->
+              <div class="space-y-2 pt-1 border-t border-slate-100">
+                <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="check-fsc-passthrough" checked onchange="updateMarkupPreview()" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="font-medium">Pass-Through Fuel FSC (Do not markup carrier fuel surcharge)</span>
+                </label>
+                <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="check-accessorial-markup" onchange="updateMarkupPreview()" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="font-medium">Markup Accessorials & Surcharges (+15%)</span>
+                </label>
+              </div>
+
+              <!-- Live Wholesale vs Client Preview Box -->
+              <div class="p-3 rounded-xl border border-slate-200/90 bg-slate-50 space-y-2">
+                <div class="flex items-center justify-between text-[11px] text-slate-500 font-semibold border-b border-slate-200/70 pb-1">
+                  <span>Wholesale vs Client Quote Preview</span>
+                  <span class="font-mono text-[10px] text-slate-400">Sample 1,450 lbs LTL</span>
+                </div>
+                <div class="space-y-1 text-xs font-mono">
+                  <div class="flex justify-between text-slate-600">
+                    <span>Wholesale Base:</span>
+                    <span id="prev-wholesale-base" class="font-semibold text-slate-800">$412.50</span>
+                  </div>
+                  <div class="flex justify-between text-emerald-700">
+                    <span id="prev-margin-label">Broker Margin (+15%):</span>
+                    <span id="prev-broker-margin" class="font-bold">+$61.88</span>
+                  </div>
+                  <div class="flex justify-between text-slate-600">
+                    <span>Fuel FSC (18.5% Pass-through):</span>
+                    <span id="prev-fuel-fsc" class="font-semibold text-slate-800">$76.31</span>
+                  </div>
+                  <div class="flex justify-between text-slate-600">
+                    <span>Accessorial Charges:</span>
+                    <span id="prev-accessorials" class="font-semibold text-slate-800">$0.00</span>
+                  </div>
+                  <div class="pt-1.5 border-t border-slate-200 flex justify-between items-baseline">
+                    <span class="text-xs font-bold text-slate-900 uppercase tracking-tight">Total Client Quote:</span>
+                    <span id="prev-client-total" class="text-base font-black text-red-600 tracking-tight">$550.69 CAD</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Manual Broker Approval Switch Card -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-3">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="text-xs font-bold text-slate-900">Manual Broker Approval (Use in Live Quotes)</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">Allow quoting even if some agent verification items are pending.</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+                  <input type="checkbox" id="switch-manual-approval" onchange="handleManualApprovalToggle(this.checked)" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                </label>
+              </div>
+
+              <!-- Dynamic Warning Callout -->
+              <div id="manual-approval-warning" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-1">
+                <div class="flex items-center gap-1.5 font-bold text-amber-800">
+                  <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                  <span>⚠️ Warning: Manual Approval Active</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-amber-800">
+                  You are overriding pending agent verification to enable this sheet for live quoting. Any unverified cell coordinates will be flagged with caution badges and logged in the immutable audit trail (Rule 30).
+                </p>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="pt-2 space-y-2">
+                <button id="modal-confirm-btn" onclick="confirmCurrentSheet()" class="w-full py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <span id="modal-confirm-btn-text">✓ Apply Approval & Enable Quoting</span>
+                </button>
+                <button type="button" onclick="testPreflightLane()" class="w-full py-2 px-4 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                  <span>Test Pre-Flight Lane →</span>
+                </button>
+                <button type="button" onclick="deleteCurrentSheet()" class="w-full py-1 text-xs text-red-600 hover:text-red-700 font-medium hover:underline text-center cursor-pointer">
+                  Delete Rate Sheet
+                </button>
+              </div>
+            </div>
+
           </div>
+
         </div>
 
       </div>
 
       <!-- Modal Footer -->
-      <div class="p-4 border-t border-[var(--border)] bg-slate-50 flex items-center justify-between">
-        <button onclick="deleteCurrentSheet()" class="text-xs text-red-600 hover:text-red-700 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors">
-          Delete Sheet
+      <div class="p-3.5 border-t border-[var(--border)] bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <div>Ratesift Freight Engine • Canadian WHC Central Data Residency (Rule 29)</div>
+        <button onclick="closeConfirmModal()" class="px-4 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold transition-colors cursor-pointer">
+          Close Studio
         </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- In-Browser Formatted Sheet Inspection Modal (Platform Security Invariant: No Downloads) -->
+  <!-- ===================================================================== -->
+  <div id="formatted-sheet-modal" class="hidden fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150" oncontextmenu="preventDownloadAction(event)">
+      
+      <!-- Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl border border-[var(--border)] text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors">
-            Close
-          </button>
-          <button id="modal-confirm-btn" onclick="confirmCurrentSheet()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-            <span>Confirm Rate Sheet (Enable Quoting)</span>
-          </button>
+          <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">👁️</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-slate-900" id="fsm-carrier-title">Formatted Carrier Tariff Matrix</h3>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                🔒 In-Browser Inspection Only
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Normalized matrix representation with 100% cell traceability. Downloads & exports are disabled.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeFormattedSheetModal()" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Security Notice Ribbon -->
+      <div class="px-5 py-2.5 bg-red-50/60 border-b border-red-100 flex items-center justify-between text-xs text-red-900">
+        <div class="flex items-center gap-2">
+          <span class="text-red-600 font-bold">🔒 Platform Security Policy:</span>
+          <span>Reformatted carrier tariffs are restricted to in-browser inspection only. Downloading, scraping, or exporting spreadsheet files is strictly blocked.</span>
+        </div>
+        <span class="font-mono text-[10px] text-red-700 shrink-0">Rule 3 & Tenant Isolation</span>
+      </div>
+
+      <!-- Search & Filter Controls -->
+      <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+        <div class="flex-1 min-w-[240px]">
+          <input id="fsm-search-input" type="text" placeholder="Search lane, city, zone, bracket, or coordinate..." oninput="onSearchFsmDebounced(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-red-500 focus:bg-white shadow-2xs">
+        </div>
+        <div class="flex items-center gap-3 text-xs text-slate-500 font-mono">
+          <div>Total Rates: <strong id="fsm-rows-count" class="text-slate-800">0</strong></div>
+          <div>•</div>
+          <div id="fsm-currency-badge">CAD / lb</div>
         </div>
       </div>
 
+      <!-- Matrix Scrollable Table -->
+      <div class="p-4 overflow-y-auto flex-1 text-xs">
+        <div class="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+          <table class="w-full text-left border-collapse text-[11px]">
+            <thead class="bg-slate-50 border-b border-slate-200 font-bold text-slate-700">
+              <tr>
+                <th class="py-2.5 px-3">Origin Lane</th>
+                <th class="py-2.5 px-3">Destination Lane</th>
+                <th class="py-2.5 px-3">Carrier Zone</th>
+                <th class="py-2.5 px-3">Weight Bracket</th>
+                <th class="py-2.5 px-3">Base Wholesale Rate</th>
+                <th class="py-2.5 px-3">Unit</th>
+                <th class="py-2.5 px-3">Source Coordinate</th>
+                <th class="py-2.5 px-3 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="fsm-matrix-tbody" class="divide-y divide-slate-100 font-mono">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer & Pagination -->
+      <div class="p-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div id="fsm-pagination-summary" class="text-[11px] text-slate-500 font-mono">
+          Showing 0 rows
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="fsm-prev-btn" onclick="goToFsmPage(-1)" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">‹ Prev</button>
+          <span id="fsm-page-number" class="font-mono font-bold text-slate-800 text-xs px-1">Page 1 / 1</span>
+          <button id="fsm-next-btn" onclick="goToFsmPage(1)" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">Next ›</button>
+          <div class="h-4 w-[1px] bg-slate-300 mx-1"></div>
+          <button type="button" onclick="closeFormattedSheetModal()" class="px-3.5 py-1 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold cursor-pointer">
+            Close Inspector
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -352,6 +694,165 @@
   <script>
     let activeSheetId = null;
     let stagedRedactFile = null;
+    let currentSheetData = null;
+    let currentMarkupMode = 'PERCENTAGE';
+    
+    // Human confirmation rule states
+    let selectedCurrency = 'CAD';
+    let selectedWeightUnit = 'lb';
+    let selectedDimDivisor = 139.0;
+    let selectedRoundingRule = 'standard_2dp';
+    let flaggedCellsMap = new Map(); // coord -> cell object
+    
+    // Extraction table pagination state
+    let extractionPage = 1;
+    const extractionLimit = 50;
+    let extractionTotal = 0;
+    let extractionQuery = '';
+    let extractionDebounceTimer = null;
+
+    // Formatted sheet matrix pagination state
+    let fsmPage = 1;
+    const fsmLimit = 50;
+    let fsmTotal = 0;
+    let fsmQuery = '';
+    let fsmDebounceTimer = null;
+
+    // --- Currency Rule (Rule 5 & 6) ---
+    function setTariffCurrency(curr) {
+      selectedCurrency = (curr || 'CAD').toUpperCase();
+      const btnCad = document.getElementById('btn-currency-cad');
+      const btnUsd = document.getElementById('btn-currency-usd');
+      if (selectedCurrency === 'CAD') {
+        if (btnCad) btnCad.className = "py-1 px-2 rounded-lg text-xs font-bold text-center transition-all cursor-pointer bg-red-600 text-white shadow-2xs";
+        if (btnUsd) btnUsd.className = "py-1 px-2 rounded-lg text-xs font-semibold text-center text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
+      } else {
+        if (btnUsd) btnUsd.className = "py-1 px-2 rounded-lg text-xs font-bold text-center transition-all cursor-pointer bg-red-600 text-white shadow-2xs";
+        if (btnCad) btnCad.className = "py-1 px-2 rounded-lg text-xs font-semibold text-center text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
+      }
+      updateMarkupPreview();
+    }
+
+    // --- Weight Unit Rule (Rule 5 & 6) ---
+    function setTariffWeightUnit(unit) {
+      selectedWeightUnit = (unit || 'lb').toLowerCase();
+      const btnLb = document.getElementById('btn-weight-lb');
+      const btnKg = document.getElementById('btn-weight-kg');
+      if (selectedWeightUnit === 'lb') {
+        if (btnLb) btnLb.className = "py-1 px-2 rounded-lg text-xs font-bold text-center transition-all cursor-pointer bg-red-600 text-white shadow-2xs";
+        if (btnKg) btnKg.className = "py-1 px-2 rounded-lg text-xs font-semibold text-center text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
+      } else {
+        if (btnKg) btnKg.className = "py-1 px-2 rounded-lg text-xs font-bold text-center transition-all cursor-pointer bg-red-600 text-white shadow-2xs";
+        if (btnLb) btnLb.className = "py-1 px-2 rounded-lg text-xs font-semibold text-center text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
+      }
+    }
+
+    // --- DIM Divisor Rule (Rule 1 & 6) ---
+    function onDimPresetChange(val) {
+      const customInput = document.getElementById('input-dim-custom');
+      if (val === 'custom') {
+        if (customInput) {
+          customInput.classList.remove('hidden');
+          customInput.focus();
+          selectedDimDivisor = parseFloat(customInput.value) || 139.0;
+        }
+      } else {
+        if (customInput) customInput.classList.add('hidden');
+        selectedDimDivisor = parseFloat(val) || 139.0;
+      }
+    }
+
+    function onCustomDimInput(val) {
+      selectedDimDivisor = parseFloat(val) || 139.0;
+    }
+
+    // --- Markup Mode & Calculations ---
+    function setMarkupMode(mode) {
+      currentMarkupMode = mode;
+      const btnPct = document.getElementById('btn-mode-pct');
+      const btnFlat = document.getElementById('btn-mode-flat');
+      const btnCwt = document.getElementById('btn-mode-cwt');
+      const unitBadge = document.getElementById('markup-unit-badge');
+
+      [btnPct, btnFlat, btnCwt].forEach(b => {
+        if (b) b.className = "py-1.5 px-2 rounded-lg text-slate-600 hover:text-slate-900 text-center transition-all cursor-pointer";
+      });
+
+      if (mode === 'PERCENTAGE' && btnPct) {
+        btnPct.className = "py-1.5 px-2 rounded-lg bg-white text-red-600 shadow-2xs text-center transition-all cursor-pointer font-bold";
+        if (unitBadge) unitBadge.textContent = "% margin";
+      } else if (mode === 'FLAT' && btnFlat) {
+        btnFlat.className = "py-1.5 px-2 rounded-lg bg-white text-red-600 shadow-2xs text-center transition-all cursor-pointer font-bold";
+        if (unitBadge) unitBadge.textContent = `$ ${selectedCurrency} / load`;
+      } else if (mode === 'CWT' && btnCwt) {
+        btnCwt.className = "py-1.5 px-2 rounded-lg bg-white text-red-600 shadow-2xs text-center transition-all cursor-pointer font-bold";
+        if (unitBadge) unitBadge.textContent = `$ / CWT`;
+      }
+      updateMarkupPreview();
+    }
+
+    function updateMarkupPreview() {
+      const inputEl = document.getElementById('input-markup-val');
+      const val = inputEl ? (parseFloat(inputEl.value) || 0.0) : 15.0;
+      const fscPassthrough = document.getElementById('check-fsc-passthrough') ? document.getElementById('check-fsc-passthrough').checked : true;
+      const accMarkup = document.getElementById('check-accessorial-markup') ? document.getElementById('check-accessorial-markup').checked : false;
+
+      const baseWholesale = 412.50;
+      const weightLbs = 1450.0;
+      let brokerMargin = 0.0;
+
+      if (currentMarkupMode === 'PERCENTAGE') {
+        brokerMargin = baseWholesale * (val / 100.0);
+        const lbl = document.getElementById('prev-margin-label');
+        if (lbl) lbl.textContent = `Broker Margin (+${val.toFixed(1)}%):`;
+      } else if (currentMarkupMode === 'FLAT') {
+        brokerMargin = val;
+        const lbl = document.getElementById('prev-margin-label');
+        if (lbl) lbl.textContent = `Broker Margin (+$${val.toFixed(2)}/load):`;
+      } else if (currentMarkupMode === 'CWT') {
+        brokerMargin = (weightLbs / 100.0) * val;
+        const lbl = document.getElementById('prev-margin-label');
+        if (lbl) lbl.textContent = `Broker Margin (+$${val.toFixed(2)}/cwt):`;
+      }
+
+      const fscAmount = 76.31; // 18.5% FSC
+      let accAmount = 0.0;
+      if (accMarkup) {
+        accAmount = 15.00; // sample accessorial markup
+      }
+
+      const clientTotal = baseWholesale + brokerMargin + fscAmount + accAmount;
+
+      const baseEl = document.getElementById('prev-wholesale-base');
+      const marginEl = document.getElementById('prev-broker-margin');
+      const fscEl = document.getElementById('prev-fuel-fsc');
+      const accEl = document.getElementById('prev-accessorials');
+      const totalEl = document.getElementById('prev-client-total');
+
+      if (baseEl) baseEl.textContent = `$${baseWholesale.toFixed(2)} ${selectedCurrency}`;
+      if (marginEl) marginEl.textContent = `+$${brokerMargin.toFixed(2)}`;
+      if (fscEl) fscEl.textContent = `$${fscAmount.toFixed(2)}`;
+      if (accEl) accEl.textContent = `$${accAmount.toFixed(2)}`;
+      if (totalEl) totalEl.textContent = `$${clientTotal.toFixed(2)} ${selectedCurrency}`;
+    }
+
+    function handleManualApprovalToggle(checked) {
+      const warningBox = document.getElementById('manual-approval-warning');
+      const badge = document.getElementById('modal-status-badge');
+      if (checked) {
+        if (warningBox) warningBox.classList.remove('hidden');
+        if (badge && currentSheetData && currentSheetData.sheet && currentSheetData.sheet.confirmation_status !== 'CONFIRMED') {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300";
+          badge.textContent = "Manual Approval Override Active";
+        }
+      } else {
+        if (warningBox) warningBox.classList.add('hidden');
+        if (badge && currentSheetData && currentSheetData.sheet && currentSheetData.sheet.confirmation_status !== 'CONFIRMED') {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800";
+          badge.textContent = "Pending Confirmation";
+        }
+      }
+    }
 
     function openRedactionModal() {
       document.getElementById('redaction-modal').classList.remove('hidden');
@@ -424,7 +925,6 @@
       statusBox.textContent = `Scrubbing and uploading ${stagedRedactFile.name}...`;
 
       try {
-        // Fetch redacted blob
         const redactForm = new FormData();
         redactForm.append('file', stagedRedactFile);
         const redactRes = await fetch('/api/ratesift/redact-sheet', { method: 'POST', body: redactForm });
@@ -432,7 +932,6 @@
         const blob = await redactRes.blob();
         const scrubbedFile = new File([blob], `scrubbed_${stagedRedactFile.name}`, { type: blob.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-        // Upload scrubbed file
         const uploadForm = new FormData();
         uploadForm.append('file', scrubbedFile);
         const uploadRes = await fetch('/api/ratesift/upload-sheet', { method: 'POST', body: uploadForm });
@@ -450,7 +949,7 @@
 
     function toggleAccountMenu() {
       const menu = document.getElementById('account-dropdown');
-      menu.classList.toggle('hidden');
+      if (menu) menu.classList.toggle('hidden');
     }
 
     async function loadRateSheets() {
@@ -461,7 +960,25 @@
         const countIndicator = document.getElementById('sheet-count-indicator');
         
         if (!data.sheets || data.sheets.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 font-medium">No rate sheets uploaded yet. Click 'Upload New Rate Sheet' above.</td></tr>`;
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="py-12 px-4 text-center">
+                <div class="max-w-md mx-auto flex flex-col items-center justify-center space-y-3">
+                  <div class="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-slate-800">No Carrier Tariffs Uploaded Yet</h4>
+                    <p class="text-xs text-slate-500 mt-1">To ensure total confidentiality, your account only has access to rate sheets you upload. No sample or public tariffs are shared across accounts.</p>
+                  </div>
+                  <button type="button" onclick="document.getElementById('sheet-file-input').click()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Upload Your First Rate Sheet (.xlsx, .csv)</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
           countIndicator.textContent = "0 active sheets";
           return;
         }
@@ -469,10 +986,18 @@
         countIndicator.textContent = `${data.sheets.length} sheets registered`;
         tbody.innerHTML = data.sheets.map(s => {
           const isConfirmed = s.confirmation_status === 'CONFIRMED';
-          const badgeClass = isConfirmed 
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-            : 'bg-amber-50 text-amber-700 border-amber-300 animate-pulse';
-          const statusText = isConfirmed ? '✓ Confirmed' : '⚠ Needs Confirmation';
+          const isManual = s.manual_override === 1;
+          
+          let badgeClass = 'bg-amber-50 text-amber-700 border-amber-300 animate-pulse';
+          let statusText = '⚠ Needs Confirmation';
+          
+          if (isConfirmed) {
+            badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+            statusText = '✓ Confirmed';
+          } else if (isManual) {
+            badgeClass = 'bg-amber-100 text-amber-900 border-amber-300';
+            statusText = '⚡ Manual Approval Active';
+          }
           
           return `
             <tr class="hover:bg-slate-50/70 transition-colors">
@@ -480,7 +1005,6 @@
                 <div class="flex items-center gap-1.5 flex-wrap">
                   <span>${s.carrier_name}</span>
                   <span class="text-slate-400 font-normal">(${s.service_name})</span>
-                  ${s.is_benchmark ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200">🇨🇦 Benchmark Tariff</span>' : ''}
                 </div>
               </td>
               <td class="py-3 px-4 font-mono text-[11px] text-slate-600">${s.tariff_ref || 'Standard Matrix'}</td>
@@ -492,8 +1016,8 @@
                 </span>
               </td>
               <td class="py-3 px-4 text-right space-x-2">
-                <button onclick="openReviewModal('${s.id}')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs">
-                  ${isConfirmed ? 'View Rules' : 'Review & Confirm →'}
+                <button onclick="openReviewModal('${s.id}')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs cursor-pointer">
+                  ${isConfirmed ? 'Review & Markup Studio →' : 'Review & Confirm →'}
                 </button>
               </td>
             </tr>
@@ -525,7 +1049,7 @@
         if (!res.ok) throw new Error(result.detail || "Upload failed");
 
         statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200";
-        statusBox.innerHTML = `✓ Parsed <strong>${file.name}</strong> successfully! Opening Confirmation Gate...`;
+        statusBox.innerHTML = `✓ Parsed <strong>${file.name}</strong> successfully! Opening Review & Markup Studio...`;
         
         loadRateSheets();
         openReviewModal(result.sheet_id);
@@ -535,72 +1059,333 @@
       }
     }
 
+    // --- Flagged Review Items (Rule 6) ---
+    function renderFlaggedList() {
+      const reviewBanner = document.getElementById('modal-review-banner');
+      const cleanBanner = document.getElementById('modal-review-clean-banner');
+      const flaggedList = document.getElementById('modal-flagged-list');
+      const flaggedCount = document.getElementById('modal-flagged-count');
+
+      const flaggedItems = Array.from(flaggedCellsMap.values());
+      if (flaggedCount) flaggedCount.textContent = flaggedItems.length;
+
+      if (flaggedItems.length > 0) {
+        if (reviewBanner) reviewBanner.classList.remove('hidden');
+        if (cleanBanner) cleanBanner.classList.add('hidden');
+        if (flaggedList) {
+          flaggedList.innerHTML = flaggedItems.map(c => `
+            <div class="flex items-center justify-between p-2 rounded-lg bg-amber-100/70 border border-amber-300">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-amber-900 bg-amber-200/80 px-1.5 py-0.5 rounded text-[11px]">[${c.cell_coord}]</span>
+                <span class="text-amber-900 font-medium">${c.review_notes || c.field_name || 'Flagged Coordinate'}</span>
+              </div>
+              <button type="button" onclick="resolveCellFlag('${c.cell_coord}')" class="px-2.5 py-1 rounded-md bg-white hover:bg-amber-50 text-amber-900 border border-amber-400 font-bold text-[10px] shadow-2xs transition-colors cursor-pointer shrink-0">
+                ✓ Verify & Clear Flag
+              </button>
+            </div>
+          `).join('');
+        }
+      } else {
+        if (reviewBanner) reviewBanner.classList.add('hidden');
+        if (cleanBanner) cleanBanner.classList.remove('hidden');
+      }
+    }
+
+    async function resolveCellFlag(cellCoord) {
+      if (!activeSheetId || !cellCoord) return;
+      try {
+        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/cells/resolve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cell_coord: cellCoord })
+        });
+        if (!res.ok) throw new Error("Failed to resolve flagged coordinate");
+        
+        flaggedCellsMap.delete(cellCoord.trim().toUpperCase());
+        renderFlaggedList();
+        fetchExtractionBreaks();
+      } catch (err) {
+        alert("Error resolving cell flag: " + err.message);
+      }
+    }
+
+    async function resolveAllFlags() {
+      if (!activeSheetId) return;
+      const coords = Array.from(flaggedCellsMap.keys());
+      if (coords.length === 0) return;
+      
+      try {
+        for (const coord of coords) {
+          await fetch(`/api/ratesift/sheets/${activeSheetId}/cells/resolve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cell_coord: coord })
+          });
+        }
+        flaggedCellsMap.clear();
+        renderFlaggedList();
+        fetchExtractionBreaks();
+      } catch (err) {
+        alert("Error resolving all flags: " + err.message);
+      }
+    }
+
+    // --- Surcharges Waive/Bill Toggle (Rule 4 & 11) ---
+    async function toggleSurchargeWaived(surchargeCode, shouldWaive) {
+      if (!activeSheetId) return;
+      try {
+        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/surcharges/${surchargeCode}/waive`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_waived: shouldWaive })
+        });
+        if (!res.ok) throw new Error("Failed to update surcharge");
+        
+        if (currentSheetData && currentSheetData.surcharges) {
+          const s = currentSheetData.surcharges.find(item => item.surcharge_code === surchargeCode);
+          if (s) s.is_waived = shouldWaive ? 1 : 0;
+          renderSurchargesTable(currentSheetData.surcharges);
+        }
+        updateMarkupPreview();
+      } catch (err) {
+        alert("Error updating surcharge: " + err.message);
+      }
+    }
+
+    function renderSurchargesTable(surcharges) {
+      const sTbody = document.getElementById('modal-surcharges-tbody');
+      const countEl = document.getElementById('modal-surcharges-count');
+      if (countEl) countEl.textContent = surcharges.length;
+      if (!sTbody) return;
+
+      if (!surcharges || surcharges.length === 0) {
+        sTbody.innerHTML = '<tr><td colspan="5" class="p-3 text-center text-slate-400">No surcharges detected.</td></tr>';
+        return;
+      }
+
+      sTbody.innerHTML = surcharges.map(s => {
+        const isWaived = s.is_waived === 1 || s.is_waived === true;
+        const feeStr = isWaived ? '$0.00' : (s.fee_type === 'PERCENTAGE' ? s.amount + '%' : '$' + parseFloat(s.amount || 0).toFixed(2));
+        const statusBadge = isWaived
+          ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Waived</span>'
+          : '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-slate-600 bg-slate-100">Billed</span>';
+        
+        const actionBtn = isWaived
+          ? `<button type="button" onclick="toggleSurchargeWaived('${s.surcharge_code}', false)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition-colors cursor-pointer shadow-2xs">Unwaive / Bill</button>`
+          : `<button type="button" onclick="toggleSurchargeWaived('${s.surcharge_code}', true)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition-colors cursor-pointer shadow-2xs">Waive Fee</button>`;
+
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-2 px-3 font-semibold text-slate-800">${s.name} <span class="text-[10px] text-slate-400 font-mono">(${s.surcharge_code})</span></td>
+            <td class="py-2 px-3 font-mono font-bold ${isWaived ? 'line-through text-slate-400' : 'text-slate-800'}">${feeStr}</td>
+            <td class="py-2 px-3">${statusBadge}</td>
+            <td class="py-2 px-3 font-mono text-[10px] text-slate-500">${s.source_cell || 'Auto-detected'}</td>
+            <td class="py-2 px-3 text-right">${actionBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // --- 5-Column Agent Extraction Table (Paginated & Fast) ---
+    function renderExtractionBreaks(breaks) {
+      const bTbody = document.getElementById('modal-breaks-tbody');
+      if (!bTbody) return;
+
+      if (!breaks || breaks.length === 0) {
+        bTbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-400 font-medium">No matching weight breaks found.</td></tr>';
+        return;
+      }
+
+      bTbody.innerHTML = breaks.map(b => {
+        const coord = (b.source_cell || '').trim().toUpperCase();
+        const isFlagged = coord && flaggedCellsMap.has(coord);
+        const verBadge = isFlagged
+          ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">⚠ Needs Review</span>'
+          : '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">✓ Agent Verified</span>';
+        
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-2.5 px-3 font-semibold text-slate-900">${b.origin_spec || 'System Default'} → ${b.dest_spec || 'All Zones'}</td>
+            <td class="py-2.5 px-3 text-slate-600">${b.break_name}</td>
+            <td class="py-2.5 px-3 text-slate-900 font-bold">$${parseFloat(b.base_rate || 0).toFixed(2)} <span class="text-[10px] text-slate-400 font-normal">${b.rate_type || 'CWT'}</span></td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded font-mono text-[10px] bg-slate-100 text-slate-700 font-bold">${b.source_cell || 'Matrix'}</span></td>
+            <td class="py-2.5 px-3 text-center">${verBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateExtractionPaginationControls() {
+      const summary = document.getElementById('extraction-pagination-summary');
+      const indicator = document.getElementById('extraction-page-indicator');
+      const prevBtn = document.getElementById('extraction-prev-btn');
+      const nextBtn = document.getElementById('extraction-next-btn');
+
+      const totalPages = Math.ceil(extractionTotal / extractionLimit) || 1;
+      const start = extractionTotal > 0 ? (extractionPage - 1) * extractionLimit + 1 : 0;
+      const end = Math.min(extractionPage * extractionLimit, extractionTotal);
+
+      if (summary) summary.textContent = `Showing ${start}–${end} of ${extractionTotal.toLocaleString()} breaks`;
+      if (indicator) indicator.textContent = `${extractionPage} / ${totalPages}`;
+      if (prevBtn) prevBtn.disabled = extractionPage <= 1;
+      if (nextBtn) nextBtn.disabled = extractionPage >= totalPages;
+    }
+
+    async function fetchExtractionBreaks() {
+      if (!activeSheetId) return;
+      try {
+        const queryParam = extractionQuery ? `&query=${encodeURIComponent(extractionQuery)}` : '';
+        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/breaks?page=${extractionPage}&limit=${extractionLimit}${queryParam}`);
+        if (!res.ok) throw new Error("Failed to load breaks");
+        const data = await res.json();
+        
+        extractionTotal = data.total_count || 0;
+        renderExtractionBreaks(data.breaks || []);
+        updateExtractionPaginationControls();
+      } catch (err) {
+        console.error("Error fetching breaks:", err);
+      }
+    }
+
+    function goToExtractionPage(delta) {
+      const totalPages = Math.ceil(extractionTotal / extractionLimit) || 1;
+      const newPage = extractionPage + delta;
+      if (newPage < 1 || newPage > totalPages) return;
+      extractionPage = newPage;
+      fetchExtractionBreaks();
+    }
+
+    function onSearchExtractionDebounced(val) {
+      clearTimeout(extractionDebounceTimer);
+      extractionDebounceTimer = setTimeout(() => {
+        extractionQuery = (val || '').trim();
+        extractionPage = 1;
+        fetchExtractionBreaks();
+      }, 200);
+    }
+
+    function clearExtractionSearch() {
+      const input = document.getElementById('extraction-search-input');
+      if (input) input.value = '';
+      extractionQuery = '';
+      extractionPage = 1;
+      fetchExtractionBreaks();
+    }
+
+    // --- Modal Opening & Initialization ---
     async function openReviewModal(sheetId) {
       activeSheetId = sheetId;
       const modal = document.getElementById('confirm-modal');
       modal.classList.remove('hidden');
 
+      // Reset extraction state
+      extractionPage = 1;
+      extractionQuery = '';
+      const searchInput = document.getElementById('extraction-search-input');
+      if (searchInput) searchInput.value = '';
+      flaggedCellsMap.clear();
+
       try {
-        const res = await fetch(`/api/ratesift/sheets/${sheetId}`);
+        // Fast lightweight fetch: limit 50 breaks
+        const res = await fetch(`/api/ratesift/sheets/${sheetId}?limit=50&offset=0`);
         const data = await res.json();
+        currentSheetData = data;
         const sheet = data.sheet;
 
+        // Modal header
         document.getElementById('modal-carrier-title').textContent = `${sheet.carrier_name} — ${sheet.service_name}`;
-        document.getElementById('modal-tariff-ref').textContent = sheet.tariff_ref || "None Specified";
-        document.getElementById('modal-dates').textContent = `${sheet.effective_date || 'None'} to ${sheet.expiry_date || 'Open'}`;
-        document.getElementById('modal-units').textContent = `${sheet.currency} / ${sheet.weight_unit}`;
-        document.getElementById('modal-dim-divisor').textContent = sheet.dim_divisor;
+        document.getElementById('modal-tariff-ref').textContent = sheet.tariff_ref || "Standard Matrix";
 
-        // Status badge
-        const badge = document.getElementById('modal-status-badge');
-        const confirmBtn = document.getElementById('modal-confirm-btn');
-        if (sheet.confirmation_status === 'CONFIRMED') {
-          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800";
-          badge.textContent = `Confirmed by ${sheet.confirmed_by || 'User'}`;
-          confirmBtn.classList.add('hidden');
+        // Human confirmation rules pre-fill
+        setTariffCurrency(sheet.currency || 'CAD');
+        setTariffWeightUnit(sheet.weight_unit || 'lb');
+        
+        // DIM Divisor
+        selectedDimDivisor = parseFloat(sheet.dim_divisor || 139.0);
+        const dimSelect = document.getElementById('select-dim-preset');
+        const dimCustom = document.getElementById('input-dim-custom');
+        if (['139.0', '166.0', '250.0'].includes(String(selectedDimDivisor)) || ['139', '166', '250'].includes(String(selectedDimDivisor))) {
+          if (dimSelect) dimSelect.value = String(selectedDimDivisor.toFixed(1));
+          if (dimCustom) dimCustom.classList.add('hidden');
         } else {
-          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800";
+          if (dimSelect) dimSelect.value = 'custom';
+          if (dimCustom) {
+            dimCustom.value = selectedDimDivisor;
+            dimCustom.classList.remove('hidden');
+          }
+        }
+
+        // Rounding rule
+        selectedRoundingRule = sheet.rounding_rule || 'standard_2dp';
+        const roundSelect = document.getElementById('select-rounding-rule');
+        if (roundSelect) roundSelect.value = selectedRoundingRule;
+
+        // Dates
+        const effInput = document.getElementById('input-effective-date');
+        const expInput = document.getElementById('input-expiry-date');
+        if (effInput) effInput.value = sheet.effective_date || '';
+        if (expInput) expInput.value = sheet.expiry_date || '';
+
+        // Markup mode & value
+        setMarkupMode(sheet.markup_mode || 'PERCENTAGE');
+        document.getElementById('input-markup-val').value = sheet.markup_value !== null && sheet.markup_value !== undefined ? sheet.markup_value : 15.0;
+        document.getElementById('check-fsc-passthrough').checked = sheet.fsc_passthrough !== 0;
+        document.getElementById('check-accessorial-markup').checked = (sheet.accessorial_markup_pct || 0) > 0;
+
+        // Manual broker approval switch
+        const isManual = sheet.manual_override === 1;
+        document.getElementById('switch-manual-approval').checked = isManual;
+        handleManualApprovalToggle(isManual);
+
+        // Status badge & button text
+        const badge = document.getElementById('modal-status-badge');
+        const confirmBtnText = document.getElementById('modal-confirm-btn-text');
+        const ruleStatus = document.getElementById('rule-confirmed-status-text');
+        
+        if (sheet.confirmation_status === 'CONFIRMED') {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800";
+          badge.textContent = `Confirmed by ${sheet.confirmed_by || 'User'}`;
+          confirmBtnText.textContent = "✓ Update Markup & Confirmation Settings";
+          if (ruleStatus) {
+            ruleStatus.className = "text-[11px] font-bold text-emerald-700 font-mono";
+            ruleStatus.textContent = "✓ Rules Human-Confirmed";
+          }
+        } else if (isManual) {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300";
+          badge.textContent = "Manual Approval Override Active";
+          confirmBtnText.textContent = "✓ Apply Approval & Enable Quoting";
+          if (ruleStatus) {
+            ruleStatus.className = "text-[11px] font-bold text-amber-800 font-mono";
+            ruleStatus.textContent = "⚡ Manual Approval Active";
+          }
+        } else {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800";
           badge.textContent = "Pending Confirmation";
-          confirmBtn.classList.remove('hidden');
+          confirmBtnText.textContent = "✓ Apply Approval & Enable Quoting";
+          if (ruleStatus) {
+            ruleStatus.className = "text-[11px] font-semibold text-slate-500 font-mono";
+            ruleStatus.textContent = "Pending User Confirmation";
+          }
         }
 
         // Flagged review items (Rule 6)
-        const reviewBanner = document.getElementById('modal-review-banner');
-        const flaggedList = document.getElementById('modal-flagged-list');
         if (data.flagged_cells && data.flagged_cells.length > 0) {
-          reviewBanner.classList.remove('hidden');
-          flaggedList.innerHTML = data.flagged_cells.map(c => `
-            <div>• <strong class="font-mono text-slate-800">[${c.cell_coord}]</strong> ${c.review_notes || c.field_name}</div>
-          `).join('');
-        } else {
-          reviewBanner.classList.add('hidden');
+          data.flagged_cells.forEach(c => {
+            if (c.cell_coord) flaggedCellsMap.set(c.cell_coord.trim().toUpperCase(), c);
+          });
         }
+        renderFlaggedList();
 
-        // Surcharges
-        document.getElementById('modal-surcharges-count').textContent = data.surcharges.length;
-        const sTbody = document.getElementById('modal-surcharges-tbody');
-        sTbody.innerHTML = data.surcharges.map(s => `
-          <tr class="hover:bg-slate-50">
-            <td class="py-2 px-3 font-semibold text-slate-800">${s.name} <span class="text-[10px] text-slate-400 font-mono">(${s.surcharge_code})</span></td>
-            <td class="py-2 px-3 font-mono">${s.is_waived ? '$0.00' : (s.fee_type === 'PERCENTAGE' ? s.amount + '%' : '$' + s.amount.toFixed(2))}</td>
-            <td class="py-2 px-3">${s.is_waived ? '<span class="text-emerald-700 font-bold">Waived</span>' : 'Standard'}</td>
-            <td class="py-2 px-3 font-mono text-[10px] text-slate-500">${s.source_cell || 'Auto-detected'}</td>
-          </tr>
-        `).join('');
+        // 5-Column Agent Extraction Table (first 50 breaks)
+        extractionTotal = data.total_breaks_count || (data.breaks ? data.breaks.length : 0);
+        document.getElementById('modal-breaks-count').textContent = extractionTotal.toLocaleString();
+        renderExtractionBreaks(data.breaks || []);
+        updateExtractionPaginationControls();
 
-        // Breaks
-        document.getElementById('modal-breaks-count').textContent = data.breaks.length;
-        const bTbody = document.getElementById('modal-breaks-tbody');
-        bTbody.innerHTML = data.breaks.slice(0, 15).map(b => `
-          <tr class="hover:bg-slate-50">
-            <td class="py-1.5 px-3">${b.origin_spec || 'Any'} → ${b.dest_spec || 'Any'}</td>
-            <td class="py-1.5 px-3">${b.break_name}</td>
-            <td class="py-1.5 px-3 text-slate-900 font-bold">$${b.base_rate.toFixed(2)}</td>
-            <td class="py-1.5 px-3 text-[10px] text-slate-500">${b.rate_type}</td>
-            <td class="py-1.5 px-3 text-[10px] text-slate-400">${b.source_cell || '-'}</td>
-          </tr>
-        `).join('');
+        // Extracted Surcharges Section
+        renderSurchargesTable(data.surcharges || []);
 
+        updateMarkupPreview();
       } catch (err) {
         alert("Error loading sheet details: " + err.message);
       }
@@ -613,9 +1398,33 @@
 
     async function confirmCurrentSheet() {
       if (!activeSheetId) return;
+      const payload = {
+        currency: selectedCurrency,
+        weight_unit: selectedWeightUnit,
+        dim_divisor: selectedDimDivisor,
+        effective_date: document.getElementById('input-effective-date').value || null,
+        expiry_date: document.getElementById('input-expiry-date').value || null,
+        rounding_rule: document.getElementById('select-rounding-rule').value,
+        markup_mode: currentMarkupMode,
+        markup_value: parseFloat(document.getElementById('input-markup-val').value) || 0.0,
+        fsc_passthrough: document.getElementById('check-fsc-passthrough').checked,
+        accessorial_markup_pct: document.getElementById('check-accessorial-markup').checked ? 15.0 : 0.0,
+        manual_override: document.getElementById('switch-manual-approval').checked,
+        resolve_flags: false
+      };
+
       try {
-        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/confirm`, { method: 'POST' });
+        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
         if (!res.ok) throw new Error("Confirmation failed");
+        
+        const statusBox = document.getElementById('upload-status');
+        statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+        statusBox.innerHTML = `✓ Sheet & tariff rules confirmed! ${payload.manual_override ? '<strong>Manual Broker Approval Override Enabled</strong> for live quoting.' : '<strong>Confirmed for Live Quoting</strong>.'}`;
+        
         closeConfirmModal();
         loadRateSheets();
       } catch (err) {
@@ -636,8 +1445,134 @@
       }
     }
 
+    // =========================================================================
+    // In-Browser Formatted Sheet Inspection Modal Logic (No Downloads Allowed)
+    // =========================================================================
+    async function openFormattedSheetModal() {
+      if (!activeSheetId) return;
+      const modal = document.getElementById('formatted-sheet-modal');
+      modal.classList.remove('hidden');
+
+      fsmPage = 1;
+      fsmQuery = '';
+      const input = document.getElementById('fsm-search-input');
+      if (input) input.value = '';
+
+      fetchFsmMatrix();
+    }
+
+    function closeFormattedSheetModal() {
+      document.getElementById('formatted-sheet-modal').classList.add('hidden');
+    }
+
+    async function fetchFsmMatrix() {
+      if (!activeSheetId) return;
+      try {
+        const queryParam = fsmQuery ? `&query=${encodeURIComponent(fsmQuery)}` : '';
+        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/formatted-matrix?page=${fsmPage}&limit=${fsmLimit}${queryParam}`);
+        if (!res.ok) throw new Error("Failed to load formatted matrix");
+        const data = await res.json();
+        
+        document.getElementById('fsm-carrier-title').textContent = `${data.sheet.carrier_name} — ${data.sheet.service_name} Formatted Matrix`;
+        document.getElementById('fsm-currency-badge').textContent = `${data.sheet.currency} / ${data.sheet.weight_unit}`;
+        
+        fsmTotal = data.total_breaks || 0;
+        document.getElementById('fsm-rows-count').textContent = fsmTotal.toLocaleString();
+        
+        renderFormattedMatrixRows(data.breaks || []);
+        updateFsmPaginationControls();
+      } catch (err) {
+        alert("Error loading formatted sheet: " + err.message);
+      }
+    }
+
+    function renderFormattedMatrixRows(rows) {
+      const tbody = document.getElementById('fsm-matrix-tbody');
+      if (!rows || rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-slate-400">No matching lane rates found.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(r => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="py-2 px-3 font-semibold text-slate-800">${r.origin_spec || 'System Default'}</td>
+          <td class="py-2 px-3 font-semibold text-slate-800">${r.dest_spec || 'All Destination Zones'}</td>
+          <td class="py-2 px-3 text-slate-500">${r.zone_code || 'DEFAULT'}</td>
+          <td class="py-2 px-3 text-slate-700">${r.break_name}</td>
+          <td class="py-2 px-3 font-bold text-slate-900">$${parseFloat(r.base_rate || 0).toFixed(2)}</td>
+          <td class="py-2 px-3 text-slate-500 text-[10px]">${r.rate_type || 'CWT'}</td>
+          <td class="py-2 px-3 text-red-600 font-bold">${r.source_cell || 'Auto'}</td>
+          <td class="py-2 px-3 text-center">
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Preserved
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateFsmPaginationControls() {
+      const summary = document.getElementById('fsm-pagination-summary');
+      const numberEl = document.getElementById('fsm-page-number');
+      const prevBtn = document.getElementById('fsm-prev-btn');
+      const nextBtn = document.getElementById('fsm-next-btn');
+
+      const totalPages = Math.ceil(fsmTotal / fsmLimit) || 1;
+      const start = fsmTotal > 0 ? (fsmPage - 1) * fsmLimit + 1 : 0;
+      const end = Math.min(fsmPage * fsmLimit, fsmTotal);
+
+      if (summary) summary.textContent = `Showing ${start}–${end} of ${fsmTotal.toLocaleString()} rows`;
+      if (numberEl) numberEl.textContent = `Page ${fsmPage} / ${totalPages}`;
+      if (prevBtn) prevBtn.disabled = fsmPage <= 1;
+      if (nextBtn) nextBtn.disabled = fsmPage >= totalPages;
+    }
+
+    function goToFsmPage(delta) {
+      const totalPages = Math.ceil(fsmTotal / fsmLimit) || 1;
+      const newPage = fsmPage + delta;
+      if (newPage < 1 || newPage > totalPages) return;
+      fsmPage = newPage;
+      fetchFsmMatrix();
+    }
+
+    function onSearchFsmDebounced(val) {
+      clearTimeout(fsmDebounceTimer);
+      fsmDebounceTimer = setTimeout(() => {
+        fsmQuery = (val || '').trim();
+        fsmPage = 1;
+        fetchFsmMatrix();
+      }, 250);
+    }
+
+    function preventDownloadAction(e) {
+      e.preventDefault();
+      alert("🔒 Platform Security Notice: Reformatted carrier tariffs are restricted to in-browser inspection only. Downloads, exports, and file extractions are permanently disabled.");
+    }
+
+    function testPreflightLane() {
+      if (!currentSheetData || !currentSheetData.sheet) return;
+      window.location.href = `/console/new-quote?origin=M5V2T6&dest=T2P1J9&weight=1450`;
+    }
+
+    function updateHeaderQuota() {
+      fetch('/api/user/quota')
+        .then(r => r.json())
+        .then(q => {
+          if (!q) return;
+          const tierElem = document.getElementById('pill-tier-name');
+          const quotesElem = document.getElementById('pill-quotes-info');
+          if (tierElem) tierElem.textContent = q.tier_name || q.tier;
+          if (quotesElem) {
+            quotesElem.textContent = q.max_quotes_per_month > 0 ? `${q.quotes_remaining} quotes left` : 'Unlimited quotes';
+          }
+        })
+        .catch(err => console.debug("Quota header load:", err));
+    }
+
     // Initial load
-    document.addEventListener("DOMContentLoaded", loadRateSheets);
+    document.addEventListener("DOMContentLoaded", () => {
+      loadRateSheets();
+      updateHeaderQuota();
+    });
   </script>
 </body>
 </html>

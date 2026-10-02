@@ -62,7 +62,7 @@ def build_client_proposal_data(
             "amount": float(s.get("amount", 0.0))
         })
 
-    return {
+    proposal_dict = {
         "proposal_id": proposal_id,
         "issue_date": issue_date,
         "expiry_date": expiry_date,
@@ -79,8 +79,8 @@ def build_client_proposal_data(
         "shipment": {
             "origin": quote_data.get("origin", "N/A"),
             "destination": quote_data.get("destination", "N/A"),
-            "weight_lbs": quote_data.get("actual_weight") or quote_data.get("billable_weight") or 0.0,
-            "billable_weight": quote_data.get("billable_weight") or quote_data.get("actual_weight") or 0.0,
+            "weight_lbs": quote_data.get("weight_lbs") or quote_data.get("actual_weight") or quote_data.get("billable_weight") or 0.0,
+            "billable_weight": quote_data.get("billable_weight") or quote_data.get("weight_lbs") or quote_data.get("actual_weight") or 0.0,
             "is_dim_billed": bool(quote_data.get("is_dim_billed", False)),
             "service_level": quote_data.get("service_name") or "Standard Road LTL",
             "transit_days": quote_data.get("transit_days") or 3,
@@ -101,6 +101,182 @@ def build_client_proposal_data(
             "3. Transit Times: Transit days are business-day estimates and exclude statutory holidays and weekend layovers.",
             "4. Loading / Unloading: Standard 2-hour free time applies at shipper and receiver docks. Detention applies thereafter."
         ]
+    }
+    proposal_dict["email"] = generate_proposal_email(proposal_dict)
+    return proposal_dict
+
+def generate_proposal_email(proposal_data: Dict[str, Any]) -> Dict[str, str]:
+    """
+    Generates a professional, executive-grade freight proposal email with full quote details.
+    Includes route specifications, itemized pricing breakdown, rate lock, and commercial terms.
+    """
+    broker = proposal_data.get("broker", {})
+    client = proposal_data.get("client", {})
+    shipment = proposal_data.get("shipment", {})
+    pricing = proposal_data.get("pricing", {})
+    line_items = proposal_data.get("line_items", [])
+
+    origin = shipment.get("origin", "N/A")
+    destination = shipment.get("destination", "N/A")
+    weight = float(shipment.get("billable_weight") or shipment.get("weight_lbs") or 0.0)
+    service_level = shipment.get("service_level", "Standard Road LTL")
+    transit_days = shipment.get("transit_days", 3)
+    currency = pricing.get("currency", "CAD")
+    client_total = float(pricing.get("client_total", 0.0))
+    proposal_id = proposal_data.get("proposal_id", "PROP-REF")
+    issue_date = proposal_data.get("issue_date", "")
+    expiry_date = proposal_data.get("expiry_date", "")
+    client_name = client.get("name", "Client Partner")
+    agent_name = broker.get("agent_name", "Alex Rivers")
+    company_name = broker.get("company", "TechCorp Logistics")
+    agent_email = broker.get("email", "alex.rivers@techcorp.io")
+    origin_hub = broker.get("origin_hub", "Toronto, ON")
+
+    subject = f"Freight Rate Quote Proposal: {origin} → {destination} ({weight:,.0f} lbs) - Ref #{proposal_id}"
+
+    # Build itemized lines for text & HTML
+    item_lines_txt = []
+    item_rows_html = []
+    for item in line_items:
+        desc = item.get("description", "Transportation Charge")
+        cat = item.get("category", "Service")
+        amt = float(item.get("amount", 0.0))
+        item_lines_txt.append(f"  • {desc} ({cat}): ${amt:,.2f} {currency}")
+        item_rows_html.append(f"""
+          <tr>
+            <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: #1e293b;">{desc}</td>
+            <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 12px; color: #64748b;">{cat}</td>
+            <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; font-weight: bold; color: #0f172a; text-align: right; font-family: monospace;">${amt:,.2f}</td>
+          </tr>
+        """)
+
+    items_block = "\n".join(item_lines_txt)
+    items_table_html = "".join(item_rows_html)
+
+    body_text = f"""Hi {client_name},
+
+Thank you for the opportunity to quote your freight shipment. Please find your official freight rate proposal and shipment details below:
+
+============================================================
+SHIPMENT OVERVIEW & ROUTE PROFILE
+============================================================
+• Origin:             {origin}
+• Destination:        {destination}
+• Service Level:      {service_level}
+• Estimated Transit:  {transit_days} Business Days
+• Cargo Weight:       {weight:,.1f} lbs
+• Proposal Reference: {proposal_id}
+• Date Issued:        {issue_date}
+• Rate Lock Guarantee: 7-Day Rate Lock Guarantee (Valid until {expiry_date})
+
+============================================================
+ITEMIZED RATE SCHEDULE ({currency})
+============================================================
+{items_block}
+------------------------------------------------------------
+GUARANTEED ALL-IN CLIENT TOTAL: ${client_total:,.2f} {currency}
+------------------------------------------------------------
+
+TERMS & CONDITIONS OF CARRIAGE:
+1. Rate Guarantee: Guaranteed valid for 7 calendar days from issuance. Subject to carrier equipment availability.
+2. Verification: Final billing subject to standard scale re-weigh and cube audit upon tender.
+3. Transit Times: Business day estimates excluding statutory holidays and weekends.
+4. Loading / Unloading: Standard 2-hour free time applies at shipper and receiver docks.
+
+To accept this quote and schedule dispatch pickup, simply reply directly to this email or call our operations desk.
+
+Best regards,
+
+{agent_name}
+{company_name}
+Email: {agent_email}
+Dispatch Hub: {origin_hub}
+RateSift Canadian Freight Engine • WHC Canadian Data Residency Verified"""
+
+    body_html = f"""<div style="font-family: Arial, -apple-system, sans-serif; color: #1e293b; max-width: 650px; line-height: 1.6;">
+  <p style="font-size: 14px; margin-bottom: 16px;">Hi <strong>{client_name}</strong>,</p>
+  <p style="font-size: 13px; color: #475569; margin-bottom: 20px;">
+    Thank you for the opportunity to quote your freight shipment. Please find your formal rate proposal and route details below:
+  </p>
+
+  <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+    <div style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px;">
+      Shipment Specifications & Route Profile
+    </div>
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+      <tr>
+        <td style="padding: 4px 0; color: #64748b; width: 35%;">Origin:</td>
+        <td style="padding: 4px 0; font-weight: bold; color: #0f172a;">{origin}</td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 0; color: #64748b;">Destination:</td>
+        <td style="padding: 4px 0; font-weight: bold; color: #0f172a;">{destination}</td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 0; color: #64748b;">Service Level:</td>
+        <td style="padding: 4px 0; font-weight: bold; color: #0f172a;">{service_level}</td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 0; color: #64748b;">Estimated Transit:</td>
+        <td style="padding: 4px 0; font-weight: bold; color: #0f172a;">{transit_days} Business Days</td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 0; color: #64748b;">Billable Weight:</td>
+        <td style="padding: 4px 0; font-weight: bold; color: #0f172a;">{weight:,.1f} lbs</td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 0; color: #64748b;">Proposal Ref:</td>
+        <td style="padding: 4px 0; font-family: monospace; color: #dc2626; font-weight: bold;">{proposal_id}</td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 0; color: #64748b;">Rate Lock Guarantee:</td>
+        <td style="padding: 4px 0; color: #16a34a; font-weight: bold;">Valid until {expiry_date}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background-color: #0f172a; color: white;">
+          <th style="padding: 10px 12px; font-size: 11px; text-align: left; text-transform: uppercase;">Description</th>
+          <th style="padding: 10px 12px; font-size: 11px; text-align: left; text-transform: uppercase;">Category</th>
+          <th style="padding: 10px 12px; font-size: 11px; text-align: right; text-transform: uppercase;">Amount ({currency})</th>
+        </tr>
+      </thead>
+      <tbody>
+        {items_table_html}
+      </tbody>
+      <tfoot>
+        <tr style="background-color: #fef2f2; border-top: 2px solid #dc2626;">
+          <td colspan="2" style="padding: 12px; font-size: 13px; font-weight: bold; color: #991b1b; text-transform: uppercase;">Total Client Price (All-In {currency})</td>
+          <td style="padding: 12px; font-size: 16px; font-weight: 900; color: #dc2626; text-align: right; font-family: monospace;">${client_total:,.2f} {currency}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div style="font-size: 11px; color: #64748b; line-height: 1.5; margin-bottom: 24px; padding-left: 8px; border-left: 3px solid #cbd5e1;">
+    <p style="margin: 0 0 4px 0;"><strong>Terms:</strong> Quote valid for 7 calendar days. Final billing subject to actual scale re-weigh and dimensional cube inspection.</p>
+    <p style="margin: 0;">Standard 2-hour dock free time applies for loading and unloading.</p>
+  </div>
+
+  <p style="font-size: 13px; margin-bottom: 24px;">
+    To accept this quote and schedule dispatch pickup, please reply directly to this email.
+  </p>
+
+  <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; font-size: 12px; color: #334155;">
+    <strong style="font-size: 13px; color: #0f172a;">{agent_name}</strong><br>
+    <span>{company_name}</span><br>
+    <span>Email: <a href="mailto:{agent_email}" style="color: #dc2626; text-decoration: none;">{agent_email}</a></span><br>
+    <span>Dispatch Hub: {origin_hub}</span>
+  </div>
+</div>"""
+
+    return {
+        "subject": subject,
+        "body_text": body_text,
+        "body_html": body_html
     }
 
 def generate_proposal_excel_workbook(proposal_data: Dict[str, Any]) -> bytes:

@@ -344,8 +344,8 @@ def calculate_quote_for_sheet(
     if not sheet:
         raise ValueError(f"Rate sheet {sheet_id} not found or unauthorized (Rule 28).")
 
-    # Rule 19: Strict confirmation gate check
-    if sheet["confirmation_status"] != "CONFIRMED":
+    # Rule 19: Strict confirmation gate check (with manual broker override support)
+    if sheet["confirmation_status"] != "CONFIRMED" and not sheet.get("manual_override"):
         raise ValueError(f"Rule 19 Violation: Cannot quote from unconfirmed sheet '{sheet['carrier_name']}' (Status: {sheet['confirmation_status']}). Confirmation required.")
 
     # Rule 16: Effective Date and Expiry Date validation
@@ -502,12 +502,44 @@ def calculate_quote_for_sheet(
         total_amount = subtotal_pre_min
 
     # 5. Final Step Rounding (Rule 15)
-    final_total = round_currency(total_amount, sheet.get("rounding_rule", "standard_2dp"))
+    wholesale_total = round_currency(total_amount, sheet.get("rounding_rule", "standard_2dp"))
     trace_steps.append({
-        "step": "Final-Step Rounding (Rule 15)",
-        "final_total": final_total,
+        "step": "Final-Step Rounding (Wholesale Net Total) (Rule 15)",
+        "wholesale_total": wholesale_total,
         "rounding_rule": sheet.get("rounding_rule", "standard_2dp")
     })
+
+    # Broker Margin & Markup Calculation
+    markup_mode = sheet.get("markup_mode", "PERCENTAGE")
+    markup_val = float(sheet.get("markup_value") or 0.0)
+    broker_margin = 0.0
+    if markup_val > 0:
+        if markup_mode == "PERCENTAGE":
+            broker_margin = round(base_charge * (markup_val / 100.0), 2)
+        elif markup_mode == "FLAT":
+            broker_margin = round(markup_val, 2)
+        elif markup_mode == "CWT":
+            broker_margin = round((billable_weight / 100.0) * markup_val, 2)
+        
+        trace_steps.append({
+            "step": f"Broker Margin Markup ({markup_mode}: {markup_val})",
+            "wholesale_base": base_charge,
+            "broker_margin": broker_margin,
+            "formula": f"{base_charge} x {markup_val}%" if markup_mode == "PERCENTAGE" else f"${markup_val}"
+        })
+
+    # Accessorial markup if configured
+    acc_markup_pct = float(sheet.get("accessorial_markup_pct") or 0.0)
+    if acc_markup_pct > 0 and total_surcharges > 0:
+        acc_margin = round(total_surcharges * (acc_markup_pct / 100.0), 2)
+        broker_margin = round(broker_margin + acc_margin, 2)
+        trace_steps.append({
+            "step": f"Accessorial Margin Markup (+{acc_markup_pct}%)",
+            "accessorial_margin": acc_margin
+        })
+
+    client_total = round_currency(wholesale_total + broker_margin, sheet.get("rounding_rule", "standard_2dp"))
+    final_total = client_total if broker_margin > 0 else wholesale_total
 
     # Transit time resolution
     transit_days = None
@@ -539,6 +571,10 @@ def calculate_quote_for_sheet(
                 flagged_reasons.append(f"{label} at {coord}")
                 break
 
+    # Manual broker override flag
+    if sheet.get("manual_override"):
+        flagged_reasons.append("Manual Broker Override: Sheet enabled prior to agent verification")
+
     relies_on_flagged = len(flagged_reasons) > 0
     caution_badge = f"Caution: Relies on flagged/reviewed data ({', '.join(flagged_reasons)})" if relies_on_flagged else None
 
@@ -563,7 +599,10 @@ def calculate_quote_for_sheet(
         "is_deficit_rated": matched_break.get("is_deficit_rated", False),
         "deficit_savings": matched_break.get("deficit_savings", 0.0),
         "deficit_weight": matched_break.get("deficit_weight", 0.0),
+        "wholesale_total": wholesale_total,
+        "broker_margin": broker_margin,
         "final_total": final_total,
+        "client_total": final_total,
         "transit_days": transit_days or 3,  # default estimated transit if zone unstated
         "relies_on_flagged_cell": relies_on_flagged,
         "caution_badge": caution_badge,
@@ -594,6 +633,7 @@ def check_rate_shift_anomaly(
     SELECT * FROM rs_rate_sheets
     WHERE user_id = ? AND carrier_name = ? AND service_name = ?
       AND version < ? AND confirmation_status = 'CONFIRMED'
+      AND (is_benchmark = 0 OR is_benchmark IS NULL)
     ORDER BY version DESC LIMIT 1
     """, (user_id, current_sheet["carrier_name"], current_sheet["service_name"], current_sheet.get("version", 1)))
     row = cursor.fetchone()
@@ -650,7 +690,8 @@ def quote_all_confirmed_carriers(
     Rule 18 (Operational limits & mode feasibility), Rule 20 (Ranking),
     Rule 27 (Rate shift anomaly), and Rule 30 (Audit logging).
     """
-    confirmed_sheets = list_rate_sheets(user_id=user_id, status="CONFIRMED")
+    all_tenant_sheets = list_rate_sheets(user_id=user_id)
+    confirmed_sheets = [s for s in all_tenant_sheets if s.get("confirmation_status") == "CONFIRMED" or s.get("manual_override") == 1]
     
     valid_quotes = []
     excluded_sheets = []
@@ -781,12 +822,19 @@ def quote_all_confirmed_carriers(
         final_results=valid_quotes
     )
 
+    message = None
+    if len(all_tenant_sheets) == 0:
+        message = "No rate sheets uploaded yet. Please upload your carrier tariffs in Carrier Tariffs to calculate quotes."
+    elif len(valid_quotes) == 0:
+        message = "No valid rates found for this lane across your uploaded sheets."
+
     return {
         "quote_id": quote_id,
         "timestamp": datetime.utcnow().isoformat(),
         "total_options": len(valid_quotes),
         "quotes": valid_quotes,
         "excluded_sheets": excluded_sheets,
+        "message": message,
         "disclaimer": "Calculation from customer uploaded rate sheets. Non-binding quote (Rule 26)."
     }
 

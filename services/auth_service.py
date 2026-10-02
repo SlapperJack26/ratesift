@@ -129,13 +129,6 @@ def register_and_create_session(
             "origin_zip": origin_zip.strip(),
             "tier": "FREE"
         }
-
-        # Auto-seed benchmark Canadian tariffs for immediate quoting sandbox
-        try:
-            from services.seed_canadian_benchmarks import seed_canadian_benchmarks_for_user
-            seed_canadian_benchmarks_for_user(user_id)
-        except Exception:
-            pass
     except Exception:
         # If user exists, retrieve existing user
         cursor.execute("SELECT id, name, email, company, origin_zip, tier FROM users WHERE email = ?", (email_clean,))
@@ -156,8 +149,8 @@ def get_user_profile(user_id: str = "usr_alex_rivers") -> Dict[str, Any]:
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-    SELECT u.id, u.name, u.email, u.company, u.origin_zip, u.tier,
-           s.currency, s.units, s.markup_pct, s.auto_detect_headers, s.skip_blank_rows
+    SELECT u.id, u.name, u.email, u.company, u.origin_zip, u.origin_address, u.phone, u.tier,
+           s.currency, s.units, s.markup_pct, s.markup_mode, s.fsc_passthrough, s.auto_detect_headers, s.skip_blank_rows
     FROM users u
     LEFT JOIN user_settings s ON u.id = s.user_id
     WHERE u.id = ?
@@ -173,11 +166,15 @@ def get_user_profile(user_id: str = "usr_alex_rivers") -> Dict[str, Any]:
         "name": "Alex Rivers",
         "email": "alex.rivers@techcorp.io",
         "company": "TechCorp Logistics",
-        "origin_zip": "94103",
+        "origin_zip": "TORONTO, ON",
+        "origin_address": "5500 Logistics Way, Bay 12",
+        "phone": "+1 (416) 555-0199",
         "tier": "FREE",
-        "currency": "USD",
+        "currency": "CAD",
         "units": "lbs",
         "markup_pct": 10.0,
+        "markup_mode": "PERCENTAGE",
+        "fsc_passthrough": 1,
         "auto_detect_headers": 1,
         "skip_blank_rows": 1
     }
