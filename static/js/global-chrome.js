@@ -39,13 +39,13 @@
             <button type="button" id="doc-tab-btn-engine" onclick="switchDocTab('engine')" class="pb-2.5 text-red-600 border-b-2 border-red-600 font-bold">Rating Engine & Deficit</button>
             <button type="button" id="doc-tab-btn-tariffs" onclick="switchDocTab('tariffs')" class="pb-2.5 hover:text-slate-900">Tariff Excel Formats</button>
             <button type="button" id="doc-tab-btn-fsa" onclick="switchDocTab('fsa')" class="pb-2.5 hover:text-slate-900">Canadian FSA Routing</button>
-            <button type="button" id="doc-tab-btn-privacy" onclick="switchDocTab('privacy')" class="pb-2.5 hover:text-slate-900">Tenant Quarantine (Rule 28)</button>
+            <button type="button" id="doc-tab-btn-privacy" onclick="switchDocTab('privacy')" class="pb-2.5 hover:text-slate-900">Tenant Quarantine</button>
           </div>
 
           <!-- Documentation Tab Contents -->
           <div class="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs leading-relaxed flex-1">
             <div id="doc-pane-engine" class="space-y-3">
-              <h4 class="text-sm font-bold text-slate-900">Deterministic Rating & Deficit Pricing Logic (Rule 8 & 19)</h4>
+              <h4 class="text-sm font-bold text-slate-900">Deterministic Rating & Deficit Pricing Logic</h4>
               <p>RateSift evaluates every freight quote using absolute mathematical precision. If a shipment weighs 850 lbs under a base rate of $12.50/cwt ($106.25), but the 1,000 lbs break drops to $9.50/cwt ($95.00), the deficit weight engine automatically rates the shipment at the lower 1,000 lbs threshold ($95.00), saving you money on every lane.</p>
               <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1 font-mono text-[11px]">
                 <div class="font-bold text-slate-700">Formula Evaluation:</div>
@@ -74,7 +74,7 @@
             </div>
 
             <div id="doc-pane-privacy" class="hidden space-y-3">
-              <h4 class="text-sm font-bold text-slate-900">Rule 28: Complete Tenant Data Quarantine</h4>
+              <h4 class="text-sm font-bold text-slate-900">Complete Tenant Data Quarantine</h4>
               <p>In accordance with Canadian PIPEDA sovereignty, RateSift enforces a zero-knowledge tariff boundary. Accounts only have access to tariffs they directly upload. No benchmark sample rates from other carriers or competitors are shared, ensuring your private rates and negotiated customer discounts remain 100% confidential.</p>
             </div>
           </div>
@@ -238,7 +238,7 @@ print(response.json())</pre>
             </section>
 
             <section class="space-y-1.5">
-              <h4 class="font-bold text-slate-900 text-sm">2. PIPEDA Strict Tenant Isolation (Rule 28)</h4>
+              <h4 class="font-bold text-slate-900 text-sm">2. PIPEDA Strict Tenant Isolation</h4>
               <p class="text-slate-600">Under the Personal Information Protection and Electronic Documents Act (PIPEDA), your commercial tariffs are treated as strictly confidential proprietary assets. No freight rates or carrier agreements uploaded by your organization are ever shared, pooled, or benchmarked with any third party.</p>
             </section>
 

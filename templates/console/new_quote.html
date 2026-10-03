@@ -140,7 +140,7 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
         <div>
           <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Freight Rating Engine</h1>
-          <p class="text-sm text-slate-500 mt-0.5">100% Deterministic (Rule 8) • A Canadian freight rate comparison UI design</p>
+          <p class="text-sm text-slate-500 mt-0.5">100% Deterministic Rating • A Canadian freight rate comparison UI design</p>
         </div>
 
         <!-- Weekly Canadian Fuel Surcharge (FSC) Index Card (Matches Mockup) -->
@@ -232,7 +232,7 @@
                 <input id="input-height" type="number" step="0.1" min="0" placeholder="e.g. 50" value="50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
               </div>
               <div>
-                <label for="input-date" class="block text-xs font-bold text-slate-800 mb-1">Shipment Date (Rule 16)</label>
+                <label for="input-date" class="block text-xs font-bold text-slate-800 mb-1">Shipment Date</label>
                 <input id="input-date" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
               </div>
             </div>
@@ -241,10 +241,7 @@
             <div class="space-y-3 pt-3 border-t border-slate-100">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-slate-900">Requested Accessorials & Surcharges</span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">Rule 11</span>
-                  </div>
+                  <h3 class="text-xs font-bold text-slate-900">Requested Accessorials & Surcharges</h3>
                   <p class="text-[11px] text-slate-500">Deterministic line-item charges • Filter options by Land, Sea, or Air shipping mode</p>
                 </div>
 
@@ -492,7 +489,7 @@
           <!-- Rule 21: In-Memory Re-Sorting Toggles -->
           <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
             <span class="text-[10px] uppercase font-bold text-slate-400 px-2">Sort:</span>
-            <button type="button" id="sort-price-btn" onclick="setSortMode('price')" class="px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer" title="Lowest Price First (Rule 20)">
+            <button type="button" id="sort-price-btn" onclick="setSortMode('price')" class="px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer" title="Lowest Price First">
               Lowest Price
             </button>
             <button type="button" id="sort-transit-btn" onclick="setSortMode('transit')" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer" title="Fastest Transit First">
@@ -509,25 +506,25 @@
           <!-- Quote cards injected via JavaScript -->
         </div>
 
-        <!-- Excluded Sheets Drawer (Rules 16, 17, 18, 24) -->
+        <!-- Excluded Sheets Drawer -->
         <div id="excluded-sheets-box" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
           <div class="flex items-center justify-between text-xs font-bold text-slate-700">
             <span class="flex items-center gap-1.5">
               <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               Excluded Rate Sheets & Carriers (<span id="excluded-count">0</span>)
             </span>
-            <span class="text-[10px] text-slate-400 font-normal">Rules 16, 17, 18 & 24 Compliance</span>
+            <span class="text-[10px] text-slate-400 font-normal">Carrier Tariff Compliance</span>
           </div>
           <div id="excluded-list-container" class="space-y-1.5 text-xs text-slate-600 divide-y divide-slate-200/60">
             <!-- Excluded reasons injected here -->
           </div>
         </div>
 
-        <!-- Rule 26 Non-Binding Legal Disclaimer -->
+        <!-- Non-Binding Legal Disclaimer -->
         <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 text-[11px] text-slate-500 flex items-start gap-2">
           <svg class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           <div>
-            <span class="font-semibold text-slate-700">Rule 26 Legal Notice:</span>
+            <span class="font-semibold text-slate-700">Non-Binding Estimate Legal Notice:</span>
             <span>All calculations are derived deterministically from customer-uploaded rate sheets. This quote is non-binding and subject to final carrier tariff verification, operational conditions, and accessorial validation upon booking.</span>
           </div>
         </div>
@@ -554,7 +551,7 @@
         </div>
       </section>
 
-      <!-- CLARIFICATION & VERIFICATION GATE MODAL (Rules 1, 3, 5, 6, 7, 19, 25) -->
+      <!-- CLARIFICATION & VERIFICATION GATE MODAL -->
       <div id="clarification-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
         <div class="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150">
           
@@ -564,14 +561,14 @@
               <div class="flex items-center gap-2">
                 <h3 class="text-base font-bold text-slate-900">RateSift Clarification & Verification Gate</h3>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                  Human Gate • Rule 7 & 19
+                  Human Verification Gate
                 </span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                  WHC Canada • Rule 29
+                  WHC Canada • Sovereign Data Hosting
                 </span>
               </div>
               <p class="text-xs text-slate-500">
-                Review detected columns, units, and normalized data before calculating quotes (Rules 1, 3, 5 & 25).
+                Review detected columns, units, and normalized data before calculating quotes.
               </p>
             </div>
             <button type="button" onclick="closeClarificationModal()" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors">
@@ -1448,7 +1445,7 @@
       const checkedAcc = Array.from(document.querySelectorAll('input[name="accessorial"]:checked')).map(cb => cb.value);
 
       if (!origin || !destination) {
-        if (!isInitialLoad) alert("Please specify Origin and Destination locations (Rule 25).");
+        if (!isInitialLoad) alert("Please specify Origin and Destination locations.");
         return;
       }
       if (isNaN(actualWeight) || actualWeight <= 0) {
@@ -1525,7 +1522,7 @@
       }
     }
 
-    // Rule 21: Client-Side In-Memory Re-Sorting
+    // Client-Side In-Memory Re-Sorting
     function setSortMode(mode) {
       currentSortMode = mode;
 
@@ -1562,10 +1559,10 @@
         return;
       }
 
-      // Perform in-memory sorting without recalculation (Rule 21)
+      // Perform in-memory sorting without recalculation
       let sorted = [...currentQuotes];
       if (currentSortMode === 'price') {
-        // Lowest total cost first (Rule 20)
+        // Lowest total cost first
         sorted.sort((a, b) => a.final_total - b.final_total || (a.transit_days || 99) - (b.transit_days || 99));
       } else if (currentSortMode === 'transit') {
         // Fastest transit first
@@ -1592,24 +1589,24 @@
 
         const isTop = idx === 0;
 
-        // Rule 23 Caution Badge
+        // Caution Badge for Flagged Cell
         let cautionHtml = '';
         if (q.relies_on_flagged_cell) {
           cautionHtml = `
             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300" title="${q.caution_badge || 'Relies on reviewed/flagged data'}">
               <svg class="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-              Rule 23 Caution: Flagged Cell Used
+              Caution: Flagged Cell Used
             </span>
           `;
         }
 
-        // Rule 27 Rate Shift Warning Badge
+        // Rate Shift Warning Badge
         let rateShiftHtml = '';
         if (q.rate_shift_warning && q.rate_shift_warning.flagged) {
           rateShiftHtml = `
             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-300" title="${q.rate_shift_warning.message}">
               <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
-              Rule 27 Alert: ${q.rate_shift_warning.shift_pct > 0 ? '+' : ''}${q.rate_shift_warning.shift_pct}% Rate Shift
+              Rate Alert: ${q.rate_shift_warning.shift_pct > 0 ? '+' : ''}${q.rate_shift_warning.shift_pct}% Rate Shift
             </span>
           `;
         }
@@ -1676,7 +1673,7 @@
             </button>
           </div>
 
-          <!-- Rule 13 Expandable Full Line-Item Breakdown Drawer -->
+          <!-- Expandable Full Line-Item Breakdown Drawer -->
           <div id="${detailId}" class="hidden mt-3 pt-3 border-t border-slate-100 text-xs space-y-2.5">
             ${cautionHtml}
             ${rateShiftHtml}
@@ -1702,7 +1699,7 @@
 
             ${q.surcharges && q.surcharges.length > 0 ? `
               <div class="space-y-1">
-                <div class="text-[10px] font-bold text-slate-700">Accessorials & FSC (Rule 11):</div>
+                <div class="text-[10px] font-bold text-slate-700">Accessorials & Fuel Surcharges:</div>
                 <div class="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100 bg-white">
                   ${q.surcharges.map(s => `
                     <div class="flex items-center justify-between p-1.5 text-[11px]">
@@ -1719,7 +1716,7 @@
 
             <div class="pt-1.5 border-t border-slate-100 text-[9px] text-slate-400 font-mono">
               <div>Break: ${q.rate_break} • Billable: ${q.billable_weight.toLocaleString()} ${q.weight_unit}</div>
-              <div>Trace Audit: <a href="/api/ratesift/quotes/audit" target="_blank" class="text-red-600 hover:underline">Immutable Log (Rule 30)</a></div>
+              <div>Trace Audit: <a href="/api/ratesift/quotes/audit" target="_blank" class="text-red-600 hover:underline">Immutable Audit Log</a></div>
             </div>
           </div>
         `;

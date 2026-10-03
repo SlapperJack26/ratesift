@@ -102,11 +102,11 @@
           <div class="flex items-center gap-2.5">
             <h1 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Carrier Rate Sheets</h1>
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-red-50 text-red-700 border border-red-200">
-              WHC Canada Hosting • Rule 29
+              WHC Canada Sovereign Hosting
             </span>
           </div>
           <p class="text-xs text-[var(--muted-foreground)] mt-1">
-            Normalized rate sheets require human confirmation before live quoting (Rules 1, 6, 7 & 19).
+            Normalized rate sheets require human confirmation before live quoting.
           </p>
         </div>
 
@@ -197,10 +197,10 @@
             <h2 class="text-base font-bold text-slate-900" id="modal-carrier-title">Review Rate Sheet & Broker Markup</h2>
             <span id="modal-status-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"></span>
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-700 border border-red-200">
-              WHC Canada Hosting • Rule 29
+              WHC Canada Sovereign Hosting
             </span>
           </div>
-          <p class="text-xs text-slate-500 mt-0.5">Rate Sheet Review, Broker Markup & Human Confirmation Gate (Rules 1, 6, 7 & 19). Verify parsed rules before live quoting.</p>
+          <p class="text-xs text-slate-500 mt-0.5">Rate Sheet Review, Broker Markup & Human Confirmation Gate. Verify parsed parameters before live quoting.</p>
         </div>
         <button onclick="closeConfirmModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -210,12 +210,12 @@
       <!-- Modal Body (Scrollable Studio) -->
       <div class="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs flex-1">
         
-        <!-- Human Confirmation & Tariff Rule Verification Panel (Rules 1, 5, 6, 15, 16) -->
+        <!-- Human Confirmation & Tariff Rule Verification Panel -->
         <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/90 shadow-2xs space-y-3.5">
           <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
             <div class="flex items-center gap-2">
               <span class="text-xs font-bold text-slate-900 uppercase tracking-wide">Tariff Rules & Human Confirmation Gate</span>
-              <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-red-100 text-red-700">Rules 1, 5, 6, 15 & 16</span>
+              <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-red-100 text-red-700">Tariff Verification Standards</span>
             </div>
             <div class="text-[11px] font-semibold text-slate-600 font-mono" id="rule-confirmed-status-text">Pending User Confirmation</div>
           </div>
@@ -223,10 +223,10 @@
           <!-- 4-Column Controls: Currency, Weight Unit, DIM Divisor, Rounding Rule -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             
-            <!-- 1. Currency Confirmation (Rule 5 & 6) -->
+            <!-- 1. Currency Confirmation -->
             <div class="space-y-1">
               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                Tariff Currency (Rule 5)
+                Tariff Currency
               </label>
               <div class="grid grid-cols-2 gap-1 p-1 bg-white border border-slate-200 rounded-xl shadow-2xs">
                 <button type="button" id="btn-currency-cad" onclick="setTariffCurrency('CAD')" class="py-1 px-2 rounded-lg text-xs font-bold text-center transition-all cursor-pointer bg-red-600 text-white shadow-2xs">
@@ -238,10 +238,10 @@
               </div>
             </div>
 
-            <!-- 2. Weight Unit Confirmation (Rule 5 & 6) -->
+            <!-- 2. Weight Unit Confirmation -->
             <div class="space-y-1">
               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                Weight Unit (Rule 5)
+                Weight Unit
               </label>
               <div class="grid grid-cols-2 gap-1 p-1 bg-white border border-slate-200 rounded-xl shadow-2xs">
                 <button type="button" id="btn-weight-lb" onclick="setTariffWeightUnit('lb')" class="py-1 px-2 rounded-lg text-xs font-bold text-center transition-all cursor-pointer bg-red-600 text-white shadow-2xs">
@@ -253,10 +253,10 @@
               </div>
             </div>
 
-            <!-- 3. DIM Divisor (Rule 1 & 6) -->
+            <!-- 3. DIM Divisor -->
             <div class="space-y-1">
               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                DIM Divisor (Rule 1)
+                DIM Divisor
               </label>
               <div class="flex items-center gap-1.5">
                 <select id="select-dim-preset" onchange="onDimPresetChange(this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
@@ -269,10 +269,10 @@
               </div>
             </div>
 
-            <!-- 4. Rounding Rule (Rule 15) -->
+            <!-- 4. Rounding Rule -->
             <div class="space-y-1">
               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                Rounding Logic (Rule 15)
+                Rounding Logic
               </label>
               <select id="select-rounding-rule" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
                 <option value="standard_2dp">Standard (2 Decimal Places)</option>
@@ -281,29 +281,29 @@
             </div>
           </div>
 
-          <!-- Second Row: Validity Dates (Rule 16) & Tariff Reference -->
+          <!-- Second Row: Validity Dates & Tariff Reference -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2 border-t border-slate-200/70">
             <div>
               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tariff / Account Reference</label>
               <div id="modal-tariff-ref" class="font-bold text-slate-800 text-xs mt-1.5 font-mono truncate">-</div>
             </div>
             <div>
-              <label for="input-effective-date" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Effective Date (Rule 16)</label>
+              <label for="input-effective-date" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Effective Date</label>
               <input id="input-effective-date" type="date" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-mono font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
             </div>
             <div>
-              <label for="input-expiry-date" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Expiry Date (Rule 16)</label>
+              <label for="input-expiry-date" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Expiry Date</label>
               <input id="input-expiry-date" type="date" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-mono font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
             </div>
           </div>
         </div>
 
-        <!-- Needs Review Warning Banner (Rule 6) -->
+        <!-- Needs Review Warning Banner -->
         <div id="modal-review-banner" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 space-y-2.5">
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div class="flex items-center gap-2 font-bold text-xs">
               <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-              <span>Items Needing Human Verification (<span id="modal-flagged-count">0</span>) (Rule 6)</span>
+              <span>Items Needing Human Verification (<span id="modal-flagged-count">0</span>)</span>
             </div>
             <button type="button" onclick="resolveAllFlags()" class="px-2.5 py-1 rounded-lg bg-amber-200 hover:bg-amber-300 text-amber-900 text-[11px] font-bold transition-colors cursor-pointer shadow-2xs">
               ✓ Verify & Clear All Flags
@@ -318,13 +318,13 @@
             <span class="text-emerald-600 font-bold text-sm">✓</span>
             <span class="font-medium">All cell coordinates, footnotes, and tariff terms verified. No caution flags.</span>
           </div>
-          <span class="font-mono text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-bold">Rule 6 Verified</span>
+          <span class="font-mono text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-bold">Human Verified</span>
         </div>
 
         <!-- Two-Column Studio Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          <!-- LEFT COLUMN: Agent Extraction & Cell Traceability (Rule 3 & 6) -->
+          <!-- LEFT COLUMN: Agent Extraction & Cell Traceability -->
           <div class="lg:col-span-7 space-y-4">
             
             <!-- Action Bar directly above table: Button sized to span the first 2 columns -->
@@ -340,7 +340,7 @@
             <!-- Agent Extraction Card -->
             <div class="border border-[var(--border)] rounded-xl p-4 bg-white shadow-2xs space-y-3">
               <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                <span class="font-bold text-slate-800 text-xs">Agent Extraction & Cell Traceability (Rule 3 & 6)</span>
+                <span class="font-bold text-slate-800 text-xs">Agent Extraction & Cell Traceability</span>
                 <span class="text-[11px] text-slate-500 font-mono"><span id="modal-breaks-count">0</span> breaks extracted</span>
               </div>
 
@@ -391,7 +391,7 @@
             <div class="border border-[var(--border)] rounded-xl p-3.5 space-y-2.5 bg-slate-50/40">
               <div class="font-bold text-slate-800 flex items-center justify-between text-xs">
                 <span>Extracted Surcharges & Accessorials (<span id="modal-surcharges-count">0</span>)</span>
-                <span class="text-[10px] font-normal text-slate-500">Traced to source cell (Rule 3)</span>
+                <span class="text-[10px] font-normal text-slate-500">Traced to source cell</span>
               </div>
               <div class="border border-slate-200 rounded-lg overflow-hidden max-h-36 overflow-y-auto bg-white">
                 <table class="w-full text-left text-[11px]">
@@ -512,7 +512,7 @@
                   <span>⚠️ Warning: Manual Approval Active</span>
                 </div>
                 <p class="text-[11px] leading-relaxed text-amber-800">
-                  You are overriding pending agent verification to enable this sheet for live quoting. Any unverified cell coordinates will be flagged with caution badges and logged in the immutable audit trail (Rule 30).
+                  You are overriding pending agent verification to enable this sheet for live quoting. Any unverified cell coordinates will be flagged with caution badges and logged in the immutable audit trail.
                 </p>
               </div>
 
@@ -539,7 +539,7 @@
 
       <!-- Modal Footer -->
       <div class="p-3.5 border-t border-[var(--border)] bg-slate-50 flex items-center justify-between text-xs text-slate-500">
-        <div>Ratesift Freight Engine • Canadian WHC Central Data Residency (Rule 29)</div>
+        <div>Ratesift Freight Engine • Canadian WHC Central Data Residency</div>
         <button onclick="closeConfirmModal()" class="px-4 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold transition-colors cursor-pointer">
           Close Studio
         </button>
@@ -579,7 +579,7 @@
           <span class="text-red-600 font-bold">🔒 Platform Security Policy:</span>
           <span>Reformatted carrier tariffs are restricted to in-browser inspection only. Downloading, scraping, or exporting spreadsheet files is strictly blocked.</span>
         </div>
-        <span class="font-mono text-[10px] text-red-700 shrink-0">Rule 3 & Tenant Isolation</span>
+        <span class="font-mono text-[10px] text-red-700 shrink-0">Tenant Quarantine & Cell Security</span>
       </div>
 
       <!-- Search & Filter Controls -->
