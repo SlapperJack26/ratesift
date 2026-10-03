@@ -175,6 +175,24 @@
         </button>
       </div>
 
+      <!-- LOADED USER RATE SHEETS TRAY (Automatically Loaded on Login) -->
+      <div id="loaded-tariffs-tray" class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span id="loaded-sheets-indicator" class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+            <span class="text-xs font-bold text-slate-900">Your Uploaded Rate Sheets:</span>
+            <span id="loaded-sheets-count" class="text-xs font-medium text-slate-500">Checking uploaded tariffs...</span>
+          </div>
+          <a href="/console/rate-sheets" class="inline-flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-700 transition-colors">
+            <span>Manage / Upload Rate Sheets</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div id="loaded-carriers-pills" class="flex flex-wrap items-center gap-2 pt-2.5">
+          <span class="text-xs text-slate-400 italic">Loading your uploaded rate sheets...</span>
+        </div>
+      </div>
+
       <!-- MODE 1: INSTANT FREIGHT RATER FORM -->
       <section id="section-instant" class="space-y-4">
         <form id="freight-quote-form" onsubmit="event.preventDefault(); calculateFreightQuote();" class="space-y-4">
@@ -1069,7 +1087,77 @@
       }
     }
 
-    // Initialize default shipment date to today & auto-quote initial mockup state
+    let userUploadedSheets = [];
+    let userUploadedSheetsLoaded = false;
+
+    async function loadUserUploadedRateSheets() {
+      const pillsContainer = document.getElementById('loaded-carriers-pills');
+      const countLabel = document.getElementById('loaded-sheets-count');
+      const indicator = document.getElementById('loaded-sheets-indicator');
+      const banner = document.getElementById('no-sheets-banner');
+
+      try {
+        const res = await fetch('/api/ratesift/sheets');
+        if (!res.ok) throw new Error("Could not load rate sheets.");
+        const data = await res.json();
+        userUploadedSheets = data.sheets || [];
+        userUploadedSheetsLoaded = true;
+
+        if (userUploadedSheets.length === 0) {
+          if (countLabel) countLabel.textContent = "0 Active Tariffs";
+          if (indicator) indicator.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+          if (pillsContainer) {
+            pillsContainer.innerHTML = `
+              <div class="flex items-center gap-2 text-xs text-slate-500 py-0.5">
+                <span>No carrier rate sheets uploaded yet.</span>
+                <a href="/console/rate-sheets" class="font-semibold text-red-600 hover:underline">Upload your first carrier tariff →</a>
+              </div>
+            `;
+          }
+          if (banner) banner.classList.remove('hidden');
+          return;
+        }
+
+        // Hide banner since user has uploaded sheets
+        if (banner) banner.classList.add('hidden');
+
+        // Confirmed vs pending counts
+        const confirmedSheets = userUploadedSheets.filter(s => s.confirmation_status === 'CONFIRMED' || s.manual_override === 1);
+        const pendingSheets = userUploadedSheets.filter(s => s.confirmation_status !== 'CONFIRMED' && s.manual_override !== 1);
+
+        if (indicator) indicator.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+        if (countLabel) {
+          countLabel.textContent = `${confirmedSheets.length} Confirmed for Quoting${pendingSheets.length > 0 ? ` • ${pendingSheets.length} Pending Review` : ''}`;
+        }
+
+        if (pillsContainer) {
+          pillsContainer.innerHTML = userUploadedSheets.map(s => {
+            const isConfirmed = (s.confirmation_status === 'CONFIRMED' || s.manual_override === 1);
+            const statusClass = isConfirmed 
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+              : 'bg-amber-50 text-amber-800 border-amber-200';
+            const dotClass = isConfirmed ? 'bg-emerald-500' : 'bg-amber-500';
+            const statusText = isConfirmed ? 'Ready to Quote' : 'Pending Review';
+            const modeText = s.mode || 'LTL';
+
+            return `
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${statusClass} shadow-2xs">
+                <span class="w-1.5 h-1.5 rounded-full ${dotClass}"></span>
+                <span class="font-bold">${s.carrier_name}</span>
+                <span class="text-[10px] opacity-75 font-normal">(${modeText})</span>
+                <span class="text-[10px] px-1 py-0.5 rounded bg-white/70 font-medium">${statusText}</span>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        console.debug("Error loading user rate sheets:", err);
+        if (countLabel) countLabel.textContent = "Error loading tariffs";
+        if (indicator) indicator.className = "w-2.5 h-2.5 rounded-full bg-red-400";
+      }
+    }
+
+    // Initialize default shipment date to today & auto-load user-uploaded rate sheets
     document.addEventListener("DOMContentLoaded", () => {
       const today = new Date().toISOString().split('T')[0];
       const dateInput = document.getElementById('input-date');
@@ -1093,8 +1181,11 @@
       resolveFsaLive('origin', document.getElementById('input-origin').value);
       resolveFsaLive('dest', document.getElementById('input-destination').value);
 
-      // Auto-calculate freight quote on initial load
-      calculateFreightQuote(true);
+      // Automatically load all user-uploaded rate sheets upon login/page load
+      // DIRECTIVE COMPLIANCE:
+      // 1. Only loads sheets uploaded by this user (never auto-seeds benchmarks).
+      // 2. Never auto-quotes on page load (only quotes when user clicks Calculate).
+      loadUserUploadedRateSheets();
     });
 
     function toggleAccountMenu() {
@@ -1325,6 +1416,10 @@
       }
       if (isNaN(actualWeight) || actualWeight <= 0) {
         if (!isInitialLoad) alert("Please enter a valid shipment weight greater than 0 lbs.");
+        return;
+      }
+      if (userUploadedSheetsLoaded && userUploadedSheets.length === 0) {
+        alert("No carrier rate sheets found. Please upload your carrier rate sheets in Carrier Tariffs to begin quoting.");
         return;
       }
 
