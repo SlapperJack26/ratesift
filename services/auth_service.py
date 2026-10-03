@@ -168,7 +168,7 @@ def get_user_profile(user_id: str = "usr_alex_rivers") -> Dict[str, Any]:
         "company": "TechCorp Logistics",
         "origin_zip": "TORONTO, ON",
         "origin_address": "5500 Logistics Way, Bay 12",
-        "phone": "+1 (416) 555-0199",
+        "phone": "289-929-8565",
         "tier": "FREE",
         "currency": "CAD",
         "units": "lbs",

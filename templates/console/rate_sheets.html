@@ -157,11 +157,31 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="w-full py-4 px-6 border-t border-[var(--border)] text-center text-xs text-[var(--muted-foreground)]">
-      Ratesift Freight Quoting Platform • Canadian Data Residency Verified (WHC Montreal/Halifax)
+    <!-- Semantic Footer -->
+    <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>
+
+        <nav aria-label="Footer Navigation" class="flex flex-wrap items-center gap-4 text-xs font-medium">
+          <a href="/console/new-quote" class="hover:text-[var(--foreground)] transition-colors">New Quote</a>
+          <a href="/console/history" class="hover:text-[var(--foreground)] transition-colors">Audit History</a>
+          <a href="/console/settings" class="hover:text-[var(--foreground)] transition-colors">Settings</a>
+          <a href="#docs" onclick="openDocsModal(event)" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#support" onclick="openSupportModal(event)" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#api" onclick="openApiModal(event)" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#privacy" onclick="openPrivacyModal(event)" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+        </nav>
+      </div>
+
+      <div class="text-xs text-[var(--muted-foreground)] font-medium">
+        RateSift Quoting Engine • Canadian Residency (WHC)
+      </div>
     </footer>
 
+    <!-- Floating Red Support Chat Widget (Opens Support & Hotline Drawer) -->
+    <button type="button" onclick="openSupportModal(event)" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-all cursor-pointer z-40 focus:outline-none focus:ring-4 focus:ring-red-200" title="RateSift Canadian Broker Support (Hotline: 289-929-8565)">
+      <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    </button>
   </div>
 
   <!-- ===================================================================== -->
@@ -1574,5 +1594,6 @@
       updateHeaderQuota();
     });
   </script>
+  <script src="/static/js/global-chrome.js"></script>
 </body>
 </html>

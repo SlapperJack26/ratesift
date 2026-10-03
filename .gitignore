@@ -29,3 +29,7 @@ scratch/
 *.sqlite
 *.sqlite3
 shipflow.db
+
+# Helper scripts
+push_to_github.bat
+

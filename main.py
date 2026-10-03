@@ -348,6 +348,70 @@ def api_profile(request: Request):
     user_id = user["id"] if user else "usr_alex_rivers"
     return get_user_profile(user_id)
 
+@app.post("/api/support/ticket", tags=["Support Desk"])
+async def api_submit_support_ticket(request: Request):
+    """Submits a tenant support ticket / inquiry."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else None
+    
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        body = await request.json()
+        email = body.get("email", "")
+        subject = body.get("subject", "")
+        message = body.get("message", "")
+        category = body.get("category", "GENERAL")
+        browser_info = body.get("browser_info", "")
+    else:
+        form = await request.form()
+        email = form.get("email", "")
+        subject = form.get("subject", "")
+        message = form.get("message", "")
+        category = form.get("category", "GENERAL")
+        browser_info = form.get("browser_info", "")
+        
+    if not email or "@" not in str(email):
+        raise HTTPException(status_code=400, detail="A valid contact email is required.")
+    if not subject or not message:
+        raise HTTPException(status_code=400, detail="Subject and message are required.")
+        
+    from services.db_service import create_support_ticket
+    return create_support_ticket(
+        email=str(email),
+        subject=str(subject),
+        message=str(message),
+        user_id=user_id,
+        category=str(category),
+        browser_info=str(browser_info)
+    )
+
+@app.get("/api/notifications", tags=["System Notifications"])
+def api_get_notifications(request: Request, limit: int = 20):
+    """Returns system notifications and unread alert count for the active tenant."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    from services.db_service import list_system_notifications
+    return list_system_notifications(user_id=user_id, limit=limit)
+
+@app.post("/api/notifications/read-all", tags=["System Notifications"])
+def api_mark_all_notifications_read(request: Request):
+    """Marks all system notifications as read for current user."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    from services.db_service import mark_all_system_notifications_read
+    count = mark_all_system_notifications_read(user_id)
+    return {"status": "success", "marked_read": count}
+
+@app.post("/api/notifications/{notification_id}/read", tags=["System Notifications"])
+def api_mark_notification_read(notification_id: str, request: Request):
+    """Marks a single system notification as read."""
+    user = get_current_user_from_request(request)
+    user_id = user["id"] if user else "usr_alex_rivers"
+    from services.db_service import mark_system_notification_read
+    success = mark_system_notification_read(notification_id, user_id)
+    return {"status": "success" if success else "not_found", "marked_read": success}
+
+
 @app.post("/api/quotes/upload", tags=["Quoting Engine"])
 async def api_upload_rate_sheet(
     request: Request,

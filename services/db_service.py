@@ -186,6 +186,50 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_bottleneck_user ON bottleneck_events (user_id, created_at)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_bottleneck_type ON bottleneck_events (bottleneck_type, created_at)")
     
+    # 10. Support Tickets Table (Footer & Helpdesk Inquiries)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS support_tickets (
+        id TEXT PRIMARY KEY,
+        user_id TEXT,
+        email TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        message TEXT NOT NULL,
+        category TEXT NOT NULL DEFAULT 'GENERAL',
+        browser_info TEXT,
+        status TEXT NOT NULL DEFAULT 'OPEN',
+        created_at TEXT NOT NULL
+    )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_support_user ON support_tickets (user_id, created_at)")
+
+    # 11. System Notifications Table (Header Bell & Alerts Popover)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS system_notifications (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        alert_type TEXT NOT NULL DEFAULT 'INFO',
+        link_url TEXT,
+        is_read INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users (id)
+    )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_notif_user ON system_notifications (user_id, is_read, created_at)")
+
+    # Seed default notifications for demo user Alex Rivers
+    cursor.execute("SELECT count(*) as count FROM system_notifications WHERE user_id = 'usr_alex_rivers'")
+    if cursor.fetchone()["count"] == 0:
+        now_ts = datetime.utcnow().isoformat()
+        cursor.execute("""
+        INSERT INTO system_notifications (id, user_id, title, message, alert_type, link_url, is_read, created_at)
+        VALUES 
+        ('notif_1', 'usr_alex_rivers', 'Weekly OTA Fuel Index Updated', 'Ontario Trucking Association (OTA) LTL Fuel Index updated to 32.8% for week of Oct 2, 2026.', 'FUEL', '/console/settings', 0, ?),
+        ('notif_2', 'usr_alex_rivers', 'Canadian Data Residency Verified', 'Your tenant tariffs and calculation engine are hosted on Canadian WHC cloud (Montreal/Halifax).', 'SECURITY', '/console/account', 0, ?),
+        ('notif_3', 'usr_alex_rivers', '1-Click Client Proposals Active', 'Export clean client quote proposals hiding carrier buy costs with custom broker markups.', 'FEATURE', '/console/new-quote', 0, ?)
+        """, (now_ts, now_ts, now_ts))
+
     # Seed default Business API key for demo / testing
     cursor.execute("SELECT count(*) as count FROM api_keys WHERE user_id = 'usr_alex_rivers'")
     if cursor.fetchone()["count"] == 0:
@@ -586,6 +630,113 @@ def validate_api_key(api_key: str):
     if row:
         return dict(row)
     return None
+
+def create_support_ticket(
+    email: str,
+    subject: str,
+    message: str,
+    user_id: Optional[str] = None,
+    category: str = "GENERAL",
+    browser_info: Optional[str] = None
+) -> Dict[str, Any]:
+    """Creates a new user support ticket."""
+    import uuid
+    ticket_id = f"tkt_{uuid.uuid4().hex[:10]}"
+    now = datetime.utcnow().isoformat()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO support_tickets (id, user_id, email, subject, message, category, browser_info, status, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'OPEN', ?)
+    """, (ticket_id, user_id, email.strip(), subject.strip(), message.strip(), category, browser_info or "", now))
+    conn.commit()
+    conn.close()
+    return {
+        "status": "success",
+        "ticket_id": ticket_id,
+        "message": "Support ticket created successfully. Our dispatch engineering desk will respond within 4 business hours."
+    }
+
+def list_support_tickets(user_id: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+    """Lists support tickets for admin or specific tenant."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    if user_id:
+        cursor.execute("SELECT * FROM support_tickets WHERE user_id = ? ORDER BY created_at DESC LIMIT ?", (user_id, limit))
+    else:
+        cursor.execute("SELECT * FROM support_tickets ORDER BY created_at DESC LIMIT ?", (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def create_system_notification(
+    user_id: str,
+    title: str,
+    message: str,
+    alert_type: str = "INFO",
+    link_url: Optional[str] = None
+) -> str:
+    """Inserts a system notification for a tenant."""
+    import uuid
+    notif_id = f"notif_{uuid.uuid4().hex[:10]}"
+    now = datetime.utcnow().isoformat()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO system_notifications (id, user_id, title, message, alert_type, link_url, is_read, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, 0, ?)
+    """, (notif_id, user_id, title.strip(), message.strip(), alert_type, link_url, now))
+    conn.commit()
+    conn.close()
+    return notif_id
+
+def list_system_notifications(user_id: str, limit: int = 20) -> Dict[str, Any]:
+    """Retrieves notifications and unread count for a tenant."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT * FROM system_notifications 
+    WHERE user_id = ? 
+    ORDER BY created_at DESC LIMIT ?
+    """, (user_id, limit))
+    rows = cursor.fetchall()
+    
+    cursor.execute("""
+    SELECT count(*) as unread_count FROM system_notifications
+    WHERE user_id = ? AND is_read = 0
+    """, (user_id,))
+    unread = cursor.fetchone()["unread_count"]
+    conn.close()
+    return {
+        "notifications": [dict(r) for r in rows],
+        "unread_count": int(unread)
+    }
+
+def mark_system_notification_read(notification_id: str, user_id: str) -> bool:
+    """Marks a single notification as read."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE system_notifications SET is_read = 1
+    WHERE id = ? AND user_id = ?
+    """, (notification_id, user_id))
+    updated = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return updated
+
+def mark_all_system_notifications_read(user_id: str) -> int:
+    """Marks all notifications as read for a user."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE system_notifications SET is_read = 1
+    WHERE user_id = ? AND is_read = 0
+    """, (user_id,))
+    count = cursor.rowcount
+    conn.commit()
+    conn.close()
+    return count
 
 if __name__ == "__main__":
     init_db()

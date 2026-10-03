@@ -292,16 +292,16 @@
 
         <!-- Crawlable Footer Links -->
         <nav aria-label="Footer Legal and Support Navigation" class="flex items-center gap-4 text-xs font-medium text-[var(--muted-foreground)]">
-          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
-          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Support</a>
-          <a href="#" class="hover:text-[var(--foreground)] transition-colors">API</a>
-          <a href="#" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
+          <a href="#docs" onclick="openDocsModal(event)" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
+          <a href="#support" onclick="openSupportModal(event)" class="hover:text-[var(--foreground)] transition-colors">Support</a>
+          <a href="#api" onclick="openApiModal(event)" class="hover:text-[var(--foreground)] transition-colors">API</a>
+          <a href="#privacy" onclick="openPrivacyModal(event)" class="hover:text-[var(--foreground)] transition-colors">Privacy</a>
         </nav>
       </div>
 
       <!-- Right: Copyright & Current Date -->
       <div class="text-xs text-[var(--muted-foreground)] font-medium">
-        September 28, 2026
+        RateSift Quoting Engine • Canadian Residency (WHC)
       </div>
     </footer>
   </div>
@@ -396,6 +396,8 @@
       if (drawer) {
         drawer.classList.toggle('hidden');
       }
-    }</script>
+    }
+  </script>
+  <script src="/static/js/global-chrome.js"></script>
 </body>
 </html>
