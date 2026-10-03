@@ -57,10 +57,7 @@
         <!-- Left: Logo & Nav Links -->
         <div class="flex items-center gap-6 lg:gap-8">
           <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="RateSift Console">
-            <div class="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-xs text-xs">
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13H5.5L12 6.5z"/></svg>
-            </div>
-            <span class="text-lg font-bold tracking-tight text-slate-900">RateSift</span>
+            <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-8 w-auto object-contain" />
           </a>
 
           <!-- Center/Left Navigation Links -->
@@ -237,36 +234,109 @@
               </div>
             </div>
 
-            <!-- Accessorials / Surcharges Selection -->
-            <div class="space-y-2 pt-2 border-t border-slate-100">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-800">Requested Accessorials & Surcharges:</span>
-                <span class="text-[10px] text-slate-500">Deterministic line-item charges</span>
+            <!-- Accessorials / Surcharges Selection with Mode Filter (Land, Sea, Air) -->
+            <div class="space-y-3 pt-3 border-t border-slate-100">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 class="text-xs font-bold text-slate-900">Requested Accessorials & Surcharges</h3>
+                  <p class="text-[11px] text-slate-500">Deterministic line-item charges • Filter options by shipping mode</p>
+                </div>
+
+                <!-- Shipping Mode Filter Tabs (Land, Sea, Air) -->
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium" role="tablist" aria-label="Filter accessorials by shipping mode">
+                  <button type="button" id="acc-tab-all" onclick="filterAccessorialMode('all')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer flex items-center gap-1.5" role="tab" aria-selected="false">
+                    <span>All Modes</span>
+                  </button>
+                  <button type="button" id="acc-tab-land" onclick="filterAccessorialMode('land')" class="px-3 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer flex items-center gap-1.5" role="tab" aria-selected="true">
+                    <span>🚚 Land Shipping</span>
+                  </button>
+                  <button type="button" id="acc-tab-sea" onclick="filterAccessorialMode('sea')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer flex items-center gap-1.5" role="tab" aria-selected="false">
+                    <span>🚢 Sea Freight</span>
+                  </button>
+                  <button type="button" id="acc-tab-air" onclick="filterAccessorialMode('air')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer flex items-center gap-1.5" role="tab" aria-selected="false">
+                    <span>✈️ Air Cargo</span>
+                  </button>
+                </div>
               </div>
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-xs">
-                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+
+              <!-- Accessorial Items Grid (Categorized by Land, Sea, Air) -->
+              <div id="accessorials-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-xs">
+                <!-- 1. LAND SHIPPING -->
+                <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
                   <input type="checkbox" name="accessorial" value="liftgate" checked class="rounded text-red-600 focus:ring-red-500">
                   <span class="text-[11px] font-semibold text-slate-800">Power Tailgate / Liftgate</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
                   <input type="checkbox" name="accessorial" value="appointment" class="rounded text-red-600 focus:ring-red-500">
                   <span class="text-[11px] font-medium text-slate-700">Delivery Appointment</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
                   <input type="checkbox" name="accessorial" value="heated" class="rounded text-red-600 focus:ring-red-500">
                   <span class="text-[11px] font-medium text-slate-700">Protect From Freeze</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
                   <input type="checkbox" name="accessorial" value="dangerous_goods" class="rounded text-red-600 focus:ring-red-500">
                   <span class="text-[11px] font-medium text-slate-700">Dangerous Goods</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
                   <input type="checkbox" name="accessorial" value="residential" class="rounded text-red-600 focus:ring-red-500">
                   <span class="text-[11px] font-medium text-slate-700">Residential Delivery</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+                <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
                   <input type="checkbox" name="accessorial" value="inside_delivery" class="rounded text-red-600 focus:ring-red-500">
                   <span class="text-[11px] font-medium text-slate-700">Inside Delivery</span>
+                </label>
+
+                <!-- 2. SEA FREIGHT -->
+                <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="pier_pass" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-semibold text-slate-800">Pier Pass & Clean Truck</span>
+                </label>
+                <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="chassis_split" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Chassis Split / Tri-Axle</span>
+                </label>
+                <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="port_demurrage" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Port Demurrage Guard</span>
+                </label>
+                <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="cfs_destuffing" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">CFS Destuffing / Bonded</span>
+                </label>
+                <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="fumigation" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Fumigation & Phyto</span>
+                </label>
+                <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="reefer_monitoring" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Reefer Genset Monitoring</span>
+                </label>
+
+                <!-- 3. AIR CARGO -->
+                <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="tsa_screening" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-semibold text-slate-800">TSA / Known Shipper</span>
+                </label>
+                <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="ramp_transfer" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Express Tarmac Transfer</span>
+                </label>
+                <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="dry_ice_cold_chain" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Dry Ice & Cold Chain</span>
+                </label>
+                <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="high_value_vault" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">High-Value Escort / Vault</span>
+                </label>
+                <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="awb_clearance" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">AWB Customs Clearance</span>
+                </label>
+                <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="oversized_tie_down" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Aircraft Rigging & Tie-Down</span>
                 </label>
               </div>
             </div>
@@ -1183,6 +1253,35 @@
     function uploadScrubbedToSheets() {
       closeRedactionModal();
       window.location.href = '/console/rate-sheets';
+    }
+
+    let currentAccMode = 'land';
+
+    function filterAccessorialMode(mode) {
+      currentAccMode = mode;
+      const modes = ['all', 'land', 'sea', 'air'];
+      modes.forEach(m => {
+        const btn = document.getElementById(`acc-tab-${m}`);
+        if (btn) {
+          if (m === mode) {
+            btn.className = "px-3 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer flex items-center gap-1.5";
+            btn.setAttribute('aria-selected', 'true');
+          } else {
+            btn.className = "px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer flex items-center gap-1.5";
+            btn.setAttribute('aria-selected', 'false');
+          }
+        }
+      });
+
+      const cards = document.querySelectorAll('#accessorials-grid .acc-option-card');
+      cards.forEach(c => {
+        const cardMode = c.getAttribute('data-mode');
+        if (mode === 'all' || cardMode === mode) {
+          c.classList.remove('hidden');
+        } else {
+          c.classList.add('hidden');
+        }
+      });
     }
 
     function loadPresetLane(orig, dest, weight, l, w, h, accessorials) {
