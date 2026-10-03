@@ -271,6 +271,8 @@ def evaluate_surcharges(
             triggered = True
         elif cond_type == "expedited_monday" and "expedited_monday" in req_set:
             triggered = True
+        elif cond_type in req_set or code.lower() in req_set:
+            triggered = True
         elif cond_type.startswith("dest_province:"):
             target_prov = cond_type.split(":")[-1].strip().upper()
             if dest_province == target_prov:
