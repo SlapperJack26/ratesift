@@ -744,6 +744,22 @@ def api_get_quotes_history(request: Request, search: Optional[str] = None, sort_
     cursor.execute(query, params)
     rows = [dict(r) for r in cursor.fetchall()]
     conn.close()
+
+    from services.ratesift_db_service import list_rate_sheets
+    user_sheets = list_rate_sheets(user_id=user_id)
+    default_sheet_id = user_sheets[0]["id"] if user_sheets else None
+
+    for r in rows:
+        if not r.get("sheet_id"):
+            matched_sid = None
+            carrier_clean = (r.get("carrier") or "").lower()
+            for s in user_sheets:
+                s_carrier = (s.get("carrier_name") or "").lower()
+                if s_carrier in carrier_clean or carrier_clean in s_carrier:
+                    matched_sid = s["id"]
+                    break
+            r["sheet_id"] = matched_sid or default_sheet_id
+
     return {"total": len(rows), "quotes": rows}
 
 # ==============================================================================
@@ -977,7 +993,9 @@ def api_ratesift_formatted_matrix(
     request: Request,
     page: int = 1,
     limit: int = 50,
-    query: Optional[str] = None
+    query: Optional[str] = None,
+    cell: Optional[str] = None,
+    highlight: Optional[str] = None
 ):
     """
     Returns normalized matrix data for in-browser visual inspection only.
@@ -991,7 +1009,8 @@ def api_ratesift_formatted_matrix(
     if not sheet:
         raise HTTPException(status_code=404, detail="Rate sheet not found or unauthorized.")
         
-    breaks_res = get_sheet_breaks_paginated(sheet_id, user_id, page=page, limit=limit, query=query)
+    target_cell = cell or highlight
+    breaks_res = get_sheet_breaks_paginated(sheet_id, user_id, page=page, limit=limit, query=query, target_cell=target_cell)
     return {
         "sheet": sheet,
         "breaks": breaks_res["breaks"],
@@ -1237,6 +1256,8 @@ class ProposalRequestPayload(BaseModel):
     client_name: Optional[str] = "Client Partner"
     markup_pct: Optional[float] = None
     custom_total: Optional[float] = None
+    source_coordinate: Optional[str] = None
+    sheet_id: Optional[str] = None
 
 @app.post("/api/quotes/client-proposal/preview", tags=["Client Proposal Generator"])
 def api_quote_client_proposal_preview(
@@ -1270,6 +1291,14 @@ def api_quote_client_proposal_preview(
     )
     # Cache in active session memory until next quote calculation
     _active_proposal_memory[user_id] = proposal
+
+    # Persist the quote to the database table (Quotes History)
+    from services.db_service import save_proposal_quote_item
+    save_proposal_quote_item(
+        user_id=user_id,
+        proposal=proposal,
+        quote_data=payload.dict()
+    )
 
     return {"status": "success", "proposal": proposal}
 
@@ -1331,6 +1360,13 @@ def api_quote_client_proposal_excel(
         custom_total=payload.custom_total
     )
     _active_proposal_memory[user_id] = proposal
+
+    from services.db_service import save_proposal_quote_item
+    save_proposal_quote_item(
+        user_id=user_id,
+        proposal=proposal,
+        quote_data=payload.dict()
+    )
 
     wb_bytes = generate_proposal_excel_workbook(proposal)
     clean_id = proposal["proposal_id"].replace(" ", "_")

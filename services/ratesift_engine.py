@@ -594,6 +594,8 @@ def calculate_quote_for_sheet(
         "is_dim_billed": weight_info["is_dim_billed"],
         "base_rate": base_charge,
         "rate_break": matched_break["break_name"],
+        "source_coordinate": matched_break.get("source_cell", ""),
+        "source_cell": matched_break.get("source_cell", ""),
         "surcharges": applied_surcharges,
         "total_surcharges": total_surcharges,
         "carrier_min_charge": min_charge,

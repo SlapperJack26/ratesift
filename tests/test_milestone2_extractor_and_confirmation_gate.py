@@ -18,8 +18,10 @@ class TestMilestone2ExtractorAndConfirmationGate(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         from services.auth_service import create_session
+        from services.db_service import update_user_tier
         cls.client = TestClient(app)
         cls.user_id = "usr_alex_rivers"
+        update_user_tier(cls.user_id, "TEAM")
         cls.token = create_session(cls.user_id)
         cls.client.cookies.set("shipflow_session", cls.token)
         cls.guide_csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sample_sheets", "day_and_ross_guide_tariff.csv")

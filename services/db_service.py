@@ -137,9 +137,16 @@ def init_db():
         final_rate REAL NOT NULL,
         coordinate TEXT NOT NULL,
         created_at TEXT NOT NULL,
+        sheet_id TEXT,
         FOREIGN KEY (batch_id) REFERENCES quote_batches (id)
     )
     """)
+    
+    # Auto-migrate sheet_id on quote_items if table already exists
+    cursor.execute("PRAGMA table_info(quote_items)")
+    qi_cols = [r["name"] for r in cursor.fetchall()]
+    if "sheet_id" not in qi_cols:
+        cursor.execute("ALTER TABLE quote_items ADD COLUMN sheet_id TEXT")
     
     # 7. API Keys Table (Business Tier Embedded Quoting API)
     cursor.execute("""
@@ -249,7 +256,7 @@ def init_db():
         
         cursor.execute("""
         INSERT INTO users (id, name, email, password_hash, company, origin_zip, tier, created_at)
-        VALUES ('usr_alex_rivers', 'Alex Rivers', 'alex.rivers@techcorp.io', ?, 'TechCorp Logistics', '94103', 'FREE', ?)
+        VALUES ('usr_alex_rivers', 'Alex Rivers', 'alex.rivers@techcorp.io', ?, 'TechCorp Logistics', '94103', 'TEAM', ?)
         """, (demo_pwd_hash, now))
         
         cursor.execute("""
@@ -737,6 +744,95 @@ def mark_all_system_notifications_read(user_id: str) -> int:
     conn.commit()
     conn.close()
     return count
+
+def save_proposal_quote_item(user_id: str, proposal: Dict[str, Any], quote_data: Optional[Dict[str, Any]] = None) -> str:
+    """
+    Saves a client proposal quote to the persistent quote history table (quote_items).
+    Ensures a client proposals batch exists for the user and persists the proposal quote across logins.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    now_iso = datetime.utcnow().isoformat()
+    
+    batch_id = f"qb_proposals_{user_id}"
+    cursor.execute("SELECT id FROM quote_batches WHERE id = ?", (batch_id,))
+    if not cursor.fetchone():
+        cursor.execute("""
+        INSERT INTO quote_batches (id, user_id, filename, total_rows, processed_rows, created_at)
+        VALUES (?, ?, 'Client Proposals', 0, 0, ?)
+        """, (batch_id, user_id, now_iso))
+        
+    proposal_id = proposal.get("proposal_id") or f"PROP-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:5].upper()}"
+    qd = quote_data or {}
+    
+    origin = proposal.get("shipment", {}).get("origin") or qd.get("origin") or "TORONTO, ON"
+    dest = proposal.get("shipment", {}).get("destination") or qd.get("destination") or "MONTREAL, QC"
+    weight = float(proposal.get("shipment", {}).get("billable_weight") or qd.get("weight_lbs") or 1000.0)
+    
+    carrier = (proposal.get("carrier", {}).get("name") or 
+               qd.get("carrier_name") or 
+               proposal.get("broker", {}).get("company") or 
+               "Standard Carrier")
+    service = (proposal.get("carrier", {}).get("service") or 
+               qd.get("service_name") or 
+               proposal.get("shipment", {}).get("service_level") or 
+               "Standard Road LTL")
+               
+    base_rate = float(proposal.get("pricing", {}).get("wholesale_cost") or 
+                      proposal.get("pricing", {}).get("client_base_freight") or 
+                      qd.get("base_rate") or 0.0)
+    markup_pct = float(proposal.get("pricing", {}).get("effective_markup_pct") or 
+                       qd.get("markup_pct") or 15.0)
+    final_rate = float(proposal.get("pricing", {}).get("client_total") or 
+                       qd.get("final_total") or 0.0)
+                       
+    sheet_id = qd.get("sheet_id") or proposal.get("sheet_id")
+    source_coord = (
+        qd.get("source_coordinate") or 
+        qd.get("source_cell") or 
+        qd.get("coordinate") or 
+        proposal.get("source_coordinate") or 
+        proposal.get("source_cell")
+    )
+    if source_coord:
+        coordinate = str(source_coord)
+    else:
+        coordinate = f"Proposal • {proposal_id}"
+    
+    # Ensure sheet_id column exists
+    cursor.execute("PRAGMA table_info(quote_items)")
+    qi_cols = [r["name"] for r in cursor.fetchall()]
+    if "sheet_id" not in qi_cols:
+        cursor.execute("ALTER TABLE quote_items ADD COLUMN sheet_id TEXT")
+
+    cursor.execute("""
+    INSERT OR REPLACE INTO quote_items 
+    (id, batch_id, row_num, origin_zip, dest_zip, weight_lbs, carrier, service, base_rate, markup_pct, final_rate, coordinate, created_at, sheet_id)
+    VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        proposal_id,
+        batch_id,
+        origin,
+        dest,
+        weight,
+        carrier,
+        service,
+        base_rate,
+        markup_pct,
+        final_rate,
+        coordinate,
+        now_iso,
+        sheet_id
+    ))
+    
+    # Update total_rows and processed_rows on batch
+    cursor.execute("SELECT count(*) as count FROM quote_items WHERE batch_id = ?", (batch_id,))
+    cnt = cursor.fetchone()["count"]
+    cursor.execute("UPDATE quote_batches SET total_rows = ?, processed_rows = ? WHERE id = ?", (cnt, cnt, batch_id))
+    
+    conn.commit()
+    conn.close()
+    return proposal_id
 
 if __name__ == "__main__":
     init_db()

@@ -77,5 +77,44 @@ class TestProposalEmailLifecycle(unittest.TestCase):
         self.assertFalse(mem3["has_active_proposal"])
         self.assertIsNone(mem3["proposal"])
 
+        # 7. Verify the quote was PERSISTENTLY saved to Quotes History
+        hist_res = self.client.get("/api/quotes/history")
+        self.assertEqual(hist_res.status_code, 200)
+        hist_data = hist_res.json()
+        saved_ids = [q["id"] for q in hist_data["quotes"]]
+        self.assertIn(prop["proposal_id"], saved_ids)
+
+        saved_quote = next(q for q in hist_data["quotes"] if q["id"] == prop["proposal_id"])
+        self.assertEqual(saved_quote["origin_zip"], "TORONTO, ON")
+        self.assertEqual(saved_quote["dest_zip"], "MONTREAL, QC")
+        self.assertAlmostEqual(saved_quote["final_rate"], prop["pricing"]["client_total"], places=2)
+        self.assertIn("Proposal •", saved_quote["coordinate"])
+
+        # 8. Verify persistent across login: logout and log back in
+        self.client.get("/api/auth/logout")
+        login_res = self.client.post("/api/auth/login", data={"email": "alex.rivers@techcorp.io", "password": "RateSiftDemo2026!"})
+        self.assertEqual(login_res.status_code, 200)
+
+        # Quotes history still contains the saved proposal quote after login
+        hist_after_login = self.client.get("/api/quotes/history").json()
+        saved_after_login_ids = [q["id"] for q in hist_after_login["quotes"]]
+        self.assertIn(prop["proposal_id"], saved_after_login_ids)
+
+        # 9. Verify /console/history page renders capped 10 per page pagination and all-header sorting
+        page_res = self.client.get("/console/history")
+        self.assertEqual(page_res.status_code, 200)
+        page_html = page_res.text
+        self.assertIn("btn-prev-page", page_html)
+        self.assertIn("btn-next-page", page_html)
+        self.assertIn("page-indicator", page_html)
+        self.assertIn("pageSize = 10", page_html)
+        self.assertIn("sort-icon-id", page_html)
+        self.assertIn("sort-icon-carrier", page_html)
+        self.assertIn("sort-icon-route", page_html)
+        self.assertIn("sort-icon-sheet", page_html)
+        self.assertIn("sort-icon-date", page_html)
+        self.assertIn("sort-icon-rate", page_html)
+        self.assertIn("sort-icon-proposal", page_html)
+
 if __name__ == "__main__":
     unittest.main()

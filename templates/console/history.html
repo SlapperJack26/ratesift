@@ -229,25 +229,25 @@
             <thead>
               <tr class="border-b border-[var(--border)] bg-slate-50/60 text-[var(--foreground)] font-bold select-none">
                 <th scope="col" onclick="toggleSort('id')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
-                  Quote ID <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                  Quote ID <span id="sort-icon-id" class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
                 </th>
                 <th scope="col" onclick="toggleSort('carrier')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
-                  Carrier & Service <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                  Carrier & Service <span id="sort-icon-carrier" class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
                 </th>
-                <th scope="col" class="py-2.5 px-3.5">
-                  Route & Weight (Lbs)
+                <th scope="col" onclick="toggleSort('route')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
+                  Route & Weight (Lbs) <span id="sort-icon-route" class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
                 </th>
-                <th scope="col" class="py-2.5 px-3.5">
-                  Excel Reference (Sheet, Row/Col)
+                <th scope="col" onclick="toggleSort('sheet')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
+                  Excel Reference <span id="sort-icon-sheet" class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
                 </th>
                 <th scope="col" onclick="toggleSort('date')" class="py-2.5 px-3.5 cursor-pointer hover:text-red-600 transition-colors">
-                  Date <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                  Date <span id="sort-icon-date" class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
                 </th>
                 <th scope="col" onclick="toggleSort('rate')" class="py-2.5 px-3.5 text-right cursor-pointer hover:text-red-600 transition-colors">
-                  Quoted Rate <span class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
+                  Quoted Rate <span id="sort-icon-rate" class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
                 </th>
-                <th scope="col" class="py-2.5 px-3.5 text-right">
-                  Client Proposal
+                <th scope="col" onclick="toggleSort('proposal')" class="py-2.5 px-3.5 text-right cursor-pointer hover:text-red-600 transition-colors">
+                  Client Proposal <span id="sort-icon-proposal" class="inline-block text-[10px] opacity-60" aria-hidden="true">⇅</span>
                 </th>
               </tr>
             </thead>
@@ -255,6 +255,26 @@
               <!-- Dynamically populated via JS -->
             </tbody>
           </table>
+        </div>
+
+        <!-- Table Pagination Footer (Capped at 10 Quotes Per Page) -->
+        <div id="pagination-container" class="px-4 py-3 border-t border-[var(--border)] bg-slate-50/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--muted-foreground)]">
+          <div id="pagination-info" class="font-medium">
+            Showing <span id="page-start" class="font-bold text-[var(--foreground)]">1</span> to <span id="page-end" class="font-bold text-[var(--foreground)]">10</span> of <span id="total-quotes-count" class="font-bold text-[var(--foreground)]">0</span> quotes
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-prev-page" type="button" onclick="prevPage()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-white hover:bg-slate-50 text-[var(--foreground)] font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs cursor-pointer">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <span>Previous</span>
+            </button>
+            <span id="page-indicator" class="px-2.5 py-1 text-xs font-bold text-slate-800 bg-white border border-[var(--border)] rounded-md shadow-2xs">
+              Page 1 of 1
+            </span>
+            <button id="btn-next-page" type="button" onclick="nextPage()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-white hover:bg-slate-50 text-[var(--foreground)] font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs cursor-pointer">
+              <span>Next</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -482,6 +502,112 @@
         </div>
       </div>
 
+      <!-- ===================================================================== -->
+      <!-- In-Browser Formatted Carrier Tariff Matrix Modal (Cell Traceability) -->
+      <!-- ===================================================================== -->
+      <div id="formatted-sheet-modal" class="hidden fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150" oncontextmenu="preventDownloadAction(event)">
+          
+          <!-- Header -->
+          <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">👁️</div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-bold text-slate-900" id="fsm-carrier-title">Formatted Carrier Tariff Matrix</h3>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    🔒 In-Browser Inspection Only
+                  </span>
+                  <span id="fsm-focused-cell-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">
+                    Target Cell: <span id="fsm-target-cell-label" class="ml-1 font-mono font-bold">[C:14]</span>
+                  </span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-0.5">Normalized matrix representation with 100% cell traceability. Downloads & exports are disabled.</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <a id="fsm-tariffs-link" href="/console/rate-sheets" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors">
+                <span>Open in Tariffs Tab</span>
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </a>
+              <button type="button" onclick="closeFormattedSheetModal()" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Highlight Notification Ribbon -->
+          <div id="fsm-highlight-banner" class="hidden px-5 py-2.5 bg-amber-50 border-b border-amber-200 flex items-center justify-between text-xs text-amber-950">
+            <div class="flex items-center gap-2">
+              <span class="text-amber-700 font-bold">📌 Cell Traceability Focus:</span>
+              <span>Showing cell <strong id="fsm-highlight-text" class="font-mono text-red-700 underline font-black">[C:14]</strong> highlighted in amber/red within the active carrier rate matrix.</span>
+            </div>
+            <span class="font-mono text-[10px] text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 font-bold shrink-0">100% Traceability Lock</span>
+          </div>
+
+          <!-- Security Policy Ribbon -->
+          <div class="px-5 py-2.5 bg-red-50/60 border-b border-red-100 flex items-center justify-between text-xs text-red-900">
+            <div class="flex items-center gap-2">
+              <span class="text-red-600 font-bold">🔒 Platform Security Policy:</span>
+              <span>Reformatted carrier tariffs are restricted to in-browser inspection only. Downloading, scraping, or exporting spreadsheet files is strictly blocked.</span>
+            </div>
+            <span class="font-mono text-[10px] text-red-700 shrink-0">Tenant Quarantine & Cell Security</span>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+            <div class="flex-1 min-w-[240px]">
+              <input id="fsm-search-input" type="text" placeholder="Search lane, city, zone, bracket, or coordinate..." oninput="onSearchFsmDebounced(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-red-500 focus:bg-white shadow-2xs">
+            </div>
+            <div class="flex items-center gap-3 text-xs text-slate-500 font-mono">
+              <div>Total Rates: <strong id="fsm-rows-count" class="text-slate-800">0</strong></div>
+              <div>•</div>
+              <div id="fsm-currency-badge">CAD / lb</div>
+            </div>
+          </div>
+
+          <!-- Matrix Scrollable Table -->
+          <div class="p-4 overflow-y-auto flex-1 text-xs" style="max-height: 52vh;">
+            <div class="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+              <table class="w-full text-left border-collapse text-[11px]">
+                <thead class="bg-slate-50 border-b border-slate-200 font-bold text-slate-700 sticky top-0 z-10">
+                  <tr>
+                    <th class="py-2.5 px-3">Origin Lane</th>
+                    <th class="py-2.5 px-3">Destination Lane</th>
+                    <th class="py-2.5 px-3">Carrier Zone</th>
+                    <th class="py-2.5 px-3">Weight Bracket</th>
+                    <th class="py-2.5 px-3">Base Wholesale Rate</th>
+                    <th class="py-2.5 px-3">Unit</th>
+                    <th class="py-2.5 px-3">Source Coordinate</th>
+                    <th class="py-2.5 px-3 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="fsm-matrix-tbody" class="divide-y divide-slate-100 font-mono">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Footer & Pagination -->
+          <div class="p-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div id="fsm-pagination-summary" class="text-[11px] text-slate-500 font-mono">
+              Showing 0 rows
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="fsm-prev-btn" onclick="goToFsmPage(-1)" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">‹ Prev</button>
+              <span id="fsm-page-number" class="font-mono font-bold text-slate-800 text-xs px-1">Page 1 / 1</span>
+              <button id="fsm-next-btn" onclick="goToFsmPage(1)" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">Next ›</button>
+              <div class="h-4 w-[1px] bg-slate-300 mx-1"></div>
+              <button type="button" onclick="closeFormattedSheetModal()" class="px-3.5 py-1 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold cursor-pointer">
+                Close Inspector
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </main>
 
     <!-- Semantic Footer -->
@@ -514,22 +640,132 @@
   <script>
     let allQuotes = [];
     let currentQuotes = [];
-    let sortDirection = {};
+    let currentSortField = 'date';
+    let currentSortAsc = false;
+    const pageSize = 10;
+    let currentPage = 1;
     let activeProposalQuote = null;
     let activeProposalData = null;
 
+    let activeSheetId = null;
+    let activeHighlightCell = null;
+    let fsmPage = 1;
+    const fsmLimit = 50;
+    let fsmTotal = 0;
+    let fsmQuery = '';
+    let fsmDebounceTimer = null;
+    let cachedRegisteredSheets = null;
+
+    function formatExcelReference(coord, rowNum) {
+      if (!coord && !rowNum) return '[C:1]';
+      const str = String(coord || '').trim();
+      
+      // 1. Already in [Col:Row] format
+      const bracketMatch = str.match(/\[([A-Za-z]+)\s*[:,\s]\s*(\d+)\]/);
+      if (bracketMatch) {
+        return `[${bracketMatch[1].toUpperCase()}:${bracketMatch[2]}]`;
+      }
+      
+      // 2. Row X, Col Y or Col Y, Row X
+      const rowColMatch1 = str.match(/Row\s*(\d+)[^\w\d]+Col(?:umn)?\s*([A-Za-z]+)/i);
+      if (rowColMatch1) {
+        return `[${rowColMatch1[2].toUpperCase()}:${rowColMatch1[1]}]`;
+      }
+      const rowColMatch2 = str.match(/Col(?:umn)?\s*([A-Za-z]+)[^\w\d]+Row\s*(\d+)/i);
+      if (rowColMatch2) {
+        return `[${rowColMatch2[1].toUpperCase()}:${rowColMatch2[2]}]`;
+      }
+
+      // 3. Cell coordinate like "Rates!C2", "Terms!C14", "D12"
+      const cellMatch = str.match(/(?:!|^|\s)([A-Za-z]{1,3})(\d+)(?:\b|$)/);
+      if (cellMatch) {
+        return `[${cellMatch[1].toUpperCase()}:${cellMatch[2]}]`;
+      }
+
+      // 4. "Row X"
+      const rowOnlyMatch = str.match(/Row\s*(\d+)/i);
+      if (rowOnlyMatch) {
+        return `[C:${rowOnlyMatch[1]}]`;
+      }
+
+      // 5. Explicit rowNum
+      if (rowNum && !isNaN(Number(rowNum))) {
+        return `[C:${rowNum}]`;
+      }
+
+      return '[C:1]';
+    }
+
+    function matchesHighlightCell(sourceCell, targetCell) {
+      if (!sourceCell || !targetCell) return false;
+      const s = String(sourceCell).trim().toUpperCase();
+      const t = String(targetCell).trim().toUpperCase();
+      if (s === t) return true;
+      
+      const fS = formatExcelReference(sourceCell);
+      const fT = formatExcelReference(targetCell);
+      if (fS && fT && fS === fT) return true;
+
+      const cleanS = fS.replace(/[\[\]:]/g, '');
+      const cleanT = fT.replace(/[\[\]:]/g, '');
+      if (cleanS === cleanT) return true;
+
+      return false;
+    }
+
     function renderTable(quotes) {
+      if (quotes) {
+        currentQuotes = quotes;
+      }
       const tbody = document.getElementById('quotes-table-body');
-      if (!quotes.length) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-xs text-slate-400">No quotes match your filter or search query.</td></tr>`;
+      const total = currentQuotes.length;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      if (total === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-xs text-slate-400">No quotes match your filter or search query.</td></tr>`;
+        const startEl = document.getElementById('page-start');
+        const endEl = document.getElementById('page-end');
+        const totalEl = document.getElementById('total-quotes-count');
+        const indEl = document.getElementById('page-indicator');
+        const prevBtn = document.getElementById('btn-prev-page');
+        const nextBtn = document.getElementById('btn-next-page');
+
+        if (startEl) startEl.textContent = '0';
+        if (endEl) endEl.textContent = '0';
+        if (totalEl) totalEl.textContent = '0';
+        if (indEl) indEl.textContent = 'Page 0 of 0';
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
         return;
       }
-      tbody.innerHTML = quotes.map(q => `
+
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, total);
+      const pageQuotes = currentQuotes.slice(startIndex, endIndex);
+
+      tbody.innerHTML = pageQuotes.map(q => {
+        const cellFormatted = q.sheet || formatExcelReference(q.rawCoord, q.raw?.row_num);
+        const targetSheetId = q.sheetId || '';
+        const carrierName = q.carrierName || q.carrier || '';
+        const sheetUrl = `/console/rate-sheets?sheet_id=${encodeURIComponent(targetSheetId)}&carrier=${encodeURIComponent(carrierName)}&cell=${encodeURIComponent(cellFormatted)}&highlight=${encodeURIComponent(cellFormatted)}`;
+
+        return `
         <tr class="hover:bg-slate-50/50 transition-colors font-normal">
           <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--foreground)]">${q.id}</td>
           <td class="py-2.5 px-3.5 font-normal text-[var(--foreground)]">${q.carrier}</td>
           <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--muted-foreground)]">${q.route}</td>
-          <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--muted-foreground)]">${q.sheet}</td>
+          <td class="py-2.5 px-3.5 font-normal font-mono">
+            <a href="${sheetUrl}" 
+               onclick="openHistoryFormattedSheet(event, '${targetSheetId}', '${cellFormatted}', '${encodeURIComponent(carrierName)}')"
+               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono font-bold text-xs text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-800 border border-red-200/90 transition-all shadow-2xs group cursor-pointer"
+               title="View formatted Excel sheet with cell ${cellFormatted} highlighted">
+              <span>${cellFormatted}</span>
+              <svg class="w-3 h-3 text-red-400 group-hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+          </td>
           <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--muted-foreground)]">${q.date}</td>
           <td class="py-2.5 px-3.5 text-right font-normal font-mono text-slate-900 font-semibold">$${Number(q.rate).toFixed(2)}</td>
           <td class="py-2.5 px-3.5 text-right">
@@ -539,36 +775,267 @@
             </button>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
+
+      const startEl = document.getElementById('page-start');
+      const endEl = document.getElementById('page-end');
+      const totalEl = document.getElementById('total-quotes-count');
+      const indEl = document.getElementById('page-indicator');
+      const prevBtn = document.getElementById('btn-prev-page');
+      const nextBtn = document.getElementById('btn-next-page');
+
+      if (startEl) startEl.textContent = (startIndex + 1).toString();
+      if (endEl) endEl.textContent = endIndex.toString();
+      if (totalEl) totalEl.textContent = total.toString();
+      if (indEl) indEl.textContent = `Page ${currentPage} of ${totalPages}`;
+      if (prevBtn) prevBtn.disabled = (currentPage <= 1);
+      if (nextBtn) nextBtn.disabled = (currentPage >= totalPages);
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    }
+
+    function nextPage() {
+      const totalPages = Math.ceil(currentQuotes.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+      }
+    }
+
+    function goToPage(page) {
+      const totalPages = Math.max(1, Math.ceil(currentQuotes.length / pageSize));
+      if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        renderTable();
+      }
     }
 
     function loadQuotes() {
       fetch('/api/quotes/history')
         .then(r => r.json())
         .then(data => {
-          allQuotes = (data.quotes || []).map(q => ({
-            raw: q,
-            id: q.id,
-            carrierName: q.carrier,
-            serviceName: q.service,
-            originZip: q.origin_zip,
-            destZip: q.dest_zip,
-            weightLbs: q.weight_lbs,
-            baseRate: q.base_rate,
-            markupPct: q.markup_pct,
-            finalRate: q.final_rate,
-            carrier: `${q.carrier} (${q.service})`,
-            route: `${q.origin_zip} → ${q.dest_zip} • ${q.weight_lbs} lbs`,
-            sheet: q.coordinate,
-            date: q.created_at ? q.created_at.split('T')[0] : '2026-09-28',
-            rate: q.final_rate
-          }));
+          allQuotes = (data.quotes || []).map(q => {
+            const formattedRef = formatExcelReference(q.coordinate, q.row_num);
+            return {
+              raw: q,
+              id: q.id,
+              carrierName: q.carrier,
+              serviceName: q.service,
+              originZip: q.origin_zip,
+              destZip: q.dest_zip,
+              weightLbs: q.weight_lbs,
+              baseRate: q.base_rate,
+              markupPct: q.markup_pct,
+              finalRate: q.final_rate,
+              carrier: `${q.carrier} (${q.service})`,
+              route: `${q.origin_zip} → ${q.dest_zip} • ${q.weight_lbs} lbs`,
+              sheet: formattedRef,
+              rawCoord: q.coordinate,
+              sheetId: q.sheet_id || '',
+              date: q.created_at ? q.created_at.split('T')[0] : '2026-09-28',
+              rate: q.final_rate,
+              proposal: q.id
+            };
+          });
           currentQuotes = [...allQuotes];
-          renderTable(currentQuotes);
+          currentPage = 1;
+          updateSortIndicators();
+          renderTable();
         })
         .catch(err => {
           console.error("Error fetching quotes:", err);
         });
+    }
+
+    async function openHistoryFormattedSheet(event, sheetId, cellCoord, carrierEncoded) {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1) {
+        return; // Allow new tab navigation
+      }
+      event.preventDefault();
+      const carrier = decodeURIComponent(carrierEncoded || '');
+      await openFormattedSheetModalForHistory(sheetId, cellCoord, carrier);
+    }
+
+    async function openFormattedSheetModalForHistory(sheetId, cellCoord, carrier) {
+      activeHighlightCell = cellCoord || '';
+      let targetSheetId = sheetId;
+
+      if (!targetSheetId) {
+        try {
+          if (!cachedRegisteredSheets) {
+            const res = await fetch('/api/ratesift/sheets');
+            const data = await res.json();
+            cachedRegisteredSheets = data.sheets || [];
+          }
+          if (cachedRegisteredSheets.length > 0) {
+            const match = cachedRegisteredSheets.find(s => 
+              (s.carrier_name || '').toLowerCase().includes(carrier.toLowerCase()) ||
+              carrier.toLowerCase().includes((s.carrier_name || '').toLowerCase())
+            );
+            targetSheetId = match ? match.id : cachedRegisteredSheets[0].id;
+          }
+        } catch (err) {
+          console.error("Error resolving sheet for history modal:", err);
+        }
+      }
+
+      if (!targetSheetId) {
+        window.location.href = `/console/rate-sheets?cell=${encodeURIComponent(cellCoord)}`;
+        return;
+      }
+
+      activeSheetId = targetSheetId;
+      const modal = document.getElementById('formatted-sheet-modal');
+      if (modal) modal.classList.remove('hidden');
+
+      // Update link to Tariffs tab
+      const tariffsLink = document.getElementById('fsm-tariffs-link');
+      if (tariffsLink) {
+        tariffsLink.href = `/console/rate-sheets?sheet_id=${encodeURIComponent(targetSheetId)}&cell=${encodeURIComponent(cellCoord)}&highlight=${encodeURIComponent(cellCoord)}`;
+      }
+
+      // Update Target Cell Badges
+      const focusedBadge = document.getElementById('fsm-focused-cell-badge');
+      const targetLabel = document.getElementById('fsm-target-cell-label');
+      const highlightBanner = document.getElementById('fsm-highlight-banner');
+      const highlightText = document.getElementById('fsm-highlight-text');
+
+      if (activeHighlightCell) {
+        if (focusedBadge) focusedBadge.classList.remove('hidden');
+        if (targetLabel) targetLabel.textContent = activeHighlightCell;
+        if (highlightBanner) highlightBanner.classList.remove('hidden');
+        if (highlightText) highlightText.textContent = activeHighlightCell;
+      } else {
+        if (focusedBadge) focusedBadge.classList.add('hidden');
+        if (highlightBanner) highlightBanner.classList.add('hidden');
+      }
+
+      fsmPage = 1;
+      fsmQuery = '';
+      const input = document.getElementById('fsm-search-input');
+      if (input) input.value = '';
+
+      fetchFsmMatrix();
+    }
+
+    function closeFormattedSheetModal() {
+      const modal = document.getElementById('formatted-sheet-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function fetchFsmMatrix() {
+      if (!activeSheetId) return;
+      try {
+        const queryParam = fsmQuery ? `&query=${encodeURIComponent(fsmQuery)}` : '';
+        const cellParam = activeHighlightCell ? `&cell=${encodeURIComponent(activeHighlightCell)}` : '';
+        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/formatted-matrix?page=${fsmPage}&limit=${fsmLimit}${queryParam}${cellParam}`);
+        if (!res.ok) throw new Error("Failed to load formatted matrix");
+        const data = await res.json();
+        
+        document.getElementById('fsm-carrier-title').textContent = `${data.sheet.carrier_name} — ${data.sheet.service_name} Formatted Matrix`;
+        document.getElementById('fsm-currency-badge').textContent = `${data.sheet.currency} / ${data.sheet.weight_unit}`;
+        
+        fsmTotal = data.total_breaks || 0;
+        fsmPage = data.page || fsmPage;
+        document.getElementById('fsm-rows-count').textContent = fsmTotal.toLocaleString();
+        
+        renderFormattedMatrixRows(data.breaks || []);
+        updateFsmPaginationControls();
+      } catch (err) {
+        alert("Error loading formatted sheet: " + err.message);
+      }
+    }
+
+    function renderFormattedMatrixRows(rows) {
+      const tbody = document.getElementById('fsm-matrix-tbody');
+      if (!tbody) return;
+      if (!rows || rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-slate-400">No matching lane rates found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(r => {
+        const isTargetCell = matchesHighlightCell(r.source_cell, activeHighlightCell);
+        const cellFormatted = formatExcelReference(r.source_cell);
+        const rowClass = isTargetCell 
+          ? "bg-amber-100/90 ring-2 ring-red-500 font-bold transition-all shadow-sm" 
+          : "hover:bg-slate-50 transition-colors";
+        const cellBadgeClass = isTargetCell 
+          ? "inline-flex items-center gap-1 bg-red-600 text-white px-2 py-0.5 rounded font-mono font-bold shadow-xs animate-pulse" 
+          : "text-red-600 font-bold";
+
+        return `
+        <tr class="${rowClass}" ${isTargetCell ? 'id="fsm-highlighted-row"' : ''}>
+          <td class="py-2 px-3 font-semibold text-slate-800">${r.origin_spec || 'System Default'}</td>
+          <td class="py-2 px-3 font-semibold text-slate-800">${r.dest_spec || 'All Destination Zones'}</td>
+          <td class="py-2 px-3 text-slate-500">${r.zone_code || 'DEFAULT'}</td>
+          <td class="py-2 px-3 text-slate-700">${r.break_name}</td>
+          <td class="py-2 px-3 font-bold text-slate-900">$${parseFloat(r.base_rate || 0).toFixed(2)}</td>
+          <td class="py-2 px-3 text-slate-500 text-[10px]">${r.rate_type || 'CWT'}</td>
+          <td class="py-2 px-3"><span class="${cellBadgeClass}">${cellFormatted}</span></td>
+          <td class="py-2 px-3 text-center">
+            ${isTargetCell ? `
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-600 text-white animate-pulse">
+                ★ Highlighted Cell
+              </span>
+            ` : `
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Preserved
+              </span>
+            `}
+          </td>
+        </tr>
+      `}).join('');
+
+      const targetRow = document.getElementById('fsm-highlighted-row');
+      if (targetRow) {
+        setTimeout(() => {
+          targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 150);
+      }
+    }
+
+    function updateFsmPaginationControls() {
+      const summary = document.getElementById('fsm-pagination-summary');
+      const numberEl = document.getElementById('fsm-page-number');
+      const prevBtn = document.getElementById('fsm-prev-btn');
+      const nextBtn = document.getElementById('fsm-next-btn');
+
+      const totalPages = Math.ceil(fsmTotal / fsmLimit) || 1;
+      const start = fsmTotal > 0 ? (fsmPage - 1) * fsmLimit + 1 : 0;
+      const end = Math.min(fsmPage * fsmLimit, fsmTotal);
+
+      if (summary) summary.textContent = `Showing ${start}–${end} of ${fsmTotal.toLocaleString()} rows`;
+      if (numberEl) numberEl.textContent = `Page ${fsmPage} / ${totalPages}`;
+      if (prevBtn) prevBtn.disabled = fsmPage <= 1;
+      if (nextBtn) nextBtn.disabled = fsmPage >= totalPages;
+    }
+
+    function goToFsmPage(delta) {
+      const totalPages = Math.ceil(fsmTotal / fsmLimit) || 1;
+      const newPage = fsmPage + delta;
+      if (newPage < 1 || newPage > totalPages) return;
+      fsmPage = newPage;
+      fetchFsmMatrix();
+    }
+
+    function onSearchFsmDebounced(val) {
+      clearTimeout(fsmDebounceTimer);
+      fsmDebounceTimer = setTimeout(() => {
+        fsmQuery = (val || '').trim();
+        fsmPage = 1;
+        fetchFsmMatrix();
+      }, 250);
+    }
+
+    function preventDownloadAction(e) {
+      e.preventDefault();
+      alert("🔒 Platform Security Notice: Reformatted carrier tariffs are restricted to in-browser inspection only. Downloads, exports, and file extractions are permanently disabled.");
     }
 
     function openHistoryProposal(quoteId) {
@@ -781,6 +1248,9 @@
       document.getElementById('rate-sort-btn').setAttribute('aria-expanded', 'false');
       const label = document.getElementById('rate-sort-label');
       
+      currentSortField = 'rate';
+      currentSortAsc = (direction !== 'desc');
+      
       if (direction === 'desc') {
         currentQuotes.sort((a, b) => b.rate - a.rate);
         label.textContent = "Rate: High to Low";
@@ -788,28 +1258,64 @@
         currentQuotes.sort((a, b) => a.rate - b.rate);
         label.textContent = "Rate: Low to High";
       }
-      renderTable(currentQuotes);
+      updateSortIndicators();
+      currentPage = 1;
+      renderTable();
     }
 
     function resetSort() {
       document.getElementById('rate-dropdown').classList.add('hidden');
       document.getElementById('rate-sort-btn').setAttribute('aria-expanded', 'false');
       document.getElementById('rate-sort-label').textContent = "Sort by Rate";
+      currentSortField = null;
       currentQuotes = [...allQuotes];
-      renderTable(currentQuotes);
+      updateSortIndicators();
+      currentPage = 1;
+      renderTable();
+    }
+
+    function updateSortIndicators() {
+      const fields = ['id', 'carrier', 'route', 'sheet', 'date', 'rate', 'proposal'];
+      fields.forEach(f => {
+        const el = document.getElementById(`sort-icon-${f}`);
+        if (el) {
+          if (f === currentSortField) {
+            el.textContent = currentSortAsc ? '▲' : '▼';
+            el.className = 'inline-block text-[10px] text-red-600 font-bold opacity-100';
+          } else {
+            el.textContent = '⇅';
+            el.className = 'inline-block text-[10px] opacity-60';
+          }
+        }
+      });
     }
 
     function toggleSort(field) {
-      sortDirection[field] = !sortDirection[field];
+      if (currentSortField === field) {
+        currentSortAsc = !currentSortAsc;
+      } else {
+        currentSortField = field;
+        currentSortAsc = (field !== 'rate' && field !== 'date');
+      }
+
       currentQuotes.sort((a, b) => {
         let valA = a[field];
         let valB = b[field];
-        if (typeof valA === 'string') {
-          return sortDirection[field] ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        if (field === 'proposal') {
+          valA = a.id;
+          valB = b.id;
         }
-        return sortDirection[field] ? valA - valB : valB - valA;
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          return currentSortAsc ? valA - valB : valB - valA;
+        }
+        const strA = (valA ?? '').toString().toLowerCase();
+        const strB = (valB ?? '').toString().toLowerCase();
+        return currentSortAsc ? strA.localeCompare(strB) : strB.localeCompare(strA);
       });
-      renderTable(currentQuotes);
+
+      updateSortIndicators();
+      currentPage = 1;
+      renderTable();
     }
 
     function filterQuotes() {
@@ -824,7 +1330,8 @@
           q.sheet.toLowerCase().includes(query)
         );
       }
-      renderTable(currentQuotes);
+      currentPage = 1;
+      renderTable();
     }
 
     window.addEventListener('click', function(e) {

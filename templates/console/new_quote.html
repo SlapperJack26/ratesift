@@ -137,7 +137,7 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
         <div>
           <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Freight Rating Engine</h1>
-          <p class="text-sm text-slate-500 mt-0.5">100% Deterministic Rating • A Canadian freight rate comparison UI design</p>
+          <p class="text-sm text-slate-500 mt-0.5">100% Deterministic (Rule 8) • WHC Canada • Rule 29 • A Canadian freight rate comparison UI design</p>
         </div>
 
         <!-- Weekly Canadian Fuel Surcharge (FSC) Index Card (Matches Mockup) -->
@@ -256,7 +256,7 @@
             <div class="space-y-3 pt-3 border-t border-slate-100">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 class="text-xs font-bold text-slate-900">Requested Accessorials & Surcharges</h3>
+                  <h3 class="text-xs font-bold text-slate-900">Requested Accessorials & Surcharges (Rule 11)</h3>
                   <p class="text-[11px] text-slate-500">Deterministic line-item charges • Filter options by shipping mode</p>
                 </div>
 
@@ -448,7 +448,7 @@
         <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 text-[11px] text-slate-500 flex items-start gap-2">
           <svg class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           <div>
-            <span class="font-semibold text-slate-700">Non-Binding Estimate Legal Notice:</span>
+            <span class="font-semibold text-slate-700">Rule 26 Legal Notice (Non-Binding Estimate):</span>
             <span>All calculations are derived deterministically from customer-uploaded rate sheets. This quote is non-binding and subject to final carrier tariff verification, operational conditions, and accessorial validation upon booking.</span>
           </div>
         </div>
@@ -1941,7 +1941,7 @@
       const currency = activeProposalQuote.currency || "CAD";
 
       const payload = {
-        quote_id: activeProposalQuote.quote_id || activeProposalQuote.sheet_id || null,
+        quote_id: activeProposalQuote.proposal_id || activeProposalQuote.quote_id || activeProposalQuote.sheet_id || null,
         carrier_name: activeProposalQuote.carrier_name || "Standard Carrier",
         service_name: activeProposalQuote.service_name || "Standard Road LTL",
         origin: activeProposalQuote.origin || "TORONTO, ON",
@@ -1954,7 +1954,9 @@
         currency: currency,
         client_name: clientName,
         markup_pct: markupPct,
-        custom_total: customTotal
+        custom_total: customTotal,
+        source_coordinate: activeProposalQuote.source_coordinate || activeProposalQuote.source_cell || activeProposalQuote.coordinate || null,
+        sheet_id: activeProposalQuote.sheet_id || null
       };
 
       try {
@@ -1966,6 +1968,9 @@
         if (!res.ok) throw new Error("Failed to generate proposal preview");
         const data = await res.json();
         activeProposalData = data.proposal;
+        if (activeProposalQuote && activeProposalData && activeProposalData.proposal_id) {
+          activeProposalQuote.proposal_id = activeProposalData.proposal_id;
+        }
         activeProposalEmail = activeProposalData.email || null;
 
         // Render Email Draft

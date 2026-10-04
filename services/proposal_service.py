@@ -24,7 +24,11 @@ def build_client_proposal_data(
     origin_hub = broker.get("origin_zip") or quote_data.get("origin") or "TORONTO, ON"
 
     now = datetime.utcnow()
-    proposal_id = f"PROP-{now.strftime('%Y%m%d')}-{uuid.uuid4().hex[:5].upper()}"
+    existing_id = quote_data.get("quote_id")
+    if existing_id and str(existing_id).startswith("PROP-"):
+        proposal_id = str(existing_id)
+    else:
+        proposal_id = f"PROP-{now.strftime('%Y%m%d')}-{uuid.uuid4().hex[:5].upper()}"
     expiry_date = (now + timedelta(days=7)).strftime("%B %d, %Y")
     issue_date = now.strftime("%B %d, %Y")
 
@@ -86,13 +90,18 @@ def build_client_proposal_data(
             "transit_days": quote_data.get("transit_days") or 3,
             "currency": quote_data.get("currency") or "CAD"
         },
+        "carrier": {
+            "name": quote_data.get("carrier_name") or "Standard Carrier",
+            "service": quote_data.get("service_name") or "Standard Road LTL"
+        },
         "pricing": {
             "client_base_freight": client_base_freight,
             "total_surcharges": total_surcharges,
             "client_total": client_total,
             "currency": quote_data.get("currency") or "CAD",
             "effective_markup_pct": effective_markup,
-            "broker_margin_dollars": margin_dollars
+            "broker_margin_dollars": margin_dollars,
+            "wholesale_cost": net_carrier_total
         },
         "line_items": line_items,
         "terms": [

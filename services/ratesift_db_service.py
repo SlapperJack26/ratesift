@@ -675,9 +675,10 @@ def get_sheet_breaks_paginated(
     user_id: str,
     page: int = 1,
     limit: int = 50,
-    query: Optional[str] = None
+    query: Optional[str] = None,
+    target_cell: Optional[str] = None
 ) -> Dict[str, Any]:
-    """Retrieves weight breaks with high-performance server-side pagination and search."""
+    """Retrieves weight breaks with high-performance server-side pagination, search, and target cell auto-jump."""
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -692,6 +693,20 @@ def get_sheet_breaks_paginated(
     cursor.execute(f"SELECT COUNT(*) {base_sql}", params)
     total_count = cursor.fetchone()[0]
     
+    # If target_cell is specified without an explicit query, locate the break's page
+    if target_cell and target_cell.strip() and not query:
+        tc = target_cell.strip().upper()
+        # Clean [C:14] into C14 and also check for "14" or "C"
+        tc_clean = tc.replace("[", "").replace("]", "").replace(" ", "").replace(":", "")
+        cursor.execute(f"SELECT id, source_cell {base_sql} ORDER BY id ASC", params)
+        all_breaks = cursor.fetchall()
+        for idx, brk in enumerate(all_breaks):
+            sc = (brk["source_cell"] or "").strip().upper()
+            sc_clean = sc.replace("[", "").replace("]", "").replace(" ", "").replace(":", "").replace("•", "").replace("ROW", "").replace("COL", "")
+            if tc_clean in sc_clean or sc_clean in tc_clean or tc in sc:
+                page = (idx // limit) + 1
+                break
+
     offset = max(0, (page - 1) * limit)
     cursor.execute(f"SELECT * {base_sql} ORDER BY id ASC LIMIT ? OFFSET ?", params + [limit, offset])
     rows = [dict(r) for r in cursor.fetchall()]

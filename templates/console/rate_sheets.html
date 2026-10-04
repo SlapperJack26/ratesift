@@ -561,6 +561,9 @@
               <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                 🔒 In-Browser Inspection Only
               </span>
+              <span id="fsm-focused-cell-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">
+                Target Cell: <span id="fsm-target-cell-label" class="ml-1 font-mono font-bold">[C:14]</span>
+              </span>
             </div>
             <p class="text-[11px] text-slate-500 mt-0.5">Normalized matrix representation with 100% cell traceability. Downloads & exports are disabled.</p>
           </div>
@@ -568,6 +571,15 @@
         <button type="button" onclick="closeFormattedSheetModal()" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
+      </div>
+
+      <!-- Highlight Notification Ribbon -->
+      <div id="fsm-highlight-banner" class="hidden px-5 py-2.5 bg-amber-50 border-b border-amber-200 flex items-center justify-between text-xs text-amber-950">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-700 font-bold">📌 Cell Traceability Focus:</span>
+          <span>Showing cell <strong id="fsm-highlight-text" class="font-mono text-red-700 underline font-black">[C:14]</strong> highlighted in amber/red within the active carrier rate matrix.</span>
+        </div>
+        <span class="font-mono text-[10px] text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 font-bold shrink-0">100% Traceability Lock</span>
       </div>
 
       <!-- Security Notice Ribbon -->
@@ -710,9 +722,63 @@
 
   <script>
     let activeSheetId = null;
+    let activeHighlightCell = null;
+    let currentSheetsList = [];
     let stagedRedactFile = null;
     let currentSheetData = null;
     let currentMarkupMode = 'PERCENTAGE';
+
+    function formatExcelReference(coord, rowNum) {
+      if (!coord && !rowNum) return '[C:1]';
+      const str = String(coord || '').trim();
+      
+      const bracketMatch = str.match(/\[([A-Za-z]+)\s*[:,\s]\s*(\d+)\]/);
+      if (bracketMatch) {
+        return `[${bracketMatch[1].toUpperCase()}:${bracketMatch[2]}]`;
+      }
+      
+      const rowColMatch1 = str.match(/Row\s*(\d+)[^\w\d]+Col(?:umn)?\s*([A-Za-z]+)/i);
+      if (rowColMatch1) {
+        return `[${rowColMatch1[2].toUpperCase()}:${rowColMatch1[1]}]`;
+      }
+      const rowColMatch2 = str.match(/Col(?:umn)?\s*([A-Za-z]+)[^\w\d]+Row\s*(\d+)/i);
+      if (rowColMatch2) {
+        return `[${rowColMatch2[1].toUpperCase()}:${rowColMatch2[2]}]`;
+      }
+
+      const cellMatch = str.match(/(?:!|^|\s)([A-Za-z]{1,3})(\d+)(?:\b|$)/);
+      if (cellMatch) {
+        return `[${cellMatch[1].toUpperCase()}:${cellMatch[2]}]`;
+      }
+
+      const rowOnlyMatch = str.match(/Row\s*(\d+)/i);
+      if (rowOnlyMatch) {
+        return `[C:${rowOnlyMatch[1]}]`;
+      }
+
+      if (rowNum && !isNaN(Number(rowNum))) {
+        return `[C:${rowNum}]`;
+      }
+
+      return '[C:1]';
+    }
+
+    function matchesHighlightCell(sourceCell, targetCell) {
+      if (!sourceCell || !targetCell) return false;
+      const s = String(sourceCell).trim().toUpperCase();
+      const t = String(targetCell).trim().toUpperCase();
+      if (s === t) return true;
+      
+      const fS = formatExcelReference(sourceCell);
+      const fT = formatExcelReference(targetCell);
+      if (fS && fT && fS === fT) return true;
+
+      const cleanS = fS.replace(/[\[\]:]/g, '');
+      const cleanT = fT.replace(/[\[\]:]/g, '');
+      if (cleanS === cleanT) return true;
+
+      return false;
+    }
     
     // Human confirmation rule states
     let selectedCurrency = 'CAD';
@@ -973,6 +1039,7 @@
       try {
         const res = await fetch('/api/ratesift/sheets');
         const data = await res.json();
+        currentSheetsList = data.sheets || [];
         const tbody = document.getElementById('sheets-tbody');
         const countIndicator = document.getElementById('sheet-count-indicator');
         
@@ -1225,7 +1292,7 @@
             <td class="py-2.5 px-3 font-semibold text-slate-900">${b.origin_spec || 'System Default'} → ${b.dest_spec || 'All Zones'}</td>
             <td class="py-2.5 px-3 text-slate-600">${b.break_name}</td>
             <td class="py-2.5 px-3 text-slate-900 font-bold">$${parseFloat(b.base_rate || 0).toFixed(2)} <span class="text-[10px] text-slate-400 font-normal">${b.rate_type || 'CWT'}</span></td>
-            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded font-mono text-[10px] bg-slate-100 text-slate-700 font-bold">${b.source_cell || 'Matrix'}</span></td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded font-mono text-[10px] bg-slate-100 text-slate-700 font-bold">${formatExcelReference(b.source_cell)}</span></td>
             <td class="py-2.5 px-3 text-center">${verBadge}</td>
           </tr>
         `;
@@ -1465,10 +1532,28 @@
     // =========================================================================
     // In-Browser Formatted Sheet Inspection Modal Logic (No Downloads Allowed)
     // =========================================================================
-    async function openFormattedSheetModal() {
+    async function openFormattedSheetModal(sheetId, targetCell) {
+      if (sheetId) activeSheetId = sheetId;
       if (!activeSheetId) return;
+      if (targetCell !== undefined) activeHighlightCell = targetCell;
+
       const modal = document.getElementById('formatted-sheet-modal');
       modal.classList.remove('hidden');
+
+      const focusedBadge = document.getElementById('fsm-focused-cell-badge');
+      const targetLabel = document.getElementById('fsm-target-cell-label');
+      const highlightBanner = document.getElementById('fsm-highlight-banner');
+      const highlightText = document.getElementById('fsm-highlight-text');
+
+      if (activeHighlightCell) {
+        if (focusedBadge) focusedBadge.classList.remove('hidden');
+        if (targetLabel) targetLabel.textContent = activeHighlightCell;
+        if (highlightBanner) highlightBanner.classList.remove('hidden');
+        if (highlightText) highlightText.textContent = activeHighlightCell;
+      } else {
+        if (focusedBadge) focusedBadge.classList.add('hidden');
+        if (highlightBanner) highlightBanner.classList.add('hidden');
+      }
 
       fsmPage = 1;
       fsmQuery = '';
@@ -1486,7 +1571,8 @@
       if (!activeSheetId) return;
       try {
         const queryParam = fsmQuery ? `&query=${encodeURIComponent(fsmQuery)}` : '';
-        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/formatted-matrix?page=${fsmPage}&limit=${fsmLimit}${queryParam}`);
+        const cellParam = activeHighlightCell ? `&cell=${encodeURIComponent(activeHighlightCell)}` : '';
+        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/formatted-matrix?page=${fsmPage}&limit=${fsmLimit}${queryParam}${cellParam}`);
         if (!res.ok) throw new Error("Failed to load formatted matrix");
         const data = await res.json();
         
@@ -1494,6 +1580,7 @@
         document.getElementById('fsm-currency-badge').textContent = `${data.sheet.currency} / ${data.sheet.weight_unit}`;
         
         fsmTotal = data.total_breaks || 0;
+        fsmPage = data.page || fsmPage;
         document.getElementById('fsm-rows-count').textContent = fsmTotal.toLocaleString();
         
         renderFormattedMatrixRows(data.breaks || []);
@@ -1509,22 +1596,45 @@
         tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-slate-400">No matching lane rates found.</td></tr>';
         return;
       }
-      tbody.innerHTML = rows.map(r => `
-        <tr class="hover:bg-slate-50 transition-colors">
+      tbody.innerHTML = rows.map(r => {
+        const isTargetCell = matchesHighlightCell(r.source_cell, activeHighlightCell);
+        const cellFormatted = formatExcelReference(r.source_cell);
+        const rowClass = isTargetCell 
+          ? "bg-amber-100/90 ring-2 ring-red-500 font-bold transition-all shadow-sm" 
+          : "hover:bg-slate-50 transition-colors";
+        const cellBadgeClass = isTargetCell 
+          ? "inline-flex items-center gap-1 bg-red-600 text-white px-2 py-0.5 rounded font-mono font-bold shadow-xs animate-pulse" 
+          : "text-red-600 font-bold";
+
+        return `
+        <tr class="${rowClass}" ${isTargetCell ? 'id="fsm-highlighted-row"' : ''}>
           <td class="py-2 px-3 font-semibold text-slate-800">${r.origin_spec || 'System Default'}</td>
           <td class="py-2 px-3 font-semibold text-slate-800">${r.dest_spec || 'All Destination Zones'}</td>
           <td class="py-2 px-3 text-slate-500">${r.zone_code || 'DEFAULT'}</td>
           <td class="py-2 px-3 text-slate-700">${r.break_name}</td>
           <td class="py-2 px-3 font-bold text-slate-900">$${parseFloat(r.base_rate || 0).toFixed(2)}</td>
           <td class="py-2 px-3 text-slate-500 text-[10px]">${r.rate_type || 'CWT'}</td>
-          <td class="py-2 px-3 text-red-600 font-bold">${r.source_cell || 'Auto'}</td>
+          <td class="py-2 px-3"><span class="${cellBadgeClass}">${cellFormatted}</span></td>
           <td class="py-2 px-3 text-center">
-            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              Preserved
-            </span>
+            ${isTargetCell ? `
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-600 text-white animate-pulse">
+                ★ Highlighted Cell
+              </span>
+            ` : `
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Preserved
+              </span>
+            `}
           </td>
         </tr>
-      `).join('');
+      `}).join('');
+
+      const targetRow = document.getElementById('fsm-highlighted-row');
+      if (targetRow) {
+        setTimeout(() => {
+          targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 150);
+      }
     }
 
     function updateFsmPaginationControls() {
@@ -1586,10 +1696,39 @@
     }
 
     // Initial load
-    document.addEventListener("DOMContentLoaded", () => {
-      loadRateSheets();
+    document.addEventListener("DOMContentLoaded", async () => {
+      await loadRateSheets();
       updateHeaderQuota();
+
+      // Check URL query parameters for auto-opening formatted matrix with cell highlight
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetSheetId = urlParams.get('sheet_id');
+      const targetCarrier = urlParams.get('carrier');
+      const targetCell = urlParams.get('cell') || urlParams.get('highlight');
+
+      if (targetSheetId || targetCell) {
+        let sheetToOpen = null;
+        if (targetSheetId && currentSheetsList.length > 0) {
+          sheetToOpen = currentSheetsList.find(s => s.id === targetSheetId);
+        }
+        if (!sheetToOpen && targetCarrier && currentSheetsList.length > 0) {
+          sheetToOpen = currentSheetsList.find(s => 
+            (s.carrier_name || '').toLowerCase().includes(targetCarrier.toLowerCase()) ||
+            targetCarrier.toLowerCase().includes((s.carrier_name || '').toLowerCase())
+          );
+        }
+        if (!sheetToOpen && currentSheetsList.length > 0) {
+          sheetToOpen = currentSheetsList[0];
+        }
+
+        if (sheetToOpen) {
+          activeSheetId = sheetToOpen.id;
+          activeHighlightCell = targetCell || '';
+          openFormattedSheetModal(sheetToOpen.id, activeHighlightCell);
+        }
+      }
     });
+
   </script>
   <script src="/static/js/global-chrome.js"></script>
 </body>
