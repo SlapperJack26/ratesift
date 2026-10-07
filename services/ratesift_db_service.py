@@ -72,6 +72,10 @@ def init_ratesift_db():
         cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN accessorial_markup_pct REAL DEFAULT 0.0")
     if "manual_override" not in rs_cols:
         cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN manual_override INTEGER DEFAULT 0")
+    if "rating_basis" not in rs_cols:
+        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN rating_basis TEXT DEFAULT 'WEIGHT_CWT'")
+    if "max_skid_capacity" not in rs_cols:
+        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN max_skid_capacity INTEGER DEFAULT 10")
 
     # 2. Rate Sheet Cell Coordinates Traceability Table (Rule 3, 6, 28)
     cursor.execute("""
@@ -133,6 +137,16 @@ def init_ratesift_db():
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_rs_breaks_lookup ON rs_weight_breaks (sheet_id, zone_code, min_weight, max_weight)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_rs_breaks_od ON rs_weight_breaks (sheet_id, origin_spec, dest_spec)")
+
+    # Auto-migrate columns for rs_weight_breaks
+    cursor.execute("PRAGMA table_info(rs_weight_breaks)")
+    wb_cols = [r["name"] for r in cursor.fetchall()]
+    if "break_unit" not in wb_cols:
+        cursor.execute("ALTER TABLE rs_weight_breaks ADD COLUMN break_unit TEXT DEFAULT 'CWT'")
+    if "min_units" not in wb_cols:
+        cursor.execute("ALTER TABLE rs_weight_breaks ADD COLUMN min_units REAL DEFAULT 0.0")
+    if "max_units" not in wb_cols:
+        cursor.execute("ALTER TABLE rs_weight_breaks ADD COLUMN max_units REAL DEFAULT 999999.0")
 
     # 5. Carrier Minimum Charges Table (Rule 12, 28)
     cursor.execute("""
@@ -215,7 +229,9 @@ def create_rate_sheet(
     version: int = 1,
     source_filename: str = "",
     confirmation_status: str = "PENDING_REVIEW",
-    is_benchmark: int = 0
+    is_benchmark: int = 0,
+    rating_basis: str = "WEIGHT_CWT",
+    max_skid_capacity: int = 10
 ) -> str:
     """Creates a new rate sheet record strictly scoped to user_id."""
     sheet_id = f"rs_sheet_{uuid.uuid4().hex[:12]}"
@@ -228,15 +244,17 @@ def create_rate_sheet(
         id, user_id, carrier_name, service_name, tariff_ref, mode,
         currency, weight_unit, dim_unit, dim_divisor, dim_min_rule,
         rounding_rule, effective_date, expiry_date, version, is_latest,
-        confirmation_status, source_filename, storage_region, created_at, is_benchmark
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+        confirmation_status, source_filename, storage_region, created_at, is_benchmark,
+        rating_basis, max_skid_capacity
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)
     """, (
         sheet_id, user_id, carrier_name.strip(), service_name.strip(),
         tariff_ref.strip() if tariff_ref else None, mode.upper(),
         currency.upper(), weight_unit.lower(), dim_unit.lower(),
         float(dim_divisor), dim_min_rule, rounding_rule,
         effective_date, expiry_date, int(version),
-        confirmation_status, source_filename, DATA_RESIDENCY_REGION, now_ts, int(is_benchmark)
+        confirmation_status, source_filename, DATA_RESIDENCY_REGION, now_ts, int(is_benchmark),
+        rating_basis.upper(), int(max_skid_capacity)
     ))
     conn.commit()
     conn.close()
@@ -561,15 +579,19 @@ def insert_weight_breaks(sheet_id: str, user_id: str, breaks: List[Dict[str, Any
             b["break_name"].strip(),
             float(b["base_rate"]),
             b.get("rate_type", "CWT").upper(),
-            b.get("source_cell", "")
+            b.get("source_cell", ""),
+            b.get("break_unit", "CWT").upper(),
+            float(b.get("min_units", 0.0)),
+            float(b.get("max_units", 999999.0))
         )
         for b in breaks
     ]
     cursor.executemany("""
     INSERT INTO rs_weight_breaks (
         id, sheet_id, user_id, zone_code, origin_spec, dest_spec,
-        min_weight, max_weight, break_name, base_rate, rate_type, source_cell
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        min_weight, max_weight, break_name, base_rate, rate_type, source_cell,
+        break_unit, min_units, max_units
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, records)
     conn.commit()
     conn.close()

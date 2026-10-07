@@ -173,6 +173,70 @@ def match_lane_break(
     result_break["effective_base_charge"] = effective_charge
     return result_break
 
+def match_skid_break(
+    breaks: List[Dict[str, Any]],
+    origin: str,
+    destination: str,
+    skid_count: int
+) -> Optional[Dict[str, Any]]:
+    """
+    Rule 8 & 10: Matches exact lane and skid break deterministically for PER_SKID rating.
+    Supports FSA matching and Canadian City/Province parsing.
+    """
+    norm_origin = normalize_location_string(origin)
+    norm_dest = normalize_location_string(destination)
+    fsa_orig = extract_fsa(origin)
+    fsa_dest = extract_fsa(destination)
+
+    matched_candidates = []
+    for b in breaks:
+        b_unit = (b.get("break_unit") or "").upper()
+        b_type = (b.get("rate_type") or "").upper()
+        if b_unit != "SKID" and b_type != "PER_SKID":
+            continue
+
+        b_orig = normalize_location_string(b.get("origin_spec") or "")
+        b_dest = normalize_location_string(b.get("dest_spec") or "")
+
+        origin_matches = (b_orig == norm_origin) or (not b_orig and not b_dest)
+        dest_matches = (b_dest == norm_dest) or (not b_orig and not b_dest)
+
+        if not origin_matches and fsa_orig and (b_orig == fsa_orig or extract_fsa(b_orig) == fsa_orig):
+            origin_matches = True
+        if not dest_matches and fsa_dest and (b_dest == fsa_dest or extract_fsa(b_dest) == fsa_dest):
+            dest_matches = True
+
+        if not origin_matches and b_orig and "," in norm_origin and "," in b_orig:
+            o_city, o_prov = [x.strip() for x in norm_origin.split(",", 1)]
+            bo_city, bo_prov = [x.strip() for x in b_orig.split(",", 1)]
+            if o_prov == bo_prov and (o_city in bo_city or bo_city in o_city):
+                origin_matches = True
+        elif not origin_matches and b_orig and "," in b_orig and "," not in norm_origin:
+            bo_city = b_orig.split(",", 1)[0].strip()
+            if norm_origin == bo_city or norm_origin in bo_city:
+                origin_matches = True
+
+        if not dest_matches and b_dest and "," in norm_dest and "," in b_dest:
+            d_city, d_prov = [x.strip() for x in norm_dest.split(",", 1)]
+            bd_city, bd_prov = [x.strip() for x in b_dest.split(",", 1)]
+            if d_prov == bd_prov and (d_city in bd_city or bd_city in d_city):
+                dest_matches = True
+        elif not dest_matches and b_dest and "," in b_dest and "," not in norm_dest:
+            bd_city = b_dest.split(",", 1)[0].strip()
+            if norm_dest == bd_city or norm_dest in bd_city:
+                dest_matches = True
+
+        if origin_matches and dest_matches:
+            matched_candidates.append(b)
+
+    for c in matched_candidates:
+        min_u = float(c.get("min_units") or 0.0)
+        max_u = float(c.get("max_units") or 999999.0)
+        if min_u <= skid_count <= max_u:
+            return c
+
+    return None
+
 def match_lane_minimum(
     minimums: List[Dict[str, Any]],
     origin: str,
@@ -196,6 +260,11 @@ def match_lane_minimum(
             mo_city, mo_prov = [x.strip() for x in m_orig.split(",", 1)] if "," in m_orig else (m_orig, "")
             md_city, md_prov = [x.strip() for x in m_dest.split(",", 1)] if "," in m_dest else (m_dest, "")
             if o_prov == mo_prov and d_prov == md_prov and (o_city in mo_city or mo_city in o_city) and (d_city in md_city or md_city in d_city):
+                return m
+        elif m_orig and m_dest:
+            mo_city = m_orig.split(",", 1)[0].strip() if "," in m_orig else m_orig
+            md_city = m_dest.split(",", 1)[0].strip() if "," in m_dest else m_dest
+            if (norm_origin == mo_city or norm_origin in mo_city) and (norm_dest == md_city or norm_dest in md_city):
                 return m
 
     return minimums[0] if minimums else None
@@ -336,11 +405,13 @@ def calculate_quote_for_sheet(
     width: Optional[float] = None,
     height: Optional[float] = None,
     accessorials: Optional[List[str]] = None,
-    shipment_date: Optional[str] = None
+    shipment_date: Optional[str] = None,
+    skid_count: Optional[int] = None
 ) -> Dict[str, Any]:
     """
     Rules 8–15: Core deterministic calculation engine.
     Never uses LLM reasoning for math. Pure deterministic Python code.
+    Supports both CWT weight breaks and Skid-based LTL rating (MC + S x RateBreak).
     """
     sheet = get_rate_sheet(sheet_id, user_id)
     if not sheet:
@@ -400,49 +471,84 @@ def calculate_quote_for_sheet(
         if billable_weight > 44000.0:
             raise ValueError(f"Rule 18 Exclusion: Shipment weight {billable_weight} lbs exceeds legal LTL capacity of 44,000 lbs (requires Dedicated FTL equipment).")
 
-    # 2. Match Lane Rate Break (Rule 8, 10)
-    matched_break = match_lane_break(rules["breaks"], origin, destination, billable_weight)
-    if not matched_break:
-        raise ValueError(f"Rule 18 / Rule 24 Exclusion: Lane not served: {sheet['carrier_name']} does not publish confirmed rates between {origin} and {destination} for weight {billable_weight} lbs.")
+    rating_basis = (sheet.get("rating_basis") or "WEIGHT_CWT").upper()
+    max_skid_cap = int(sheet.get("max_skid_capacity") or 10)
+    matched_min = None
+    skid_charge = None
+    mc_charge = 0.0
 
+    if rating_basis == "PER_SKID":
+        # Rule 18 & 25: Skid-based LTL rating
+        if skid_count is None or skid_count <= 0:
+            raise ValueError(f"Rule 25 Exclusion: Rate sheet '{sheet['carrier_name']}' rates on a per-skid basis, but no skid count was provided.")
+        if skid_count > max_skid_cap:
+            raise ValueError(f"Rule 18 Exclusion: Skid count ({skid_count}) exceeds maximum carrier LTL capacity of {max_skid_cap} skids (requires Dedicated FTL equipment).")
 
-    rate_type = matched_break.get("rate_type", "CWT").upper()
-    rate_val = float(matched_break["base_rate"])
-    
-    # Calculate base charge (with Deficit Weight Rating support)
-    if matched_break.get("is_deficit_rated") and matched_break.get("effective_base_charge") is not None:
-        base_charge = matched_break["effective_base_charge"]
+        matched_break = match_skid_break(rules["breaks"], origin, destination, skid_count)
+        if not matched_break:
+            raise ValueError(f"Rule 18 / Rule 24 Exclusion: Lane not served: {sheet['carrier_name']} does not publish confirmed skid rates between {origin} and {destination} for {skid_count} skids.")
+
+        matched_min = match_lane_minimum(rules["minimums"], origin, destination)
+        mc_charge = float(matched_min["min_charge"]) if matched_min else 0.0
+        rate_val = float(matched_break["base_rate"])
+        skid_charge = round(skid_count * rate_val, 2)
+        base_charge = round(mc_charge + skid_charge, 2)
+
         trace_steps.append({
-            "step": "Base Rate Calculation with Deficit Weight Rating (Rule 8 / Deficit Bumping)",
+            "step": "Skid-Based LTL Base Rate Calculation (Formula: MC + S x RateBreak)",
             "lane": f"{origin} -> {destination}",
-            "natural_weight": billable_weight,
-            "deficit_bumped_weight": billable_weight + matched_break.get("deficit_weight", 0.0),
-            "deficit_weight_added": matched_break.get("deficit_weight", 0.0),
-            "break_name": f"{matched_break['break_name']} (Deficit Rated)",
+            "skid_count": skid_count,
+            "break_name": matched_break["break_name"],
             "rate_value": rate_val,
-            "rate_type": rate_type,
+            "skid_charge": skid_charge,
+            "base_cost_mc": mc_charge,
             "base_charge": base_charge,
-            "deficit_savings": matched_break.get("deficit_savings", 0.0),
+            "formula": f"${mc_charge:.2f} (MC) + ({skid_count} skids x ${rate_val:.2f}) = ${base_charge:.2f}",
             "source_coordinate": matched_break.get("source_cell", "")
         })
     else:
-        if rate_type == "CWT":
-            base_charge_unrounded = (billable_weight / 100.0) * rate_val
-        elif rate_type == "FLAT":
-            base_charge_unrounded = rate_val
-        else:  # PER_UNIT
-            base_charge_unrounded = billable_weight * rate_val
+        # 2. Match Lane Rate Break (Rule 8, 10)
+        matched_break = match_lane_break(rules["breaks"], origin, destination, billable_weight)
+        if not matched_break:
+            raise ValueError(f"Rule 18 / Rule 24 Exclusion: Lane not served: {sheet['carrier_name']} does not publish confirmed rates between {origin} and {destination} for weight {billable_weight} lbs.")
 
-        base_charge = round(base_charge_unrounded, 2)
-        trace_steps.append({
-            "step": "Base Rate Calculation (Rule 8)",
-            "lane": f"{origin} -> {destination}",
-            "break_name": matched_break["break_name"],
-            "rate_value": rate_val,
-            "rate_type": rate_type,
-            "base_charge": base_charge,
-            "source_coordinate": matched_break.get("source_cell", "")
-        })
+        rate_type = matched_break.get("rate_type", "CWT").upper()
+        rate_val = float(matched_break["base_rate"])
+        
+        # Calculate base charge (with Deficit Weight Rating support)
+        if matched_break.get("is_deficit_rated") and matched_break.get("effective_base_charge") is not None:
+            base_charge = matched_break["effective_base_charge"]
+            trace_steps.append({
+                "step": "Base Rate Calculation with Deficit Weight Rating (Rule 8 / Deficit Bumping)",
+                "lane": f"{origin} -> {destination}",
+                "natural_weight": billable_weight,
+                "deficit_bumped_weight": billable_weight + matched_break.get("deficit_weight", 0.0),
+                "deficit_weight_added": matched_break.get("deficit_weight", 0.0),
+                "break_name": f"{matched_break['break_name']} (Deficit Rated)",
+                "rate_value": rate_val,
+                "rate_type": rate_type,
+                "base_charge": base_charge,
+                "deficit_savings": matched_break.get("deficit_savings", 0.0),
+                "source_coordinate": matched_break.get("source_cell", "")
+            })
+        else:
+            if rate_type == "CWT":
+                base_charge_unrounded = (billable_weight / 100.0) * rate_val
+            elif rate_type == "FLAT":
+                base_charge_unrounded = rate_val
+            else:  # PER_UNIT
+                base_charge_unrounded = billable_weight * rate_val
+
+            base_charge = round(base_charge_unrounded, 2)
+            trace_steps.append({
+                "step": "Base Rate Calculation (Rule 8)",
+                "lane": f"{origin} -> {destination}",
+                "break_name": matched_break["break_name"],
+                "rate_value": rate_val,
+                "rate_type": rate_type,
+                "base_charge": base_charge,
+                "source_coordinate": matched_break.get("source_cell", "")
+            })
 
     # 3. Itemized Surcharges (Rule 11)
     applied_surcharges, total_surcharges = evaluate_surcharges(
@@ -485,23 +591,28 @@ def calculate_quote_for_sheet(
             })
 
     # 4. Minimum Charge Comparison (Rule 12)
-    matched_min = match_lane_minimum(rules["minimums"], origin, destination)
-    min_charge = float(matched_min["min_charge"]) if matched_min else 0.0
-    
-    subtotal_pre_min = base_charge + total_surcharges
-    min_charge_adjustment = 0.0
-    if subtotal_pre_min < min_charge:
-        min_charge_adjustment = round(min_charge - subtotal_pre_min, 2)
-        total_amount = min_charge
-        trace_steps.append({
-            "step": "Minimum Charge Adjustment (Rule 12)",
-            "subtotal_pre_min": subtotal_pre_min,
-            "carrier_min_charge": min_charge,
-            "adjustment_added": min_charge_adjustment,
-            "source_coordinate": matched_min.get("source_cell", "")
-        })
+    if rating_basis == "PER_SKID":
+        min_charge = mc_charge
+        min_charge_adjustment = 0.0
+        total_amount = base_charge + total_surcharges
     else:
-        total_amount = subtotal_pre_min
+        matched_min = match_lane_minimum(rules["minimums"], origin, destination)
+        min_charge = float(matched_min["min_charge"]) if matched_min else 0.0
+        
+        subtotal_pre_min = base_charge + total_surcharges
+        min_charge_adjustment = 0.0
+        if subtotal_pre_min < min_charge:
+            min_charge_adjustment = round(min_charge - subtotal_pre_min, 2)
+            total_amount = min_charge
+            trace_steps.append({
+                "step": "Minimum Charge Adjustment (Rule 12)",
+                "subtotal_pre_min": subtotal_pre_min,
+                "carrier_min_charge": min_charge,
+                "adjustment_added": min_charge_adjustment,
+                "source_coordinate": matched_min.get("source_cell", "")
+            })
+        else:
+            total_amount = subtotal_pre_min
 
     # 5. Final Step Rounding (Rule 15)
     wholesale_total = round_currency(total_amount, sheet.get("rounding_rule", "standard_2dp"))
@@ -607,6 +718,10 @@ def calculate_quote_for_sheet(
         "broker_margin": broker_margin,
         "final_total": final_total,
         "client_total": final_total,
+        "rating_basis": rating_basis,
+        "skid_count": skid_count if rating_basis == "PER_SKID" else None,
+        "skid_charge": skid_charge if rating_basis == "PER_SKID" else None,
+        "mc_base_cost": mc_charge if rating_basis == "PER_SKID" else None,
         "transit_days": transit_days or 3,  # default estimated transit if zone unstated
         "relies_on_flagged_cell": relies_on_flagged,
         "caution_badge": caution_badge,
@@ -686,7 +801,8 @@ def quote_all_confirmed_carriers(
     width: Optional[float] = None,
     height: Optional[float] = None,
     accessorials: Optional[List[str]] = None,
-    shipment_date: Optional[str] = None
+    shipment_date: Optional[str] = None,
+    skid_count: Optional[int] = None
 ) -> Dict[str, Any]:
     """
     Evaluates all confirmed rate sheets for a tenant, calculating quotes deterministically.
@@ -770,7 +886,8 @@ def quote_all_confirmed_carriers(
                 width=width,
                 height=height,
                 accessorials=accessorials,
-                shipment_date=ref_date
+                shipment_date=ref_date,
+                skid_count=skid_count
             )
 
             # Step 4: Rule 27 - Rate Shift Anomaly Detection (>25%)
@@ -811,7 +928,8 @@ def quote_all_confirmed_carriers(
         "width": width,
         "height": height,
         "accessorials": accessorials,
-        "shipment_date": ref_date
+        "shipment_date": ref_date,
+        "skid_count": skid_count
     }
     
     combined_trace = [q["calculation_trace"] for q in valid_quotes]

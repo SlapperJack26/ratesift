@@ -654,7 +654,8 @@ def api_confirm_reformatted_batch(
                 width=r.get("width"),
                 height=r.get("height"),
                 accessorials=r.get("accessorials", []),
-                shipment_date=r.get("shipment_date")
+                shipment_date=r.get("shipment_date"),
+                skid_count=r.get("skid_count")
             )
             rated_results.append({
                 "row_num": r["row_num"],
@@ -1068,12 +1069,14 @@ def api_ratesift_get_cells(sheet_id: str, request: Request, needs_review_only: b
 class QuoteRequestPayload(BaseModel):
     origin: str
     destination: str
-    actual_weight: float
+    actual_weight: Optional[float] = None
     length: Optional[float] = None
     width: Optional[float] = None
     height: Optional[float] = None
     accessorials: Optional[List[str]] = None
     shipment_date: Optional[str] = None
+    skid_count: Optional[int] = None
+    shipping_mode: Optional[str] = "STANDARD"
 
 @app.post("/api/ratesift/quotes/calculate", tags=["RateSift Quoting Core"])
 def api_ratesift_calculate_quote(
@@ -1109,7 +1112,12 @@ def api_ratesift_calculate_quote(
     # Purge any previous client proposal from memory upon generating next quote
     _active_proposal_memory.pop(user_id, None)
 
-    if payload.actual_weight <= 0:
+    # Derive actual weight if rating by LTL skids without explicit scale weight
+    actual_weight = payload.actual_weight
+    if (actual_weight is None or actual_weight <= 0) and payload.skid_count and payload.skid_count > 0:
+        actual_weight = float(payload.skid_count * 500.0)
+
+    if not actual_weight or actual_weight <= 0:
         raise HTTPException(status_code=400, detail="Shipment weight must be greater than 0.")
     if not payload.origin or not payload.destination:
         raise HTTPException(status_code=400, detail="Origin and Destination locations are required (Rule 25).")
@@ -1120,12 +1128,13 @@ def api_ratesift_calculate_quote(
             user_id=user_id,
             origin=payload.origin,
             destination=payload.destination,
-            actual_weight=payload.actual_weight,
+            actual_weight=actual_weight,
             length=payload.length,
             width=payload.width,
             height=payload.height,
             accessorials=payload.accessorials or [],
-            shipment_date=payload.shipment_date
+            shipment_date=payload.shipment_date,
+            skid_count=payload.skid_count
         )
         return result
     except Exception as e:

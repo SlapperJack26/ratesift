@@ -55,7 +55,9 @@ class RateSiftExtractor:
             "rounding_rule": "standard_2dp",
             "effective_date": None,
             "expiry_date": None,
-            "version": 1
+            "version": 1,
+            "rating_basis": "WEIGHT_CWT",
+            "max_skid_capacity": 10
         }
 
     def process(self) -> Dict[str, Any]:
@@ -87,7 +89,9 @@ class RateSiftExtractor:
             expiry_date=self.metadata["expiry_date"],
             version=self.metadata["version"],
             source_filename=self.filename,
-            confirmation_status="PENDING_REVIEW"
+            confirmation_status="PENDING_REVIEW",
+            rating_basis=self.metadata.get("rating_basis", "WEIGHT_CWT"),
+            max_skid_capacity=self.metadata.get("max_skid_capacity", 10)
         )
 
         # Batch insert extracted entities
@@ -265,8 +269,8 @@ class RateSiftExtractor:
                 if "composite_sheet_health" in detection:
                     self.metadata["composite_sheet_health"] = detection["composite_sheet_health"]
 
-                # 3. Harvest rate data rows if not already populated
-                if detection.get("rate_data_rows"):
+                # 3. Harvest rate data rows if not already populated (only for standard CWT sheets)
+                if self.metadata.get("rating_basis") != "PER_SKID" and detection.get("rate_data_rows"):
                     existing_lanes = {(rb["origin_spec"], rb["dest_spec"]) for rb in self.rate_breaks}
                     for rdr in detection["rate_data_rows"]:
                         orig = rdr["origin"]
@@ -432,12 +436,244 @@ class RateSiftExtractor:
             self._record_cell(sheet_tab, coord, "dim_min_rule", full_text, full_text, 1.0)
 
     # ==========================================================================
-    # Matrix Rate Table Scanner (CWT Breaks, Flat Rates, Minimums)
+    # Matrix Rate Table Scanner (Skid Breaks, CWT Breaks, Flat Rates, Minimums)
     # ==========================================================================
+    def _classify_skid_break_header(self, header_text: str) -> Optional[Tuple[str, int, int]]:
+        """
+        Classifies header into (break_name, min_units, max_units) if it is a Skid break.
+        Handles:
+        - 'L5C', '<5', 'L5', '1-4', '1-4 SKIDS', '1 TO 4 PALLETS' -> ('L5C', 1, 4)
+        - '5C', '5', '5 SKIDS' -> ('5C', 5, 5)
+        - '1M', '6', '6 SKIDS' -> ('1M', 6, 6) (1 more skid past 5)
+        - '2M', '7', '7 SKIDS' -> ('2M', 7, 7) (2 more skids past 5)
+        - '5M', '8-9', '8-9 SKIDS' -> ('5M', 8, 9) (covers 8-9 skids before 10M)
+        - '10M', '10', '10 SKIDS' -> ('10M', 10, 10) (10 skids break point / ceiling)
+        - General regex ranges: '1-4', '5-6', '7-8', '9-10'
+        - General '<N', 'LN', 'LNC'
+        - General 'NM'
+        """
+        h_clean = header_text.strip().upper()
+        if not h_clean:
+            return None
+
+        # Exclude known non-skid words
+        if h_clean in ["DIRECTION", "ORIGIN", "OPR", "DESTINATION", "DCOUNTY", "DPR", "MC", "MIN", "BASE", "FLAT", "TOTAL", "NOTES", "ZONE"]:
+            return None
+
+        # Range patterns: '1-4', '8-9', '1-4 SKIDS', '1 TO 4 PALLETS'
+        m_range = re.match(r'^(\d+)\s*[-–TOto]+\s*(\d+)(?:\s*(?:SKIDS?|PALLETS?|SKD|PLT))?$', h_clean)
+        if m_range:
+            n1, n2 = int(m_range.group(1)), int(m_range.group(2))
+            return (h_clean, n1, n2)
+
+        # Less than N: 'L5C', 'L5', '<5', '<5C', 'LESS THAN 5'
+        m_less = re.match(r'^(?:L|<|LESS THAN\s*)(\d+)C?$', h_clean)
+        if m_less:
+            n = int(m_less.group(1))
+            return (h_clean, 1, max(1, n - 1))
+
+        # NC: '5C'
+        m_c = re.match(r'^(\d+)C$', h_clean)
+        if m_c:
+            n = int(m_c.group(1))
+            return (h_clean, n, n)
+
+        # NM: '1M', '2M', '5M', '10M'
+        m_m = re.match(r'^(\d+)M$', h_clean)
+        if m_m:
+            n = int(m_m.group(1))
+            if n == 1:
+                return (h_clean, 6, 6)
+            elif n == 2:
+                return (h_clean, 7, 7)
+            elif n == 3:
+                return (h_clean, 8, 8)
+            elif n == 4:
+                return (h_clean, 9, 9)
+            elif n == 5:
+                return (h_clean, 8, 9)
+            elif n == 10:
+                return (h_clean, 10, 10)
+            else:
+                return (h_clean, n, n)
+
+        # Single with skid / pallet label: '5 SKIDS', '10 PALLETS'
+        m_single = re.match(r'^(\d+)\s*(?:SKIDS?|PALLETS?|SKD|PLT)$', h_clean)
+        if m_single:
+            n = int(m_single.group(1))
+            return (h_clean, n, n)
+
+        return None
+
+    def _scan_skid_ltl_tables(self, grid: List[List[str]], sheet_tab: str) -> bool:
+        """
+        Detects and extracts Skid/Pallet-based LTL rate sheets.
+        Formula: Base Freight = MC + (SkidCount x BreakRate)
+        Supports:
+        - Bidirectional lanes ('BETWEEN')
+        - Header synonyms: MC, MIN, BASE, FLAT, BASE COST
+        - Dynamic breakpoint detection for max_skid_capacity
+        """
+        header_row_idx = None
+        skid_cols = []
+        col_mc = None
+        col_origin = None
+        col_opr = None
+        col_dest = None
+        col_dpr = None
+        col_direction = None
+
+        base_cost_synonyms = {"MC", "MIN", "BASE", "BASE COST", "BASE_COST", "BASE CHARGE", "FLAT", "MIN CHARGE", "MIN_CHARGE", "MINIMUM"}
+        origin_synonyms = {"ORIGIN", "FROM", "ORIG", "SHIPPER CITY", "ORIGIN CITY"}
+        opr_synonyms = {"OPR", "ORIG_PROV", "ORIGIN_PROV", "O_PROV", "ORIG PROV", "ORIGIN STATE"}
+        dest_synonyms = {"DESTINATION", "TO", "DEST", "CONSIGNEE CITY", "DELIVERY CITY"}
+        dpr_synonyms = {"DPR", "DEST_PROV", "DESTINATION_PROV", "D_PROV", "DEST PROV", "DEST STATE"}
+        dir_synonyms = {"DIRECTION", "DIR", "LANE_TYPE", "TYPE"}
+
+        for r_idx, row in enumerate(grid):
+            row_clean = [c.strip().upper() for c in row]
+            found_breaks = []
+            found_mc = None
+            found_orig = None
+            found_dest = None
+
+            for c_idx, cell in enumerate(row_clean):
+                if cell in base_cost_synonyms and found_mc is None:
+                    found_mc = c_idx
+                elif cell in origin_synonyms and found_orig is None:
+                    found_orig = c_idx
+                elif cell in dest_synonyms and found_dest is None:
+                    found_dest = c_idx
+                else:
+                    classified = self._classify_skid_break_header(cell)
+                    if classified:
+                        found_breaks.append((c_idx, classified))
+
+            if len(found_breaks) >= 2 and found_orig is not None and found_dest is not None:
+                header_row_idx = r_idx
+                skid_cols = found_breaks
+                col_mc = found_mc
+                col_origin = found_orig
+                col_dest = found_dest
+
+                for c_idx, cell in enumerate(row_clean):
+                    if cell in opr_synonyms and col_opr is None:
+                        col_opr = c_idx
+                    elif cell in dpr_synonyms and col_dpr is None:
+                        col_dpr = c_idx
+                    elif cell in dir_synonyms and col_direction is None:
+                        col_direction = c_idx
+                break
+
+        if header_row_idx is None or not skid_cols:
+            return False
+
+        # Discovered skid sheet
+        max_skids = max(item[1][2] for item in skid_cols)
+        self.metadata["rating_basis"] = "PER_SKID"
+        self.metadata["max_skid_capacity"] = max(10, max_skids)
+
+        # Parse data rows
+        extracted_breaks_count = 0
+        for r_idx in range(header_row_idx + 1, len(grid)):
+            row = grid[r_idx]
+            if len(row) <= max(col_origin, col_dest):
+                continue
+            orig_raw = row[col_origin].strip()
+            dest_raw = row[col_dest].strip()
+            if not orig_raw or not dest_raw or orig_raw.upper() in ["TOTAL", "NOTE", "NOTES"]:
+                continue
+
+            opr_raw = row[col_opr].strip() if col_opr is not None and col_opr < len(row) else ""
+            dpr_raw = row[col_dpr].strip() if col_dpr is not None and col_dpr < len(row) else ""
+
+            orig_spec = f"{orig_raw}, {opr_raw}" if opr_raw and len(opr_raw) <= 3 and opr_raw.isalpha() else orig_raw
+            dest_spec = f"{dest_raw}, {dpr_raw}" if dpr_raw and len(dpr_raw) <= 3 and dpr_raw.isalpha() else dest_raw
+
+            dir_raw = row[col_direction].strip().upper() if col_direction is not None and col_direction < len(row) else ""
+            is_bidirectional = dir_raw in ["BETWEEN", "BI-DIRECTIONAL", "BIDIRECTIONAL", "TWO-WAY", "BOTH"]
+
+            coord_base = f"{sheet_tab}!Row {r_idx + 1}"
+
+            # Extract Base MC cost
+            mc_val = None
+            if col_mc is not None and col_mc < len(row):
+                mc_str = row[col_mc].replace("$", "").replace(",", "").strip()
+                try:
+                    mc_val = float(mc_str)
+                except ValueError:
+                    pass
+
+            if mc_val is not None:
+                coord_mc = f"{coord_base}, Col {col_mc + 1}"
+                self.minimums.append({
+                    "zone_code": "P2P",
+                    "origin_spec": orig_spec,
+                    "dest_spec": dest_spec,
+                    "min_charge": mc_val,
+                    "source_cell": coord_mc
+                })
+                if is_bidirectional:
+                    self.minimums.append({
+                        "zone_code": "P2P",
+                        "origin_spec": dest_spec,
+                        "dest_spec": orig_spec,
+                        "min_charge": mc_val,
+                        "source_cell": coord_mc
+                    })
+
+            # Extract skid breaks
+            for c_idx, (break_name, min_u, max_u) in skid_cols:
+                if c_idx >= len(row):
+                    continue
+                val_str = row[c_idx].replace("$", "").replace(",", "").strip()
+                try:
+                    rate_val = float(val_str)
+                except ValueError:
+                    continue
+
+                coord_b = f"{coord_base}, Col {c_idx + 1}"
+                self.rate_breaks.append({
+                    "zone_code": "P2P",
+                    "origin_spec": orig_spec,
+                    "dest_spec": dest_spec,
+                    "min_weight": 0.0,
+                    "max_weight": 44000.0,
+                    "break_name": break_name,
+                    "base_rate": rate_val,
+                    "rate_type": "PER_SKID",
+                    "source_cell": coord_b,
+                    "break_unit": "SKID",
+                    "min_units": min_u,
+                    "max_units": max_u
+                })
+                if is_bidirectional:
+                    self.rate_breaks.append({
+                        "zone_code": "P2P",
+                        "origin_spec": dest_spec,
+                        "dest_spec": orig_spec,
+                        "min_weight": 0.0,
+                        "max_weight": 44000.0,
+                        "break_name": break_name,
+                        "base_rate": rate_val,
+                        "rate_type": "PER_SKID",
+                        "source_cell": coord_b,
+                        "break_unit": "SKID",
+                        "min_units": min_u,
+                        "max_units": max_u
+                    })
+                extracted_breaks_count += 1
+
+        return extracted_breaks_count > 0
+
     def _scan_csv_tables(self, rows: List[List[str]]):
         self._scan_grid_tables(rows, sheet_tab="Sheet 1")
 
     def _scan_grid_tables(self, grid: List[List[str]], sheet_tab: str):
+        # 0. Check for Skid-Based LTL table format
+        if self._scan_skid_ltl_tables(grid, sheet_tab=sheet_tab):
+            return
+
         for r_idx, row in enumerate(grid):
             row_num = r_idx + 1
             if len(row) < 4:

@@ -197,8 +197,35 @@
       <section id="section-instant" class="space-y-4">
         <form id="freight-quote-form" onsubmit="event.preventDefault(); calculateFreightQuote();" class="space-y-4">
           
-          <!-- Origin & Destination Grid (Exact Mockup Side-by-Side Cards) -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+          <!-- Shipping Service Mode Selector (Standard vs Ship by LTL) -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Shipping Service:</span>
+              <div class="inline-flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium shadow-2xs">
+                <!-- Standard Mode Tab -->
+                <button type="button" id="service-tab-standard" onclick="setShippingServiceMode('standard')" class="px-3.5 py-1.5 rounded-lg bg-white shadow-xs text-red-600 font-bold border border-red-200/80 transition-all flex items-center gap-1.5 ring-1 ring-red-500/20 cursor-pointer">
+                  <span>📦</span>
+                  <span>Standard (by Weight)</span>
+                  <span id="badge-mode-standard" class="ml-1 px-1.5 py-0.2 bg-red-100 text-red-700 rounded-full text-[10px] font-extrabold">ACTIVE</span>
+                </button>
+                
+                <!-- LTL Mode Tab -->
+                <button type="button" id="service-tab-ltl" onclick="setShippingServiceMode('ltl')" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all font-medium flex items-center gap-1.5 cursor-pointer">
+                  <span>🚚</span>
+                  <span>Ship by LTL (by Skids)</span>
+                  <span id="badge-mode-ltl" class="hidden ml-1 px-1.5 py-0.2 bg-red-100 text-red-700 rounded-full text-[10px] font-extrabold">ACTIVE</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="service-mode-status" class="text-xs text-slate-500 flex items-center gap-1.5">
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span id="service-mode-status-text">Standard Mode: Rating by <strong>Origin</strong>, <strong>Destination</strong>, and <strong>Weight (lbs)</strong></span>
+            </div>
+          </div>
+
+          <!-- 3 Primary Rating Cards: Origin, Destination, Weight (Standard) or Number of Skids (LTL) -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
             
             <!-- Origin Card -->
             <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-2">
@@ -225,29 +252,70 @@
                 <span id="dest-fsa-text">Calgary, AB (FSA: T2P • Zone AB-CAL)</span>
               </div>
             </div>
+
+            <!-- 3rd Card - Standard Mode: Actual Weight -->
+            <div id="card-cargo-weight" class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-2">
+              <div class="flex items-center justify-between">
+                <div>
+                  <label for="input-weight" class="block font-bold text-sm text-slate-900">Actual Weight (lbs)</label>
+                  <div class="text-xs text-slate-500">Total shipment scale weight</div>
+                </div>
+                <span class="text-[10px] font-mono text-slate-400 uppercase">Standard</span>
+              </div>
+              <div class="relative">
+                <input id="input-weight" type="number" step="0.1" min="0.1" placeholder="e.g. 880" value="880" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+                <span class="absolute right-3.5 top-2.5 text-xs font-bold text-slate-400">lbs</span>
+              </div>
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 mt-1">
+                <span>⚖️</span>
+                <span>CWT / Hundredweight Tariff</span>
+              </div>
+            </div>
+
+            <!-- 3rd Card - LTL Mode: Number of Skids (Replaces Weight) -->
+            <div id="card-cargo-skids" class="hidden bg-white border border-red-300 rounded-2xl p-5 shadow-2xs space-y-2 ring-2 ring-red-500/10">
+              <div class="flex items-center justify-between">
+                <div>
+                  <label for="input-skids" class="block font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                    <span>Number of Skids</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700">LTL</span>
+                  </label>
+                  <div class="text-xs text-slate-500">Pallet count (48" × 40" standard)</div>
+                </div>
+                <span class="text-[10px] font-mono text-red-600 font-bold uppercase">Replaces Weight</span>
+              </div>
+              <div class="relative">
+                <input id="input-skids" type="number" step="1" min="1" max="50" placeholder="e.g. 4" value="4" class="w-full bg-white border border-red-400 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+                <span class="absolute right-3.5 top-2.5 text-xs font-bold text-slate-400">Skids</span>
+              </div>
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-50 text-red-800 border border-red-200 mt-1">
+                <span>🪵</span>
+                <span>Rating by Skid Tier • 48×40 in Pallets</span>
+              </div>
+            </div>
           </div>
 
-          <!-- Shipment Cargo Specifications & Rating Bar -->
-          <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+          <!-- Optional Cargo Specifications & Rating Bar -->
+          <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-700">Optional Dimensions & Shipment Date</span>
+              <span class="text-[11px] text-slate-400">Standard pallet height: 48×40×50 in</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <label for="input-weight" class="block text-xs font-bold text-slate-800 mb-1">Actual Weight (lbs)</label>
-                <input id="input-weight" type="number" step="0.1" min="0.1" required placeholder="e.g. 880" value="880" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
-              </div>
-              <div>
-                <label for="input-length" class="block text-xs font-bold text-slate-800 mb-1">Length (in)</label>
+                <label for="input-length" class="block text-xs font-bold text-slate-700 mb-1">Length (in)</label>
                 <input id="input-length" type="number" step="0.1" min="0" placeholder="e.g. 48" value="48" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
               </div>
               <div>
-                <label for="input-width" class="block text-xs font-bold text-slate-800 mb-1">Width (in)</label>
+                <label for="input-width" class="block text-xs font-bold text-slate-700 mb-1">Width (in)</label>
                 <input id="input-width" type="number" step="0.1" min="0" placeholder="e.g. 40" value="40" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
               </div>
               <div>
-                <label for="input-height" class="block text-xs font-bold text-slate-800 mb-1">Height (in)</label>
+                <label for="input-height" class="block text-xs font-bold text-slate-700 mb-1">Height (in)</label>
                 <input id="input-height" type="number" step="0.1" min="0" placeholder="e.g. 50" value="50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
               </div>
               <div>
-                <label for="input-date" class="block text-xs font-bold text-slate-800 mb-1">Shipment Date</label>
+                <label for="input-date" class="block text-xs font-bold text-slate-700 mb-1">Shipment Date</label>
                 <input id="input-date" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
               </div>
             </div>
@@ -1375,10 +1443,48 @@
       });
     }
 
-    function loadPresetLane(orig, dest, weight, l, w, h, accessorials) {
+    let currentShippingMode = 'standard';
+
+    function setShippingServiceMode(mode) {
+      currentShippingMode = mode;
+      const tabStd = document.getElementById('service-tab-standard');
+      const tabLtl = document.getElementById('service-tab-ltl');
+      const badgeStd = document.getElementById('badge-mode-standard');
+      const badgeLtl = document.getElementById('badge-mode-ltl');
+      const cardWeight = document.getElementById('card-cargo-weight');
+      const cardSkids = document.getElementById('card-cargo-skids');
+      const statusText = document.getElementById('service-mode-status-text');
+      const btnCalcText = document.getElementById('btn-calc-text');
+
+      if (mode === 'ltl') {
+        if (tabStd) tabStd.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all font-medium flex items-center gap-1.5 cursor-pointer";
+        if (tabLtl) tabLtl.className = "px-3.5 py-1.5 rounded-lg bg-white shadow-xs text-red-600 font-bold border border-red-200/80 transition-all flex items-center gap-1.5 ring-1 ring-red-500/20 cursor-pointer";
+        if (badgeStd) badgeStd.classList.add('hidden');
+        if (badgeLtl) badgeLtl.classList.remove('hidden');
+        if (cardWeight) cardWeight.classList.add('hidden');
+        if (cardSkids) cardSkids.classList.remove('hidden');
+        if (statusText) statusText.innerHTML = "LTL Mode: Rating by <strong>Origin</strong>, <strong>Destination</strong>, and <strong>Number of Skids</strong>";
+        if (btnCalcText) btnCalcText.textContent = "Calculate LTL Rates";
+      } else {
+        if (tabStd) tabStd.className = "px-3.5 py-1.5 rounded-lg bg-white shadow-xs text-red-600 font-bold border border-red-200/80 transition-all flex items-center gap-1.5 ring-1 ring-red-500/20 cursor-pointer";
+        if (tabLtl) tabLtl.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all font-medium flex items-center gap-1.5 cursor-pointer";
+        if (badgeStd) badgeStd.classList.remove('hidden');
+        if (badgeLtl) badgeLtl.classList.add('hidden');
+        if (cardWeight) cardWeight.classList.remove('hidden');
+        if (cardSkids) cardSkids.classList.add('hidden');
+        if (statusText) statusText.innerHTML = "Standard Mode: Rating by <strong>Origin</strong>, <strong>Destination</strong>, and <strong>Weight (lbs)</strong>";
+        if (btnCalcText) btnCalcText.textContent = "Calculate Rates";
+      }
+    }
+
+    function loadPresetLane(orig, dest, weight, l, w, h, accessorials, skids = 2) {
       document.getElementById('input-origin').value = orig;
       document.getElementById('input-destination').value = dest;
-      document.getElementById('input-weight').value = weight;
+      const weightEl = document.getElementById('input-weight');
+      if (weightEl) weightEl.value = weight;
+      const skidsEl = document.getElementById('input-skids');
+      if (skidsEl) skidsEl.value = skids;
+
       document.getElementById('input-length').value = l || '';
       document.getElementById('input-width').value = w || '';
       document.getElementById('input-height').value = h || '';
@@ -1402,11 +1508,12 @@
 
       const origin = document.getElementById('input-origin').value.trim();
       const destination = document.getElementById('input-destination').value.trim();
-      const actualWeight = parseFloat(document.getElementById('input-weight').value);
-      const length = parseFloat(document.getElementById('input-length').value) || null;
-      const width = parseFloat(document.getElementById('input-width').value) || null;
-      const height = parseFloat(document.getElementById('input-height').value) || null;
-      const shipmentDate = document.getElementById('input-date').value || null;
+      let actualWeight = parseFloat(document.getElementById('input-weight')?.value);
+      const skidCount = parseInt(document.getElementById('input-skids')?.value) || null;
+      const length = parseFloat(document.getElementById('input-length')?.value) || null;
+      const width = parseFloat(document.getElementById('input-width')?.value) || null;
+      const height = parseFloat(document.getElementById('input-height')?.value) || null;
+      const shipmentDate = document.getElementById('input-date')?.value || null;
 
       const checkedAcc = Array.from(document.querySelectorAll('input[name="accessorial"]:checked')).map(cb => cb.value);
 
@@ -1414,10 +1521,22 @@
         if (!isInitialLoad) alert("Please specify Origin and Destination locations.");
         return;
       }
-      if (isNaN(actualWeight) || actualWeight <= 0) {
-        if (!isInitialLoad) alert("Please enter a valid shipment weight greater than 0 lbs.");
-        return;
+
+      if (currentShippingMode === 'ltl') {
+        if (!skidCount || skidCount <= 0) {
+          if (!isInitialLoad) alert("Please enter a valid number of skids (at least 1).");
+          return;
+        }
+        if (isNaN(actualWeight) || actualWeight <= 0) {
+          actualWeight = skidCount * 500.0;
+        }
+      } else {
+        if (isNaN(actualWeight) || actualWeight <= 0) {
+          if (!isInitialLoad) alert("Please enter a valid shipment weight greater than 0 lbs.");
+          return;
+        }
       }
+
       if (userUploadedSheetsLoaded && userUploadedSheets.length === 0) {
         alert("No carrier rate sheets found. Please upload your carrier rate sheets in Carrier Tariffs to begin quoting.");
         return;
@@ -1433,7 +1552,7 @@
       btn.disabled = true;
       spinner.classList.remove('hidden');
       arrow.classList.add('hidden');
-      text.textContent = "Rating Carriers...";
+      text.textContent = currentShippingMode === 'ltl' ? "Rating LTL..." : "Rating Carriers...";
       if (statusInd) statusInd.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span><span>Evaluating confirmed rate sheets & surcharges...</span>`;
 
       try {
@@ -1445,7 +1564,9 @@
           width: width,
           height: height,
           accessorials: checkedAcc,
-          shipment_date: shipmentDate
+          shipment_date: shipmentDate,
+          skid_count: (currentShippingMode === 'ltl' ? skidCount : (skidCount || null)),
+          shipping_mode: (currentShippingMode === 'ltl' ? 'LTL' : 'STANDARD')
         };
 
         const res = await fetch('/api/ratesift/quotes/calculate', {
@@ -1467,7 +1588,9 @@
         document.getElementById('results-lane-title').textContent = `${origin} → ${destination}`;
         document.getElementById('results-count-badge').textContent = `${currentQuotes.length} Option${currentQuotes.length === 1 ? '' : 's'}`;
         document.getElementById('results-specs-subtitle').textContent = 
-          `Weight: ${actualWeight.toLocaleString()} lbs • Cargo Dims: ${length ? `${length}×${width}×${height} in` : 'Standard'} • Date: ${shipmentDate || 'Today'}`;
+          currentShippingMode === 'ltl'
+            ? `LTL Cargo: ${skidCount} Standard Skids (Est. ${actualWeight.toLocaleString()} lbs) • Date: ${shipmentDate || 'Today'}`
+            : `Weight: ${actualWeight.toLocaleString()} lbs • Cargo Dims: ${length ? `${length}×${width}×${height} in` : 'Standard'} • Date: ${shipmentDate || 'Today'}`;
 
         // Render Cards and Excluded
         renderQuoteCards();
@@ -1650,7 +1773,7 @@
             
             <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 font-mono text-[10px]">
               <div>
-                <span class="text-slate-400 block text-[9px]">1. Base Charge</span>
+                <span class="text-slate-400 block text-[9px]">${q.rating_basis === 'PER_SKID' ? `1. Base Freight (${q.skid_count} skids: MC $${(q.mc_base_cost||0).toFixed(2)} + $${(q.skid_charge||0).toFixed(2)})` : '1. Base Charge'}</span>
                 <span class="font-bold text-slate-800">$${q.base_rate.toFixed(2)}</span>
               </div>
               <div>

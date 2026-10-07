@@ -237,7 +237,8 @@ def analyze_excel_sheet(
         "height": None,
         "accessorials": None,
         "service": None,
-        "date": None
+        "date": None,
+        "skid_count": None
     }
     col_confidence = {}
 
@@ -300,6 +301,12 @@ def analyze_excel_sheet(
         # Date
         if any(k in h_low for k in ["date", "ship date", "shipment date", "pickup date"]):
             col_map["date"] = idx
+
+        # Skid / Pallet count
+        if any(k in h_low for k in ["skid", "skids", "pallet", "pallets", "skd", "plt"]):
+            if col_map.get("skid_count") is None:
+                col_map["skid_count"] = idx
+                col_confidence["skid_count"] = 0.90
 
     # Integrate paired ghost/province columns from dynamic detector
     ghosts = detection.get("ghost_columns_paired", [])
@@ -440,6 +447,16 @@ def analyze_excel_sheet(
                 except Exception:
                     pass
 
+        # Resolve Skid Count
+        skid_count = None
+        if col_map.get("skid_count") is not None and col_map["skid_count"] < len(row_cells):
+            sk_val = row_cells[col_map["skid_count"]].value
+            if sk_val is not None:
+                try:
+                    skid_count = int(float(str(sk_val).strip()))
+                except (ValueError, TypeError):
+                    pass
+
         # Validation & Flagging (Rules 1, 6, 18, 25, 34-36)
         row_issues = []
         needs_review = False
@@ -475,7 +492,7 @@ def analyze_excel_sheet(
                     "hint": "May be customer pick-up or internal warehouse destination."
                 })
 
-            if weight_lbs is None or weight_lbs <= 0:
+            if (weight_lbs is None or weight_lbs <= 0) and skid_count is None:
                 row_issues.append("Missing shipment weight.")
                 needs_review = True
                 flagged_issues.append({
@@ -485,7 +502,7 @@ def analyze_excel_sheet(
                     "issue": "Missing shipment weight.",
                     "hint": "Can use nominal tariff minimum or flag as non-critical info."
                 })
-            elif weight_lbs > 44000.0:
+            elif weight_lbs and weight_lbs > 44000.0:
                 row_issues.append("Exceeds standard LTL legal weight of 44,000 lbs (Rule 18).")
 
         staged_rows.append({
@@ -499,6 +516,7 @@ def analyze_excel_sheet(
             "weight_raw": str(weight_val) if weight_val is not None else "",
             "weight_lbs": weight_lbs,
             "weight_coord": weight_cell_coord or f"{row_coord_prefix}, Col C",
+            "skid_count": skid_count,
             "length": dim_l,
             "width": dim_w,
             "height": dim_h,
@@ -544,7 +562,8 @@ def analyze_excel_sheet(
             "destination": {"col_index": col_map["destination"], "detected_header": header_names[col_map["destination"]] if col_map["destination"] is not None and col_map["destination"] < len(header_names) else None, "confidence": col_confidence.get("destination", 0.8)},
             "weight": {"col_index": col_map["weight"], "detected_header": header_names[col_map["weight"]] if col_map["weight"] is not None and col_map["weight"] < len(header_names) else None, "confidence": col_confidence.get("weight", 0.8)},
             "dimensions": {"col_index": col_map["dimensions"], "detected_header": header_names[col_map["dimensions"]] if col_map["dimensions"] is not None and col_map["dimensions"] < len(header_names) else None, "confidence": col_confidence.get("dimensions", 0.7)},
-            "accessorials": {"col_index": col_map["accessorials"], "detected_header": header_names[col_map["accessorials"]] if col_map["accessorials"] is not None and col_map["accessorials"] < len(header_names) else None, "confidence": col_confidence.get("accessorials", 0.7)}
+            "accessorials": {"col_index": col_map["accessorials"], "detected_header": header_names[col_map["accessorials"]] if col_map["accessorials"] is not None and col_map["accessorials"] < len(header_names) else None, "confidence": col_confidence.get("accessorials", 0.7)},
+            "skid_count": {"col_index": col_map["skid_count"], "detected_header": header_names[col_map["skid_count"]] if col_map["skid_count"] is not None and col_map["skid_count"] < len(header_names) else None, "confidence": col_confidence.get("skid_count", 0.9)} if col_map.get("skid_count") is not None else None
         },
         "preview_rows": staged_rows[:10],
         "flagged_issues": flagged_issues,
