@@ -784,11 +784,11 @@
       </div>
 
       <!-- CLIENT QUOTE PROPOSAL GENERATOR MODAL -->
-      <div id="proposal-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150">
+      <div id="proposal-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-start sm:items-center justify-center p-2 sm:p-6 overflow-y-auto overscroll-contain">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-5xl my-auto max-h-[calc(100dvh-1rem)] sm:max-h-[92vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150">
           
           <!-- Modal Header -->
-          <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
+          <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
             <div class="space-y-0.5">
               <div class="flex items-center gap-2">
                 <h3 class="text-base font-bold text-slate-900">1-Click Client Quote Proposal Generator</h3>
@@ -809,7 +809,7 @@
           </div>
 
           <!-- Modal Scrollable Content: 2-Column Split -->
-          <div class="p-4 sm:p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs flex-1">
+          <div class="p-4 sm:p-6 overflow-y-auto min-h-0 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs overscroll-contain">
             
             <!-- Left Column: Broker Configuration Controls (5 Cols) -->
             <div class="lg:col-span-5 space-y-4">
@@ -1048,8 +1048,8 @@
                   </div>
 
                   <!-- Itemized Cost Schedule Table -->
-                  <div class="border border-slate-200 rounded-lg overflow-hidden">
-                    <table class="w-full text-left text-[11px]">
+                  <div class="border border-slate-200 rounded-lg overflow-x-auto">
+                    <table class="w-full text-left text-[11px] min-w-[280px]">
                       <thead class="bg-slate-800 text-white font-semibold text-[10px] uppercase">
                         <tr>
                           <th class="py-2 px-3">Description</th>
@@ -1093,7 +1093,7 @@
           </div>
 
           <!-- Modal Footer -->
-          <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
+          <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs shrink-0">
             <span class="text-slate-400 text-[11px]">RateSift Canadian Broker Proposal Engine</span>
             <button type="button" onclick="closeProposalModal()" class="px-4 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer">
               Close
