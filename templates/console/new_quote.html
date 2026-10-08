@@ -784,8 +784,8 @@
       </div>
 
       <!-- CLIENT QUOTE PROPOSAL GENERATOR MODAL -->
-      <div id="proposal-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-start sm:items-center justify-center p-2 sm:p-6 overflow-y-auto overscroll-contain">
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-5xl my-auto max-h-[calc(100dvh-1rem)] sm:max-h-[92vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150">
+      <div id="proposal-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 overflow-y-auto p-2 sm:p-4 lg:p-6 flex justify-center items-start lg:items-center" style="-webkit-overflow-scrolling: touch;">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-5xl my-2 sm:my-4 lg:my-auto mx-auto flex flex-col text-slate-800 animate-in fade-in zoom-in-95 duration-150 lg:max-h-[92vh] lg:overflow-hidden">
           
           <!-- Modal Header -->
           <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
@@ -809,7 +809,7 @@
           </div>
 
           <!-- Modal Scrollable Content: 2-Column Split -->
-          <div class="p-4 sm:p-6 overflow-y-auto min-h-0 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs overscroll-contain">
+          <div class="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs lg:overflow-y-auto lg:min-h-0 lg:flex-1">
             
             <!-- Left Column: Broker Configuration Controls (5 Cols) -->
             <div class="lg:col-span-5 space-y-4">
@@ -919,7 +919,7 @@
             </div>
 
             <!-- Right Column: Live Executive Email & Document Preview (7 Cols) -->
-            <div class="lg:col-span-7 bg-slate-100/70 p-3 sm:p-4 rounded-xl border border-slate-200 overflow-hidden flex flex-col">
+            <div class="lg:col-span-7 bg-slate-100/70 p-3 sm:p-4 rounded-xl border border-slate-200 flex flex-col">
               
               <!-- Tab Switcher -->
               <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
@@ -983,7 +983,7 @@
                 </div>
 
                 <!-- Rich Email HTML Content View -->
-                <div id="prop-email-body-html" class="bg-white rounded-xl border border-slate-300 p-4 overflow-y-auto max-h-[50vh] text-slate-800 text-[12px] font-sans shadow-2xs">
+                <div id="prop-email-body-html" class="bg-white rounded-xl border border-slate-300 p-4 text-slate-800 text-[12px] font-sans shadow-2xs lg:overflow-y-auto lg:max-h-[50vh]">
                   <!-- Rendered dynamically -->
                 </div>
 
@@ -992,7 +992,7 @@
               </div>
 
               <!-- VIEW 2: Formal Document Sheet -->
-              <div id="proposal-doc-view" class="hidden overflow-y-auto max-h-[60vh]">
+              <div id="proposal-doc-view" class="hidden lg:overflow-y-auto lg:max-h-[60vh]">
                 <!-- Printable Proposal Sheet -->
                 <div id="proposal-printable-sheet" class="bg-white rounded-xl border border-slate-300 shadow-sm p-5 space-y-4 text-slate-800 font-sans">
                   
@@ -1966,6 +1966,7 @@
         return;
       }
       modal.classList.remove('hidden');
+      modal.scrollTop = 0;
 
       // Default to Email Draft tab
       switchProposalTab('email');
