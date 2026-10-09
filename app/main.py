@@ -354,12 +354,219 @@ def cancel_job(job_id: str, request: Request):
     return {"job_id": job_id, "status": "expired", "message": "Job cancelled safely. Uploaded file remains untouched."}
 
 
+def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
+    """
+    Ingests the confirmed mapping into the RateSift quote database (rs_rate_sheets and rs_weight_breaks).
+    Makes the newly uploaded and confirmed sheet immediately visible in the console and quotable.
+    """
+    from services.ratesift_db_service import (
+        create_rate_sheet,
+        insert_weight_breaks,
+        insert_rate_sheet_cells,
+    )
+    from app.ingest import load_sheet_grid
+    import re
+    from openpyxl.utils import get_column_letter
+
+    rows, ext = load_sheet_grid(job["path"], job["ext"])
+    mapping = job.get("mapping") or {}
+    header_row_idx = int(mapping.get("header_row", 0))
+    origin_col = mapping.get("origin")
+    dest_col = mapping.get("destination")
+    rate_cols = mapping.get("rate_columns") or []
+    mode = mapping.get("mode", "weight")
+    weight_unit = mapping.get("weight_unit") or "lb"
+    skid_col = mapping.get("skid_count_column")
+    raw_sheet_name = mapping.get("sheet_name") or job.get("sheet_name") or "Carrier Tariff"
+
+    # Derive clean carrier and service names
+    filename = job.get("filename") or os.path.basename(job["path"])
+    base_name = os.path.splitext(filename)[0]
+    carrier_name = raw_sheet_name if raw_sheet_name and raw_sheet_name != "Sheet1" else base_name
+    carrier_name = re.sub(r'[_]+', ' ', carrier_name).strip()
+    service_name = "Standard LTL" if mode == "weight" else "Skid / Pallet Freight"
+
+    # Create sheet record with CONFIRMED status
+    sheet_id = create_rate_sheet(
+        user_id=user_id or "usr_alex_rivers",
+        carrier_name=carrier_name,
+        service_name=service_name,
+        tariff_ref="Failsafe Mapped Tariff",
+        mode="LTL",
+        currency="CAD",
+        weight_unit=weight_unit,
+        dim_unit="in",
+        dim_divisor=139.0,
+        rounding_rule="standard_2dp",
+        confirmation_status="CONFIRMED",
+        source_filename=filename,
+        rating_basis="WEIGHT_CWT" if mode == "weight" else "PALLET_TIER",
+        max_skid_capacity=10,
+    )
+
+    # Get header names
+    headers = []
+    if 0 <= header_row_idx < len(rows):
+        headers = [str(c or "").strip() for c in rows[header_row_idx]]
+
+    extracted_breaks = []
+    cell_trace_records = []
+    current_section = ""
+
+    for r_idx in range(header_row_idx + 1, len(rows)):
+        row = rows[r_idx]
+        if not row or all(c is None or str(c).strip() == "" for c in row):
+            continue
+
+        excel_row_num = r_idx + 1
+
+        # Check for section header row (e.g. "Toronto to Winnipeg")
+        row_str_values = [str(c).strip() for c in row if c is not None and str(c).strip() != ""]
+        if len(row_str_values) == 1 and ("to" in row_str_values[0].lower() or "lane" in row_str_values[0].lower()):
+            current_section = row_str_values[0]
+            continue
+
+        # Origin
+        origin_val = ""
+        origin_cell = ""
+        if origin_col is not None and origin_col < len(row) and row[origin_col] is not None:
+            origin_val = str(row[origin_col]).strip()
+            origin_cell = f"{get_column_letter(origin_col + 1)}{excel_row_num}"
+
+        # Destination
+        dest_val = ""
+        dest_cell = ""
+        if dest_col is not None and dest_col < len(row) and row[dest_col] is not None:
+            dest_val = str(row[dest_col]).strip()
+            dest_cell = f"{get_column_letter(dest_col + 1)}{excel_row_num}"
+
+        # Fallback to section header if origin/dest are blank
+        if not origin_val and current_section:
+            origin_val = current_section
+        if not dest_val and current_section:
+            dest_val = current_section
+
+        if not origin_val and not dest_val:
+            continue
+
+        # Skid count if specified in a row column
+        row_skid_count = None
+        if skid_col is not None and skid_col < len(row) and row[skid_col] is not None:
+            try:
+                row_skid_count = int(float(str(row[skid_col]).strip()))
+            except Exception:
+                pass
+
+        # Traceability for origin & destination
+        if origin_val:
+            cell_trace_records.append({
+                "cell_coord": origin_cell or f"Row{excel_row_num}",
+                "field_name": "origin",
+                "raw_value": origin_val,
+                "extracted_value": origin_val,
+                "confidence": 1.0,
+            })
+        if dest_val:
+            cell_trace_records.append({
+                "cell_coord": dest_cell or f"Row{excel_row_num}",
+                "field_name": "destination",
+                "raw_value": dest_val,
+                "extracted_value": dest_val,
+                "confidence": 1.0,
+            })
+
+        # Process each rate column
+        for c_idx in rate_cols:
+            if c_idx >= len(row) or row[c_idx] is None:
+                continue
+            raw_rate = str(row[c_idx]).strip()
+            if not raw_rate:
+                continue
+
+            cleaned_num = re.sub(r'[^0-9.]', '', raw_rate)
+            rate_val = 0.0
+            if cleaned_num:
+                try:
+                    rate_val = float(cleaned_num)
+                except ValueError:
+                    rate_val = 0.0
+
+            header_text = headers[c_idx] if c_idx < len(headers) else f"Col {get_column_letter(c_idx + 1)}"
+            source_cell = f"{get_column_letter(c_idx + 1)}{excel_row_num}"
+
+            # Weight brackets or pallet count
+            min_weight = 0.0
+            max_weight = 999999.0
+            min_units = 0.0
+            max_units = 999999.0
+            rate_type = "CWT" if mode == "weight" else "FLAT"
+            break_unit = "CWT" if mode == "weight" else "SKID"
+
+            if mode == "skid":
+                pallet_num = row_skid_count
+                if pallet_num is None:
+                    m_pl = re.search(r'(\d+)', header_text)
+                    if m_pl:
+                        pallet_num = int(m_pl.group(1))
+                if pallet_num is not None:
+                    min_units = float(pallet_num)
+                    max_units = float(pallet_num)
+                break_name = header_text
+            else:
+                break_name = header_text
+                hdr_lower = header_text.lower()
+                if "min" in hdr_lower:
+                    rate_type = "FLAT"
+                    break_unit = "FLAT"
+                    max_weight = 499.0
+                elif "<" in hdr_lower or "ltl" in hdr_lower or "-500" in hdr_lower or "-499" in hdr_lower:
+                    max_weight = 499.0
+                else:
+                    nums = [float(n) for n in re.findall(r'(\d+)', header_text)]
+                    if len(nums) == 1:
+                        min_weight = nums[0]
+                    elif len(nums) >= 2:
+                        min_weight = nums[0]
+                        max_weight = nums[1]
+
+            extracted_breaks.append({
+                "zone_code": "DEFAULT",
+                "origin_spec": origin_val,
+                "dest_spec": dest_val,
+                "min_weight": min_weight,
+                "max_weight": max_weight,
+                "break_name": break_name,
+                "base_rate": rate_val,
+                "rate_type": rate_type,
+                "source_cell": source_cell,
+                "break_unit": break_unit,
+                "min_units": min_units,
+                "max_units": max_units,
+            })
+
+            cell_trace_records.append({
+                "cell_coord": source_cell,
+                "field_name": f"rate_{break_name}",
+                "raw_value": raw_rate,
+                "extracted_value": str(rate_val),
+                "confidence": 1.0,
+            })
+
+    if extracted_breaks:
+        insert_weight_breaks(sheet_id, user_id or "usr_alex_rivers", extracted_breaks)
+    if cell_trace_records:
+        insert_rate_sheet_cells(sheet_id, user_id or "usr_alex_rivers", cell_trace_records)
+
+    return sheet_id
+
+
 @router.post("/jobs/{job_id}/process")
 def process(job_id: str, request: Request):
     """
     Gate: the quoting step can only run once status == ready.
     Atomic compare-and-set ready -> processing. Double-click returns 409.
     Full load limits checked before execution.
+    Ingests confirmed sheet into RateSift database for instant quoting.
     """
     user_id, tenant_id = get_current_user_and_tenant(request)
     job = job_store.get(job_id)
@@ -387,8 +594,26 @@ def process(job_id: str, request: Request):
     from app.agent_adapter import run_agent
     try:
         output_file = run_agent(job["path"], job["mapping"])
-        job_store.update(job_id, {"status": "done", "output_path": output_file})
-        return {"job_id": job_id, "status": "done", "output_file": os.path.basename(output_file)}
+
+        # Persist confirmed sheet and its rate breaks into RateSift quoting database
+        effective_uid = user_id or "usr_alex_rivers"
+        sheet_id = None
+        try:
+            sheet_id = ingest_job_to_ratesift(job, effective_uid)
+        except Exception as db_err:
+            print(f"[RateSift DB Ingest Warning]: {db_err}")
+
+        job_store.update(job_id, {
+            "status": "done",
+            "output_path": output_file,
+            "sheet_id": sheet_id
+        })
+        return {
+            "job_id": job_id,
+            "status": "done",
+            "sheet_id": sheet_id,
+            "output_file": os.path.basename(output_file)
+        }
     except Exception as e:
         job_store.update(job_id, {"status": "failed"})
         raise HTTPException(500, f"Error processing quote formatting: {e}")

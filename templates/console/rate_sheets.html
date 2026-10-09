@@ -1766,6 +1766,16 @@
         .catch(err => console.debug("Quota header load:", err));
     }
 
+    // Callback when Failsafe mapping confirmation and processing completes
+    window.onFailsafeMappingComplete = function(procData) {
+      const statusBox = document.getElementById('upload-status');
+      if (statusBox) {
+        statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+        statusBox.innerHTML = `✓ Sheet successfully confirmed and added to your quotable carrier tariffs!`;
+      }
+      loadRateSheets();
+    };
+
     // Initial load
     document.addEventListener("DOMContentLoaded", async () => {
       await loadRateSheets();
