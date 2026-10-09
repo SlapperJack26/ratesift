@@ -631,7 +631,7 @@ const FailsafeModal = {
 
     try {
       // 1. Post Mapping Confirmation
-      const mapRes = await fetch(`/api/failsafe/jobs/${this.currentJobId}/mapping`, {
+      const mapRes = await fetch(`/jobs/${this.currentJobId}/mapping`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -643,7 +643,7 @@ const FailsafeModal = {
       }
 
       // 2. Trigger Gated Process
-      const procRes = await fetch(`/api/failsafe/jobs/${this.currentJobId}/process`, {
+      const procRes = await fetch(`/jobs/${this.currentJobId}/process`, {
         method: 'POST'
       });
       const procData = await procRes.json();
@@ -672,7 +672,7 @@ const FailsafeModal = {
   async cancel() {
     if (this.currentJobId) {
       try {
-        await fetch(`/api/failsafe/jobs/${this.currentJobId}/cancel`, { method: 'POST' });
+        await fetch(`/jobs/${this.currentJobId}/cancel`, { method: 'POST' });
       } catch (e) {
         console.warn("Cancel call returned:", e);
       }

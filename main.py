@@ -59,6 +59,7 @@ app.add_middleware(
 
 from app.main import router as failsafe_router
 app.include_router(failsafe_router)
+app.include_router(failsafe_router, prefix="/api/failsafe")
 
 
 def get_current_user_from_request(request: Request) -> Optional[dict]:

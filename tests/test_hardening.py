@@ -247,3 +247,27 @@ def test_file_immutability_throughout_lifecycle(tmp_path):
         stored_bytes = f.read()
 
     assert stored_bytes == orig_bytes, "Original uploaded file was modified!"
+
+
+def test_intermodal_equipment_matrix_with_no_rates_triggers_failsafe(tmp_path):
+    """
+    When a sheet contains equipment availability or route codes (e.g. 40FT, CN RV)
+    with no numeric rate values, the failsafe must trigger needs_mapping with an explicit issue.
+    """
+    rows = [
+        ["", "MON", "TUES", "WED", "THU", "FRI"],
+        ["Toronto to Winnipeg", "", "", "", "", ""],
+        ["40FT", "CN RV", "CN RV", "CP Flex", "CP Flex", "CP Flex"],
+        ["53FT", "CN RV", "CN RV", "CN", "CN", "CN"],
+        ["53Ht", "CN RV", "CN RV", "CN", "CN", "CN"],
+    ]
+    wb_bytes = create_workbook_bytes(rows)
+    p = tmp_path / "intermodal_matrix.xlsx"
+    p.write_bytes(wb_bytes)
+    grid, _ = load_sheet_grid(str(p), ".xlsx")
+    res = analyze(grid)
+
+    assert res["status"] == "needs_mapping"
+    assert any("no numeric freight rates" in iss.lower() for iss in res["issues"])
+    assert "rates" in res["unresolved"]
+

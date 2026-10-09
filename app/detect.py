@@ -442,6 +442,17 @@ def analyze(rows: List[List[Any]], sheet_name: Optional[str] = None) -> Dict[str
         issues.append("No weight breaks or skid/pallet columns found - is this priced by weight or by skid?")
         unresolved.append("mode")
 
+    # Obvious missing rate data check:
+    # If the sheet has no numeric rate values across data rows, flag as missing data
+    data_rows = rows[hdr + 1:] if hdr is not None and hdr + 1 < len(rows) else []
+    total_numeric_cells = sum(
+        1 for r in data_rows for c in r if _is_num(c)
+    )
+    if not total_numeric_cells and data_rows:
+        issues.append("No numeric freight rates found in data rows. The sheet appears to be an equipment/routing matrix or is missing rate values.")
+        if "rates" not in unresolved:
+            unresolved.append("rates")
+
     # Status determination: Rule 4, Rule 8, and Rule 6
     needs_conf = any(g.get("needs_confirmation") for g in guesses)
     status = "ready" if (not unresolved and not conflicts and not needs_conf) else "needs_mapping"

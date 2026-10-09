@@ -324,11 +324,16 @@
           <!-- LEFT COLUMN: Agent Extraction & Cell Traceability -->
           <div class="lg:col-span-7 space-y-4">
             
-            <!-- Action Bar directly above table: Button sized to span the first 2 columns -->
+            <!-- Action Bar directly above table -->
             <div class="flex items-center justify-between gap-3">
-              <button type="button" onclick="openFormattedSheetModal()" class="w-[52%] inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer text-center">
-                <span>👁️ View Formatted Sheet</span>
-              </button>
+              <div class="flex items-center gap-2 flex-1">
+                <button type="button" onclick="openFormattedSheetModal()" class="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer text-center">
+                  <span>👁️ View Formatted Sheet</span>
+                </button>
+                <button type="button" onclick="openManualEntryFailsafe()" class="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer text-center" title="Manually map columns, headers, and pricing mode through the Failsafe gate">
+                  <span>⚙️ Manual Entry</span>
+                </button>
+              </div>
               <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs shrink-0">
                 <span>🔒 In-Browser Inspection Only • Downloads Disabled</span>
               </span>
@@ -1488,6 +1493,48 @@
     function closeConfirmModal() {
       document.getElementById('confirm-modal').classList.add('hidden');
       activeSheetId = null;
+    }
+
+    async function openManualEntryFailsafe() {
+      if (!currentSheetData || !currentSheetData.sheet) {
+        alert("Please select or upload a rate sheet first.");
+        return;
+      }
+      const sheet = currentSheetData.sheet;
+      const breaks = currentSheetData.breaks || [];
+
+      // Construct a JobState representation from currentSheetData
+      const previewRows = [];
+      previewRows.push(["Origin", "Destination", "Carrier Zone", "Weight Bracket", "Base Rate"]);
+      for (const b of breaks.slice(0, 11)) {
+        previewRows.push([
+          b.origin_spec || "ALL",
+          b.dest_spec || "ALL",
+          b.carrier_zone || "-",
+          b.break_name || "-",
+          String(b.base_rate !== null && b.base_rate !== undefined ? b.base_rate : "0.00")
+        ]);
+      }
+
+      const failsafeJob = {
+        job_id: sheet.id || `sheet_${activeSheetId}`,
+        status: "needs_mapping",
+        header_row: 0,
+        column_count: 5,
+        mode: sheet.weight_unit ? "weight" : "skid",
+        weight_unit: sheet.weight_unit || "lb",
+        sheet_name: sheet.carrier_name || "Rate Sheet",
+        issues: breaks.length === 0 ? ["No rate breaks extracted from sheet. Please map columns manually."] : [],
+        conflicts: [],
+        suggestions: { origin: 0, destination: 1 },
+        preview: previewRows
+      };
+
+      if (window.FailsafeModal) {
+        FailsafeModal.open(failsafeJob);
+      } else {
+        alert("Failsafe mapping modal is not available on this page.");
+      }
     }
 
     async function confirmCurrentSheet() {
