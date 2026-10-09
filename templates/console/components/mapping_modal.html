@@ -139,23 +139,38 @@
             </select>
           </div>
 
-          <!-- Skid Layout Specific: Skid Count Column -->
-          <div id="failsafe-skid-count-wrapper" class="space-y-1 hidden">
+          <!-- Base Cost / Minimum Charge (Optional) -->
+          <div class="space-y-1">
             <label class="block font-bold text-slate-800 text-xs">
-              Skid Count Column <span class="text-slate-400 font-normal">(for row-based layout)</span>
+              Base Cost / Min Charge Column <span class="text-slate-400 font-normal">(Optional)</span>
             </label>
-            <select id="failsafe-col-skid-count" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
-              <option value="">-- Optional (if one row per count) --</option>
+            <select id="failsafe-col-base-cost" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+              <option value="">-- Optional (No Base Charge / MC) --</option>
             </select>
           </div>
         </div>
 
-        <!-- Rate Columns Multi-Select / Checkbox Grid -->
-        <div class="space-y-2 pt-2 border-t border-slate-100">
+        <!-- Skid Mode Configuration: Max Capacity Breakpoint -->
+        <div id="failsafe-skid-config-panel" class="hidden p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="font-bold text-xs text-amber-900">Skid Rating Breakpoint (Rule 18)</span>
+              <p class="text-[11px] text-amber-700">Brokers specify skid count at quote time. Beyond maximum skid capacity, dedicated FTL is required.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="font-bold text-xs text-amber-900">Max LTL Skid Cap:</label>
+              <input type="number" id="failsafe-max-skid-cap" value="10" min="1" max="30" class="w-20 bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500" onchange="FailsafeModal.validate()">
+              <span class="text-[11px] text-amber-800 font-medium">skids</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weight Mode Rate Columns Multi-Select / Checkbox Grid -->
+        <div id="failsafe-weight-rate-container" class="space-y-2 pt-2 border-t border-slate-100">
           <div class="flex items-center justify-between">
             <label class="font-bold text-slate-800 text-xs">
-              Rate / Break Columns <span class="text-red-500">*</span> 
-              <span class="text-slate-400 font-normal text-[11px]">(Select all columns containing rates)</span>
+              Weight Break Columns <span class="text-red-500">*</span> 
+              <span class="text-slate-400 font-normal text-[11px]">(Select all columns containing weight rates, e.g. Min, L5C, 1M, 2M...)</span>
             </label>
             <div class="flex gap-2">
               <button type="button" onclick="FailsafeModal.selectAllRateCols(true)" class="text-[11px] text-red-600 hover:underline">Select All</button>
@@ -165,6 +180,39 @@
           </div>
           <div id="failsafe-rate-cols-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg max-h-36 overflow-y-auto">
             <!-- Dynamically populated checkboxes -->
+          </div>
+        </div>
+
+        <!-- Skid Mode Tier Ranges Configurator -->
+        <div id="failsafe-skid-tiers-container" class="space-y-2 pt-2 border-t border-slate-100 hidden">
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="font-bold text-slate-800 text-xs">
+                Skid Rate Columns & Skid Ranges <span class="text-red-500">*</span>
+              </label>
+              <p class="text-[11px] text-slate-500">Check each rate column and enter the number or range of skids it covers (e.g. 1, 1-2, 3-4, 5-8).</p>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" onclick="FailsafeModal.selectAllSkidTiers(true)" class="text-[11px] text-red-600 hover:underline">Select All</button>
+              <span class="text-slate-300">|</span>
+              <button type="button" onclick="FailsafeModal.selectAllSkidTiers(false)" class="text-[11px] text-slate-500 hover:underline">Clear All</button>
+            </div>
+          </div>
+
+          <div class="border border-slate-200 rounded-lg overflow-hidden bg-slate-50 max-h-48 overflow-y-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 sticky top-0">
+                <tr>
+                  <th class="py-2 px-3 w-10 text-center">Use</th>
+                  <th class="py-2 px-3 w-40">Column</th>
+                  <th class="py-2 px-3 w-44">Skid Count / Range</th>
+                  <th class="py-2 px-3">Pricing Basis</th>
+                </tr>
+              </thead>
+              <tbody id="failsafe-skid-tiers-tbody" class="divide-y divide-slate-200 bg-white">
+                <!-- Dynamically populated skid tier rows -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -343,14 +391,20 @@ const FailsafeModal = {
   onModeChange(mode, triggerValidation = true) {
     this.jobData.mode = mode;
     const unitContainer = document.getElementById('failsafe-unit-container');
-    const skidWrapper = document.getElementById('failsafe-skid-count-wrapper');
+    const skidConfigPanel = document.getElementById('failsafe-skid-config-panel');
+    const weightRateContainer = document.getElementById('failsafe-weight-rate-container');
+    const skidTiersContainer = document.getElementById('failsafe-skid-tiers-container');
 
     if (mode === 'weight') {
-      unitContainer.classList.remove('hidden');
-      skidWrapper.classList.add('hidden');
+      if (unitContainer) unitContainer.classList.remove('hidden');
+      if (skidConfigPanel) skidConfigPanel.classList.add('hidden');
+      if (weightRateContainer) weightRateContainer.classList.remove('hidden');
+      if (skidTiersContainer) skidTiersContainer.classList.add('hidden');
     } else {
-      unitContainer.classList.add('hidden');
-      skidWrapper.classList.remove('hidden');
+      if (unitContainer) unitContainer.classList.add('hidden');
+      if (skidConfigPanel) skidConfigPanel.classList.remove('hidden');
+      if (weightRateContainer) weightRateContainer.classList.add('hidden');
+      if (skidTiersContainer) skidTiersContainer.classList.remove('hidden');
     }
     if (triggerValidation) this.validate();
   },
@@ -378,8 +432,9 @@ const FailsafeModal = {
     const cols = this.getColumnNames();
     const originSelect = document.getElementById('failsafe-col-origin');
     const destSelect = document.getElementById('failsafe-col-destination');
-    const skidCountSelect = document.getElementById('failsafe-col-skid-count');
+    const baseCostSelect = document.getElementById('failsafe-col-base-cost');
     const rateGrid = document.getElementById('failsafe-rate-cols-grid');
+    const skidTbody = document.getElementById('failsafe-skid-tiers-tbody');
 
     const buildOptions = (placeholder) => {
       let html = `<option value="">-- ${placeholder} --</option>`;
@@ -391,9 +446,11 @@ const FailsafeModal = {
 
     originSelect.innerHTML = buildOptions("Select Origin Column");
     destSelect.innerHTML = buildOptions("Select Destination Column");
-    skidCountSelect.innerHTML = `<option value="">-- Optional (if one row per count) --</option>` + buildOptions("Select Skid Count Column");
+    if (baseCostSelect) {
+      baseCostSelect.innerHTML = `<option value="">-- Optional (No Base Charge / MC) --</option>` + buildOptions("Select Base Cost Column").replace('<option value="">-- Select Base Cost Column --</option>', '');
+    }
 
-    // Populate rate checkboxes
+    // Populate weight rate checkboxes
     rateGrid.innerHTML = '';
     cols.forEach(c => {
       const div = document.createElement('div');
@@ -406,6 +463,98 @@ const FailsafeModal = {
       `;
       rateGrid.appendChild(div);
     });
+
+    // Populate skid tier table rows
+    if (skidTbody) {
+      skidTbody.innerHTML = '';
+      cols.forEach(c => {
+        // Derive initial skid range guess from column header name if it has numbers
+        let initialRange = "";
+        const m = c.name.match(/(\d+)\s*(?:-|to)\s*(\d+)/i);
+        if (m) {
+          initialRange = `${m[1]}-${m[2]}`;
+        } else {
+          const mSingle = c.name.match(/(\d+)/);
+          if (mSingle && !c.name.toLowerCase().includes("cost") && !c.name.toLowerCase().includes("min")) {
+            initialRange = mSingle[1];
+          }
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.innerHTML = `
+          <td class="py-2 px-3 text-center">
+            <input type="checkbox" id="failsafe-skid-cb-${c.index}" value="${c.index}" class="failsafe-skid-tier-cb rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer" onchange="FailsafeModal.onSkidCbChange(${c.index}); FailsafeModal.validate();">
+          </td>
+          <td class="py-2 px-3">
+            <label for="failsafe-skid-cb-${c.index}" class="font-mono font-bold text-slate-900 cursor-pointer text-xs" title="${c.name}">
+              Col ${c.letter}: <span class="font-normal text-slate-600">${c.name}</span>
+            </label>
+          </td>
+          <td class="py-2 px-3">
+            <input type="text" id="failsafe-skid-range-${c.index}" value="${initialRange}" placeholder="e.g. 1 or 1-2" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500" oninput="FailsafeModal.validate()">
+          </td>
+          <td class="py-2 px-3">
+            <select id="failsafe-skid-basis-${c.index}" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500" onchange="FailsafeModal.validate()">
+              <option value="PER_SKID">Per Skid ($/skid)</option>
+              <option value="FLAT">Flat Total ($)</option>
+            </select>
+          </td>
+        `;
+        skidTbody.appendChild(tr);
+      });
+    }
+  },
+
+  onSkidCbChange(colIndex) {
+    const cb = document.getElementById(`failsafe-skid-cb-${colIndex}`);
+    const rangeInput = document.getElementById(`failsafe-skid-range-${colIndex}`);
+    if (cb && cb.checked && rangeInput && !rangeInput.value.trim()) {
+      // Default to 1 if blank
+      rangeInput.value = "1";
+    }
+  },
+
+  selectAllSkidTiers(select) {
+    const cbs = document.querySelectorAll('.failsafe-skid-tier-cb');
+    cbs.forEach(cb => {
+      cb.checked = select;
+      if (select) {
+        const colIdx = cb.value;
+        const rangeInput = document.getElementById(`failsafe-skid-range-${colIdx}`);
+        if (rangeInput && !rangeInput.value.trim()) rangeInput.value = "1";
+      }
+    });
+    this.validate();
+  },
+
+  parseSkidRange(strVal, maxCap = 10) {
+    const s = String(strVal || "").trim().toLowerCase();
+    if (!s) return null;
+    // e.g. "1-2", "1 - 2", "1 to 2"
+    const mRange = s.match(/^(\d+)\s*(?:-|to)\s*(\d+)$/);
+    if (mRange) {
+      const minU = parseFloat(mRange[1]);
+      const maxU = parseFloat(mRange[2]);
+      if (minU > 0 && maxU >= minU) {
+        return { min_units: minU, max_units: maxU, skid_range: `${minU}-${maxU}` };
+      }
+    }
+    // e.g. "5+"
+    const mPlus = s.match(/^(\d+)\s*\+$/);
+    if (mPlus) {
+      const minU = parseFloat(mPlus[1]);
+      return { min_units: minU, max_units: Math.max(minU, parseFloat(maxCap)), skid_range: `${minU}+` };
+    }
+    // Single number e.g. "1" or "2"
+    const mSingle = s.match(/^(\d+)$/);
+    if (mSingle) {
+      const val = parseFloat(mSingle[1]);
+      if (val > 0) {
+        return { min_units: val, max_units: val, skid_range: String(val) };
+      }
+    }
+    return null;
   },
 
   renderPreviewTable() {
@@ -511,11 +660,13 @@ const FailsafeModal = {
 
     // Rate breaks from guesses
     const guesses = this.jobData.guesses || [];
-    const rateGuess = guesses.find(g => g.field === 'rates');
+    const rateGuess = guesses.find(g => g.field === 'rates' || g.field === 'weight_breaks' || g.field === 'skid_rates');
     if (rateGuess && rateGuess.columns && rateGuess.columns.length > 0) {
       rateGuess.columns.forEach(colIdx => {
         const cb = document.getElementById(`failsafe-rate-cb-${colIdx}`);
         if (cb) cb.checked = true;
+        const skidCb = document.getElementById(`failsafe-skid-cb-${colIdx}`);
+        if (skidCb) skidCb.checked = true;
       });
     }
   },
@@ -546,14 +697,28 @@ const FailsafeModal = {
     if (m.destination !== undefined) {
       document.getElementById('failsafe-col-destination').value = m.destination;
     }
-    if (m.skid_count_column !== undefined) {
-      document.getElementById('failsafe-col-skid-count').value = m.skid_count_column;
+    if (m.base_cost_column !== undefined && document.getElementById('failsafe-col-base-cost')) {
+      document.getElementById('failsafe-col-base-cost').value = m.base_cost_column;
+    }
+    if (m.max_skid_capacity !== undefined && document.getElementById('failsafe-max-skid-cap')) {
+      document.getElementById('failsafe-max-skid-cap').value = m.max_skid_capacity;
     }
     if (m.rate_columns && Array.isArray(m.rate_columns)) {
       this.selectAllRateCols(false);
       m.rate_columns.forEach(colIdx => {
         const cb = document.getElementById(`failsafe-rate-cb-${colIdx}`);
         if (cb) cb.checked = true;
+      });
+    }
+    if (m.skid_tiers && Array.isArray(m.skid_tiers)) {
+      this.selectAllSkidTiers(false);
+      m.skid_tiers.forEach(t => {
+        const cb = document.getElementById(`failsafe-skid-cb-${t.column}`);
+        if (cb) cb.checked = true;
+        const rangeInp = document.getElementById(`failsafe-skid-range-${t.column}`);
+        if (rangeInp) rangeInp.value = t.skid_range || "1";
+        const basisSel = document.getElementById(`failsafe-skid-basis-${t.column}`);
+        if (basisSel && t.rate_type) basisSel.value = t.rate_type;
       });
     }
     this.validate();
@@ -567,6 +732,7 @@ const FailsafeModal = {
 
     const originVal = document.getElementById('failsafe-col-origin').value;
     const destVal = document.getElementById('failsafe-col-destination').value;
+    const baseCostVal = document.getElementById('failsafe-col-base-cost') ? document.getElementById('failsafe-col-base-cost').value : "";
     
     let modeVal = 'weight';
     const modeRadios = document.getElementsByName('failsafe-mode');
@@ -576,8 +742,6 @@ const FailsafeModal = {
     const unitRadios = document.getElementsByName('failsafe-weight-unit');
     unitRadios.forEach(r => { if (r.checked) unitVal = r.value; });
 
-    const checkedRates = Array.from(document.querySelectorAll('.failsafe-rate-cb:checked')).map(cb => parseInt(cb.value, 10));
-
     // Validation Rules
     const missing = [];
     if (originVal === "") missing.push("Origin column");
@@ -585,8 +749,41 @@ const FailsafeModal = {
     if (originVal !== "" && destVal !== "" && originVal === destVal) {
       missing.push("Origin and Destination cannot be the same column");
     }
-    if (checkedRates.length === 0) missing.push("At least one rate column");
-    if (modeVal === 'weight' && !unitVal) missing.push("Weight unit (lb or kg)");
+
+    if (baseCostVal !== "" && (baseCostVal === originVal || baseCostVal === destVal)) {
+      missing.push("Base Cost column cannot overlap with Origin/Destination");
+    }
+
+    if (modeVal === 'weight') {
+      const checkedRates = Array.from(document.querySelectorAll('.failsafe-rate-cb:checked')).map(cb => parseInt(cb.value, 10));
+      if (checkedRates.length === 0) missing.push("At least one rate column");
+      if (!unitVal) missing.push("Weight unit (lb or kg)");
+      if (baseCostVal !== "" && checkedRates.includes(parseInt(baseCostVal, 10))) {
+        missing.push("Base Cost column cannot overlap with a rate column");
+      }
+    } else {
+      // Skid mode: validate skid tier selections and ranges
+      const maxCapInp = document.getElementById('failsafe-max-skid-cap');
+      const maxCap = maxCapInp ? Math.max(1, parseInt(maxCapInp.value, 10) || 10) : 10;
+      const checkedSkidCbs = Array.from(document.querySelectorAll('.failsafe-skid-tier-cb:checked'));
+      if (checkedSkidCbs.length === 0) {
+        missing.push("At least one skid rate column");
+      } else {
+        let hasInvalidRange = false;
+        checkedSkidCbs.forEach(cb => {
+          const colIdx = cb.value;
+          const rangeInp = document.getElementById(`failsafe-skid-range-${colIdx}`);
+          const parsed = this.parseSkidRange(rangeInp ? rangeInp.value : "", maxCap);
+          if (!parsed) hasInvalidRange = true;
+          if (baseCostVal !== "" && parseInt(baseCostVal, 10) === parseInt(colIdx, 10)) {
+            missing.push(`Column Col ${String.fromCharCode(65 + parseInt(colIdx, 10))} cannot be both Base Cost and a Skid Rate column`);
+          }
+        });
+        if (hasInvalidRange) {
+          missing.push("Valid skid range for each selected column (e.g. 1 or 1-2)");
+        }
+      }
+    }
 
     if (missing.length > 0) {
       confirmBtn.disabled = true;
@@ -611,19 +808,46 @@ const FailsafeModal = {
     const headerRow = Math.max(0, parseInt(document.getElementById('failsafe-header-row-input').value, 10) - 1);
     const origin = parseInt(document.getElementById('failsafe-col-origin').value, 10);
     const destination = parseInt(document.getElementById('failsafe-col-destination').value, 10);
+    const baseCostVal = document.getElementById('failsafe-col-base-cost') ? document.getElementById('failsafe-col-base-cost').value : "";
+    const base_cost_column = baseCostVal !== "" ? parseInt(baseCostVal, 10) : null;
     
     let mode = 'weight';
     document.getElementsByName('failsafe-mode').forEach(r => { if (r.checked) mode = r.value; });
 
     let weight_unit = null;
+    let rate_columns = [];
+    let skid_tiers = null;
+    let max_skid_capacity = 10;
+
     if (mode === 'weight') {
       document.getElementsByName('failsafe-weight-unit').forEach(r => { if (r.checked) weight_unit = r.value; });
+      rate_columns = Array.from(document.querySelectorAll('.failsafe-rate-cb:checked')).map(cb => parseInt(cb.value, 10));
+    } else {
+      const maxCapInp = document.getElementById('failsafe-max-skid-cap');
+      max_skid_capacity = maxCapInp ? Math.max(1, parseInt(maxCapInp.value, 10) || 10) : 10;
+
+      const checkedSkidCbs = Array.from(document.querySelectorAll('.failsafe-skid-tier-cb:checked'));
+      skid_tiers = [];
+      rate_columns = [];
+
+      checkedSkidCbs.forEach(cb => {
+        const colIdx = parseInt(cb.value, 10);
+        rate_columns.push(colIdx);
+        const rangeInp = document.getElementById(`failsafe-skid-range-${colIdx}`);
+        const basisSel = document.getElementById(`failsafe-skid-basis-${colIdx}`);
+        const parsed = this.parseSkidRange(rangeInp ? rangeInp.value : "", max_skid_capacity);
+        const rateType = basisSel ? basisSel.value : "PER_SKID";
+
+        skid_tiers.push({
+          column: colIdx,
+          skid_range: parsed ? parsed.skid_range : (rangeInp ? rangeInp.value.trim() : "1"),
+          min_units: parsed ? parsed.min_units : 1.0,
+          max_units: parsed ? parsed.max_units : 1.0,
+          rate_type: rateType
+        });
+      });
     }
 
-    const skidCountVal = document.getElementById('failsafe-col-skid-count').value;
-    const skid_count_column = (mode === 'skid' && skidCountVal !== "") ? parseInt(skidCountVal, 10) : null;
-
-    const rate_columns = Array.from(document.querySelectorAll('.failsafe-rate-cb:checked')).map(cb => parseInt(cb.value, 10));
     const remember_mapping = document.getElementById('failsafe-remember-mapping').checked;
 
     const payload = {
@@ -633,7 +857,9 @@ const FailsafeModal = {
       origin: origin,
       destination: destination,
       rate_columns: rate_columns,
-      skid_count_column: skid_count_column,
+      base_cost_column: base_cost_column,
+      max_skid_capacity: max_skid_capacity,
+      skid_tiers: skid_tiers,
       weight_unit: weight_unit,
       remember_mapping: remember_mapping
     };

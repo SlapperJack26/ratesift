@@ -52,6 +52,14 @@ class JobState(BaseModel):
     expires_at: Optional[float] = None
 
 
+class SkidTierMapping(BaseModel):
+    column: int = Field(ge=0)
+    skid_range: str = "1"
+    min_units: float = Field(default=1.0, ge=1.0)
+    max_units: float = Field(default=1.0, ge=1.0)
+    rate_type: str = "PER_SKID"
+
+
 class MappingRequest(BaseModel):
     header_row: int = Field(ge=0)
     sheet_name: Optional[str] = None
@@ -59,6 +67,9 @@ class MappingRequest(BaseModel):
     origin: int = Field(ge=0)
     destination: int = Field(ge=0)
     rate_columns: List[int] = Field(min_length=1)
+    base_cost_column: Optional[int] = Field(default=None, ge=0)
+    max_skid_capacity: Optional[int] = Field(default=10, ge=1, le=50)
+    skid_tiers: Optional[List[SkidTierMapping]] = None
     skid_count_column: Optional[int] = Field(default=None, ge=0)
     weight_unit: Optional[str] = Field(default=None, pattern="^(lb|kg)$")
     remember_mapping: bool = False

@@ -299,6 +299,8 @@ def confirm_mapping(job_id: str, req: MappingRequest, request: Request):
         req.rate_columns,
         req.weight_unit,
         skid_count_column=req.skid_count_column,
+        base_cost_column=req.base_cost_column,
+        skid_tiers=req.skid_tiers,
     )
     if errors:
         return JSONResponse(status_code=422, content={"errors": errors})
@@ -363,6 +365,7 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
         create_rate_sheet,
         insert_weight_breaks,
         insert_rate_sheet_cells,
+        insert_carrier_minimums,
     )
     from app.ingest import load_sheet_grid
     import re
@@ -377,6 +380,9 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
     mode = mapping.get("mode", "weight")
     weight_unit = mapping.get("weight_unit") or "lb"
     skid_col = mapping.get("skid_count_column")
+    base_cost_col = mapping.get("base_cost_column")
+    max_skid_cap = int(mapping.get("max_skid_capacity") or 10)
+    skid_tiers = mapping.get("skid_tiers") or []
     raw_sheet_name = mapping.get("sheet_name") or job.get("sheet_name") or "Carrier Tariff"
 
     # Derive clean carrier and service names
@@ -401,7 +407,7 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
         confirmation_status="CONFIRMED",
         source_filename=filename,
         rating_basis="WEIGHT_CWT" if mode == "weight" else "PALLET_TIER",
-        max_skid_capacity=10,
+        max_skid_capacity=max_skid_cap,
     )
 
     # Get header names
@@ -411,7 +417,16 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
 
     extracted_breaks = []
     cell_trace_records = []
+    extracted_minimums = []
     current_section = ""
+
+    # Build quick lookup dictionary for skid tier mappings by column index
+    tier_map_by_col = {}
+    if mode == "skid" and skid_tiers:
+        for t in skid_tiers:
+            c = t.get("column")
+            if c is not None:
+                tier_map_by_col[int(c)] = t
 
     for r_idx in range(header_row_idx + 1, len(rows)):
         row = rows[r_idx]
@@ -475,6 +490,30 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
                 "confidence": 1.0,
             })
 
+        # Base Cost / Minimum charge column for this row/lane (if mapped)
+        if base_cost_col is not None and base_cost_col < len(row) and row[base_cost_col] is not None:
+            raw_base = str(row[base_cost_col]).strip()
+            base_cleaned = re.sub(r'[^0-9.]', '', raw_base)
+            if base_cleaned:
+                try:
+                    base_val = float(base_cleaned)
+                    base_cell = f"{get_column_letter(base_cost_col + 1)}{excel_row_num}"
+                    extracted_minimums.append({
+                        "origin_spec": origin_val,
+                        "dest_spec": dest_val,
+                        "min_charge": base_val,
+                        "source_cell": base_cell,
+                    })
+                    cell_trace_records.append({
+                        "cell_coord": base_cell,
+                        "field_name": "base_cost_minimum",
+                        "raw_value": raw_base,
+                        "extracted_value": str(base_val),
+                        "confidence": 1.0,
+                    })
+                except ValueError:
+                    pass
+
         # Process each rate column
         for c_idx in rate_cols:
             if c_idx >= len(row) or row[c_idx] is None:
@@ -499,19 +538,28 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
             max_weight = 999999.0
             min_units = 0.0
             max_units = 999999.0
-            rate_type = "CWT" if mode == "weight" else "FLAT"
+            rate_type = "CWT" if mode == "weight" else "PER_SKID"
             break_unit = "CWT" if mode == "weight" else "SKID"
 
             if mode == "skid":
-                pallet_num = row_skid_count
-                if pallet_num is None:
-                    m_pl = re.search(r'(\d+)', header_text)
-                    if m_pl:
-                        pallet_num = int(m_pl.group(1))
-                if pallet_num is not None:
-                    min_units = float(pallet_num)
-                    max_units = float(pallet_num)
-                break_name = header_text
+                if c_idx in tier_map_by_col:
+                    t_info = tier_map_by_col[c_idx]
+                    min_units = float(t_info.get("min_units", 1.0))
+                    max_units = float(t_info.get("max_units", 1.0))
+                    rate_type = (t_info.get("rate_type") or "PER_SKID").upper()
+                    break_name = t_info.get("skid_range") or header_text
+                    if "skid" not in break_name.lower():
+                        break_name = f"{break_name} Skids"
+                else:
+                    pallet_num = row_skid_count
+                    if pallet_num is None:
+                        m_pl = re.search(r'(\d+)', header_text)
+                        if m_pl:
+                            pallet_num = int(m_pl.group(1))
+                    if pallet_num is not None:
+                        min_units = float(pallet_num)
+                        max_units = float(pallet_num)
+                    break_name = header_text
             else:
                 break_name = header_text
                 hdr_lower = header_text.lower()
@@ -554,6 +602,8 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
 
     if extracted_breaks:
         insert_weight_breaks(sheet_id, user_id or "usr_alex_rivers", extracted_breaks)
+    if extracted_minimums:
+        insert_carrier_minimums(sheet_id, user_id or "usr_alex_rivers", extracted_minimums)
     if cell_trace_records:
         insert_rate_sheet_cells(sheet_id, user_id or "usr_alex_rivers", cell_trace_records)
 

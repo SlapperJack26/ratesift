@@ -566,7 +566,7 @@ def calculate_quote_for_sheet(
     skid_charge = None
     mc_charge = 0.0
 
-    if rating_basis == "PER_SKID":
+    if rating_basis in ("PER_SKID", "PALLET_TIER"):
         # Rule 18 & 25: Skid-based LTL rating
         if skid_count is None or skid_count <= 0:
             raise ValueError(f"Rule 25 Exclusion: Rate sheet '{sheet['carrier_name']}' rates on a per-skid basis, but no skid count was provided.")
@@ -580,16 +580,24 @@ def calculate_quote_for_sheet(
         matched_min = match_lane_minimum(rules["minimums"], origin, destination)
         mc_charge = float(matched_min["min_charge"]) if matched_min else 0.0
         rate_val = float(matched_break["base_rate"])
-        skid_charge = round(skid_count * rate_val, 2)
-        base_charge = round(mc_charge + skid_charge, 2)
-        base_formula = f"${mc_charge:.2f} (MC) + ({skid_count} skid{'s' if skid_count != 1 else ''} x ${rate_val:.2f} [{matched_break['break_name']}]) = ${base_charge:.2f}" if mc_charge > 0 else f"{skid_count} skid{'s' if skid_count != 1 else ''} x ${rate_val:.2f} [{matched_break['break_name']}] = ${base_charge:.2f}"
+        rate_type = (matched_break.get("rate_type") or "PER_SKID").upper()
+
+        if rate_type == "FLAT":
+            skid_charge = round(rate_val, 2)
+            base_charge = round(mc_charge + skid_charge, 2)
+            base_formula = f"${mc_charge:.2f} (MC) + Flat Rate ${rate_val:.2f} [{matched_break['break_name']}] = ${base_charge:.2f}" if mc_charge > 0 else f"Flat Rate ${rate_val:.2f} [{matched_break['break_name']}] = ${base_charge:.2f}"
+        else:
+            skid_charge = round(skid_count * rate_val, 2)
+            base_charge = round(mc_charge + skid_charge, 2)
+            base_formula = f"${mc_charge:.2f} (MC) + ({skid_count} skid{'s' if skid_count != 1 else ''} x ${rate_val:.2f} [{matched_break['break_name']}]) = ${base_charge:.2f}" if mc_charge > 0 else f"{skid_count} skid{'s' if skid_count != 1 else ''} x ${rate_val:.2f} [{matched_break['break_name']}] = ${base_charge:.2f}"
 
         trace_steps.append({
-            "step": "Skid-Based LTL Base Rate Calculation (Formula: MC + S x RateBreak)",
+            "step": f"Skid-Based LTL Base Rate Calculation ({'Flat' if rate_type == 'FLAT' else 'Per-Skid'} Formula: MC + SkidCharge)",
             "lane": f"{origin} -> {destination}",
             "skid_count": skid_count,
             "break_name": matched_break["break_name"],
             "rate_value": rate_val,
+            "rate_type": rate_type,
             "skid_charge": skid_charge,
             "base_cost_mc": mc_charge,
             "base_charge": base_charge,
@@ -693,7 +701,7 @@ def calculate_quote_for_sheet(
             })
 
     # 4. Minimum Charge Comparison (Rule 12)
-    if rating_basis == "PER_SKID":
+    if rating_basis in ("PER_SKID", "PALLET_TIER"):
         min_charge = mc_charge
         min_charge_adjustment = 0.0
         total_amount = base_charge + total_surcharges
@@ -815,6 +823,7 @@ def calculate_quote_for_sheet(
         "billable_weight": billable_weight,
         "is_dim_billed": weight_info["is_dim_billed"],
         "base_rate": base_charge,
+        "base_charge": base_charge,
         "rate_break": matched_break["break_name"],
         "source_coordinate": matched_break.get("source_cell", ""),
         "source_cell": matched_break.get("source_cell", ""),
@@ -831,8 +840,8 @@ def calculate_quote_for_sheet(
         "client_total": final_total,
         "rating_basis": rating_basis,
         "skid_count": skid_count,
-        "skid_charge": skid_charge if rating_basis == "PER_SKID" else None,
-        "mc_base_cost": mc_charge if rating_basis == "PER_SKID" else None,
+        "skid_charge": skid_charge if rating_basis in ("PER_SKID", "PALLET_TIER") else None,
+        "mc_base_cost": mc_charge if rating_basis in ("PER_SKID", "PALLET_TIER") else None,
         "transit_days": transit_days or 3,  # default estimated transit if zone unstated
         "relies_on_flagged_cell": relies_on_flagged,
         "caution_badge": caution_badge,

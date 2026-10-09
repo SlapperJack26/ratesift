@@ -481,6 +481,8 @@ def validate_mapping(
     rate_columns: List[int],
     weight_unit: Optional[str] = None,
     skid_count_column: Optional[int] = None,
+    base_cost_column: Optional[int] = None,
+    skid_tiers: Optional[List[Any]] = None,
 ) -> List[str]:
     """Return a list of human-readable problems; empty list = OK."""
     errs: List[str] = []
@@ -493,6 +495,8 @@ def validate_mapping(
         all_cols.append(("Rate column", c))
     if skid_count_column is not None:
         all_cols.append(("Skid count column", skid_count_column))
+    if base_cost_column is not None:
+        all_cols.append(("Base cost column", base_cost_column))
 
     for name, c in all_cols:
         if not (0 <= c < width):
@@ -506,6 +510,10 @@ def validate_mapping(
         errs.append("A rate column overlaps with Origin/Destination.")
     if skid_count_column is not None and skid_count_column in {origin, destination}:
         errs.append("Skid count column overlaps with Origin/Destination.")
+    if base_cost_column is not None and base_cost_column in {origin, destination}:
+        errs.append("Base cost column overlaps with Origin/Destination.")
+    if base_cost_column is not None and base_cost_column in set(rate_columns):
+        errs.append("Base cost column overlaps with a rate column.")
 
     if not rate_columns:
         errs.append("Select at least one weight-break or skid rate column.")
