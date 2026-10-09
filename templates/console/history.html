@@ -768,11 +768,61 @@
           </td>
           <td class="py-2.5 px-3.5 font-normal font-mono text-[var(--muted-foreground)]">${q.date}</td>
           <td class="py-2.5 px-3.5 text-right font-normal font-mono text-slate-900 font-semibold">$${Number(q.rate).toFixed(2)}</td>
-          <td class="py-2.5 px-3.5 text-right">
-            <button onclick="openHistoryProposal('${q.id}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] shadow-2xs transition-all cursor-pointer hover:shadow-sm" title="Generate Client Proposal (.xlsx / Printable PDF)">
+          <td class="py-2.5 px-3.5 text-right whitespace-nowrap">
+            <button type="button" onclick="toggleQuoteWorkDrawer('${q.id}', this)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] border border-slate-300 shadow-2xs transition-all cursor-pointer mr-1.5 hover:border-slate-400" title="View applied mathematical formula and calculation work">
+              <span class="text-red-600 font-mono font-bold">fx</span>
+              <span>Work</span>
+              <svg class="w-2.5 h-2.5 text-slate-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <button type="button" onclick="openHistoryProposal('${q.id}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] shadow-2xs transition-all cursor-pointer hover:shadow-sm" title="Generate Client Proposal (.xlsx / Printable PDF)">
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
               <span>Proposal</span>
             </button>
+          </td>
+        </tr>
+        <tr id="work-drawer-${q.id}" class="hidden bg-slate-50/80 border-b border-slate-200">
+          <td colspan="7" class="p-3.5 sm:p-5 text-xs text-left">
+            <div class="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs space-y-3">
+              <!-- Formula Banner -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-red-50/70 border border-red-200/80">
+                <div class="flex items-start sm:items-center gap-2">
+                  <span class="px-2 py-0.5 rounded-md bg-red-600 text-white font-mono font-bold text-[10px] tracking-wider uppercase shrink-0">Formula</span>
+                  <span class="font-mono text-xs font-semibold text-slate-800 break-all sm:break-normal">${escapeHtml(q.formula || 'Base Freight + Surcharges + Broker Margin')}</span>
+                </div>
+                <div class="text-[11px] font-mono font-bold text-red-700 shrink-0">
+                  Quoted: $${Number(q.rate).toFixed(2)} CAD
+                </div>
+              </div>
+
+              <!-- Itemized Work Metric Cards -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-mono text-[11px]">
+                <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200/70">
+                  <span class="text-slate-400 block text-[10px] uppercase font-sans">1. Base Rate / Break</span>
+                  <span class="font-bold text-slate-800">$${(q.baseRate || 0).toFixed(2)}</span>
+                  <span class="text-slate-500 block text-[10px]">${q.skidCount ? `${q.skidCount} Skid(s)` : `${q.weightLbs} lbs`}</span>
+                </div>
+                <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200/70">
+                  <span class="text-slate-400 block text-[10px] uppercase font-sans">2. Surcharges / Fuel</span>
+                  <span class="font-bold text-slate-800">$${(Math.max(0, (q.finalRate / (1 + (q.markupPct||15)/100)) - q.baseRate)).toFixed(2)}</span>
+                  <span class="text-slate-500 block text-[10px]">Net Accessorials</span>
+                </div>
+                <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200/70">
+                  <span class="text-slate-400 block text-[10px] uppercase font-sans">3. Broker Margin</span>
+                  <span class="font-bold text-slate-800">+${(q.markupPct || 15).toFixed(1)}%</span>
+                  <span class="text-slate-500 block text-[10px]">+$${(q.finalRate - (q.finalRate / (1 + (q.markupPct||15)/100))).toFixed(2)}</span>
+                </div>
+                <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200/70">
+                  <span class="text-slate-400 block text-[10px] uppercase font-sans">4. Matrix Cell Reference</span>
+                  <a href="${sheetUrl}" onclick="openHistoryFormattedSheet(event, '${targetSheetId}', '${cellFormatted}', '${encodeURIComponent(carrierName)}')" class="font-bold text-red-600 hover:text-red-800 underline block" title="Inspect source cell in formatted matrix">
+                    ${cellFormatted}
+                  </a>
+                  <span class="text-slate-500 block text-[10px] truncate">${carrierName}</span>
+                </div>
+              </div>
+
+              <!-- Audit Steps Breakdown -->
+              ${renderWorkStepsHtml(q.calculationWork)}
+            </div>
           </td>
         </tr>
       `}).join('');
@@ -790,6 +840,57 @@
       if (indEl) indEl.textContent = `Page ${currentPage} of ${totalPages}`;
       if (prevBtn) prevBtn.disabled = (currentPage <= 1);
       if (nextBtn) nextBtn.disabled = (currentPage >= totalPages);
+    }
+
+    function toggleQuoteWorkDrawer(quoteId, btn) {
+      const drawer = document.getElementById(`work-drawer-${quoteId}`);
+      if (!drawer) return;
+      const isHidden = drawer.classList.contains('hidden');
+      drawer.classList.toggle('hidden');
+      const svg = btn ? btn.querySelector('svg') : null;
+      if (svg) {
+        if (isHidden) {
+          svg.classList.add('rotate-180');
+        } else {
+          svg.classList.remove('rotate-180');
+        }
+      }
+    }
+
+    function renderWorkStepsHtml(steps) {
+      if (!Array.isArray(steps) || steps.length === 0) return '';
+      return `
+        <div class="pt-2 border-t border-slate-100">
+          <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            <span>Audit Trail & Deterministic Calculation Steps:</span>
+          </div>
+          <div class="space-y-1 font-mono text-[11px] text-slate-600">
+            ${steps.map((s, idx) => `
+              <div class="flex items-start gap-2 py-0.5">
+                <span class="inline-block w-4 h-4 rounded-full bg-slate-100 text-slate-500 text-[10px] text-center font-bold shrink-0">${idx + 1}</span>
+                <div class="flex-1">
+                  <span class="font-semibold text-slate-800">${s.step || 'Step'}:</span>
+                  ${s.formula ? `<span class="text-red-700 ml-1 font-semibold">${escapeHtml(s.formula)}</span>` : ''}
+                  ${s.lane ? `<span class="text-slate-500 ml-1">(${escapeHtml(s.lane)})</span>` : ''}
+                  ${s.break_name ? `<span class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 ml-1 font-semibold">${escapeHtml(s.break_name)}</span>` : ''}
+                  ${s.rate_value ? `<span class="text-slate-600 ml-1">@ $${Number(s.rate_value).toFixed(2)}</span>` : ''}
+                  ${s.source_coordinate ? `<span class="text-slate-400 ml-1">[Cell: ${escapeHtml(s.source_coordinate)}]</span>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
 
     function prevPage() {
@@ -833,13 +934,16 @@
               markupPct: q.markup_pct,
               finalRate: q.final_rate,
               carrier: `${q.carrier} (${q.service})`,
-              route: `${q.origin_zip} → ${q.dest_zip} • ${q.weight_lbs} lbs`,
+              route: `${q.origin_zip} → ${q.dest_zip} • ${q.skid_count ? `${q.skid_count} skid${q.skid_count != 1 ? 's' : ''}` : `${q.weight_lbs} lbs`}`,
               sheet: formattedRef,
               rawCoord: q.coordinate,
               sheetId: q.sheet_id || '',
               date: q.created_at ? q.created_at.split('T')[0] : '2026-09-28',
               rate: q.final_rate,
-              proposal: q.id
+              proposal: q.id,
+              formula: q.formula || '',
+              skidCount: q.skid_count || null,
+              calculationWork: q.calculation_work || []
             };
           });
           currentQuotes = [...allQuotes];

@@ -467,10 +467,11 @@ class RateSiftExtractor:
             return (h_clean, n1, n2)
 
         # Less than N: 'L5C', 'L5', '<5', '<5C', 'LESS THAN 5'
+        # In skid tariffs, L5C caps at 5 skids (1-5 skids).
         m_less = re.match(r'^(?:L|<|LESS THAN\s*)(\d+)C?$', h_clean)
         if m_less:
             n = int(m_less.group(1))
-            return (h_clean, 1, max(1, n - 1))
+            return (h_clean, 1, n if n <= 5 else max(1, n - 1))
 
         # NC: '5C'
         m_c = re.match(r'^(\d+)C$', h_clean)
@@ -551,7 +552,14 @@ class RateSiftExtractor:
 
             if len(found_breaks) >= 2 and found_orig is not None and found_dest is not None:
                 header_row_idx = r_idx
-                skid_cols = found_breaks
+                has_5c = any(item[1][0] == "5C" for item in found_breaks)
+                adjusted_breaks = []
+                for c_idx, (b_name, min_u, max_u) in found_breaks:
+                    if b_name == "L5C" and has_5c:
+                        adjusted_breaks.append((c_idx, (b_name, min_u, 4)))
+                    else:
+                        adjusted_breaks.append((c_idx, (b_name, min_u, max_u)))
+                skid_cols = adjusted_breaks
                 col_mc = found_mc
                 col_origin = found_orig
                 col_dest = found_dest

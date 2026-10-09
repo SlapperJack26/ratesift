@@ -78,11 +78,14 @@ def match_lane_break(
     breaks: List[Dict[str, Any]],
     origin: str,
     destination: str,
-    billable_weight: float
+    billable_weight: float,
+    skid_count: Optional[int] = None
 ) -> Optional[Dict[str, Any]]:
     """
     Rule 8 & 10: Matches exact lane and weight break deterministically.
     Supports Canadian Postal FSA matching and SMC3 Deficit Weight Rating (Bumping Rule).
+    When skid_count is provided, maps skid tiers (1-5 -> L5C/LTL, 6 -> 1M, 7 -> 2M, 8-9 -> 5M, 10 -> 10M)
+    and suppresses CWT deficit weight bumping from artificially bumping 1-5 skids to 1M.
     """
     norm_origin = normalize_location_string(origin)
     norm_dest = normalize_location_string(destination)
@@ -124,6 +127,46 @@ def match_lane_break(
     if not matched_candidates:
         return None
 
+    # When rating in skid mode, map skid tiers directly and bypass CWT bumping
+    if skid_count is not None and skid_count > 0:
+        tier_break = None
+        if 1 <= skid_count <= 5:
+            # 1-5 skids is capped at 5 skids -> strictly L5C / LTL base bracket (<1000 lbs)
+            tier_break = next(
+                (b for b in matched_candidates if b.get("break_name") in ["LTL", "L5C", "<5C", "L5"] or b["min_weight"] < 1000),
+                None
+            )
+        elif skid_count == 6:
+            # 6 skids -> 1M / CWT:1000 (1 skid on top of 5)
+            tier_break = next(
+                (b for b in matched_candidates if b.get("break_name") in ["1M", "CWT:1000"] or b["min_weight"] == 1000),
+                None
+            )
+        elif skid_count == 7:
+            # 7 skids -> 2M / CWT:2000 (2 skids on top of 5)
+            tier_break = next(
+                (b for b in matched_candidates if b.get("break_name") in ["2M", "CWT:2000"] or b["min_weight"] == 2000),
+                None
+            )
+        elif 8 <= skid_count <= 9:
+            # 8-9 skids -> 3M / 4M if present, else 5M / CWT:5000
+            tier_break = next((b for b in matched_candidates if b.get("break_name") in ["3M", "4M"]), None)
+            if not tier_break:
+                tier_break = next((b for b in matched_candidates if b.get("break_name") in ["5M", "CWT:5000"] or (2000 < b["min_weight"] <= 5000)), None)
+        elif skid_count == 10:
+            # 10 skids -> 10M / CWT:10000 preferred, else 5M
+            tier_break = next((b for b in matched_candidates if b.get("break_name") in ["10M", "CWT:10000"]), None)
+            if not tier_break:
+                tier_break = next((b for b in matched_candidates if b.get("break_name") in ["5M", "CWT:5000"] or b["min_weight"] >= 5000), None)
+
+        if tier_break:
+            result_break = dict(tier_break)
+            result_break["is_deficit_rated"] = False
+            result_break["deficit_weight"] = 0.0
+            result_break["deficit_savings"] = 0.0
+            result_break["effective_base_charge"] = None
+            return result_break
+
     # 2. Select bracket based on billable weight: min_weight <= billable_weight <= max_weight
     matching_break = None
     for b in matched_candidates:
@@ -148,7 +191,7 @@ def match_lane_break(
     effective_charge = None
     effective_break = matching_break
 
-    if matching_break.get("rate_type", "CWT").upper() == "CWT":
+    if skid_count is None and matching_break.get("rate_type", "CWT").upper() == "CWT":
         natural_rate = float(matching_break["base_rate"])
         natural_charge = (billable_weight / 100.0) * natural_rate
         best_charge = natural_charge
@@ -182,6 +225,12 @@ def match_skid_break(
     """
     Rule 8 & 10: Matches exact lane and skid break deterministically for PER_SKID rating.
     Supports FSA matching and Canadian City/Province parsing.
+    Deterministic tier mapping:
+    - 1 to 5 skids -> L5C (capped at 5 skids; uses 5C if explicit 5C break present for 5 skids)
+    - 6 skids -> 1M (1 on top of 5)
+    - 7 skids -> 2M (2 on top of 5)
+    - 8 to 9 skids -> 3M / 4M / 5M
+    - 10 skids -> 10M / 5M
     """
     norm_origin = normalize_location_string(origin)
     norm_dest = normalize_location_string(destination)
@@ -229,6 +278,46 @@ def match_skid_break(
         if origin_matches and dest_matches:
             matched_candidates.append(b)
 
+    if not matched_candidates:
+        return None
+
+    # Priority 1: Match by exact skid break tier conventions
+    if 1 <= skid_count <= 5:
+        if skid_count == 5:
+            cand_5c = next((c for c in matched_candidates if c.get("break_name") == "5C"), None)
+            if cand_5c:
+                return cand_5c
+        cand_l5c = next((c for c in matched_candidates if c.get("break_name") in ["L5C", "<5C", "L5", "<5"]), None)
+        if cand_l5c:
+            return cand_l5c
+    elif skid_count == 6:
+        cand_1m = next((c for c in matched_candidates if c.get("break_name") == "1M"), None)
+        if cand_1m:
+            return cand_1m
+    elif skid_count == 7:
+        cand_2m = next((c for c in matched_candidates if c.get("break_name") == "2M"), None)
+        if cand_2m:
+            return cand_2m
+    elif skid_count == 8:
+        cand_3m = next((c for c in matched_candidates if c.get("break_name") == "3M"), None)
+        if not cand_3m:
+            cand_3m = next((c for c in matched_candidates if c.get("break_name") == "5M"), None)
+        if cand_3m:
+            return cand_3m
+    elif skid_count == 9:
+        cand_4m = next((c for c in matched_candidates if c.get("break_name") == "4M"), None)
+        if not cand_4m:
+            cand_4m = next((c for c in matched_candidates if c.get("break_name") == "5M"), None)
+        if cand_4m:
+            return cand_4m
+    elif skid_count == 10:
+        cand_10m = next((c for c in matched_candidates if c.get("break_name") == "10M"), None)
+        if not cand_10m:
+            cand_10m = next((c for c in matched_candidates if c.get("break_name") == "5M"), None)
+        if cand_10m:
+            return cand_10m
+
+    # Priority 2: Match by unit bracket range
     for c in matched_candidates:
         min_u = float(c.get("min_units") or 0.0)
         max_u = float(c.get("max_units") or 999999.0)
@@ -493,6 +582,7 @@ def calculate_quote_for_sheet(
         rate_val = float(matched_break["base_rate"])
         skid_charge = round(skid_count * rate_val, 2)
         base_charge = round(mc_charge + skid_charge, 2)
+        base_formula = f"${mc_charge:.2f} (MC) + ({skid_count} skid{'s' if skid_count != 1 else ''} x ${rate_val:.2f} [{matched_break['break_name']}]) = ${base_charge:.2f}" if mc_charge > 0 else f"{skid_count} skid{'s' if skid_count != 1 else ''} x ${rate_val:.2f} [{matched_break['break_name']}] = ${base_charge:.2f}"
 
         trace_steps.append({
             "step": "Skid-Based LTL Base Rate Calculation (Formula: MC + S x RateBreak)",
@@ -503,12 +593,15 @@ def calculate_quote_for_sheet(
             "skid_charge": skid_charge,
             "base_cost_mc": mc_charge,
             "base_charge": base_charge,
-            "formula": f"${mc_charge:.2f} (MC) + ({skid_count} skids x ${rate_val:.2f}) = ${base_charge:.2f}",
+            "formula": base_formula,
             "source_coordinate": matched_break.get("source_cell", "")
         })
     else:
         # 2. Match Lane Rate Break (Rule 8, 10)
-        matched_break = match_lane_break(rules["breaks"], origin, destination, billable_weight)
+        if skid_count is not None and skid_count > max_skid_cap:
+            raise ValueError(f"Rule 18 Exclusion: Skid count ({skid_count}) exceeds maximum carrier LTL capacity of {max_skid_cap} skids (requires Dedicated FTL equipment).")
+
+        matched_break = match_lane_break(rules["breaks"], origin, destination, billable_weight, skid_count=skid_count)
         if not matched_break:
             raise ValueError(f"Rule 18 / Rule 24 Exclusion: Lane not served: {sheet['carrier_name']} does not publish confirmed rates between {origin} and {destination} for weight {billable_weight} lbs.")
 
@@ -518,6 +611,7 @@ def calculate_quote_for_sheet(
         # Calculate base charge (with Deficit Weight Rating support)
         if matched_break.get("is_deficit_rated") and matched_break.get("effective_base_charge") is not None:
             base_charge = matched_break["effective_base_charge"]
+            base_formula = f"Deficit Bumped ({billable_weight + matched_break.get('deficit_weight', 0.0):,.0f} lbs / 100) x ${rate_val:.2f} [{matched_break['break_name']}] = ${base_charge:.2f}"
             trace_steps.append({
                 "step": "Base Rate Calculation with Deficit Weight Rating (Rule 8 / Deficit Bumping)",
                 "lane": f"{origin} -> {destination}",
@@ -529,15 +623,22 @@ def calculate_quote_for_sheet(
                 "rate_type": rate_type,
                 "base_charge": base_charge,
                 "deficit_savings": matched_break.get("deficit_savings", 0.0),
-                "source_coordinate": matched_break.get("source_cell", "")
+                "source_coordinate": matched_break.get("source_cell", ""),
+                "formula": base_formula
             })
         else:
             if rate_type == "CWT":
                 base_charge_unrounded = (billable_weight / 100.0) * rate_val
+                if skid_count is not None and skid_count > 0:
+                    base_formula = f"{skid_count} skid{'s' if skid_count != 1 else ''} ({billable_weight:,.0f} lbs / 100) x ${rate_val:.2f} [{matched_break['break_name']}] = ${base_charge_unrounded:.2f}"
+                else:
+                    base_formula = f"({billable_weight:,.0f} lbs / 100) x ${rate_val:.2f} [{matched_break['break_name']}] = ${base_charge_unrounded:.2f}"
             elif rate_type == "FLAT":
                 base_charge_unrounded = rate_val
+                base_formula = f"Flat Rate [{matched_break['break_name']}] = ${base_charge_unrounded:.2f}"
             else:  # PER_UNIT
                 base_charge_unrounded = billable_weight * rate_val
+                base_formula = f"{billable_weight:,.0f} units x ${rate_val:.2f} [{matched_break['break_name']}] = ${base_charge_unrounded:.2f}"
 
             base_charge = round(base_charge_unrounded, 2)
             trace_steps.append({
@@ -547,7 +648,8 @@ def calculate_quote_for_sheet(
                 "rate_value": rate_val,
                 "rate_type": rate_type,
                 "base_charge": base_charge,
-                "source_coordinate": matched_break.get("source_cell", "")
+                "source_coordinate": matched_break.get("source_cell", ""),
+                "formula": base_formula
             })
 
     # 3. Itemized Surcharges (Rule 11)
@@ -690,6 +792,15 @@ def calculate_quote_for_sheet(
 
     relies_on_flagged = len(flagged_reasons) > 0
     caution_badge = f"Caution: Relies on flagged/reviewed data ({', '.join(flagged_reasons)})" if relies_on_flagged else None
+    # Assemble full mathematical equation and work summary
+    formula_parts = [f"Base Freight: {base_formula} {sheet['currency']}"]
+    if total_surcharges > 0:
+        surcharge_strs = [f"{s['name']}: ${s['amount']:.2f}" for s in applied_surcharges]
+        formula_parts.append(f"Surcharges: +${total_surcharges:.2f} ({', '.join(surcharge_strs)})")
+    formula_parts.append(f"Wholesale: ${wholesale_total:.2f} {sheet['currency']}")
+    if broker_margin > 0:
+        formula_parts.append(f"Broker Markup (+{markup_val}%): +${broker_margin:.2f} → Client Quoted Rate: ${client_total:.2f} {sheet['currency']}")
+    full_formula_str = " | ".join(formula_parts)
 
     return {
         "sheet_id": sheet["id"],
@@ -719,13 +830,15 @@ def calculate_quote_for_sheet(
         "final_total": final_total,
         "client_total": final_total,
         "rating_basis": rating_basis,
-        "skid_count": skid_count if rating_basis == "PER_SKID" else None,
+        "skid_count": skid_count,
         "skid_charge": skid_charge if rating_basis == "PER_SKID" else None,
         "mc_base_cost": mc_charge if rating_basis == "PER_SKID" else None,
         "transit_days": transit_days or 3,  # default estimated transit if zone unstated
         "relies_on_flagged_cell": relies_on_flagged,
         "caution_badge": caution_badge,
         "disclaimer": "Calculation from customer uploaded rate sheets. Non-binding quote (Rule 26).",
+        "formula": full_formula_str,
+        "calculation_work": trace_steps,
         "calculation_trace": trace_steps
     }
 

@@ -2080,7 +2080,10 @@
         markup_pct: markupPct,
         custom_total: customTotal,
         source_coordinate: activeProposalQuote.source_coordinate || activeProposalQuote.source_cell || activeProposalQuote.coordinate || null,
-        sheet_id: activeProposalQuote.sheet_id || null
+        sheet_id: activeProposalQuote.sheet_id || null,
+        formula: activeProposalQuote.formula || null,
+        skid_count: activeProposalQuote.skid_count || (currentShippingMode === 'ltl' ? (parseInt(document.getElementById('input-skids')?.value) || null) : null),
+        calculation_trace: activeProposalQuote.calculation_trace || activeProposalQuote.calculation_work || null
       };
 
       try {
@@ -2173,7 +2176,12 @@
         currency: currency,
         client_name: clientName,
         markup_pct: markupPct,
-        custom_total: customTotal
+        custom_total: customTotal,
+        source_coordinate: activeProposalQuote.source_coordinate || activeProposalQuote.source_cell || activeProposalQuote.coordinate || null,
+        sheet_id: activeProposalQuote.sheet_id || null,
+        formula: activeProposalQuote.formula || null,
+        skid_count: activeProposalQuote.skid_count || (currentShippingMode === 'ltl' ? (parseInt(document.getElementById('input-skids')?.value) || null) : null),
+        calculation_trace: activeProposalQuote.calculation_trace || activeProposalQuote.calculation_work || null
       };
 
       try {

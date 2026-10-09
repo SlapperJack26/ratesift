@@ -750,6 +750,7 @@ def api_get_quotes_history(request: Request, search: Optional[str] = None, sort_
     user_sheets = list_rate_sheets(user_id=user_id)
     default_sheet_id = user_sheets[0]["id"] if user_sheets else None
 
+    import json
     for r in rows:
         if not r.get("sheet_id"):
             matched_sid = None
@@ -760,6 +761,32 @@ def api_get_quotes_history(request: Request, search: Optional[str] = None, sort_
                     matched_sid = s["id"]
                     break
             r["sheet_id"] = matched_sid or default_sheet_id
+
+        # Parse calculation trace if JSON string
+        trace_raw = r.get("calculation_trace")
+        if trace_raw and isinstance(trace_raw, str):
+            try:
+                r["calculation_work"] = json.loads(trace_raw)
+            except Exception:
+                r["calculation_work"] = []
+        elif isinstance(trace_raw, list):
+            r["calculation_work"] = trace_raw
+        else:
+            r["calculation_work"] = []
+
+        # Ensure formula is always present
+        if not r.get("formula"):
+            base = float(r.get("base_rate") or 0.0)
+            final = float(r.get("final_rate") or 0.0)
+            markup = float(r.get("markup_pct") or 15.0)
+            margin = round(final - base, 2)
+            skids = r.get("skid_count")
+            if skids and skids > 0:
+                per_skid = round(base / max(1, skids), 2)
+                r["formula"] = f"Base Freight: {skids} skid{'s' if skids != 1 else ''} x ${per_skid:.2f} = ${base:.2f} | Markup (+{markup}%): +${margin:.2f} → Final Quoted Rate: ${final:.2f}"
+            else:
+                wt = r.get("weight_lbs") or 0
+                r["formula"] = f"Base Freight: ${base:.2f} (Weight: {wt:,.0f} lbs) | Markup (+{markup}%): +${margin:.2f} → Final Quoted Rate: ${final:.2f}"
 
     return {"total": len(rows), "quotes": rows}
 
@@ -1224,16 +1251,19 @@ def api_export_quotes_excel(request: Request):
     
     headers = [
         "Quote_ID", "Source_File", "Excel_Row", "Origin_ZIP", "Destination_ZIP", 
-        "Weight_Lbs", "Assigned_Carrier", "Service_Level", "Base_Rate_USD", 
-        "Markup_Pct", "Final_Rate_USD", "Exact_Cell_Coordinate", "Timestamp"
+        "Weight_Lbs", "Skids", "Assigned_Carrier", "Service_Level", "Base_Rate_USD", 
+        "Markup_Pct", "Final_Rate_USD", "Applied_Formula", "Exact_Cell_Coordinate", "Timestamp"
     ]
     ws.append(headers)
     
     for r in rows:
         ws.append([
             r["id"], r["filename"], r["row_num"], r["origin_zip"], r["dest_zip"],
-            r["weight_lbs"], r["carrier"], r["service"], r["base_rate"],
-            r["markup_pct"], r["final_rate"], r["coordinate"], r["created_at"]
+            r["weight_lbs"], r["skid_count"] if "skid_count" in r.keys() else "",
+            r["carrier"], r["service"], r["base_rate"],
+            r["markup_pct"], r["final_rate"],
+            r["formula"] if "formula" in r.keys() else "",
+            r["coordinate"], r["created_at"]
         ])
         
     buf = io.BytesIO()
@@ -1267,6 +1297,9 @@ class ProposalRequestPayload(BaseModel):
     custom_total: Optional[float] = None
     source_coordinate: Optional[str] = None
     sheet_id: Optional[str] = None
+    formula: Optional[str] = None
+    skid_count: Optional[int] = None
+    calculation_trace: Optional[Any] = None
 
 @app.post("/api/quotes/client-proposal/preview", tags=["Client Proposal Generator"])
 def api_quote_client_proposal_preview(

@@ -138,15 +138,24 @@ def init_db():
         coordinate TEXT NOT NULL,
         created_at TEXT NOT NULL,
         sheet_id TEXT,
+        formula TEXT,
+        calculation_trace TEXT,
+        skid_count INTEGER,
         FOREIGN KEY (batch_id) REFERENCES quote_batches (id)
     )
     """)
     
-    # Auto-migrate sheet_id on quote_items if table already exists
+    # Auto-migrate sheet_id, formula, calculation_trace, skid_count on quote_items if table already exists
     cursor.execute("PRAGMA table_info(quote_items)")
     qi_cols = [r["name"] for r in cursor.fetchall()]
     if "sheet_id" not in qi_cols:
         cursor.execute("ALTER TABLE quote_items ADD COLUMN sheet_id TEXT")
+    if "formula" not in qi_cols:
+        cursor.execute("ALTER TABLE quote_items ADD COLUMN formula TEXT")
+    if "calculation_trace" not in qi_cols:
+        cursor.execute("ALTER TABLE quote_items ADD COLUMN calculation_trace TEXT")
+    if "skid_count" not in qi_cols:
+        cursor.execute("ALTER TABLE quote_items ADD COLUMN skid_count INTEGER")
     
     # 7. API Keys Table (Business Tier Embedded Quoting API)
     cursor.execute("""
@@ -799,16 +808,54 @@ def save_proposal_quote_item(user_id: str, proposal: Dict[str, Any], quote_data:
     else:
         coordinate = f"Proposal • {proposal_id}"
     
-    # Ensure sheet_id column exists
+    # Extract formula, skid_count, and calculation trace
+    formula = (
+        qd.get("formula") or 
+        proposal.get("formula") or 
+        proposal.get("pricing", {}).get("formula")
+    )
+    skid_count = (
+        qd.get("skid_count") or 
+        proposal.get("skid_count") or 
+        proposal.get("shipment", {}).get("skid_count")
+    )
+    calculation_trace = (
+        qd.get("calculation_trace") or 
+        qd.get("calculation_work") or 
+        proposal.get("calculation_trace") or 
+        proposal.get("calculation_work") or 
+        proposal.get("trace_steps")
+    )
+    if calculation_trace and not isinstance(calculation_trace, str):
+        import json
+        calculation_trace_str = json.dumps(calculation_trace)
+    else:
+        calculation_trace_str = calculation_trace or ""
+
+    if not formula:
+        margin = round(final_rate - base_rate, 2)
+        if skid_count and skid_count > 0:
+            per_skid = round(base_rate / max(1, skid_count), 2)
+            formula = f"Base Freight: {skid_count} skid{'s' if skid_count != 1 else ''} x ${per_skid:.2f} = ${base_rate:.2f} | Markup (+{markup_pct}%): +${margin:.2f} → Final Quoted Rate: ${final_rate:.2f}"
+        else:
+            formula = f"Base Freight: ${base_rate:.2f} (Weight: {weight:,.0f} lbs) | Markup (+{markup_pct}%): +${margin:.2f} → Final Quoted Rate: ${final_rate:.2f}"
+
+    # Ensure required columns exist on quote_items table
     cursor.execute("PRAGMA table_info(quote_items)")
     qi_cols = [r["name"] for r in cursor.fetchall()]
     if "sheet_id" not in qi_cols:
         cursor.execute("ALTER TABLE quote_items ADD COLUMN sheet_id TEXT")
+    if "formula" not in qi_cols:
+        cursor.execute("ALTER TABLE quote_items ADD COLUMN formula TEXT")
+    if "calculation_trace" not in qi_cols:
+        cursor.execute("ALTER TABLE quote_items ADD COLUMN calculation_trace TEXT")
+    if "skid_count" not in qi_cols:
+        cursor.execute("ALTER TABLE quote_items ADD COLUMN skid_count INTEGER")
 
     cursor.execute("""
     INSERT OR REPLACE INTO quote_items 
-    (id, batch_id, row_num, origin_zip, dest_zip, weight_lbs, carrier, service, base_rate, markup_pct, final_rate, coordinate, created_at, sheet_id)
-    VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (id, batch_id, row_num, origin_zip, dest_zip, weight_lbs, carrier, service, base_rate, markup_pct, final_rate, coordinate, created_at, sheet_id, formula, calculation_trace, skid_count)
+    VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         proposal_id,
         batch_id,
@@ -822,7 +869,10 @@ def save_proposal_quote_item(user_id: str, proposal: Dict[str, Any], quote_data:
         final_rate,
         coordinate,
         now_iso,
-        sheet_id
+        sheet_id,
+        formula,
+        calculation_trace_str,
+        skid_count
     ))
     
     # Update total_rows and processed_rows on batch
