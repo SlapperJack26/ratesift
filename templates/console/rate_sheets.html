@@ -1118,25 +1118,35 @@
 
       const statusBox = document.getElementById('upload-status');
       statusBox.className = "p-3 rounded-xl text-xs font-mono bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-2";
-      statusBox.innerHTML = `<span class="animate-spin text-blue-600">⟳</span><span>Deep scanning ${file.name} (checking hidden rows, footnotes, accessorials)...</span>`;
+      statusBox.innerHTML = `<span class="animate-spin text-blue-600">⟳</span><span>Scanning ${file.name} through RateSift Header Failsafe...</span>`;
       statusBox.classList.remove('hidden');
 
       const formData = new FormData();
       formData.append('file', file);
 
       try {
-        const res = await fetch('/api/ratesift/sheets/upload', {
+        const res = await fetch('/jobs', {
           method: 'POST',
           body: formData
         });
-        const result = await res.json();
-        if (!res.ok) throw new Error(result.detail || "Upload failed");
+        const job = await res.json();
+        if (!res.ok) throw new Error(job.detail || "Upload failed");
 
-        statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200";
-        statusBox.innerHTML = `✓ Parsed <strong>${file.name}</strong> successfully! Opening Review & Markup Studio...`;
-        
-        loadRateSheets();
-        openReviewModal(result.sheet_id);
+        if (job.status === 'needs_mapping') {
+          statusBox.className = "p-3 rounded-xl text-xs font-mono bg-amber-50 text-amber-800 border border-amber-200";
+          statusBox.innerHTML = `⚠️ Header ambiguities detected in <strong>${file.name}</strong>. Opening Column Confirmation Gate...`;
+          if (window.FailsafeModal) {
+            FailsafeModal.open(job);
+          }
+        } else if (job.status === 'ready') {
+          statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200";
+          statusBox.innerHTML = `✓ Auto-mapped with high confidence. Processing workbook...`;
+          const procRes = await fetch(`/jobs/${job.job_id}/process`, { method: 'POST' });
+          const procData = await procRes.json();
+          if (!procRes.ok) throw new Error(procData.detail || "Processing failed");
+          statusBox.innerHTML = `✓ Successfully verified and reformatted <strong>${file.name}</strong>!`;
+          loadRateSheets();
+        }
       } catch (err) {
         statusBox.className = "p-3 rounded-xl text-xs font-mono bg-red-50 text-red-800 border border-red-200";
         statusBox.textContent = `Error: ${err.message}`;
@@ -1730,6 +1740,7 @@
     });
 
   </script>
+  {% include "console/components/mapping_modal.html" %}
   <script src="/static/js/global-chrome.js"></script>
 </body>
 </html>

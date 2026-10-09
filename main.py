@@ -57,6 +57,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from app.main import router as failsafe_router
+app.include_router(failsafe_router)
+
+
 def get_current_user_from_request(request: Request) -> Optional[dict]:
     """Helper to extract user from session cookie or Authorization header."""
     token = request.cookies.get("ratesift_session") or request.cookies.get("shipflow_session")
@@ -71,7 +75,20 @@ def serve_template(template_rel_path: str):
     if not os.path.exists(full_path):
         raise HTTPException(status_code=404, detail=f"Template {template_rel_path} not found")
     with open(full_path, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+        content = f.read()
+
+    # Simple resolver for component includes: {% include "rel/path" %}
+    import re
+    def _include_replacer(match):
+        inc_rel = match.group(1).strip()
+        inc_full = os.path.join(TEMPLATES_DIR, inc_rel)
+        if os.path.exists(inc_full):
+            with open(inc_full, "r", encoding="utf-8") as inc_f:
+                return inc_f.read()
+        return ""
+
+    content = re.sub(r'\{%\s*include\s+[\'"]([^\'"]+)[\'"]\s*%\}', _include_replacer, content)
+    return HTMLResponse(content=content)
 
 # ==========================================
 # PUBLIC PAGES (SEO-Optimized & Crawlable)
@@ -156,6 +173,18 @@ def get_settings_page(request: Request):
 # ==========================================
 # ARCHITECTURE & SHOWCASE
 # ==========================================
+
+@app.get("/failsafe/demo", response_class=HTMLResponse, tags=["Architecture"])
+def get_failsafe_demo_page():
+    """Failsafe Header Mapping Modal UI Playground."""
+    full_path = os.path.join(TEMPLATES_DIR, "console", "failsafe_demo.html")
+    comp_path = os.path.join(TEMPLATES_DIR, "console", "components", "mapping_modal.html")
+    with open(full_path, "r", encoding="utf-8") as f:
+        demo_html = f.read()
+    with open(comp_path, "r", encoding="utf-8") as f:
+        comp_html = f.read()
+    rendered = demo_html.replace('{% include "console/components/mapping_modal.html" %}', comp_html)
+    return HTMLResponse(content=rendered)
 
 @app.get("/flowchart", response_class=HTMLResponse, tags=["Architecture"])
 def get_flowchart_page():

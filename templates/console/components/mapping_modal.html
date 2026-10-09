@@ -1,0 +1,690 @@
+<!-- =========================================================================
+     RateSift Rate-Sheet Header Failsafe & Column Mapping Modal (Phase 4)
+     Contract Compliance:
+     - Rule 1: Origin and Destination required
+     - Rule 2: Exactly one mode (Weight mode + unit, or Skid mode)
+     - Rule 3: Clarify mode if ambiguous; never guess
+     - Rule 6: Show conflict badges and explanations
+     - Rule 7: Gate process until mapping is confirmed
+     - Rule 9 & 12: Cancel cleanly leaves file untouched
+     - First 12 preview rows, sticky table header, max 60 cols with show-more
+     ========================================================================= -->
+
+<div id="failsafe-mapping-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+  <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-bold text-slate-900">Confirm Column Mapping</h2>
+            <span id="failsafe-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+              Needs Mapping
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5" id="failsafe-modal-subtitle">
+            Please map the columns below to ensure 100% accurate quoting. A wrong quote is worse than a pause.
+          </p>
+        </div>
+      </div>
+      <button type="button" onclick="FailsafeModal.cancel()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer" title="Cancel mapping">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Modal Body (Scrollable) -->
+    <div class="p-6 overflow-y-auto flex-1 space-y-5 text-xs text-slate-700">
+      
+      <!-- Issues Banner -->
+      <div id="failsafe-issues-banner" class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1.5 hidden">
+        <div class="flex items-center gap-2 font-bold text-xs text-amber-800">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Required Actions Before Quoting</span>
+        </div>
+        <ul id="failsafe-issues-list" class="list-disc list-inside space-y-1 text-xs text-amber-800 pl-1 font-medium"></ul>
+      </div>
+
+      <!-- Conflicts Alert Box -->
+      <div id="failsafe-conflicts-banner" class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 space-y-1.5 hidden">
+        <div class="flex items-center gap-2 font-bold text-xs text-red-800">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span>Column Header Conflicts Detected</span>
+        </div>
+        <div id="failsafe-conflicts-list" class="space-y-1 text-xs text-red-800 pl-1 font-medium"></div>
+      </div>
+
+      <!-- Saved Mapping Match Banner -->
+      <div id="failsafe-saved-match-banner" class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 flex items-center justify-between text-xs hidden">
+        <div class="flex items-center gap-2">
+          <span class="text-blue-600 font-bold">ℹ️ Matching Layout Found:</span>
+          <span id="failsafe-saved-match-desc">Found a previously saved mapping matching this column structure.</span>
+        </div>
+        <button type="button" onclick="FailsafeModal.applySavedMapping()" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs cursor-pointer shadow-xs transition-colors">
+          Apply Saved Mapping
+        </button>
+      </div>
+
+      <!-- Top Configuration Grid: Header Row & Pricing Mode -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+        <!-- Header Row Selector -->
+        <div class="md:col-span-3 space-y-1.5">
+          <label class="block font-bold text-slate-800 text-xs">Header Row Number</label>
+          <div class="flex items-center gap-2">
+            <input type="number" id="failsafe-header-row-input" min="1" max="50" class="w-24 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.onHeaderRowChange(this.value)">
+            <span class="text-[11px] text-slate-500">(1-indexed)</span>
+          </div>
+        </div>
+
+        <!-- Pricing Mode Switcher -->
+        <div class="md:col-span-5 space-y-1.5">
+          <label class="block font-bold text-slate-800 text-xs">Pricing Mode <span class="text-red-500">*</span></label>
+          <div class="flex items-center gap-4 pt-1">
+            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-800">
+              <input type="radio" name="failsafe-mode" value="weight" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.onModeChange('weight')">
+              <span>Weight-Break Mode</span>
+            </label>
+            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-800">
+              <input type="radio" name="failsafe-mode" value="skid" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.onModeChange('skid')">
+              <span>Skid / Pallet Mode</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Weight Unit (Visible only in weight mode) -->
+        <div id="failsafe-unit-container" class="md:col-span-4 space-y-1.5">
+          <label class="block font-bold text-slate-800 text-xs">Weight Unit <span class="text-red-500">*</span></label>
+          <div class="flex items-center gap-3 pt-1">
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-slate-800">
+              <input type="radio" name="failsafe-weight-unit" value="lb" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.validate()">
+              <span>Pounds (lb)</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-slate-800">
+              <input type="radio" name="failsafe-weight-unit" value="kg" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.validate()">
+              <span>Kilograms (kg)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mapping Form Controls -->
+      <div class="border border-slate-200 rounded-xl p-4 bg-white space-y-4">
+        <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider border-b border-slate-100 pb-2">
+          Column Assignments
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Origin (Required) -->
+          <div class="space-y-1">
+            <label class="block font-bold text-slate-800 text-xs">
+              Origin Column <span class="text-red-500">*</span>
+            </label>
+            <select id="failsafe-col-origin" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+              <option value="">-- Select Origin Column --</option>
+            </select>
+          </div>
+
+          <!-- Destination (Required) -->
+          <div class="space-y-1">
+            <label class="block font-bold text-slate-800 text-xs">
+              Destination Column <span class="text-red-500">*</span>
+            </label>
+            <select id="failsafe-col-destination" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+              <option value="">-- Select Destination Column --</option>
+            </select>
+          </div>
+
+          <!-- Skid Layout Specific: Skid Count Column -->
+          <div id="failsafe-skid-count-wrapper" class="space-y-1 hidden">
+            <label class="block font-bold text-slate-800 text-xs">
+              Skid Count Column <span class="text-slate-400 font-normal">(for row-based layout)</span>
+            </label>
+            <select id="failsafe-col-skid-count" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+              <option value="">-- Optional (if one row per count) --</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Rate Columns Multi-Select / Checkbox Grid -->
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-slate-800 text-xs">
+              Rate / Break Columns <span class="text-red-500">*</span> 
+              <span class="text-slate-400 font-normal text-[11px]">(Select all columns containing rates)</span>
+            </label>
+            <div class="flex gap-2">
+              <button type="button" onclick="FailsafeModal.selectAllRateCols(true)" class="text-[11px] text-red-600 hover:underline">Select All</button>
+              <span class="text-slate-300">|</span>
+              <button type="button" onclick="FailsafeModal.selectAllRateCols(false)" class="text-[11px] text-slate-500 hover:underline">Clear All</button>
+            </div>
+          </div>
+          <div id="failsafe-rate-cols-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg max-h-36 overflow-y-auto">
+            <!-- Dynamically populated checkboxes -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Table: Sticky headers, 12 rows, max 60 cols with show-more -->
+      <div class="border border-slate-200 rounded-xl overflow-hidden shadow-2xs space-y-2 p-3 bg-white">
+        <div class="flex items-center justify-between">
+          <div class="font-bold text-slate-800 text-xs flex items-center gap-2">
+            <span>Data Preview (First 12 Rows)</span>
+            <span id="failsafe-preview-dim-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 text-slate-600 border border-slate-200"></span>
+          </div>
+          <div id="failsafe-cols-overflow-msg" class="text-[11px] text-amber-700 hidden">
+            Showing first 60 of <span id="failsafe-total-cols-count"></span> columns.
+            <button type="button" onclick="FailsafeModal.showAllColumns()" class="underline font-bold ml-1 cursor-pointer">Show All</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto max-h-72 border border-slate-200 rounded-lg">
+          <table id="failsafe-preview-table" class="w-full text-left text-[11px] border-collapse">
+            <thead id="failsafe-table-thead" class="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold sticky top-0 z-10 font-mono">
+              <!-- Dynamically rendered sticky header row -->
+            </thead>
+            <tbody id="failsafe-table-tbody" class="divide-y divide-slate-100 font-mono">
+              <!-- Dynamically rendered rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Remember this layout -->
+      <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
+        <label class="inline-flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-800">
+          <input type="checkbox" id="failsafe-remember-mapping" class="rounded text-red-600 focus:ring-red-500 w-4 h-4">
+          <span>Remember this column layout for future sheets from this carrier</span>
+        </label>
+        <span class="text-[11px] text-slate-500">Saves layout fingerprint to bypass prompts on subsequent uploads</span>
+      </div>
+
+      <!-- Inline Validation Error Box -->
+      <div id="failsafe-validation-errors" class="hidden p-3 rounded-xl bg-red-50 border border-red-300 text-red-900 font-mono text-xs"></div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-3.5 border-t border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
+      <button type="button" onclick="FailsafeModal.cancel()" class="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer transition-colors shadow-2xs">
+        Cancel & Abort
+      </button>
+
+      <div class="flex items-center gap-3">
+        <span id="failsafe-confirm-hint" class="text-xs text-slate-500 font-medium"></span>
+        <button type="button" id="failsafe-confirm-btn" onclick="FailsafeModal.confirm()" disabled class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+          Confirm Mapping & Process
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/**
+ * FailsafeModal JavaScript Controller
+ * Intercepts needs_mapping responses, manages sticky preview, handles conflict highlights,
+ * validates mapping choices, and cleanly gates POST /jobs/{id}/process.
+ */
+const FailsafeModal = {
+  currentJobId: null,
+  jobData: null,
+  maxDisplayCols: 60,
+  showAllColsFlag: false,
+
+  /** Open modal with job state object */
+  open(job) {
+    this.jobData = job;
+    this.currentJobId = job.job_id;
+    this.showAllColsFlag = false;
+
+    const modal = document.getElementById('failsafe-mapping-modal');
+    modal.classList.remove('hidden');
+
+    // Populate header row input (1-indexed for human UI)
+    const headerRowInput = document.getElementById('failsafe-header-row-input');
+    const headerIdx = (job.header_row !== null && job.header_row !== undefined) ? job.header_row : 0;
+    headerRowInput.value = headerIdx + 1;
+
+    // Set Status Badge
+    const statusBadge = document.getElementById('failsafe-status-badge');
+    statusBadge.innerText = (job.status || 'needs_mapping').replace('_', ' ');
+
+    // Set Issues
+    const issuesBanner = document.getElementById('failsafe-issues-banner');
+    const issuesList = document.getElementById('failsafe-issues-list');
+    issuesList.innerHTML = '';
+    if (job.issues && job.issues.length > 0) {
+      job.issues.forEach(iss => {
+        const li = document.createElement('li');
+        li.textContent = iss;
+        issuesList.appendChild(li);
+      });
+      issuesBanner.classList.remove('hidden');
+    } else {
+      issuesBanner.classList.add('hidden');
+    }
+
+    // Set Conflicts
+    const conflictsBanner = document.getElementById('failsafe-conflicts-banner');
+    const conflictsList = document.getElementById('failsafe-conflicts-list');
+    conflictsList.innerHTML = '';
+    if (job.conflicts && job.conflicts.length > 0) {
+      job.conflicts.forEach(c => {
+        const div = document.createElement('div');
+        div.className = "flex items-start gap-1.5";
+        div.innerHTML = `<span class="font-bold text-red-900">• Field [${c.field}]:</span> <span>${c.reason} (Columns: ${c.columns.map(idx => 'Col ' + String.fromCharCode(65 + idx)).join(', ')})</span>`;
+        conflictsList.appendChild(div);
+      });
+      conflictsBanner.classList.remove('hidden');
+    } else {
+      conflictsBanner.classList.add('hidden');
+    }
+
+    // Set Saved Mapping Match
+    const savedBanner = document.getElementById('failsafe-saved-match-banner');
+    if (job.saved_mapping_suggestion) {
+      savedBanner.classList.remove('hidden');
+      document.getElementById('failsafe-saved-match-desc').innerText =
+        `Found matching layout (${job.saved_mapping_suggestion.sheet_name || 'Carrier layout'}) with ${job.saved_mapping_suggestion.column_count} columns.`;
+    } else {
+      savedBanner.classList.add('hidden');
+    }
+
+    // Set Mode Radio
+    const modeRadios = document.getElementsByName('failsafe-mode');
+    let selectedMode = job.mode || 'weight';
+    modeRadios.forEach(r => {
+      r.checked = (r.value === selectedMode);
+    });
+    this.onModeChange(selectedMode, false);
+
+    // Set Weight Unit
+    const unitRadios = document.getElementsByName('failsafe-weight-unit');
+    unitRadios.forEach(r => {
+      r.checked = (r.value === job.weight_unit);
+    });
+
+    // Populate Column Selectors and Grid
+    this.populateColumnSelectors();
+
+    // Render Preview Table
+    this.renderPreviewTable();
+
+    // Auto-select suggestions if provided
+    this.applySuggestions();
+
+    // Validate state
+    this.validate();
+  },
+
+  onHeaderRowChange(rowNum1Indexed) {
+    const rowIdx = Math.max(0, parseInt(rowNum1Indexed, 10) - 1);
+    this.jobData.header_row = rowIdx;
+    this.populateColumnSelectors();
+    this.renderPreviewTable();
+    this.validate();
+  },
+
+  onModeChange(mode, triggerValidation = true) {
+    this.jobData.mode = mode;
+    const unitContainer = document.getElementById('failsafe-unit-container');
+    const skidWrapper = document.getElementById('failsafe-skid-count-wrapper');
+
+    if (mode === 'weight') {
+      unitContainer.classList.remove('hidden');
+      skidWrapper.classList.add('hidden');
+    } else {
+      unitContainer.classList.add('hidden');
+      skidWrapper.classList.remove('hidden');
+    }
+    if (triggerValidation) this.validate();
+  },
+
+  getColumnNames() {
+    const preview = this.jobData.preview || [];
+    const headerRowIdx = (this.jobData.header_row !== null && this.jobData.header_row !== undefined) ? this.jobData.header_row : 0;
+    const headerRow = preview[headerRowIdx] || [];
+    const colCount = Math.max(this.jobData.column_count || 0, headerRow.length);
+
+    const cols = [];
+    for (let i = 0; i < colCount; i++) {
+      const colLetter = String.fromCharCode(65 + (i % 26)); // e.g., A, B, C
+      const prefix = i >= 26 ? String.fromCharCode(64 + Math.floor(i / 26)) : '';
+      const letterCode = prefix + colLetter;
+      const text = (headerRow[i] !== undefined && headerRow[i] !== null && String(headerRow[i]).trim() !== '')
+        ? String(headerRow[i]).trim()
+        : `Column ${letterCode}`;
+      cols.push({ index: i, letter: letterCode, name: text });
+    }
+    return cols;
+  },
+
+  populateColumnSelectors() {
+    const cols = this.getColumnNames();
+    const originSelect = document.getElementById('failsafe-col-origin');
+    const destSelect = document.getElementById('failsafe-col-destination');
+    const skidCountSelect = document.getElementById('failsafe-col-skid-count');
+    const rateGrid = document.getElementById('failsafe-rate-cols-grid');
+
+    const buildOptions = (placeholder) => {
+      let html = `<option value="">-- ${placeholder} --</option>`;
+      cols.forEach(c => {
+        html += `<option value="${c.index}">Col ${c.letter}: ${c.name}</option>`;
+      });
+      return html;
+    };
+
+    originSelect.innerHTML = buildOptions("Select Origin Column");
+    destSelect.innerHTML = buildOptions("Select Destination Column");
+    skidCountSelect.innerHTML = `<option value="">-- Optional (if one row per count) --</option>` + buildOptions("Select Skid Count Column");
+
+    // Populate rate checkboxes
+    rateGrid.innerHTML = '';
+    cols.forEach(c => {
+      const div = document.createElement('div');
+      div.className = "flex items-center gap-1.5 p-1 bg-white rounded border border-slate-200 text-xs";
+      div.innerHTML = `
+        <input type="checkbox" id="failsafe-rate-cb-${c.index}" value="${c.index}" class="failsafe-rate-cb rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5" onchange="FailsafeModal.validate()">
+        <label for="failsafe-rate-cb-${c.index}" class="truncate font-mono text-[11px] text-slate-700 cursor-pointer" title="Col ${c.letter}: ${c.name}">
+          <strong class="text-slate-900">${c.letter}:</strong> ${c.name}
+        </label>
+      `;
+      rateGrid.appendChild(div);
+    });
+  },
+
+  renderPreviewTable() {
+    const preview = this.jobData.preview || [];
+    const headerRowIdx = (this.jobData.header_row !== null && this.jobData.header_row !== undefined) ? this.jobData.header_row : 0;
+    const allCols = this.getColumnNames();
+    const totalCols = allCols.length;
+
+    // Column cap (~60)
+    const visibleCols = (!this.showAllColsFlag && totalCols > this.maxDisplayCols)
+      ? allCols.slice(0, this.maxDisplayCols)
+      : allCols;
+
+    const overflowMsg = document.getElementById('failsafe-cols-overflow-msg');
+    const dimBadge = document.getElementById('failsafe-preview-dim-badge');
+    dimBadge.innerText = `${preview.length} rows × ${totalCols} cols`;
+
+    if (totalCols > this.maxDisplayCols && !this.showAllColsFlag) {
+      overflowMsg.classList.remove('hidden');
+      document.getElementById('failsafe-total-cols-count').innerText = totalCols;
+    } else {
+      overflowMsg.classList.add('hidden');
+    }
+
+    // Build thead
+    const thead = document.getElementById('failsafe-table-thead');
+    let theadHtml = `<tr><th class="py-2 px-2.5 text-center text-slate-400 border-r border-slate-200 w-12">#</th>`;
+    
+    // Conflict column set
+    const conflictCols = new Set();
+    if (this.jobData.conflicts) {
+      this.jobData.conflicts.forEach(c => (c.columns || []).forEach(idx => conflictCols.add(idx)));
+    }
+
+    visibleCols.forEach(c => {
+      const isConflict = conflictCols.has(c.index);
+      const thClass = isConflict
+        ? "bg-red-50 text-red-700 border-b-2 border-red-500"
+        : "text-slate-700";
+      const conflictPill = isConflict
+        ? `<span class="ml-1 px-1 rounded bg-red-200 text-red-900 text-[9px] font-bold">Conflict</span>`
+        : '';
+
+      theadHtml += `
+        <th class="py-2 px-3 border-r border-slate-200 text-left ${thClass}">
+          <div class="flex items-center justify-between">
+            <span>Col ${c.letter}</span>
+            ${conflictPill}
+          </div>
+          <div class="font-normal text-[10px] text-slate-500 truncate max-w-[120px]" title="${c.name}">${c.name}</div>
+        </th>
+      `;
+    });
+    theadHtml += `</tr>`;
+    thead.innerHTML = theadHtml;
+
+    // Build tbody (first 12 rows)
+    const tbody = document.getElementById('failsafe-table-tbody');
+    let tbodyHtml = '';
+    const maxRows = Math.min(12, preview.length);
+
+    for (let r = 0; r < maxRows; r++) {
+      const isHeaderRow = (r === headerRowIdx);
+      const rowClass = isHeaderRow ? "bg-amber-50 font-bold text-amber-900" : "hover:bg-slate-50";
+      const rowLabel = isHeaderRow ? `H:${r + 1}` : `${r + 1}`;
+
+      tbodyHtml += `<tr class="${rowClass}">`;
+      tbodyHtml += `<td class="py-1.5 px-2 text-center text-slate-400 border-r border-slate-200 bg-slate-50/50">${rowLabel}</td>`;
+
+      visibleCols.forEach(c => {
+        const val = (preview[r] && preview[r][c.index] !== undefined && preview[r][c.index] !== null)
+          ? String(preview[r][c.index])
+          : '';
+        tbodyHtml += `<td class="py-1.5 px-3 border-r border-slate-200 truncate max-w-[150px]" title="${val}">${val}</td>`;
+      });
+      tbodyHtml += `</tr>`;
+    }
+    tbody.innerHTML = tbodyHtml;
+  },
+
+  showAllColumns() {
+    this.showAllColsFlag = true;
+    this.renderPreviewTable();
+  },
+
+  selectAllRateCols(select) {
+    const cbs = document.querySelectorAll('.failsafe-rate-cb');
+    cbs.forEach(cb => { cb.checked = select; });
+    this.validate();
+  },
+
+  applySuggestions() {
+    const s = this.jobData.suggestions || {};
+    const originSelect = document.getElementById('failsafe-col-origin');
+    const destSelect = document.getElementById('failsafe-col-destination');
+
+    if (s.origin !== undefined && s.origin !== null) {
+      originSelect.value = s.origin;
+    }
+    if (s.destination !== undefined && s.destination !== null) {
+      destSelect.value = s.destination;
+    }
+
+    // Rate breaks from guesses
+    const guesses = this.jobData.guesses || [];
+    const rateGuess = guesses.find(g => g.field === 'rates');
+    if (rateGuess && rateGuess.columns && rateGuess.columns.length > 0) {
+      rateGuess.columns.forEach(colIdx => {
+        const cb = document.getElementById(`failsafe-rate-cb-${colIdx}`);
+        if (cb) cb.checked = true;
+      });
+    }
+  },
+
+  applySavedMapping() {
+    const s = this.jobData.saved_mapping_suggestion;
+    if (!s || !s.mapping) return;
+    const m = s.mapping;
+
+    if (m.header_row !== undefined) {
+      document.getElementById('failsafe-header-row-input').value = m.header_row + 1;
+      this.jobData.header_row = m.header_row;
+      this.populateColumnSelectors();
+      this.renderPreviewTable();
+    }
+    if (m.mode) {
+      const modeRadios = document.getElementsByName('failsafe-mode');
+      modeRadios.forEach(r => { r.checked = (r.value === m.mode); });
+      this.onModeChange(m.mode, false);
+    }
+    if (m.weight_unit) {
+      const unitRadios = document.getElementsByName('failsafe-weight-unit');
+      unitRadios.forEach(r => { r.checked = (r.value === m.weight_unit); });
+    }
+    if (m.origin !== undefined) {
+      document.getElementById('failsafe-col-origin').value = m.origin;
+    }
+    if (m.destination !== undefined) {
+      document.getElementById('failsafe-col-destination').value = m.destination;
+    }
+    if (m.skid_count_column !== undefined) {
+      document.getElementById('failsafe-col-skid-count').value = m.skid_count_column;
+    }
+    if (m.rate_columns && Array.isArray(m.rate_columns)) {
+      this.selectAllRateCols(false);
+      m.rate_columns.forEach(colIdx => {
+        const cb = document.getElementById(`failsafe-rate-cb-${colIdx}`);
+        if (cb) cb.checked = true;
+      });
+    }
+    this.validate();
+  },
+
+  validate() {
+    const confirmBtn = document.getElementById('failsafe-confirm-btn');
+    const hint = document.getElementById('failsafe-confirm-hint');
+    const errBox = document.getElementById('failsafe-validation-errors');
+    errBox.classList.add('hidden');
+
+    const originVal = document.getElementById('failsafe-col-origin').value;
+    const destVal = document.getElementById('failsafe-col-destination').value;
+    
+    let modeVal = 'weight';
+    const modeRadios = document.getElementsByName('failsafe-mode');
+    modeRadios.forEach(r => { if (r.checked) modeVal = r.value; });
+
+    let unitVal = null;
+    const unitRadios = document.getElementsByName('failsafe-weight-unit');
+    unitRadios.forEach(r => { if (r.checked) unitVal = r.value; });
+
+    const checkedRates = Array.from(document.querySelectorAll('.failsafe-rate-cb:checked')).map(cb => parseInt(cb.value, 10));
+
+    // Validation Rules
+    const missing = [];
+    if (originVal === "") missing.push("Origin column");
+    if (destVal === "") missing.push("Destination column");
+    if (originVal !== "" && destVal !== "" && originVal === destVal) {
+      missing.push("Origin and Destination cannot be the same column");
+    }
+    if (checkedRates.length === 0) missing.push("At least one rate column");
+    if (modeVal === 'weight' && !unitVal) missing.push("Weight unit (lb or kg)");
+
+    if (missing.length > 0) {
+      confirmBtn.disabled = true;
+      hint.innerText = "Required: " + missing.join(", ");
+      hint.className = "text-xs text-amber-700 font-medium";
+      return false;
+    } else {
+      confirmBtn.disabled = false;
+      hint.innerText = "✓ Ready to confirm";
+      hint.className = "text-xs text-emerald-700 font-semibold";
+      return true;
+    }
+  },
+
+  async confirm() {
+    if (!this.validate()) return;
+
+    const confirmBtn = document.getElementById('failsafe-confirm-btn');
+    confirmBtn.disabled = true;
+    confirmBtn.innerText = "Saving & Processing...";
+
+    const headerRow = Math.max(0, parseInt(document.getElementById('failsafe-header-row-input').value, 10) - 1);
+    const origin = parseInt(document.getElementById('failsafe-col-origin').value, 10);
+    const destination = parseInt(document.getElementById('failsafe-col-destination').value, 10);
+    
+    let mode = 'weight';
+    document.getElementsByName('failsafe-mode').forEach(r => { if (r.checked) mode = r.value; });
+
+    let weight_unit = null;
+    if (mode === 'weight') {
+      document.getElementsByName('failsafe-weight-unit').forEach(r => { if (r.checked) weight_unit = r.value; });
+    }
+
+    const skidCountVal = document.getElementById('failsafe-col-skid-count').value;
+    const skid_count_column = (mode === 'skid' && skidCountVal !== "") ? parseInt(skidCountVal, 10) : null;
+
+    const rate_columns = Array.from(document.querySelectorAll('.failsafe-rate-cb:checked')).map(cb => parseInt(cb.value, 10));
+    const remember_mapping = document.getElementById('failsafe-remember-mapping').checked;
+
+    const payload = {
+      header_row: headerRow,
+      sheet_name: this.jobData.sheet_name || null,
+      mode: mode,
+      origin: origin,
+      destination: destination,
+      rate_columns: rate_columns,
+      skid_count_column: skid_count_column,
+      weight_unit: weight_unit,
+      remember_mapping: remember_mapping
+    };
+
+    try {
+      // 1. Post Mapping Confirmation
+      const mapRes = await fetch(`/api/failsafe/jobs/${this.currentJobId}/mapping`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const mapData = await mapRes.json();
+
+      if (!mapRes.ok) {
+        throw new Error(mapData.errors ? mapData.errors.join("; ") : (mapData.detail || "Validation failed"));
+      }
+
+      // 2. Trigger Gated Process
+      const procRes = await fetch(`/api/failsafe/jobs/${this.currentJobId}/process`, {
+        method: 'POST'
+      });
+      const procData = await procRes.json();
+
+      if (!procRes.ok) {
+        throw new Error(procData.detail || "Processing failed after mapping confirmation");
+      }
+
+      // Success: Close modal and trigger callback / reload
+      this.close();
+      if (window.onFailsafeMappingComplete) {
+        window.onFailsafeMappingComplete(procData);
+      } else {
+        window.location.reload();
+      }
+
+    } catch (err) {
+      confirmBtn.disabled = false;
+      confirmBtn.innerText = "Confirm Mapping & Process";
+      const errBox = document.getElementById('failsafe-validation-errors');
+      errBox.innerText = `Error: ${err.message}`;
+      errBox.classList.remove('hidden');
+    }
+  },
+
+  async cancel() {
+    if (this.currentJobId) {
+      try {
+        await fetch(`/api/failsafe/jobs/${this.currentJobId}/cancel`, { method: 'POST' });
+      } catch (e) {
+        console.warn("Cancel call returned:", e);
+      }
+    }
+    this.close();
+  },
+
+  close() {
+    const modal = document.getElementById('failsafe-mapping-modal');
+    modal.classList.add('hidden');
+    this.currentJobId = null;
+    this.jobData = null;
+  }
+};
+</script>

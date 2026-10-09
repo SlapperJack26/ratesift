@@ -145,14 +145,19 @@ def parse_dimensions_string(raw_val: Any) -> Tuple[Optional[float], Optional[flo
 def analyze_excel_sheet(
     file_bytes: bytes,
     filename: str,
-    user_confirmed_header_row: Optional[int] = None
+    user_confirmed_header_row: Optional[int] = None,
+    column_overrides: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Phase 0 & 1: Structure recognition, zero-default parsing, coordinate grid tracking,
     and missing detail detection. Conforms to Rules 1, 3, 5, 6, 7, 18, 25, 33-36.
     Uses DynamicSheetDetector to autonomously locate rate table headers at arbitrary
     row positions (e.g. Line 90 or Line 140) and quarantine preamble/disclaimers.
+    Accepts column_overrides from failsafe agent to strictly enforce confirmed mappings.
     """
+    if user_confirmed_header_row is None and column_overrides and "header_row" in column_overrides:
+        user_confirmed_header_row = column_overrides["header_row"] + 1
+
     wb = openpyxl.load_workbook(io.BytesIO(file_bytes), data_only=True)
     if not wb.sheetnames:
         raise ValueError("The uploaded workbook contains no worksheets.")
@@ -167,7 +172,8 @@ def analyze_excel_sheet(
     detector = DynamicSheetDetector()
     detection = detector.scan_and_parse_sheet(grid, user_confirmed_header_row=user_confirmed_header_row)
 
-    if detection.get("status") == "CONFUSED_NEEDS_CLARIFICATION" and user_confirmed_header_row is None:
+    if detection.get("status") == "CONFUSED_NEEDS_CLARIFICATION" and user_confirmed_header_row is None and not column_overrides:
+
         analysis_token = f"ana_confused_{uuid.uuid4().hex[:10]}"
         candidates = detection.get("candidates", [])
         top_cand_1_based = candidates[0]["row_number_1_based"] if candidates else 1
@@ -212,10 +218,14 @@ def analyze_excel_sheet(
             f.write(file_bytes)
         return analysis_payload
 
-    # 1. Resolve true header row from dynamic detection
-    header_row_idx = detection.get("detected_header_row_0_based", 0)
+    # 1. Resolve true header row from dynamic detection (respect user_confirmed_header_row if provided)
+    if user_confirmed_header_row is not None:
+        header_row_idx = max(0, min(len(rows) - 1, user_confirmed_header_row - 1))
+    else:
+        header_row_idx = detection.get("detected_header_row_0_based", 0)
     header_cells = rows[header_row_idx]
     header_names = [str(c.value).strip() if c.value is not None else f"Column_{get_column_letter(c.column)}" for c in header_cells]
+
 
     # 2. Detect Units & Currency (Rule 5)
     unit_info = detect_units_and_currency(sheet, header_cells)
@@ -331,7 +341,30 @@ def analyze_excel_sheet(
         col_map["weight"] = 2
         col_confidence["weight"] = 0.50
 
+    # Apply explicit column overrides from confirmed failsafe mapping
+    if column_overrides:
+        if "origin" in column_overrides and column_overrides["origin"] is not None:
+            col_map["origin"] = column_overrides["origin"]
+            col_map["origin_city"] = None
+            col_confidence["origin"] = 1.0
+        if "destination" in column_overrides and column_overrides["destination"] is not None:
+            col_map["destination"] = column_overrides["destination"]
+            col_map["dest_city"] = None
+            col_confidence["destination"] = 1.0
+        if "weight" in column_overrides and column_overrides["weight"] is not None:
+            col_map["weight"] = column_overrides["weight"]
+            col_confidence["weight"] = 1.0
+        elif "rate_columns" in column_overrides and column_overrides["rate_columns"]:
+            col_map["weight"] = column_overrides["rate_columns"][0]
+            col_confidence["weight"] = 1.0
+        if "skid_count" in column_overrides and column_overrides["skid_count"] is not None:
+            col_map["skid_count"] = column_overrides["skid_count"]
+            col_confidence["skid_count"] = 1.0
+        if column_overrides.get("weight_unit"):
+            unit_info["weight_unit"] = column_overrides["weight_unit"]
+
     # 4. Extract Data Rows (Rule 1: ZERO ASSUMPTIONS, Rule 3: EXACT CELL COORDINATES)
+
     staged_rows = []
     flagged_issues = []
     total_data_rows = 0
