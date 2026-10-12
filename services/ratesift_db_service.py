@@ -8,17 +8,92 @@ from typing import Dict, Any, List, Optional
 DB_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "shipflow.db")
 DATA_RESIDENCY_REGION = "CA_CENTRAL_WHC"  # Rule 29: Canadian Hosting (WHC)
 
+_SCHEMA_MIGRATED_DBS = set()
+
+
+def _ensure_schema_migrated(conn: sqlite3.Connection):
+    db_key = os.path.abspath(DB_FILE)
+    if db_key in _SCHEMA_MIGRATED_DBS:
+        return
+    cursor = conn.cursor()
+    # Ensure rs_rate_sheets exists before migrating
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='rs_rate_sheets'")
+    if not cursor.fetchone():
+        return
+
+    cursor.execute("PRAGMA table_info(rs_rate_sheets)")
+    rs_info = cursor.fetchall()
+    rs_cols = {r["name"]: r for r in rs_info}
+    new_rs_cols = [
+        ("is_benchmark", "INTEGER DEFAULT 0"),
+        ("markup_mode", "TEXT DEFAULT 'PERCENTAGE'"),
+        ("markup_value", "REAL DEFAULT 0.0"),
+        ("fsc_passthrough", "INTEGER DEFAULT 1"),
+        ("accessorial_markup_pct", "REAL DEFAULT 0.0"),
+        ("manual_override", "INTEGER DEFAULT 0"),
+        ("rating_basis", "TEXT DEFAULT 'WEIGHT_CWT'"),
+        ("max_skid_capacity", "INTEGER DEFAULT 10"),
+        ("weight_rounding_rule", "TEXT DEFAULT 'CEIL_1LB'"),
+        ("allow_deficit_rating", "INTEGER DEFAULT 1"),
+        ("fsc_applies_to_accessorials", "INTEGER DEFAULT 0"),
+        ("fuel_precedence", "TEXT DEFAULT 'SHEET_FIRST'"),
+        ("no_minimum_confirmed", "INTEGER DEFAULT 0"),
+        ("failsafe_status", "TEXT DEFAULT 'ready'"),
+        ("max_weight_limit", "REAL DEFAULT 44000.0"),
+        ("max_piece_weight", "REAL DEFAULT 150.0"),
+        ("max_length_in", "REAL DEFAULT 108.0"),
+        ("max_girth_in", "REAL DEFAULT 165.0"),
+    ]
+    for col_name, col_def in new_rs_cols:
+        if col_name not in rs_cols:
+            cursor.execute(f"ALTER TABLE rs_rate_sheets ADD COLUMN {col_name} {col_def}")
+
+    cursor.execute("PRAGMA table_info(rs_weight_breaks)")
+    wb_info = cursor.fetchall()
+    wb_cols = {r["name"]: r for r in wb_info}
+    for col_name, col_def in [
+        ("break_unit", "TEXT DEFAULT 'CWT'"),
+        ("min_units", "REAL DEFAULT 0.0"),
+        ("max_units", "REAL DEFAULT 999999.0"),
+        ("is_open_ended", "INTEGER DEFAULT 0"),
+    ]:
+        if col_name not in wb_cols:
+            cursor.execute(f"ALTER TABLE rs_weight_breaks ADD COLUMN {col_name} {col_def}")
+
+    cursor.execute("PRAGMA table_info(rs_carrier_surcharges)")
+    sur_info = cursor.fetchall()
+    sur_cols = {r["name"]: r for r in sur_info}
+    for col_name, col_def in [
+        ("is_included", "INTEGER DEFAULT 0"),
+        ("weight_base", "TEXT DEFAULT 'BILLABLE'"),
+        ("pct_base", "TEXT DEFAULT 'POST_MIN_FREIGHT'"),
+        ("fsc_eligible", "INTEGER DEFAULT 0"),
+        ("is_unparsed", "INTEGER DEFAULT 0"),
+    ]:
+        if col_name not in sur_cols:
+            cursor.execute(f"ALTER TABLE rs_carrier_surcharges ADD COLUMN {col_name} {col_def}")
+
+    conn.commit()
+    _SCHEMA_MIGRATED_DBS.add(db_key)
+
+
 def get_connection():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
+    try:
+        _ensure_schema_migrated(conn)
+    except Exception:
+        pass
     return conn
+
 
 def init_ratesift_db():
     """
     Initializes the RateSift normalized multi-tenant schema.
     Strictly enforces Rules 2, 3, 28, 29, 30.
     """
-    conn = get_connection()
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
     # Enable foreign keys
@@ -36,7 +111,7 @@ def init_ratesift_db():
         currency TEXT NOT NULL DEFAULT 'CAD',
         weight_unit TEXT NOT NULL DEFAULT 'lb',
         dim_unit TEXT NOT NULL DEFAULT 'in',
-        dim_divisor REAL NOT NULL DEFAULT 139.0,
+        dim_divisor REAL DEFAULT 139.0,
         dim_min_rule TEXT,
         rounding_rule TEXT NOT NULL DEFAULT 'standard_2dp',
         effective_date TEXT,
@@ -56,26 +131,6 @@ def init_ratesift_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_rs_sheets_user ON rs_rate_sheets (user_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_rs_sheets_carrier ON rs_rate_sheets (user_id, carrier_name)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_rs_sheets_status ON rs_rate_sheets (user_id, confirmation_status)")
-
-    # Auto-migrate columns if table already exists
-    cursor.execute("PRAGMA table_info(rs_rate_sheets)")
-    rs_cols = [r["name"] for r in cursor.fetchall()]
-    if "is_benchmark" not in rs_cols:
-        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN is_benchmark INTEGER DEFAULT 0")
-    if "markup_mode" not in rs_cols:
-        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN markup_mode TEXT DEFAULT 'PERCENTAGE'")
-    if "markup_value" not in rs_cols:
-        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN markup_value REAL DEFAULT 0.0")
-    if "fsc_passthrough" not in rs_cols:
-        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN fsc_passthrough INTEGER DEFAULT 1")
-    if "accessorial_markup_pct" not in rs_cols:
-        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN accessorial_markup_pct REAL DEFAULT 0.0")
-    if "manual_override" not in rs_cols:
-        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN manual_override INTEGER DEFAULT 0")
-    if "rating_basis" not in rs_cols:
-        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN rating_basis TEXT DEFAULT 'WEIGHT_CWT'")
-    if "max_skid_capacity" not in rs_cols:
-        cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN max_skid_capacity INTEGER DEFAULT 10")
 
     # 2. Rate Sheet Cell Coordinates Traceability Table (Rule 3, 6, 28)
     cursor.execute("""
@@ -126,27 +181,18 @@ def init_ratesift_db():
         origin_spec TEXT,
         dest_spec TEXT,
         min_weight REAL NOT NULL DEFAULT 0.0,
-        max_weight REAL NOT NULL DEFAULT 999999.0,
+        max_weight REAL DEFAULT NULL,
         break_name TEXT NOT NULL,
         base_rate REAL NOT NULL,
         rate_type TEXT NOT NULL DEFAULT 'CWT',
         source_cell TEXT,
+        is_open_ended INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (sheet_id) REFERENCES rs_rate_sheets (id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users (id)
     )
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_rs_breaks_lookup ON rs_weight_breaks (sheet_id, zone_code, min_weight, max_weight)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_rs_breaks_od ON rs_weight_breaks (sheet_id, origin_spec, dest_spec)")
-
-    # Auto-migrate columns for rs_weight_breaks
-    cursor.execute("PRAGMA table_info(rs_weight_breaks)")
-    wb_cols = [r["name"] for r in cursor.fetchall()]
-    if "break_unit" not in wb_cols:
-        cursor.execute("ALTER TABLE rs_weight_breaks ADD COLUMN break_unit TEXT DEFAULT 'CWT'")
-    if "min_units" not in wb_cols:
-        cursor.execute("ALTER TABLE rs_weight_breaks ADD COLUMN min_units REAL DEFAULT 0.0")
-    if "max_units" not in wb_cols:
-        cursor.execute("ALTER TABLE rs_weight_breaks ADD COLUMN max_units REAL DEFAULT 999999.0")
 
     # 5. Carrier Minimum Charges Table (Rule 12, 28)
     cursor.execute("""
@@ -176,11 +222,16 @@ def init_ratesift_db():
         condition_type TEXT NOT NULL,
         condition_expression TEXT,
         fee_type TEXT NOT NULL DEFAULT 'FLAT',
-        amount REAL NOT NULL DEFAULT 0.0,
+        amount REAL DEFAULT 0.0,
         min_fee REAL NOT NULL DEFAULT 0.0,
         max_fee REAL,
         is_waived INTEGER NOT NULL DEFAULT 0,
         source_cell TEXT,
+        is_included INTEGER NOT NULL DEFAULT 0,
+        weight_base TEXT NOT NULL DEFAULT 'BILLABLE',
+        pct_base TEXT NOT NULL DEFAULT 'POST_MIN_FREIGHT',
+        fsc_eligible INTEGER NOT NULL DEFAULT 0,
+        is_unparsed INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (sheet_id) REFERENCES rs_rate_sheets (id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users (id)
     )
@@ -204,6 +255,8 @@ def init_ratesift_db():
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_rs_audit_user ON rs_quote_audit_logs (user_id, timestamp)")
 
+    _SCHEMA_MIGRATED_DBS.discard(os.path.abspath(DB_FILE))
+    _ensure_schema_migrated(conn)
     conn.commit()
     conn.close()
 
@@ -211,17 +264,18 @@ def init_ratesift_db():
 # Multi-Tenant Data Access Layer (Strict user_id enforcement - Rule 28)
 # ==============================================================================
 
+_UNSET_DIVISOR = object()
+
 def create_rate_sheet(
     user_id: str,
     carrier_name: str,
     service_name: str,
     tariff_ref: Optional[str] = None,
     mode: str = "LTL",
-
     currency: str = "CAD",
     weight_unit: str = "lb",
     dim_unit: str = "in",
-    dim_divisor: float = 139.0,
+    dim_divisor: Any = _UNSET_DIVISOR,
     dim_min_rule: Optional[str] = None,
     rounding_rule: str = "standard_2dp",
     effective_date: Optional[str] = None,
@@ -231,11 +285,28 @@ def create_rate_sheet(
     confirmation_status: str = "PENDING_REVIEW",
     is_benchmark: int = 0,
     rating_basis: str = "WEIGHT_CWT",
-    max_skid_capacity: int = 10
+    max_skid_capacity: int = 10,
+    weight_rounding_rule: str = "CEIL_1LB",
+    allow_deficit_rating: int = 1,
+    fsc_applies_to_accessorials: int = 0,
+    fuel_precedence: str = "SHEET_FIRST",
+    no_minimum_confirmed: int = 0,
+    failsafe_status: str = "ready",
+    max_weight_limit: float = 44000.0,
+    max_piece_weight: float = 150.0,
+    max_length_in: float = 108.0,
+    max_girth_in: float = 165.0,
 ) -> str:
     """Creates a new rate sheet record strictly scoped to user_id."""
     sheet_id = f"rs_sheet_{uuid.uuid4().hex[:12]}"
     now_ts = datetime.utcnow().isoformat()
+    if dim_divisor is _UNSET_DIVISOR:
+        effective_divisor = 139.0 if mode.upper() == "PARCEL" else None
+    else:
+        effective_divisor = dim_divisor
+    # Store 0.0 when dim_divisor is None so legacy NOT NULL constraint on rs_rate_sheets.dim_divisor is satisfied;
+    # engine and get_rate_sheet treat dim_divisor <= 0 as None ('no divisor specified').
+    db_dim_divisor = float(effective_divisor) if (effective_divisor is not None and float(effective_divisor) > 0) else 0.0
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -245,16 +316,20 @@ def create_rate_sheet(
         currency, weight_unit, dim_unit, dim_divisor, dim_min_rule,
         rounding_rule, effective_date, expiry_date, version, is_latest,
         confirmation_status, source_filename, storage_region, created_at, is_benchmark,
-        rating_basis, max_skid_capacity
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)
+        rating_basis, max_skid_capacity, weight_rounding_rule, allow_deficit_rating,
+        fsc_applies_to_accessorials, fuel_precedence, no_minimum_confirmed, failsafe_status,
+        max_weight_limit, max_piece_weight, max_length_in, max_girth_in
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         sheet_id, user_id, carrier_name.strip(), service_name.strip(),
         tariff_ref.strip() if tariff_ref else None, mode.upper(),
         currency.upper(), weight_unit.lower(), dim_unit.lower(),
-        float(dim_divisor), dim_min_rule, rounding_rule,
+        db_dim_divisor, dim_min_rule, rounding_rule,
         effective_date, expiry_date, int(version),
         confirmation_status, source_filename, DATA_RESIDENCY_REGION, now_ts, int(is_benchmark),
-        rating_basis.upper(), int(max_skid_capacity)
+        rating_basis.upper(), int(max_skid_capacity), weight_rounding_rule.upper(), int(allow_deficit_rating),
+        int(fsc_applies_to_accessorials), fuel_precedence.upper(), int(no_minimum_confirmed), failsafe_status,
+        float(max_weight_limit), float(max_piece_weight), float(max_length_in), float(max_girth_in)
     ))
     conn.commit()
     conn.close()
@@ -270,7 +345,12 @@ def get_rate_sheet(sheet_id: str, user_id: str) -> Optional[Dict[str, Any]]:
     """, (sheet_id, user_id))
     row = cursor.fetchone()
     conn.close()
-    return dict(row) if row else None
+    if not row:
+        return None
+    d = dict(row)
+    if d.get("dim_divisor") is not None and float(d["dim_divisor"]) <= 0:
+        d["dim_divisor"] = None
+    return d
 
 def list_rate_sheets(user_id: str, status: Optional[str] = None) -> List[Dict[str, Any]]:
     """Lists all rate sheets uploaded by user_id, strictly excluding benchmark/sample sheets (Rule 28)."""
@@ -290,7 +370,56 @@ def list_rate_sheets(user_id: str, status: Optional[str] = None) -> List[Dict[st
         """, (user_id,))
     rows = cursor.fetchall()
     conn.close()
-    return [dict(r) for r in rows]
+    results = []
+    for r in rows:
+        d = dict(r)
+        if d.get("dim_divisor") is not None and float(d["dim_divisor"]) <= 0:
+            d["dim_divisor"] = None
+        results.append(d)
+    return results
+
+def confirm_no_minimum_column(sheet_id: str, user_id: str, confirmed_by: str = "User") -> bool:
+    """Explicitly confirms that a rate sheet has no minimum charge column ($0.00 minimum) and resolves MISSING_MINIMUM_COLUMN flags."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE rs_rate_sheets
+    SET no_minimum_confirmed = 1,
+        failsafe_status = CASE WHEN failsafe_status = 'missing_minimum_column' THEN 'ready' ELSE failsafe_status END
+    WHERE id = ? AND user_id = ?
+    """, (sheet_id, user_id))
+    updated = cursor.rowcount > 0
+    if updated:
+        cursor.execute("""
+        UPDATE rs_rate_sheet_cells
+        SET needs_review = 0, review_notes = ?
+        WHERE sheet_id = ? AND user_id = ? AND field_name = 'MISSING_MINIMUM_COLUMN'
+        """, (f"No minimum charge ($0.00) explicitly confirmed by {confirmed_by}", sheet_id, user_id))
+    conn.commit()
+    conn.close()
+    if updated:
+        insert_carrier_minimums(sheet_id, user_id, [{
+            "zone_code": "CONFIRMED_NO_MIN",
+            "origin_spec": "",
+            "dest_spec": "",
+            "min_charge": 0.0,
+            "source_cell": f"Confirmed $0.00 Minimum ({confirmed_by})"
+        }])
+    return updated
+
+def set_sheet_manual_override(sheet_id: str, user_id: str, manual_override: bool = True) -> bool:
+    """Sets or clears the manual_override flag on a rate sheet without changing failsafe_status."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE rs_rate_sheets
+    SET manual_override = ?
+    WHERE id = ? AND user_id = ?
+    """, (1 if manual_override else 0, sheet_id, user_id))
+    updated = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return updated
 
 def confirm_rate_sheet(
     sheet_id: str,
@@ -307,7 +436,11 @@ def confirm_rate_sheet(
     fsc_passthrough: bool = True,
     accessorial_markup_pct: float = 0.0,
     manual_override: bool = False,
-    resolve_flags: bool = False
+    resolve_flags: bool = False,
+    no_minimum_confirmed: Optional[bool] = None,
+    weight_rounding_rule: Optional[str] = None,
+    allow_deficit_rating: Optional[bool] = None,
+    failsafe_status: Optional[str] = None,
 ) -> bool:
     """Enforces human confirmation gate (Rule 7, 19), confirms core rules (Rule 5, 15, 16), and stores broker markup settings."""
     now_ts = datetime.utcnow().isoformat()
@@ -353,6 +486,18 @@ def confirm_rate_sheet(
     if rounding_rule:
         updates.append("rounding_rule = ?")
         params.append(rounding_rule.strip())
+    if no_minimum_confirmed is not None:
+        updates.append("no_minimum_confirmed = ?")
+        params.append(1 if no_minimum_confirmed else 0)
+    if weight_rounding_rule:
+        updates.append("weight_rounding_rule = ?")
+        params.append(weight_rounding_rule.strip().upper())
+    if allow_deficit_rating is not None:
+        updates.append("allow_deficit_rating = ?")
+        params.append(1 if allow_deficit_rating else 0)
+    if failsafe_status is not None:
+        updates.append("failsafe_status = ?")
+        params.append(failsafe_status.strip())
 
     params.extend([sheet_id, user_id])
     sql = f"UPDATE rs_rate_sheets SET {', '.join(updates)} WHERE id = ? AND user_id = ?"
@@ -561,13 +706,20 @@ def insert_carrier_zones(sheet_id: str, user_id: str, zones: List[Dict[str, Any]
     conn.close()
 
 def insert_weight_breaks(sheet_id: str, user_id: str, breaks: List[Dict[str, Any]]):
-    """Inserts normalized matrix rate breaks."""
+    """Inserts normalized matrix rate breaks with explicit is_open_ended tracking."""
     if not breaks:
         return
     conn = get_connection()
     cursor = conn.cursor()
-    records = [
-        (
+    records = []
+    for b in breaks:
+        raw_max = b.get("max_weight")
+        if "is_open_ended" in b and b["is_open_ended"] is not None:
+            is_open = 1 if b["is_open_ended"] else 0
+        else:
+            is_open = 1 if (raw_max is None or float(raw_max) >= 999999.0) else 0
+        db_max = 999999.0 if raw_max is None else float(raw_max)
+        records.append((
             f"rs_wb_{uuid.uuid4().hex[:12]}",
             sheet_id,
             user_id,
@@ -575,23 +727,22 @@ def insert_weight_breaks(sheet_id: str, user_id: str, breaks: List[Dict[str, Any
             b.get("origin_spec", "").strip().upper() if b.get("origin_spec") else None,
             b.get("dest_spec", "").strip().upper() if b.get("dest_spec") else None,
             float(b.get("min_weight", 0.0)),
-            float(b.get("max_weight", 999999.0)),
+            db_max,
             b["break_name"].strip(),
             float(b["base_rate"]),
             b.get("rate_type", "CWT").upper(),
             b.get("source_cell", ""),
             b.get("break_unit", "CWT").upper(),
             float(b.get("min_units", 0.0)),
-            float(b.get("max_units", 999999.0))
-        )
-        for b in breaks
-    ]
+            float(b.get("max_units", 999999.0)),
+            is_open,
+        ))
     cursor.executemany("""
     INSERT INTO rs_weight_breaks (
         id, sheet_id, user_id, zone_code, origin_spec, dest_spec,
         min_weight, max_weight, break_name, base_rate, rate_type, source_cell,
-        break_unit, min_units, max_units
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        break_unit, min_units, max_units, is_open_ended
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, records)
     conn.commit()
     conn.close()
@@ -629,8 +780,12 @@ def insert_carrier_surcharges(sheet_id: str, user_id: str, surcharges: List[Dict
         return
     conn = get_connection()
     cursor = conn.cursor()
-    records = [
-        (
+    records = []
+    for s in surcharges:
+        raw_amt = s.get("amount")
+        is_unparsed = 1 if (raw_amt is None or s.get("is_unparsed")) else 0
+        db_amt = 0.0 if raw_amt is None else float(raw_amt)
+        records.append((
             f"rs_sur_{uuid.uuid4().hex[:12]}",
             sheet_id,
             user_id,
@@ -639,19 +794,23 @@ def insert_carrier_surcharges(sheet_id: str, user_id: str, surcharges: List[Dict
             s["condition_type"].strip().lower(),
             json.dumps(s.get("condition_expression", {})) if isinstance(s.get("condition_expression"), (dict, list)) else s.get("condition_expression"),
             s.get("fee_type", "FLAT").upper(),
-            float(s.get("amount", 0.0)),
+            db_amt,
             float(s.get("min_fee", 0.0)),
             float(s["max_fee"]) if s.get("max_fee") is not None else None,
             1 if s.get("is_waived") else 0,
-            s.get("source_cell", "")
-        )
-        for s in surcharges
-    ]
+            s.get("source_cell", ""),
+            1 if s.get("is_included") else 0,
+            (s.get("weight_base") or "BILLABLE").upper(),
+            (s.get("pct_base") or "POST_MIN_FREIGHT").upper(),
+            1 if s.get("fsc_eligible") else 0,
+            is_unparsed,
+        ))
     cursor.executemany("""
     INSERT INTO rs_carrier_surcharges (
         id, sheet_id, user_id, surcharge_code, name, condition_type,
-        condition_expression, fee_type, amount, min_fee, max_fee, is_waived, source_cell
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        condition_expression, fee_type, amount, min_fee, max_fee, is_waived, source_cell,
+        is_included, weight_base, pct_base, fsc_eligible, is_unparsed
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, records)
     conn.commit()
     conn.close()
@@ -680,7 +839,12 @@ def get_sheet_full_rules(sheet_id: str, user_id: str, limit: Optional[int] = Non
     minimums = [dict(r) for r in cursor.fetchall()]
     
     cursor.execute("SELECT * FROM rs_carrier_surcharges WHERE sheet_id = ? AND user_id = ?", (sheet_id, user_id))
-    surcharges = [dict(r) for r in cursor.fetchall()]
+    surcharges = []
+    for r in cursor.fetchall():
+        d = dict(r)
+        if d.get("is_unparsed"):
+            d["amount"] = None
+        surcharges.append(d)
     
     conn.close()
     return {

@@ -43,50 +43,20 @@ def _to_float(v: Any) -> Optional[float]:
         return None
 
 
+from services.break_header_parser import (
+    is_numeric_range_header,
+    parse_break_header,
+    parse_break_value as _shared_parse_break_value,
+)
+
+
 def parse_break_value(h: Any) -> Tuple[Optional[float], Optional[str]]:
     """
-    Parses a header cell into (break_value, weight_unit).
-    Handles: -45, +100, 100+, 100-499, 45 lb, 45#, 45 kg, 500 cwt, numeric cells.
-    Weight break values in freight are positive thresholds (e.g. -45 lbs break point is 45.0).
+    Parses a header cell into (break_value, weight_unit) using the unified break_header_parser.
+    Handles: L5C, M5C, M1M..M10M, 1,000 to 1,999 lbs, CWT:2000, 10,000+ lbs, -45, 500-999, etc.
+    Rejects rate-unit labels like 'Rate per CWT'.
     """
-    raw = _s(h)
-    if not raw:
-        return None, None
-
-    # Detect unit
-    unit: Optional[str] = None
-    u_match = WEIGHT_UNIT_REGEX.search(raw)
-    if u_match:
-        matched = u_match.group(0).lower()
-        unit = "lb" if matched in ("lb", "lbs", "#", "cwt") else "kg"
-
-    # Strip prefixes like rate, rates, break(s), ltl, min, and signs -, +, <, >
-    cleaned = re.sub(
-        r"^\s*(?:[-+<>]|rates?|breaks?|weight\s*breaks?|ltl(?:\s*rates?)?(?:\s*\([^)]*\))?|min)\s*",
-        "",
-        raw,
-        flags=re.I
-    )
-
-    # Match break pattern (-45, +100, 100+, 100-499, 45 lb, -45 (lbs), etc.)
-    m = re.match(
-        r"^\s*(?:[-+<>]|ltl|min)?\s*(\d+(?:\.\d+)?)\s*(?:\+|(?:\(?\s*(?:lbs?|kgs?|#|cwt)\s*\)?))?(?:\s*[-–]\s*(\d+(?:\.\d+)?)\s*(?:lbs?|kgs?|#|cwt)?)?\s*$",
-        cleaned,
-        re.I
-    )
-    if m:
-        val = _to_float(m.group(1))
-        if val is not None:
-            return abs(val), unit
-
-    # Pure numeric cell (e.g. openpyxl int/float or pure string number)
-    if _is_num(cleaned):
-        val = _to_float(cleaned)
-        if val is not None:
-            return abs(val), unit
-
-
-    return None, None
+    return _shared_parse_break_value(h)
 
 
 # ---------------------------------------------------------------- loading
@@ -149,12 +119,16 @@ def detect_and_flatten_headers(rows: List[List[Any]], hdr_idx: int) -> Tuple[Lis
     return curr_row, hdr_idx
 
 
-
 # ---------------------------------------------------------------- scoring
 def _header_score(header: str, field: str) -> float:
     norm = normalize_header(header)
     if not norm:
         return 0.0
+
+    # Never classify a weight break or numeric range (e.g. "1,000 to 1,999 lbs") as Origin or Destination
+    if field in ("origin", "destination"):
+        if is_numeric_range_header(header) or parse_break_header(header) is not None:
+            return 0.0
 
     synonyms = SYNONYMS.get(field, [])
     best = 0.0
@@ -162,6 +136,9 @@ def _header_score(header: str, field: str) -> float:
         syn_norm = normalize_header(syn)
         if norm == syn_norm:
             return 1.0
+        # Short 2-letter prepositions like "to" must only match exact or whole-phrase headers, not fuzzy substrings
+        if syn_norm == "to":
+            continue
         ratio = SequenceMatcher(None, norm, syn_norm).ratio()
         if ratio >= 0.75:
             best = max(best, ratio * 0.9)

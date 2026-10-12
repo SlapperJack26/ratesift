@@ -155,30 +155,131 @@ def update_tenant_fuel_settings(
     conn.close()
     return get_tenant_fuel_settings(user_id)
 
+def record_fuel_index_history(
+    index_code_or_date: str,
+    diesel_price_cad_litre: float,
+    ltl_surcharge_percent: float,
+    tl_surcharge_percent: float,
+    effective_date: Optional[str] = None,
+    source: Optional[str] = None,
+    index_code: Optional[str] = None,
+) -> None:
+    """Inserts a dated benchmark fuel index record into rs_fuel_history."""
+    # Support calling with (effective_date, diesel, ltl_pct, tl_pct, source=...) or (index_code, diesel, ltl_pct, tl_pct, effective_date)
+    if effective_date is None and len(index_code_or_date.strip()) == 10 and index_code_or_date.strip()[4] == "-":
+        eff_date_str = index_code_or_date.strip()
+        idx_code_str = (index_code or "OTA_LTL_STANDARD").strip().upper()
+    else:
+        idx_code_str = (index_code or index_code_or_date).strip().upper()
+        eff_date_str = (effective_date or datetime.utcnow().strftime("%Y-%m-%d")).strip()
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO rs_fuel_history (
+            index_code, diesel_price_cad_litre, ltl_surcharge_percent,
+            tl_surcharge_percent, effective_date, recorded_at
+        ) VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            idx_code_str,
+            float(diesel_price_cad_litre),
+            float(ltl_surcharge_percent),
+            float(tl_surcharge_percent),
+            eff_date_str,
+            datetime.utcnow().isoformat(),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+
 def resolve_effective_fuel_surcharge(
     user_id: str,
     carrier_sheet_fsc: Optional[float] = None,
-    base_freight: float = 0.0
+    base_freight: float = 0.0,
+    is_fuel_included: bool = False,
+    fuel_precedence: str = "SHEET_FIRST",
+    shipment_date: Optional[str] = None,
+    sheet_fsc_pct: Optional[float] = None,
+    mode: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Deterministically computes the active Fuel Surcharge (FSC) percentage and dollar amount.
-    - If sheet has its own explicit FSC and tenant has use_carrier_sheet_fsc=True, uses sheet's FSC.
-    - Otherwise, falls back to broker's active Canadian benchmark index (e.g. OTA 31.5%).
+    - If is_fuel_included is True (e.g. tariff states 'Fuel Included'), returns 0.0% ($0.00).
+    - If fuel_precedence == 'SHEET_FIRST' and carrier_sheet_fsc is present (>0), uses sheet's FSC.
+    - Otherwise (or when fuel_precedence == 'BENCHMARK_FIRST'), looks up the benchmark index
+      at shipment_date in rs_fuel_history (falling back to tenant active index).
+    - Uses Decimal ROUND_HALF_UP for monetary quantization.
     """
-    settings = get_tenant_fuel_settings(user_id)
+    from decimal import Decimal, ROUND_HALF_UP
 
-    if carrier_sheet_fsc is not None and carrier_sheet_fsc > 0 and settings.get("use_carrier_sheet_fsc", 1):
+    if carrier_sheet_fsc is None and sheet_fsc_pct is not None:
+        carrier_sheet_fsc = sheet_fsc_pct
+
+    if is_fuel_included:
+        return {
+            "fsc_percent": 0.0,
+            "fsc_amount": 0.0,
+            "source": "Fuel Included in Tariff (0%)",
+            "diesel_benchmark": None,
+            "index_code": "INCLUDED",
+            "effective_date": shipment_date,
+        }
+
+    settings = get_tenant_fuel_settings(user_id)
+    active_code = settings["active_index_code"]
+    prec = (fuel_precedence or "SHEET_FIRST").upper()
+    use_sheet = (
+        prec != "BENCHMARK_FIRST"
+        and carrier_sheet_fsc is not None
+        and float(carrier_sheet_fsc) > 0
+        and bool(settings.get("use_carrier_sheet_fsc", 1))
+    )
+
+    eff_date_used = settings["active_index_meta"].get("effective_date")
+
+    if use_sheet:
         fsc_pct = float(carrier_sheet_fsc)
         source = "Carrier Published Tariff FSC"
     else:
-        fsc_pct = float(settings["effective_ltl_percent"])
+        hist_pct = None
+        if shipment_date and settings.get("custom_ltl_percent") is None:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT ltl_surcharge_percent, effective_date
+                FROM rs_fuel_history
+                WHERE index_code = ? AND effective_date <= ?
+                ORDER BY effective_date DESC, id DESC
+                LIMIT 1
+                """,
+                (active_code, shipment_date),
+            )
+            h_row = cursor.fetchone()
+            conn.close()
+            if h_row:
+                hist_pct = float(h_row["ltl_surcharge_percent"])
+                eff_date_used = h_row["effective_date"]
+
+        if hist_pct is not None:
+            fsc_pct = hist_pct
+        else:
+            fsc_pct = float(settings["effective_ltl_percent"])
         source = f"{settings['active_index_meta']['index_name']} ({fsc_pct:.1f}%)"
 
-    fsc_amount = round((fsc_pct / 100.0) * base_freight, 2)
+    d_base = Decimal(str(base_freight))
+    d_pct = Decimal(str(fsc_pct))
+    d_amt = ((d_base * d_pct) / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     return {
         "fsc_percent": fsc_pct,
-        "fsc_amount": fsc_amount,
+        "fsc_amount": float(d_amt),
         "source": source,
-        "diesel_benchmark": settings["active_index_meta"].get("diesel_price_cad_litre")
+        "diesel_benchmark": settings["active_index_meta"].get("diesel_price_cad_litre"),
+        "index_code": active_code,
+        "effective_date": eff_date_used,
     }
+

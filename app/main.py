@@ -402,18 +402,48 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
         currency="CAD",
         weight_unit=weight_unit,
         dim_unit="in",
-        dim_divisor=139.0,
+        dim_divisor=None,
         rounding_rule="standard_2dp",
         confirmation_status="CONFIRMED",
         source_filename=filename,
         rating_basis="WEIGHT_CWT" if mode == "weight" else "PALLET_TIER",
         max_skid_capacity=max_skid_cap,
+        no_minimum_confirmed=1 if base_cost_col is None else 0,
+        failsafe_status="ready",
     )
 
     # Get header names
     headers = []
     if 0 <= header_row_idx < len(rows):
         headers = [str(c or "").strip() for c in rows[header_row_idx]]
+
+    from services.break_header_parser import (
+        ParsedBreak,
+        parse_break_header,
+        resolve_contiguous_weight_brackets,
+    )
+
+    # Pre-resolve weight break bounds across rate_cols using the shared parser
+    resolved_weight_by_col: Dict[int, ParsedBreak] = {}
+    if mode == "weight":
+        col_pbs = []
+        for c_idx in rate_cols:
+            h_txt = headers[c_idx] if c_idx < len(headers) else f"Col {c_idx + 1}"
+            pb = parse_break_header(h_txt, mode_hint="weight")
+            if pb is None:
+                pb = ParsedBreak(
+                    raw_header=h_txt,
+                    break_name=h_txt,
+                    min_weight=0.0,
+                    max_weight=None,
+                    is_open_ended=True,
+                    break_value=0.0,
+                )
+            col_pbs.append((c_idx, pb))
+        col_pbs.sort(key=lambda item: item[1].min_weight)
+        res_pbs, _ = resolve_contiguous_weight_brackets([item[1] for item in col_pbs])
+        for (c_idx, _), r_pb in zip(col_pbs, res_pbs):
+            resolved_weight_by_col[c_idx] = r_pb
 
     extracted_breaks = []
     cell_trace_records = []
@@ -535,13 +565,15 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
 
             # Weight brackets or pallet count
             min_weight = 0.0
-            max_weight = 999999.0
+            max_weight = None
+            is_open_ended = 1
             min_units = 0.0
             max_units = 999999.0
             rate_type = "CWT" if mode == "weight" else "PER_SKID"
             break_unit = "CWT" if mode == "weight" else "SKID"
 
             if mode == "skid":
+                max_weight = 999999.0
                 if c_idx in tier_map_by_col:
                     t_info = tier_map_by_col[c_idx]
                     min_units = float(t_info.get("min_units", 1.0))
@@ -561,21 +593,14 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
                         max_units = float(pallet_num)
                     break_name = header_text
             else:
-                break_name = header_text
-                hdr_lower = header_text.lower()
-                if "min" in hdr_lower:
-                    rate_type = "FLAT"
-                    break_unit = "FLAT"
-                    max_weight = 499.0
-                elif "<" in hdr_lower or "ltl" in hdr_lower or "-500" in hdr_lower or "-499" in hdr_lower:
-                    max_weight = 499.0
+                r_pb = resolved_weight_by_col.get(c_idx)
+                if r_pb is not None:
+                    break_name = r_pb.break_name
+                    min_weight = r_pb.min_weight
+                    max_weight = r_pb.max_weight
+                    is_open_ended = 1 if r_pb.is_open_ended else 0
                 else:
-                    nums = [float(n) for n in re.findall(r'(\d+)', header_text)]
-                    if len(nums) == 1:
-                        min_weight = nums[0]
-                    elif len(nums) >= 2:
-                        min_weight = nums[0]
-                        max_weight = nums[1]
+                    break_name = header_text
 
             extracted_breaks.append({
                 "zone_code": "DEFAULT",
@@ -583,6 +608,7 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
                 "dest_spec": dest_val,
                 "min_weight": min_weight,
                 "max_weight": max_weight,
+                "is_open_ended": is_open_ended,
                 "break_name": break_name,
                 "base_rate": rate_val,
                 "rate_type": rate_type,

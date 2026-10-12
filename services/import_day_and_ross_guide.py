@@ -43,7 +43,8 @@ def import_day_and_ross_tariff(user_id: str = "usr_alex_rivers", auto_confirm: b
         expiry_date="2024-04-30",
         version=1,
         source_filename="day_and_ross_guide_tariff.csv",
-        confirmation_status="CONFIRMED" if auto_confirm else "PENDING_REVIEW"
+        confirmation_status="CONFIRMED" if auto_confirm else "PENDING_REVIEW",
+        weight_rounding_rule="EXACT"
     )
 
     if auto_confirm:

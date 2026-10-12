@@ -45,8 +45,8 @@ class TestMilestone3DeterministicQuotingEngine(unittest.TestCase):
         )
         self.assertEqual(quote["carrier_name"], "Day & Ross")
         self.assertEqual(quote["rate_break"], "CWT:1000")
-        self.assertEqual(quote["base_rate"], 402.08)
-        self.assertEqual(quote["final_total"], 402.08)
+        self.assertEqual(quote["base_rate"], 402.09)
+        self.assertEqual(quote["final_total"], 402.09)
         self.assertEqual(quote["currency"], "CAD")
 
     def test_02_rule9_dimensional_weight_and_divisor(self):
@@ -96,9 +96,9 @@ class TestMilestone3DeterministicQuotingEngine(unittest.TestCase):
         self.assertEqual(surcharges["POWER_TAILGATE"]["amount"], 0.00)
         self.assertTrue(surcharges["POWER_TAILGATE"]["is_waived"])
 
-        # Base 402.08 + Surcharges 20.00 = 422.08
+        # Base 402.09 + Surcharges 20.00 = 422.09
         self.assertEqual(quote["total_surcharges"], 20.00)
-        self.assertEqual(quote["final_total"], 422.08)
+        self.assertEqual(quote["final_total"], 422.09)
 
     def test_04_rule12_carrier_minimum_charge_comparison(self):
         """Rule 12: Compare calculated total to carrier minimum charge and use whichever is higher."""
@@ -115,7 +115,7 @@ class TestMilestone3DeterministicQuotingEngine(unittest.TestCase):
             accessorials=[],
             shipment_date="2024-01-15"
         )
-        self.assertEqual(quote["base_rate"], 17.25)
+        self.assertEqual(quote["base_rate"], 17.26)
         self.assertEqual(quote["carrier_min_charge"], 96.89)
         self.assertGreater(quote["min_charge_adjustment"], 0.0)
         self.assertEqual(quote["final_total"], 96.89)
@@ -156,7 +156,7 @@ class TestMilestone3DeterministicQuotingEngine(unittest.TestCase):
 
         # All 10 calculations must be identical to the penny
         self.assertEqual(len(set(results)), 1)
-        self.assertEqual(results[0], 422.08)
+        self.assertEqual(results[0], 422.09)
 
     def test_07_rule19_unconfirmed_sheet_gated(self):
         """Rule 19: Never quote a rate from a sheet that has not passed confirmation."""
@@ -197,8 +197,8 @@ class TestMilestone3DeterministicQuotingEngine(unittest.TestCase):
         
         quote = data["quotes"][0]
         self.assertEqual(quote["carrier_name"], "Day & Ross")
-        self.assertEqual(quote["final_total"], 422.08)
-        self.assertEqual(quote["base_rate"], 402.08)
+        self.assertEqual(quote["final_total"], 422.09)
+        self.assertEqual(quote["base_rate"], 402.09)
         self.assertEqual(len(quote["surcharges"]), 2)
 
         # Test audit log retrieval via API (Rule 30)

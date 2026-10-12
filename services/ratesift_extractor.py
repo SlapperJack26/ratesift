@@ -27,10 +27,17 @@ class RateSiftExtractor:
     - Stores as 'PENDING_REVIEW' until human confirmation (Rule 7, 19).
     """
 
-    def __init__(self, file_bytes: bytes, filename: str, user_id: str):
+    def __init__(
+        self,
+        file_bytes: bytes,
+        filename: str,
+        user_id: str,
+        column_overrides: Optional[Dict[str, Any]] = None,
+    ):
         self.file_bytes = file_bytes
         self.filename = filename
         self.user_id = user_id
+        self.column_overrides = column_overrides or {}
         
         self.raw_cells: List[Dict[str, Any]] = []
         self.surcharges: List[Dict[str, Any]] = []
@@ -41,23 +48,27 @@ class RateSiftExtractor:
         self.hidden_rows_found: List[int] = []
         self.hidden_cols_found: List[str] = []
         self.flagged_items: List[Dict[str, Any]] = []
+        self.override_conflicts: List[Dict[str, Any]] = []
         
         self.metadata = {
             "carrier_name": "Unknown Carrier",
             "service_name": "Standard Freight",
             "tariff_ref": None,
-            "mode": "LTL",
-            "currency": None,
-            "weight_unit": None,
+            "mode": (self.column_overrides.get("sheet_mode") or "LTL").upper(),
+            "currency": self.column_overrides.get("currency"),
+            "weight_unit": self.column_overrides.get("weight_unit"),
             "dim_unit": None,
-            "dim_divisor": 139.0,
+            "dim_divisor": self.column_overrides.get("dim_divisor"),
             "dim_min_rule": None,
             "rounding_rule": "standard_2dp",
+            "weight_rounding_rule": self.column_overrides.get("weight_rounding_rule", "CEIL_1LB"),
             "effective_date": None,
             "expiry_date": None,
             "version": 1,
             "rating_basis": "WEIGHT_CWT",
-            "max_skid_capacity": 10
+            "max_skid_capacity": 10,
+            "no_minimum_confirmed": bool(self.column_overrides.get("no_minimum_confirmed", False)),
+            "failsafe_status": self.column_overrides.get("failsafe_status", "ready"),
         }
 
     def process(self) -> Dict[str, Any]:
@@ -71,6 +82,15 @@ class RateSiftExtractor:
 
         # Validate mandatory units (Rule 5)
         self._validate_units_and_currency()
+
+        # Check PARCEL missing dim_divisor gate
+        if self.metadata.get("mode", "").upper() == "PARCEL" and not self.metadata.get("dim_divisor"):
+            self._flag_item(
+                "Metadata",
+                "MISSING_PARCEL_DIM_DIVISOR",
+                "None",
+                "PARCEL tariff is missing a dimensional weight divisor (dim_divisor). Sheet is non-quotable until specified.",
+            )
 
         # Save to Normalized Database with status PENDING_REVIEW (Rule 7, 19)
         sheet_id = create_rate_sheet(
@@ -91,7 +111,10 @@ class RateSiftExtractor:
             source_filename=self.filename,
             confirmation_status="PENDING_REVIEW",
             rating_basis=self.metadata.get("rating_basis", "WEIGHT_CWT"),
-            max_skid_capacity=self.metadata.get("max_skid_capacity", 10)
+            max_skid_capacity=self.metadata.get("max_skid_capacity", 10),
+            weight_rounding_rule=self.metadata.get("weight_rounding_rule", "CEIL_1LB"),
+            no_minimum_confirmed=1 if self.metadata.get("no_minimum_confirmed") else 0,
+            failsafe_status=self.metadata.get("failsafe_status", "ready"),
         )
 
         # Batch insert extracted entities
@@ -108,6 +131,7 @@ class RateSiftExtractor:
             "metadata": self.metadata,
             "flagged_items_count": len(self.flagged_items),
             "flagged_items": self.flagged_items,
+            "override_conflicts": self.override_conflicts,
             "surcharges_count": len(self.surcharges),
             "surcharges": self.surcharges[:10],
             "rate_breaks_count": len(self.rate_breaks),
@@ -333,14 +357,21 @@ class RateSiftExtractor:
             
         coord = f"{sheet_tab}!Row {row_num}"
 
+        # Explicit dimensional divisor detection (e.g. "divisor 139" or "dim divisor: 166")
+        div_m = re.search(r'(?:dim(?:ensional)?\s*)?divisor(?:\s*of|\s*[:=])?\s*(\d{2,3}(?:\.\d+)?)', full_text, re.I)
+        if div_m and not self.metadata.get("dim_divisor"):
+            self.metadata["dim_divisor"] = float(div_m.group(1))
+            self._record_cell(sheet_tab, coord, "dim_divisor", full_text[:80], str(self.metadata["dim_divisor"]), 1.0)
+
         # 1. Appointment Deliveries
         if re.search(r'\bappointment\b', full_text, re.I):
-            amt = self._extract_amount(full_text) or 20.00
-            self._add_surcharge("APPOINTMENT", "Appointment Deliveries", "appointment", "FLAT", amt, coord=coord)
+            is_waived = bool(re.search(r'waived|no charge|included|\$0(?:\.00)?', full_text, re.I))
+            amt = 0.0 if is_waived else self._extract_amount(full_text)
+            self._add_surcharge("APPOINTMENT", "Appointment Deliveries", "appointment", "FLAT", amt, is_waived=is_waived, coord=coord)
 
         # 2. After Hour Service
         if re.search(r'after hour|after-hours|between 7 pm & 6 am', full_text, re.I):
-            amt = self._extract_amount(full_text) or 200.00
+            amt = self._extract_amount(full_text)
             self._add_surcharge("AFTER_HOURS_METRO", "After Hours Service (Metro Terminal)", "after_hours", "FLAT", amt, coord=coord)
             if "AMAZON" in full_text.upper() and "$50.00" in full_text:
                 self._add_surcharge("AFTER_HOURS_AMAZON", "After Hours Amazon Delivery (6pm - 11pm)", "amazon_delivery", "FLAT", 50.00, coord=coord)
@@ -356,29 +387,30 @@ class RateSiftExtractor:
                 self._add_surcharge("DANGEROUS_GOODS_HEAVY", "Dangerous Goods (1000 - 99999 lbs)", "dangerous_goods", "FLAT", amt2,
                                     cond_expr={"weight_min": 1000, "weight_max": 99999}, coord=coord)
             else:
-                amt = float(amounts[0]) if amounts else 49.50
+                amt = float(amounts[0]) if amounts else None
                 self._add_surcharge("DANGEROUS_GOODS", "Dangerous Goods Surcharge", "dangerous_goods", "FLAT", amt, coord=coord)
 
         # 4. Power Tailgate / Liftgate (Waived check)
         if re.search(r'tailgate|liftgate', full_text, re.I):
             is_waived = bool(re.search(r'waived|no charge|included|\$0(?:\.00)?', full_text, re.I))
-            amt = 0.0 if is_waived else (self._extract_amount(full_text) or 45.00)
+            amt = 0.0 if is_waived else self._extract_amount(full_text)
             self._add_surcharge("POWER_TAILGATE", "Power Tailgate / Liftgate", "liftgate", "FLAT", amt, is_waived=is_waived, coord=coord)
 
         # 5. Private Residence / Limited Access
         if re.search(r'private residence|limited access', full_text, re.I):
-            amt = self._extract_amount(full_text) or 20.00
+            is_waived = bool(re.search(r'waived|no charge|included|\$0(?:\.00)?', full_text, re.I))
+            amt = 0.0 if is_waived else self._extract_amount(full_text)
             if "pickup" in full_text.lower():
-                self._add_surcharge("RESIDENTIAL_PICKUP", "Private Residence / Limited Access Pickup", "residential_pickup", "FLAT", amt, coord=coord)
+                self._add_surcharge("RESIDENTIAL_PICKUP", "Private Residence / Limited Access Pickup", "residential_pickup", "FLAT", amt, is_waived=is_waived, coord=coord)
             else:
-                self._add_surcharge("RESIDENTIAL_DELIVERY", "Private Residence / Limited Access Delivery", "residential_delivery", "FLAT", amt, coord=coord)
+                self._add_surcharge("RESIDENTIAL_DELIVERY", "Private Residence / Limited Access Delivery", "residential_delivery", "FLAT", amt, is_waived=is_waived, coord=coord)
 
         # 6. Protective Heated Service
         if re.search(r'protective service|heated service|protect from freeze', full_text, re.I):
             pct_match = re.search(r'(\d+(?:\.\d+)?)\s*%', full_text)
             min_match = re.search(r'not less than\s*\$(\d+(?:\.\d{2})?)', full_text)
-            pct = float(pct_match.group(1)) if pct_match else 18.0
-            min_fee = float(min_match.group(1)) if min_match else 39.50
+            pct = float(pct_match.group(1)) if pct_match else None
+            min_fee = float(min_match.group(1)) if min_match else 0.0
             self._add_surcharge("PROTECTIVE_SERVICE", "Protective Heated Service", "heated", "PERCENTAGE", pct, min_fee=min_fee, coord=coord)
 
         # 7. Reconsignment / Diversion
@@ -386,34 +418,34 @@ class RateSiftExtractor:
             cwt_match = re.search(r'\$(\d+(?:\.\d{2})?)\s*cwt', full_text, re.I)
             min_match = re.search(r'min\s*\$(\d+(?:\.\d{2})?)', full_text, re.I)
             max_match = re.search(r'max\s*\$(\d+(?:\.\d{2})?)', full_text, re.I)
-            rate = float(cwt_match.group(1)) if cwt_match else 6.50
-            min_f = float(min_match.group(1)) if min_match else 70.0
-            max_f = float(max_match.group(1)) if max_match else 285.0
+            rate = float(cwt_match.group(1)) if cwt_match else self._extract_amount(full_text)
+            min_f = float(min_match.group(1)) if min_match else 0.0
+            max_f = float(max_match.group(1)) if max_match else None
             self._add_surcharge("RECONSIGNMENT", "Reconsignment / Diversion", "reconsignment", "CWT", rate, min_fee=min_f, max_fee=max_f, coord=coord)
 
         # 8. Storage Fees
         if re.search(r'storage fee', full_text, re.I):
-            amt = self._extract_amount(full_text) or 35.00
+            amt = self._extract_amount(full_text)
             self._add_surcharge("STORAGE", "Storage Fee (per day)", "storage", "FLAT", amt, coord=coord)
 
         # 9. Tradeshow Deliveries
         if re.search(r'tradeshow', full_text, re.I):
             cwt_match = re.search(r'\$(\d+(?:\.\d{2})?)\s*cwt', full_text, re.I)
             min_match = re.search(r'minimum of\s*\$(\d+(?:\.\d{2})?)', full_text, re.I)
-            rate = float(cwt_match.group(1)) if cwt_match else 4.15
-            min_f = float(min_match.group(1)) if min_match else 167.0
+            rate = float(cwt_match.group(1)) if cwt_match else self._extract_amount(full_text)
+            min_f = float(min_match.group(1)) if min_match else 0.0
             self._add_surcharge("TRADESHOW", "Tradeshow Delivery Surcharge", "tradeshow", "CWT", rate, min_fee=min_f, coord=coord)
 
         # 10. Inside Pickup / Delivery (Waived check)
         if re.search(r'inside pickup|inside delivery', full_text, re.I):
             is_waived = bool(re.search(r'waived|no charge|\$0(?:\.00)?', full_text, re.I))
-            amt = 0.0 if is_waived else (self._extract_amount(full_text) or 40.00)
+            amt = 0.0 if is_waived else self._extract_amount(full_text)
             self._add_surcharge("INSIDE_PICKUP_DELIVERY", "Inside Pickup / Delivery", "inside_delivery", "FLAT", amt, is_waived=is_waived, coord=coord)
 
         # 11. Cost Recovery Ferry Surcharge (Newfoundland)
         if "FERRY SURCHARGE" in full_text.upper():
             amt = self._extract_amount(full_text)
-            if amt:
+            if amt is not None:
                 if "LTL" in full_text.upper() or "< 7500" in full_text or "less than 7500" in full_text:
                     self._add_surcharge("FERRY_LTL", "Cost Recovery Ferry Surcharge - LTL (<7500 lbs)", "dest_province:NL",
                                         "FLAT", amt, cond_expr={"weight_max": 7500}, coord=coord)
@@ -426,9 +458,19 @@ class RateSiftExtractor:
                 else:
                     self._add_surcharge("FERRY_SURCHARGE", "Cost Recovery Ferry Surcharge", "dest_province:NL", "FLAT", amt, coord=coord)
 
-        # 12. Fuel Surcharge index
-        if re.search(r'fuel surcharge|fca fuel', full_text, re.I):
-            self._add_surcharge("FUEL_FSC", "Fuel Surcharge (FCA Index)", "fuel", "PERCENTAGE", 0.0, coord=coord)
+        # 12. Fuel Surcharge (3-State: Included 0%, Explicit %, or FCA/Benchmark Index)
+        if re.search(r'fuel\s+included|fsc\s+included|no\s+fuel\s+surcharge|0(?:\.0+)?\s*%\s*(?:fuel|fsc)', full_text, re.I):
+            self._add_surcharge("FUEL_FSC", "Fuel Surcharge (Included)", "fuel", "PERCENTAGE", 0.0, is_included=True, coord=coord)
+        elif re.search(r'fuel surcharge|fca fuel', full_text, re.I):
+            pct_m = re.search(r'(\d+(?:\.\d+)?)\s*%', full_text)
+            if pct_m:
+                self._add_surcharge("FUEL_FSC", "Fuel Surcharge", "fuel", "PERCENTAGE", float(pct_m.group(1)), is_included=False, coord=coord)
+            elif re.search(r'fca|index|matrix|schedule|standard', full_text, re.I):
+                # Reference to external/benchmark fuel index; do NOT insert a $0.00 row that shadows resolve_effective_fuel_surcharge
+                self.metadata["fuel_index_ref"] = "FCA_BENCHMARK"
+                self._record_cell(sheet_tab, coord, "fuel_index_ref", full_text[:80], "FCA_BENCHMARK", 1.0)
+            else:
+                self._add_surcharge("FUEL_FSC", "Fuel Surcharge (Unparsed)", "fuel", "PERCENTAGE", None, is_included=False, coord=coord)
 
         # 13. Weight & Density restrictions
         if re.search(r'minimum weight restriction|lbs per cu ft', full_text, re.I):
@@ -441,16 +483,6 @@ class RateSiftExtractor:
     def _classify_skid_break_header(self, header_text: str) -> Optional[Tuple[str, int, int]]:
         """
         Classifies header into (break_name, min_units, max_units) if it is a Skid break.
-        Handles:
-        - 'L5C', '<5', 'L5', '1-4', '1-4 SKIDS', '1 TO 4 PALLETS' -> ('L5C', 1, 4)
-        - '5C', '5', '5 SKIDS' -> ('5C', 5, 5)
-        - '1M', '6', '6 SKIDS' -> ('1M', 6, 6) (1 more skid past 5)
-        - '2M', '7', '7 SKIDS' -> ('2M', 7, 7) (2 more skids past 5)
-        - '5M', '8-9', '8-9 SKIDS' -> ('5M', 8, 9) (covers 8-9 skids before 10M)
-        - '10M', '10', '10 SKIDS' -> ('10M', 10, 10) (10 skids break point / ceiling)
-        - General regex ranges: '1-4', '5-6', '7-8', '9-10'
-        - General '<N', 'LN', 'LNC'
-        - General 'NM'
         """
         h_clean = header_text.strip().upper()
         if not h_clean:
@@ -464,20 +496,25 @@ class RateSiftExtractor:
         m_range = re.match(r'^(\d+)\s*[-–TOto]+\s*(\d+)(?:\s*(?:SKIDS?|PALLETS?|SKD|PLT))?$', h_clean)
         if m_range:
             n1, n2 = int(m_range.group(1)), int(m_range.group(2))
-            return (h_clean, n1, n2)
+            if n2 <= 50:
+                return (h_clean, n1, n2)
+            return None
 
         # Less than N: 'L5C', 'L5', '<5', '<5C', 'LESS THAN 5'
-        # In skid tariffs, L5C caps at 5 skids (1-5 skids).
         m_less = re.match(r'^(?:L|<|LESS THAN\s*)(\d+)C?$', h_clean)
         if m_less:
             n = int(m_less.group(1))
-            return (h_clean, 1, n if n <= 5 else max(1, n - 1))
+            if n <= 50:
+                return (h_clean, 1, n if n <= 5 else max(1, n - 1))
+            return None
 
         # NC: '5C'
         m_c = re.match(r'^(\d+)C$', h_clean)
         if m_c:
             n = int(m_c.group(1))
-            return (h_clean, n, n)
+            if n <= 50:
+                return (h_clean, n, n)
+            return None
 
         # NM: '1M', '2M', '5M', '10M'
         m_m = re.match(r'^(\d+)M$', h_clean)
@@ -495,8 +532,9 @@ class RateSiftExtractor:
                 return (h_clean, 8, 9)
             elif n == 10:
                 return (h_clean, 10, 10)
-            else:
+            elif n <= 50:
                 return (h_clean, n, n)
+            return None
 
         # Single with skid / pallet label: '5 SKIDS', '10 PALLETS'
         m_single = re.match(r'^(\d+)\s*(?:SKIDS?|PALLETS?|SKD|PLT)$', h_clean)
@@ -509,12 +547,12 @@ class RateSiftExtractor:
     def _scan_skid_ltl_tables(self, grid: List[List[str]], sheet_tab: str) -> bool:
         """
         Detects and extracts Skid/Pallet-based LTL rate sheets.
-        Formula: Base Freight = MC + (SkidCount x BreakRate)
-        Supports:
-        - Bidirectional lanes ('BETWEEN')
-        - Header synonyms: MC, MIN, BASE, FLAT, BASE COST
-        - Dynamic breakpoint detection for max_skid_capacity
+        Note: If column_overrides explicitly sets mode == 'weight', or if the row contains
+        explicit weight break headers (like M5C, M1M, lbs, cwt, >=100), do NOT misclassify as skid.
         """
+        if (self.column_overrides.get("mode") or "").lower() == "weight":
+            return False
+
         header_row_idx = None
         skid_cols = []
         col_mc = None
@@ -533,6 +571,10 @@ class RateSiftExtractor:
 
         for r_idx, row in enumerate(grid):
             row_clean = [c.strip().upper() for c in row]
+            # If row contains explicit weight markers (M5C, M1M, LBS, KG, CWT, or numbers >= 100), it's a weight table
+            if any(re.search(r'\b(?:M\d+[CM]|LBS?|KGS?|CWT)\b|\b\d{3,}\b', c) for c in row_clean):
+                continue
+
             found_breaks = []
             found_mc = None
             found_orig = None
@@ -674,12 +716,211 @@ class RateSiftExtractor:
 
         return extracted_breaks_count > 0
 
+    def _scan_header_based_weight_table(self, grid: List[List[str]], sheet_tab: str) -> bool:
+        """
+        Uses the shared break_header_parser (and optional column_overrides) to extract
+        header-based weight-break tables, validate bracket contiguity (flagging gaps),
+        and log MAPPING_OVERRIDE_CONFLICT when column_overrides disagrees with auto-detection.
+        """
+        from services.break_header_parser import (
+            ParsedBreak,
+            parse_break_header,
+            resolve_contiguous_weight_brackets,
+        )
+
+        origin_synonyms = {"ORIGIN", "FROM", "ORIG", "SHIP FROM", "PICKUP", "ORIGIN CITY"}
+        dest_synonyms = {"DESTINATION", "TO", "DEST", "SHIP TO", "CONSIGNEE", "DESTINATION CITY"}
+        min_synonyms = {"MIN", "MINIMUM", "MIN CHARGE", "MINIMUM CHARGE", "MC"}
+
+        tab_ov = self.column_overrides.get(sheet_tab) if isinstance(self.column_overrides.get(sheet_tab), dict) else self.column_overrides
+        hdr_idx = tab_ov.get("header_row")
+        col_orig = tab_ov.get("origin", tab_ov.get("origin_col"))
+        col_dest = tab_ov.get("destination", tab_ov.get("destination_col"))
+        col_min = tab_ov.get("base_cost_column", tab_ov.get("min_charge_col"))
+        override_rate_cols = tab_ov.get("rate_columns")
+        override_col_breaks = dict(tab_ov.get("column_breaks") or {})
+        if isinstance(tab_ov.get("rate_breaks"), list):
+            for rb_entry in tab_ov["rate_breaks"]:
+                if isinstance(rb_entry, dict) and rb_entry.get("col") is not None and rb_entry.get("break_value") is not None:
+                    override_col_breaks[int(rb_entry["col"])] = float(rb_entry["break_value"])
+            if not override_rate_cols:
+                override_rate_cols = [int(rb_entry["col"]) for rb_entry in tab_ov["rate_breaks"] if isinstance(rb_entry, dict) and rb_entry.get("col") is not None]
+
+        # Auto-detect header row if not explicitly specified in overrides
+        if hdr_idx is None:
+            for r_idx, row in enumerate(grid[:25]):
+                cand_orig, cand_dest, cand_min = col_orig, col_dest, col_min
+                cand_breaks_count = 0
+                for c_idx, cell in enumerate(row):
+                    cell_str = cell.strip()
+                    cell_up = cell_str.upper()
+                    if cell_up in origin_synonyms and cand_orig is None:
+                        cand_orig = c_idx
+                    elif cell_up in dest_synonyms and cand_dest is None:
+                        cand_dest = c_idx
+                    elif cell_up in min_synonyms and cand_min is None:
+                        cand_min = c_idx
+                    else:
+                        pb = parse_break_header(cell_str, mode_hint="weight")
+                        if pb is not None or c_idx in override_col_breaks or str(c_idx) in override_col_breaks:
+                            cand_breaks_count += 1
+                if cand_orig is not None and cand_dest is not None and cand_breaks_count >= 2:
+                    hdr_idx = r_idx
+                    col_orig = cand_orig
+                    col_dest = cand_dest
+                    col_min = cand_min
+                    break
+
+        found_breaks: List[Tuple[int, ParsedBreak]] = []
+
+        if hdr_idx is not None and 0 <= int(hdr_idx) < len(grid):
+            hdr_idx = int(hdr_idx)
+            row = grid[hdr_idx]
+            for c_idx, cell in enumerate(row):
+                cell_up = cell.strip().upper()
+                if col_orig is None and cell_up in origin_synonyms:
+                    col_orig = c_idx
+                elif col_dest is None and cell_up in dest_synonyms:
+                    col_dest = c_idx
+                elif col_min is None and cell_up in min_synonyms:
+                    col_min = c_idx
+
+            target_cols = override_rate_cols if override_rate_cols else range(len(row))
+            for c_idx in target_cols:
+                if c_idx in (col_orig, col_dest, col_min) or c_idx >= len(row):
+                    continue
+                cell_str = row[c_idx].strip()
+                auto_parsed = parse_break_header(cell_str, mode_hint="weight")
+                override_val = override_col_breaks.get(c_idx, override_col_breaks.get(str(c_idx)))
+                if override_val is not None:
+                    ov_float = float(override_val)
+                    if auto_parsed is not None and abs(auto_parsed.min_weight - ov_float) > 1e-6:
+                        conflict_entry = {
+                            "column": c_idx,
+                            "header": cell_str,
+                            "auto_detected_min_weight": auto_parsed.min_weight,
+                            "override_min_weight": ov_float,
+                        }
+                        self.override_conflicts.append(conflict_entry)
+                        self._record_cell(
+                            sheet_tab,
+                            f"{sheet_tab}!Row {hdr_idx + 1}, Col {c_idx + 1}",
+                            "MAPPING_OVERRIDE_CONFLICT",
+                            cell_str,
+                            str(ov_float),
+                            1.0,
+                            needs_review=False,
+                            notes=f"User column_overrides ({ov_float}) overrode detector ({auto_parsed.min_weight})",
+                        )
+                    found_breaks.append((
+                        c_idx,
+                        ParsedBreak(
+                            raw_header=cell_str or f"Col_{c_idx}",
+                            break_name=cell_str or f"CWT:{int(ov_float)}",
+                            min_weight=ov_float,
+                            max_weight=None,
+                            is_open_ended=True,
+                            break_value=ov_float,
+                            unit=auto_parsed.unit if auto_parsed else None,
+                        ),
+                    ))
+                elif auto_parsed is not None:
+                    found_breaks.append((c_idx, auto_parsed))
+
+        if hdr_idx is None or col_orig is None or col_dest is None or not found_breaks:
+            return False
+
+        # Detect unit from break headers if not yet set
+        for _, pb in found_breaks:
+            if pb.unit and not self.metadata.get("weight_unit"):
+                self.metadata["weight_unit"] = pb.unit
+
+        # Sort breaks by min_weight and validate contiguity
+        found_breaks.sort(key=lambda item: item[1].min_weight)
+        raw_pbs = [item[1] for item in found_breaks]
+        resolved_pbs, gap_errors = resolve_contiguous_weight_brackets(raw_pbs)
+        for err in gap_errors:
+            self._flag_item(
+                f"{sheet_tab}!Row {hdr_idx + 1}",
+                "BRACKET_GAP_DETECTED",
+                ", ".join(pb.raw_header for pb in raw_pbs),
+                err,
+            )
+
+        # Missing Minimum Column check (GT-20)
+        if col_min is None and not self.metadata.get("no_minimum_confirmed"):
+            if self.metadata.get("failsafe_status") == "ready":
+                self.metadata["failsafe_status"] = "missing_minimum_column"
+            self._flag_item(
+                f"{sheet_tab}!Row {hdr_idx + 1}",
+                "MISSING_MINIMUM_COLUMN",
+                "No MIN column",
+                "Weight rate sheet has no Minimum Charge column and 'no_minimum_confirmed' is False.",
+            )
+
+        col_and_resolved = list(zip([item[0] for item in found_breaks], resolved_pbs))
+        extracted_count = 0
+
+        for r_idx in range(hdr_idx + 1, len(grid)):
+            row = grid[r_idx]
+            if len(row) <= max(col_orig, col_dest):
+                continue
+            orig_val = row[col_orig].strip()
+            dest_val = row[col_dest].strip()
+            if not orig_val or not dest_val or orig_val.upper() in ("ORIGIN", "TOTAL", "NOTES"):
+                continue
+
+            coord_base = f"{sheet_tab}!Row {r_idx + 1}"
+            if col_min is not None and col_min < len(row):
+                m_str = row[col_min].replace("$", "").replace(",", "").strip()
+                try:
+                    m_val = float(m_str)
+                    self.minimums.append({
+                        "zone_code": "P2P",
+                        "origin_spec": orig_val,
+                        "dest_spec": dest_val,
+                        "min_charge": m_val,
+                        "source_cell": f"{coord_base}, Col {col_min + 1}",
+                    })
+                except ValueError:
+                    pass
+
+            for c_idx, r_pb in col_and_resolved:
+                if c_idx >= len(row):
+                    continue
+                v_str = row[c_idx].replace("$", "").replace(",", "").strip()
+                if not v_str:
+                    continue
+                try:
+                    rate_val = float(v_str)
+                except ValueError:
+                    continue
+                self.rate_breaks.append({
+                    "zone_code": "P2P",
+                    "origin_spec": orig_val,
+                    "dest_spec": dest_val,
+                    "min_weight": r_pb.min_weight,
+                    "max_weight": r_pb.max_weight,
+                    "is_open_ended": 1 if r_pb.is_open_ended else 0,
+                    "break_name": r_pb.break_name,
+                    "base_rate": rate_val,
+                    "rate_type": "CWT",
+                    "source_cell": f"{coord_base}, Col {c_idx + 1}",
+                })
+                extracted_count += 1
+
+        return extracted_count > 0
+
     def _scan_csv_tables(self, rows: List[List[str]]):
         self._scan_grid_tables(rows, sheet_tab="Sheet 1")
 
     def _scan_grid_tables(self, grid: List[List[str]], sheet_tab: str):
         # 0. Check for Skid-Based LTL table format
         if self._scan_skid_ltl_tables(grid, sheet_tab=sheet_tab):
+            return
+
+        # 0b. Check for header-based Weight/CWT table format (with shared parser & overrides)
+        if self._scan_header_based_weight_table(grid, sheet_tab=sheet_tab):
             return
 
         for r_idx, row in enumerate(grid):
@@ -705,6 +946,7 @@ class RateSiftExtractor:
                     "dest_spec": dest,
                     "min_weight": 0.0,
                     "max_weight": 44000.0,
+                    "is_open_ended": 0,
                     "break_name": "FLAT:PTL",
                     "base_rate": flat_rate,
                     "rate_type": "FLAT",
@@ -724,6 +966,7 @@ class RateSiftExtractor:
                     "dest_spec": dest,
                     "min_weight": 0.0,
                     "max_weight": 44000.0,
+                    "is_open_ended": 0,
                     "break_name": "FLAT:PTL",
                     "base_rate": flat_rate,
                     "rate_type": "FLAT",
@@ -773,11 +1016,11 @@ class RateSiftExtractor:
                 })
 
                 # Explicit CWT Weight Breaks (Rule 1, 8)
-                self.rate_breaks.append({"zone_code": "P2P", "origin_spec": origin, "dest_spec": dest, "min_weight": 0, "max_weight": 999, "break_name": "LTL", "base_rate": ltl_val, "rate_type": "CWT", "source_cell": f"{coord_base}, Col F"})
-                self.rate_breaks.append({"zone_code": "P2P", "origin_spec": origin, "dest_spec": dest, "min_weight": 1000, "max_weight": 1999, "break_name": "CWT:1000", "base_rate": cwt1k, "rate_type": "CWT", "source_cell": f"{coord_base}, Col G"})
-                self.rate_breaks.append({"zone_code": "P2P", "origin_spec": origin, "dest_spec": dest, "min_weight": 2000, "max_weight": 4999, "break_name": "CWT:2000", "base_rate": cwt2k, "rate_type": "CWT", "source_cell": f"{coord_base}, Col H"})
-                self.rate_breaks.append({"zone_code": "P2P", "origin_spec": origin, "dest_spec": dest, "min_weight": 5000, "max_weight": 9999, "break_name": "CWT:5000", "base_rate": cwt5k, "rate_type": "CWT", "source_cell": f"{coord_base}, Col I"})
-                self.rate_breaks.append({"zone_code": "P2P", "origin_spec": origin, "dest_spec": dest, "min_weight": 10000, "max_weight": 999999, "break_name": "CWT:10000", "base_rate": cwt10k, "rate_type": "CWT", "source_cell": f"{coord_base}, Col J"})
+                self.rate_breaks.append({"zone_code": "P2P", "origin_spec": origin, "dest_spec": dest, "min_weight": 0, "max_weight": 999, "is_open_ended": 0, "break_name": "LTL", "base_rate": ltl_val, "rate_type": "CWT", "source_cell": f"{coord_base}, Col F"})
+                self.rate_breaks.append({"zone_code": "P2P", "origin_spec": origin, "dest_spec": dest, "min_weight": 1000, "max_weight": 1999, "is_open_ended": 0, "break_name": "CWT:1000", "base_rate": cwt1k, "rate_type": "CWT", "source_cell": f"{coord_base}, Col G"})
+                self.rate_breaks.append({"zone_code": "P2P", "origin_spec": origin, "dest_spec": dest, "min_weight": 2000, "max_weight": 4999, "is_open_ended": 0, "break_name": "CWT:2000", "base_rate": cwt2k, "rate_type": "CWT", "source_cell": f"{coord_base}, Col H"})
+                self.rate_breaks.append({"zone_code": "P2P", "origin_spec": origin, "dest_spec": dest, "min_weight": 5000, "max_weight": 9999, "is_open_ended": 0, "break_name": "CWT:5000", "base_rate": cwt5k, "rate_type": "CWT", "source_cell": f"{coord_base}, Col I"})
+                self.rate_breaks.append({"zone_code": "P2P", "origin_spec": origin, "dest_spec": dest, "min_weight": 10000, "max_weight": None, "is_open_ended": 1, "break_name": "CWT:10000", "base_rate": cwt10k, "rate_type": "CWT", "source_cell": f"{coord_base}, Col J"})
 
                 # Record cell coordinates for traceability (Rule 3)
                 if row_num % 15 == 0:
@@ -790,7 +1033,6 @@ class RateSiftExtractor:
         """Rule 5: Detect and record currency, weight unit, dimension unit. Never assume."""
         # 1. Currency
         if not self.metadata["currency"]:
-            # Scan text for Canadian vs US currency hints
             full_sample = " ".join([c["raw_value"] for c in self.raw_cells[:50]])
             if "Cdn funds" in full_sample or "CAD" in full_sample:
                 self.metadata["currency"] = "CAD"
@@ -816,15 +1058,17 @@ class RateSiftExtractor:
             self.metadata["dim_unit"] = "in"
 
     def _add_surcharge(self, code: str, name: str, condition: str, fee_type: str,
-                       amount: float, min_fee: float = 0.0, max_fee: Optional[float] = None,
-                       is_waived: bool = False, cond_expr: Any = None, coord: str = ""):
+                       amount: Optional[float], min_fee: float = 0.0, max_fee: Optional[float] = None,
+                       is_waived: bool = False, is_included: bool = False, cond_expr: Any = None, coord: str = ""):
         existing = next((s for s in self.surcharges if s["surcharge_code"] == code), None)
         if existing:
             if is_waived:
                 existing["is_waived"] = 1
                 existing["amount"] = 0.0
+                existing["is_unparsed"] = 0
             return
 
+        is_unparsed = amount is None and not is_waived and not is_included
         self.surcharges.append({
             "surcharge_code": code,
             "name": name,
@@ -835,10 +1079,20 @@ class RateSiftExtractor:
             "min_fee": min_fee,
             "max_fee": max_fee,
             "is_waived": 1 if is_waived else 0,
+            "is_included": 1 if is_included else 0,
+            "is_unparsed": 1 if is_unparsed else 0,
             "source_cell": coord
         })
-        self._record_cell("Surcharges", coord, f"surcharge.{code.lower()}", f"${amount:.2f}", str(amount), 1.0)
-
+        if is_unparsed:
+            self._flag_item(
+                coord,
+                f"surcharge.{code.lower()}.unparsed",
+                name,
+                f"Surcharge '{name}' ({code}) detected without a parseable rate (Rule 1 & 6).",
+            )
+        else:
+            amt_str = f"${amount:.2f}" if amount is not None else "$0.00"
+            self._record_cell("Surcharges", coord, f"surcharge.{code.lower()}", amt_str, str(amount), 1.0)
 
     def _record_cell(self, tab: str, coord: str, field: str, raw: str, extracted: str, confidence: float, needs_review: bool = False, notes: str = ""):
         self.raw_cells.append({
