@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.responses import JSONResponse
 
-from app.config import ALLOWED_EXT, MAX_BYTES, PREVIEW_ROWS
+from app.config import ALLOWED_EXT, MAX_BYTES, PREVIEW_ROWS, MAX_DATA_COLS, MAX_DATA_ROWS
 from app.detect import analyze, validate_mapping
 from app.ingest import IngestionError, check_uncached_formulas, load_sheet_grid
 from app.jobs import job_store
@@ -77,7 +77,11 @@ def get_current_user_and_tenant(request: Request) -> Tuple[Optional[str], Option
     # Inspect RateSift session token
     try:
         from services.auth_service import validate_session_token
-        token = request.cookies.get("ratesift_session") or request.cookies.get("shipflow_session")
+        token = (
+            request.cookies.get("quotelytics_session")
+            or request.cookies.get("ratesift_session")
+            or request.cookies.get("shipflow_session")
+        )
         if not token:
             auth_header = request.headers.get("Authorization")
             if auth_header and auth_header.startswith("Bearer "):
@@ -288,7 +292,11 @@ def confirm_mapping(job_id: str, req: MappingRequest, request: Request):
 
     # Load rows for full validation
     from app.ingest import load_sheet_grid
-    rows, _ = load_sheet_grid(job["path"], job["ext"])
+    rows, _ = load_sheet_grid(
+        job["path"],
+        job["ext"],
+        sheet_name=req.sheet_name or job.get("sheet_name"),
+    )
 
     errors = validate_mapping(
         rows,
@@ -371,8 +379,15 @@ def ingest_job_to_ratesift(job: Dict[str, Any], user_id: str) -> Optional[str]:
     import re
     from openpyxl.utils import get_column_letter
 
-    rows, ext = load_sheet_grid(job["path"], job["ext"])
     mapping = job.get("mapping") or {}
+    target_sheet = mapping.get("sheet_name") or job.get("sheet_name")
+    rows, ext = load_sheet_grid(
+        job["path"],
+        job["ext"],
+        sheet_name=target_sheet,
+        max_rows=MAX_DATA_ROWS,
+        max_cols=MAX_DATA_COLS,
+    )
     header_row_idx = int(mapping.get("header_row", 0))
     origin_col = mapping.get("origin")
     dest_col = mapping.get("destination")

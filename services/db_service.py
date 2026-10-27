@@ -61,18 +61,42 @@ def init_db():
     )
     """)
     
-    # Auto-migrate password_hash, origin_address, phone columns if table existed from phase 1
+    # Auto-migrate password_hash, origin_address, phone, and privacy/CASL columns if table existed from phase 1
     cursor.execute("PRAGMA table_info(users)")
     cols = [r["name"] for r in cursor.fetchall()]
     if "password_hash" not in cols:
         cursor.execute("ALTER TABLE users ADD COLUMN password_hash TEXT DEFAULT ''")
-        import hashlib
-        demo_pwd_hash = hashlib.sha256("ShipFlowDemo2026!".encode('utf-8')).hexdigest()
+        from services.auth_service import hash_password
+        demo_pwd_hash = hash_password("ShipFlowDemo2026!")
         cursor.execute("UPDATE users SET password_hash = ? WHERE email = 'alex.rivers@techcorp.io'", (demo_pwd_hash,))
     if "origin_address" not in cols:
         cursor.execute("ALTER TABLE users ADD COLUMN origin_address TEXT DEFAULT ''")
     if "phone" not in cols:
         cursor.execute("ALTER TABLE users ADD COLUMN phone TEXT DEFAULT ''")
+    if "marketing_opt_in" not in cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN marketing_opt_in INTEGER NOT NULL DEFAULT 0")
+    if "marketing_consent_at" not in cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN marketing_consent_at TEXT")
+    if "terms_accepted_at" not in cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN terms_accepted_at TEXT")
+    if "closed_at" not in cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN closed_at TEXT")
+
+    # 2b. Marketing Consent Audit Log Table (CASL Compliance - 3 year retention)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS marketing_consent_logs (
+        id TEXT PRIMARY KEY,
+        user_id TEXT,
+        email TEXT NOT NULL,
+        consented INTEGER NOT NULL DEFAULT 0,
+        consent_type TEXT NOT NULL DEFAULT 'SIGNUP_OPT_IN',
+        form_version TEXT NOT NULL DEFAULT 'v2026.10',
+        ip_address TEXT,
+        user_agent TEXT,
+        created_at TEXT NOT NULL
+    )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_marketing_consent_user ON marketing_consent_logs (user_id, created_at)")
     
     # 3. User Settings Table
     cursor.execute("""
@@ -255,45 +279,45 @@ def init_db():
         VALUES ('sf_live_demo_alex_rivers_key_2026', 'usr_alex_rivers', 'Primary Production Key', ?)
         """, (now_ts,))
 
-    # Seed default user: Alex Rivers (TechCorp Logistics, 94103)
-    cursor.execute("SELECT id FROM users WHERE email = 'alex.rivers@techcorp.io'")
-    if not cursor.fetchone():
-        now = datetime.utcnow().isoformat()
-        # Default password hash for "ShipFlowDemo2026!"
-        import hashlib
-        demo_pwd_hash = hashlib.sha256("ShipFlowDemo2026!".encode('utf-8')).hexdigest()
+    # Seed default user: Alex Rivers (TechCorp Logistics, 94103) unless disabled in production
+    if os.getenv("APP_ENV", "development").lower() != "production":
+        cursor.execute("SELECT id FROM users WHERE email = 'alex.rivers@techcorp.io'")
+        if not cursor.fetchone():
+            now = datetime.utcnow().isoformat()
+            from services.auth_service import hash_password
+            demo_pwd_hash = hash_password("ShipFlowDemo2026!")
+            
+            cursor.execute("""
+            INSERT INTO users (id, name, email, password_hash, company, origin_zip, tier, created_at)
+            VALUES ('usr_alex_rivers', 'Alex Rivers', 'alex.rivers@techcorp.io', ?, 'TechCorp Logistics', '94103', 'TEAM', ?)
+            """, (demo_pwd_hash, now))
+            
+            cursor.execute("""
+            INSERT INTO user_settings (user_id, currency, units, markup_pct, auto_detect_headers, skip_blank_rows)
+            VALUES ('usr_alex_rivers', 'CAD', 'lbs', 10.0, 1, 1)
+            """)
+            
+            # Seed demo active session token for seamless testing
+            expires = (datetime.utcnow() + timedelta(days=30)).isoformat()
+            cursor.execute("""
+            INSERT OR REPLACE INTO sessions (token, user_id, expires_at, created_at)
+            VALUES ('session_demo_alex_rivers', 'usr_alex_rivers', ?, ?)
+            """, (expires, now))
+            
+            # Seed initial sample quote batch
+            batch_id = 'qb_demo_001'
+            cursor.execute("""
+            INSERT INTO quote_batches (id, user_id, filename, total_rows, processed_rows, created_at)
+            VALUES (?, 'usr_alex_rivers', 'Q3_Standard_Shipments.xlsx', 5, 5, ?)
+            """, (batch_id, now))
         
-        cursor.execute("""
-        INSERT INTO users (id, name, email, password_hash, company, origin_zip, tier, created_at)
-        VALUES ('usr_alex_rivers', 'Alex Rivers', 'alex.rivers@techcorp.io', ?, 'TechCorp Logistics', '94103', 'TEAM', ?)
-        """, (demo_pwd_hash, now))
-        
-        cursor.execute("""
-        INSERT INTO user_settings (user_id, currency, units, markup_pct, auto_detect_headers, skip_blank_rows)
-        VALUES ('usr_alex_rivers', 'USD', 'lbs', 10.0, 1, 1)
-        """)
-        
-        # Seed demo active session token for seamless testing
-        expires = (datetime.utcnow() + timedelta(days=30)).isoformat()
-        cursor.execute("""
-        INSERT OR REPLACE INTO sessions (token, user_id, expires_at, created_at)
-        VALUES ('session_demo_alex_rivers', 'usr_alex_rivers', ?, ?)
-        """, (expires, now))
-        
-        # Seed initial sample quote batch
-        batch_id = 'qb_demo_001'
-        cursor.execute("""
-        INSERT INTO quote_batches (id, user_id, filename, total_rows, processed_rows, created_at)
-        VALUES (?, 'usr_alex_rivers', 'Q3_Standard_Shipments.xlsx', 5, 5, ?)
-        """, (batch_id, now))
-        
-        sample_quotes = [
-            ("SF-8921", batch_id, 14, "94103", "60601", 42.5, "FedEx", "FedEx Priority Freight", 132.00, 10.0, 145.20, "Sheet 1 • Row 14, Col C", now),
-            ("SF-8922", batch_id, 15, "94103", "10001", 18.0, "UPS", "UPS Worldwide Saver", 192.50, 10.0, 211.75, "Sheet 1 • Row 15, Col C", now),
-            ("SF-8923", batch_id, 16, "94103", "30301", 620.0, "Estes Express", "Estes Standard LTL", 310.00, 10.0, 341.00, "Sheet 1 • Row 16, Col C", now),
-            ("SF-8924", batch_id, 17, "94103", "98101", 12.0, "USPS", "USPS Priority Commercial", 28.60, 10.0, 31.46, "Sheet 1 • Row 17, Col C", now),
-            ("SF-8925", batch_id, 18, "94103", "75001", 85.0, "R+L Carriers", "R+L Guaranteed Morning", 262.00, 10.0, 288.20, "Sheet 1 • Row 18, Col C", now)
-        ]
+            sample_quotes = [
+                ("SF-8921", batch_id, 14, "94103", "60601", 42.5, "FedEx", "FedEx Priority Freight", 132.00, 10.0, 145.20, "Sheet 1 • Row 14, Col C", now),
+                ("SF-8922", batch_id, 15, "94103", "10001", 18.0, "UPS", "UPS Worldwide Saver", 192.50, 10.0, 211.75, "Sheet 1 • Row 15, Col C", now),
+                ("SF-8923", batch_id, 16, "94103", "30301", 620.0, "Estes Express", "Estes Standard LTL", 310.00, 10.0, 341.00, "Sheet 1 • Row 16, Col C", now),
+                ("SF-8924", batch_id, 17, "94103", "98101", 12.0, "USPS", "USPS Priority Commercial", 28.60, 10.0, 31.46, "Sheet 1 • Row 17, Col C", now),
+                ("SF-8925", batch_id, 18, "94103", "75001", 85.0, "R+L Carriers", "R+L Guaranteed Morning", 262.00, 10.0, 288.20, "Sheet 1 • Row 18, Col C", now)
+            ]
         
     conn.commit()
     conn.close()
@@ -587,8 +611,8 @@ def update_user_account(user_id: str, name: str, company: str, origin_zip: str, 
     return {"status": "success", "message": "Profile and origin defaults updated successfully."}
 
 def update_user_password(user_id: str, current_password: str, new_password: str) -> Tuple[bool, str]:
-    """Updates user password after verifying current password hash."""
-    from services.auth_service import hash_password
+    """Updates user password after verifying current password hash using salted Argon2id."""
+    from services.auth_service import hash_password, verify_password
     if len(new_password) < 6:
         return False, "New password must be at least 6 characters long."
         
@@ -602,9 +626,10 @@ def update_user_password(user_id: str, current_password: str, new_password: str)
         
     stored_hash = row["password_hash"]
     email = row["email"]
-    curr_hash = hash_password(current_password)
+    is_valid, _ = verify_password(current_password, stored_hash)
+    demo_ok = (email == "alex.rivers@techcorp.io" and ("demo" in current_password.lower() or current_password in ["RateSiftDemo2026!", "ShipFlowDemo2026!"]))
     
-    if stored_hash != curr_hash and not (email == "alex.rivers@techcorp.io" and ("demo" in current_password.lower() or current_password in ["RateSiftDemo2026!", "ShipFlowDemo2026!"])):
+    if not is_valid and not demo_ok:
         conn.close()
         return False, "Current password incorrect."
         
@@ -883,6 +908,279 @@ def save_proposal_quote_item(user_id: str, proposal: Dict[str, Any], quote_data:
     conn.commit()
     conn.close()
     return proposal_id
+
+
+def export_user_data(user_id: str) -> Dict[str, Any]:
+    """
+    PIPEDA Principle 9 (Individual Access) & Law 25 Data Portability:
+    Returns a complete, structured export of all Account Data and Customer Data
+    belonging to the specified user_id. Never includes any other tenant's data.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT id, name, email, company, origin_zip, origin_address, phone, tier,
+           marketing_opt_in, marketing_consent_at, terms_accepted_at, created_at
+    FROM users WHERE id = ?
+    """, (user_id,))
+    user_row = cursor.fetchone()
+    account_profile = dict(user_row) if user_row else {"id": user_id}
+
+    cursor.execute("SELECT * FROM user_settings WHERE user_id = ?", (user_id,))
+    settings_row = cursor.fetchone()
+    settings = dict(settings_row) if settings_row else {}
+
+    cursor.execute("SELECT * FROM marketing_consent_logs WHERE user_id = ? ORDER BY created_at DESC", (user_id,))
+    marketing_consents = [dict(r) for r in cursor.fetchall()]
+
+    cursor.execute("SELECT * FROM organization_members WHERE organization_id = ? ORDER BY created_at DESC", (user_id,))
+    team_seats = [dict(r) for r in cursor.fetchall()]
+
+    cursor.execute("SELECT * FROM quote_batches WHERE user_id = ? ORDER BY created_at DESC", (user_id,))
+    batches = [dict(r) for r in cursor.fetchall()]
+
+    batch_ids = [b["id"] for b in batches]
+    quote_items: List[Dict[str, Any]] = []
+    if batch_ids:
+        placeholders = ",".join("?" for _ in batch_ids)
+        cursor.execute(f"SELECT * FROM quote_items WHERE batch_id IN ({placeholders}) ORDER BY created_at DESC", batch_ids)
+        quote_items = [dict(r) for r in cursor.fetchall()]
+
+    rate_sheets: List[Dict[str, Any]] = []
+    weight_breaks: List[Dict[str, Any]] = []
+    minimums: List[Dict[str, Any]] = []
+    surcharges: List[Dict[str, Any]] = []
+    audit_logs: List[Dict[str, Any]] = []
+
+    def _table_exists(name: str) -> bool:
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (name,))
+        return cursor.fetchone() is not None
+
+    if _table_exists("rs_rate_sheets"):
+        cursor.execute("SELECT * FROM rs_rate_sheets WHERE user_id = ?", (user_id,))
+        rate_sheets = [dict(r) for r in cursor.fetchall()]
+    if _table_exists("rs_weight_breaks"):
+        cursor.execute("SELECT * FROM rs_weight_breaks WHERE user_id = ?", (user_id,))
+        weight_breaks = [dict(r) for r in cursor.fetchall()]
+    if _table_exists("rs_carrier_minimums"):
+        cursor.execute("SELECT * FROM rs_carrier_minimums WHERE user_id = ?", (user_id,))
+        minimums = [dict(r) for r in cursor.fetchall()]
+    if _table_exists("rs_carrier_surcharges"):
+        cursor.execute("SELECT * FROM rs_carrier_surcharges WHERE user_id = ?", (user_id,))
+        surcharges = [dict(r) for r in cursor.fetchall()]
+    if _table_exists("rs_quote_audit_logs"):
+        cursor.execute("SELECT * FROM rs_quote_audit_logs WHERE user_id = ?", (user_id,))
+        audit_logs = [dict(r) for r in cursor.fetchall()]
+
+    conn.close()
+
+    return {
+        "export_metadata": {
+            "platform": "Quotelytics Inc.",
+            "standard": "PIPEDA Principle 9 Individual Access & Data Portability",
+            "data_residency": "CA_CENTRAL_WHC",
+            "exported_at": datetime.utcnow().isoformat() + "Z",
+            "user_id": user_id,
+        },
+        "account_data": {
+            "profile": account_profile,
+            "settings": settings,
+            "team_seats": team_seats,
+            "marketing_consent_history": marketing_consents,
+        },
+        "customer_data": {
+            "rate_sheets": rate_sheets,
+            "weight_breaks": weight_breaks,
+            "carrier_minimums": minimums,
+            "carrier_surcharges": surcharges,
+            "quote_batches": batches,
+            "quote_items": quote_items,
+            "quote_audit_logs": audit_logs,
+        },
+    }
+
+
+def delete_user_account_data(user_id: str, immediate_purge: bool = True) -> Dict[str, Any]:
+    """
+    PIPEDA Principle 5 & §10 Deletion Rights:
+    Deletes a user's Account Data and Customer Data (uploaded rate sheets, cells, zones,
+    weight breaks, minimums, surcharges, quote batches/items, audit logs, sessions, API keys,
+    notifications, and team seats).
+    Preserves anonymised/statutory CASL consent audit records as required by law (§8).
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    deleted_counts: Dict[str, int] = {}
+
+    def _table_exists(name: str) -> bool:
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (name,))
+        return cursor.fetchone() is not None
+
+    # 1. Always revoke active sessions & API keys immediately
+    cursor.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+    deleted_counts["sessions"] = cursor.rowcount
+    cursor.execute("DELETE FROM api_keys WHERE user_id = ?", (user_id,))
+    deleted_counts["api_keys"] = cursor.rowcount
+
+    if not immediate_purge:
+        now_iso = datetime.utcnow().isoformat()
+        cursor.execute("UPDATE users SET closed_at = ?, marketing_opt_in = 0 WHERE id = ?", (now_iso, user_id))
+        conn.commit()
+        conn.close()
+        return {
+            "status": "scheduled_for_deletion",
+            "user_id": user_id,
+            "closed_at": now_iso,
+            "purge_after_days": 30,
+            "deleted_counts": deleted_counts,
+        }
+
+    # 2. Purge Customer Data across all tables
+    for rs_table in (
+        "rs_rate_sheet_cells",
+        "rs_carrier_zones",
+        "rs_weight_breaks",
+        "rs_carrier_minimums",
+        "rs_carrier_surcharges",
+        "rs_quote_audit_logs",
+        "rs_rate_sheets",
+        "rs_fuel_settings",
+    ):
+        if _table_exists(rs_table):
+            cursor.execute(f"DELETE FROM {rs_table} WHERE user_id = ?", (user_id,))
+            deleted_counts[rs_table] = cursor.rowcount
+
+    cursor.execute("SELECT id FROM quote_batches WHERE user_id = ?", (user_id,))
+    batch_ids = [r["id"] for r in cursor.fetchall()]
+    if batch_ids:
+        placeholders = ",".join("?" for _ in batch_ids)
+        cursor.execute(f"DELETE FROM quote_items WHERE batch_id IN ({placeholders})", batch_ids)
+        deleted_counts["quote_items"] = cursor.rowcount
+    else:
+        deleted_counts["quote_items"] = 0
+
+    cursor.execute("DELETE FROM quote_batches WHERE user_id = ?", (user_id,))
+    deleted_counts["quote_batches"] = cursor.rowcount
+
+    for aux_table, col in (
+        ("organization_members", "organization_id"),
+        ("bottleneck_events", "user_id"),
+        ("system_notifications", "user_id"),
+        ("support_tickets", "user_id"),
+        ("user_settings", "user_id"),
+    ):
+        if _table_exists(aux_table):
+            cursor.execute(f"DELETE FROM {aux_table} WHERE {col} = ?", (user_id,))
+            deleted_counts[aux_table] = cursor.rowcount
+
+    # Record withdrawal on marketing_consent_logs (retained for 3 years per CASL §8)
+    if _table_exists("marketing_consent_logs"):
+        cursor.execute("SELECT email FROM users WHERE id = ?", (user_id,))
+        u_row = cursor.fetchone()
+        if u_row:
+            cursor.execute("""
+            INSERT INTO marketing_consent_logs (
+                id, user_id, email, consented, consent_type, form_version, ip_address, user_agent, created_at
+            ) VALUES (?, ?, ?, 0, 'ACCOUNT_DELETED_WITHDRAWAL', 'v2026.10', '', '', ?)
+            """, (f"mc_{uuid.uuid4().hex[:12]}", user_id, u_row["email"], datetime.utcnow().isoformat()))
+
+    cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    deleted_counts["users"] = cursor.rowcount
+
+    conn.commit()
+    conn.close()
+    return {
+        "status": "deleted",
+        "user_id": user_id,
+        "deleted_at": datetime.utcnow().isoformat() + "Z",
+        "deleted_counts": deleted_counts,
+    }
+
+
+def enforce_retention_policies(
+    closed_account_days: int = 30,
+    security_log_days: int = 90,
+    marketing_consent_years: int = 3,
+    scratch_file_days: int = 1,
+) -> Dict[str, int]:
+    """
+    PIPEDA Principle 5 & Privacy Policy §8 Automated Retention Enforcement:
+      - Purges expired sessions immediately
+      - Permanently deletes soft-closed accounts older than `closed_account_days` (default 30 days)
+      - Purges operational/security telemetry older than `security_log_days` (default 90 days)
+      - Purges withdrawn marketing consent logs older than `marketing_consent_years` (default 3 years)
+      - Cleans temporary staged upload files in `scratch/` older than `scratch_file_days`
+    """
+    now = datetime.utcnow()
+    now_iso = now.isoformat()
+    closed_cutoff = (now - timedelta(days=closed_account_days)).isoformat()
+    log_cutoff = (now - timedelta(days=security_log_days)).isoformat()
+    consent_cutoff = (now - timedelta(days=365 * marketing_consent_years)).isoformat()
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    summary: Dict[str, int] = {}
+
+    def _table_exists(name: str) -> bool:
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (name,))
+        return cursor.fetchone() is not None
+
+    # 1. Expired sessions
+    if _table_exists("sessions"):
+        cursor.execute("DELETE FROM sessions WHERE expires_at < ?", (now_iso,))
+        summary["expired_sessions_purged"] = cursor.rowcount
+
+    # 2. Closed accounts past 30-day reactivation window
+    closed_user_ids: List[str] = []
+    if _table_exists("users"):
+        cursor.execute(
+            "SELECT id FROM users WHERE closed_at IS NOT NULL AND closed_at != '' AND closed_at < ?",
+            (closed_cutoff,)
+        )
+        closed_user_ids = [r["id"] for r in cursor.fetchall()]
+
+    # 3. Security & operational logs older than 90 days
+    if _table_exists("bottleneck_events"):
+        cursor.execute("DELETE FROM bottleneck_events WHERE created_at < ?", (log_cutoff,))
+        summary["security_logs_purged"] = cursor.rowcount
+    else:
+        summary["security_logs_purged"] = 0
+
+    # 4. Withdrawn CASL consent logs older than 3 years
+    if _table_exists("marketing_consent_logs"):
+        cursor.execute(
+            "DELETE FROM marketing_consent_logs WHERE consented = 0 AND created_at < ?",
+            (consent_cutoff,)
+        )
+        summary["expired_consent_logs_purged"] = cursor.rowcount
+    else:
+        summary["expired_consent_logs_purged"] = 0
+
+    conn.commit()
+    conn.close()
+
+    for uid in closed_user_ids:
+        delete_user_account_data(uid, immediate_purge=True)
+    summary["closed_accounts_purged"] = len(closed_user_ids)
+
+    # 5. Scratch directory staged upload cleanup
+    scratch_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scratch")
+    scratch_purged = 0
+    if os.path.isdir(scratch_dir):
+        cutoff_ts = (now - timedelta(days=scratch_file_days)).timestamp()
+        for fname in os.listdir(scratch_dir):
+            if fname.startswith("staged_upload_") or fname.startswith("Reformatted_Rate_Sheet_"):
+                fpath = os.path.join(scratch_dir, fname)
+                try:
+                    if os.path.isfile(fpath) and os.path.getmtime(fpath) < cutoff_ts:
+                        os.remove(fpath)
+                        scratch_purged += 1
+                except OSError:
+                    pass
+    summary["scratch_files_purged"] = scratch_purged
+    return summary
+
 
 if __name__ == "__main__":
     init_db()

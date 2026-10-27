@@ -12,7 +12,7 @@ def test_failsafe_demo_page_renders(client):
     """Verify that the failsafe UI playground endpoint loads with HTTP 200 and renders modal."""
     resp = client.get("/failsafe/demo")
     assert resp.status_code == 200
-    assert "RateSift Header Failsafe & Mapping Modal Playground" in resp.text
+    assert "Quotelytics Header Failsafe & Mapping Modal Playground" in resp.text or "RateSift Header Failsafe & Mapping Modal Playground" in resp.text
     assert "failsafe-mapping-modal" in resp.text
     assert "FailsafeModal" in resp.text
     assert "Confirm Mapping & Process" in resp.text

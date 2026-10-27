@@ -210,14 +210,14 @@ def _load_csv(path: str, max_rows: int, max_cols: int) -> List[List[Any]]:
             for i, r in enumerate(reader):
                 if i >= max_rows:
                     break
-                rows.append([cell[:max_cols] for cell in r[:max_cols]])
+                rows.append([cell for cell in r[:max_cols]])
     except UnicodeDecodeError:
         with open(path, newline="", encoding="latin-1") as f:
             reader = csv.reader(f)
             for i, r in enumerate(reader):
                 if i >= max_rows:
                     break
-                rows.append([cell[:max_cols] for cell in r[:max_cols]])
+                rows.append([cell for cell in r[:max_cols]])
     return rows
 
 

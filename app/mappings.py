@@ -42,22 +42,35 @@ def save_mapping(
     header_names: List[str],
 ) -> str:
     """Saves or updates a confirmed mapping fingerprint in the database."""
-    mapping_id = uuid.uuid4().hex
     now = time.time()
     conn = job_store._get_connection()
-    cur = conn.cursor()
-    cur.execute("""
-    INSERT OR REPLACE INTO failsafe_saved_mappings (
-        id, fingerprint, user_id, tenant_id, sheet_name, mapping_json,
-        column_count, header_names_json, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-    """, (
-        mapping_id, fingerprint, user_id, tenant_id, sheet_name,
-        json.dumps(mapping), column_count, json.dumps(header_names), now, now
-    ))
-    conn.commit()
-    conn.close()
-    return mapping_id
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id, created_at FROM failsafe_saved_mappings WHERE fingerprint = ? AND (tenant_id = ? OR (tenant_id IS NULL AND ? IS NULL));",
+            (fingerprint, tenant_id, tenant_id),
+        )
+        existing = cur.fetchone()
+        if existing:
+            mapping_id = existing["id"]
+            created_at = existing["created_at"]
+        else:
+            mapping_id = uuid.uuid4().hex
+            created_at = now
+
+        cur.execute("""
+        INSERT OR REPLACE INTO failsafe_saved_mappings (
+            id, fingerprint, user_id, tenant_id, sheet_name, mapping_json,
+            column_count, header_names_json, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """, (
+            mapping_id, fingerprint, user_id, tenant_id, sheet_name,
+            json.dumps(mapping), column_count, json.dumps(header_names), created_at, now
+        ))
+        conn.commit()
+        return mapping_id
+    finally:
+        conn.close()
 
 
 def find_saved_mapping(
@@ -66,21 +79,23 @@ def find_saved_mapping(
 ) -> Optional[Dict[str, Any]]:
     """Looks up exact fingerprint match scoped to tenant."""
     conn = job_store._get_connection()
-    cur = conn.cursor()
-    cur.execute("""
-    SELECT * FROM failsafe_saved_mappings
-    WHERE fingerprint = ? AND (tenant_id = ? OR (tenant_id IS NULL AND ? IS NULL))
-    ORDER BY updated_at DESC LIMIT 1;
-    """, (fingerprint, tenant_id, tenant_id))
-    row = cur.fetchone()
-    conn.close()
-    if not row:
-        return None
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+        SELECT * FROM failsafe_saved_mappings
+        WHERE fingerprint = ? AND (tenant_id = ? OR (tenant_id IS NULL AND ? IS NULL))
+        ORDER BY updated_at DESC LIMIT 1;
+        """, (fingerprint, tenant_id, tenant_id))
+        row = cur.fetchone()
+        if not row:
+            return None
 
-    res = dict(row)
-    res["mapping"] = json.loads(res["mapping_json"])
-    res["header_names"] = json.loads(res["header_names_json"])
-    return res
+        res = dict(row)
+        res["mapping"] = json.loads(res["mapping_json"])
+        res["header_names"] = json.loads(res["header_names_json"])
+        return res
+    finally:
+        conn.close()
 
 
 def find_near_match(
@@ -93,14 +108,16 @@ def find_near_match(
     Finds nearest saved mapping for suggestion banner. Never auto-applies silently.
     """
     conn = job_store._get_connection()
-    cur = conn.cursor()
-    cur.execute("""
-    SELECT * FROM failsafe_saved_mappings
-    WHERE tenant_id = ? OR (tenant_id IS NULL AND ? IS NULL)
-    ORDER BY updated_at DESC LIMIT 20;
-    """, (tenant_id, tenant_id))
-    rows = cur.fetchall()
-    conn.close()
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+        SELECT * FROM failsafe_saved_mappings
+        WHERE tenant_id = ? OR (tenant_id IS NULL AND ? IS NULL)
+        ORDER BY updated_at DESC LIMIT 20;
+        """, (tenant_id, tenant_id))
+        rows = cur.fetchall()
+    finally:
+        conn.close()
 
     curr_str = " ".join(normalize_header(h) for h in header_row_values)
     best_match = None
@@ -122,37 +139,40 @@ def find_near_match(
 def list_saved_mappings(tenant_id: Optional[str] = None, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     """Lists saved mappings scoped to tenant/user."""
     conn = job_store._get_connection()
-    cur = conn.cursor()
-    if tenant_id:
-        cur.execute("SELECT * FROM failsafe_saved_mappings WHERE tenant_id = ? ORDER BY updated_at DESC;", (tenant_id,))
-    elif user_id:
-        cur.execute("SELECT * FROM failsafe_saved_mappings WHERE user_id = ? ORDER BY updated_at DESC;", (user_id,))
-    else:
-        cur.execute("SELECT * FROM failsafe_saved_mappings ORDER BY updated_at DESC;")
-    rows = cur.fetchall()
-    conn.close()
-
-    result = []
-    for r in rows:
-        d = dict(r)
-        d["mapping"] = json.loads(d["mapping_json"])
-        d["header_names"] = json.loads(d["header_names_json"])
-        result.append(d)
-    return result
+    try:
+        cur = conn.cursor()
+        if tenant_id:
+            cur.execute("SELECT * FROM failsafe_saved_mappings WHERE tenant_id = ? ORDER BY updated_at DESC;", (tenant_id,))
+        elif user_id:
+            cur.execute("SELECT * FROM failsafe_saved_mappings WHERE user_id = ? ORDER BY updated_at DESC;", (user_id,))
+        else:
+            cur.execute("SELECT * FROM failsafe_saved_mappings ORDER BY updated_at DESC;")
+        rows = cur.fetchall()
+        result = []
+        for r in rows:
+            d = dict(r)
+            d["mapping"] = json.loads(d["mapping_json"])
+            d["header_names"] = json.loads(d["header_names_json"])
+            result.append(d)
+        return result
+    finally:
+        conn.close()
 
 
 def delete_saved_mapping(mapping_id: str, tenant_id: Optional[str] = None) -> bool:
     """Deletes saved mapping with tenant scoping check."""
     conn = job_store._get_connection()
-    cur = conn.cursor()
-    if tenant_id:
-        cur.execute("DELETE FROM failsafe_saved_mappings WHERE id = ? AND tenant_id = ?;", (mapping_id, tenant_id))
-    else:
-        cur.execute("DELETE FROM failsafe_saved_mappings WHERE id = ?;", (mapping_id,))
-    deleted = cur.rowcount > 0
-    conn.commit()
-    conn.close()
-    return deleted
+    try:
+        cur = conn.cursor()
+        if tenant_id:
+            cur.execute("DELETE FROM failsafe_saved_mappings WHERE id = ? AND tenant_id = ?;", (mapping_id, tenant_id))
+        else:
+            cur.execute("DELETE FROM failsafe_saved_mappings WHERE id = ?;", (mapping_id,))
+        deleted = cur.rowcount > 0
+        conn.commit()
+        return deleted
+    finally:
+        conn.close()
 
 
 # ---------------------------------------------------------------- Audit log
@@ -180,11 +200,13 @@ def record_audit_log(
         "sheet_name": mapping.get("sheet_name"),
     }
     conn = job_store._get_connection()
-    cur = conn.cursor()
-    cur.execute("""
-    INSERT INTO failsafe_audit_logs (
-        id, job_id, user_id, tenant_id, decision_type, mapping_summary_json, timestamp
-    ) VALUES (?, ?, ?, ?, ?, ?, ?);
-    """, (log_id, job_id, user_id, tenant_id, decision_type, json.dumps(sanitized_mapping), now))
-    conn.commit()
-    conn.close()
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+        INSERT INTO failsafe_audit_logs (
+            id, job_id, user_id, tenant_id, decision_type, mapping_summary_json, timestamp
+        ) VALUES (?, ?, ?, ?, ?, ?, ?);
+        """, (log_id, job_id, user_id, tenant_id, decision_type, json.dumps(sanitized_mapping), now))
+        conn.commit()
+    finally:
+        conn.close()

@@ -2,6 +2,8 @@ import os
 import io
 import json
 import uuid
+import re
+import openpyxl
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Response, Request, Depends
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,6 +11,7 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 from pydantic import BaseModel
 
+from app.output_safety import sanitize_workbook
 from services.ratesift_excel_reformatter import (
     analyze_excel_sheet,
     build_reformatted_excel_workbook,
@@ -34,8 +37,13 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 os.makedirs(STATIC_DIR, exist_ok=True)
 
-# Initialize database and tables
+# Initialize database and tables, then run automated PIPEDA retention cleanup
 init_db()
+try:
+    from services.db_service import enforce_retention_policies
+    enforce_retention_policies()
+except Exception:
+    pass
 
 app = FastAPI(
     title="Ratesift Quoting API",
@@ -62,9 +70,44 @@ app.include_router(failsafe_router)
 app.include_router(failsafe_router, prefix="/api/failsafe")
 
 
+SESSION_COOKIE_NAMES = ("quotelytics_session", "ratesift_session", "shipflow_session")
+
+
+def _should_set_secure_cookie(request: Optional[Request] = None) -> bool:
+    """Enforces Secure flag on HTTPS requests or when APP_ENV=production / COOKIE_SECURE=true."""
+    if os.getenv("APP_ENV", "").lower() == "production" or os.getenv("COOKIE_SECURE", "").lower() in ("1", "true", "yes"):
+        return True
+    if request is not None:
+        if request.url.scheme == "https" or request.headers.get("x-forwarded-proto", "").lower() == "https":
+            return True
+    return False
+
+
+def _set_session_cookies(response: Response, token: str, request: Optional[Request] = None) -> None:
+    secure_flag = _should_set_secure_cookie(request)
+    for cookie_key in SESSION_COOKIE_NAMES:
+        response.set_cookie(
+            key=cookie_key,
+            value=token,
+            max_age=30 * 86400,
+            httponly=True,
+            samesite="lax",
+            secure=secure_flag,
+        )
+
+
+def _clear_session_cookies(response: Response) -> None:
+    for cookie_key in SESSION_COOKIE_NAMES:
+        response.delete_cookie(key=cookie_key)
+
+
 def get_current_user_from_request(request: Request) -> Optional[dict]:
     """Helper to extract user from session cookie or Authorization header."""
-    token = request.cookies.get("ratesift_session") or request.cookies.get("shipflow_session")
+    token = (
+        request.cookies.get("quotelytics_session")
+        or request.cookies.get("ratesift_session")
+        or request.cookies.get("shipflow_session")
+    )
     if not token:
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
@@ -125,6 +168,11 @@ def get_get_started_page(request: Request):
     if user:
         return RedirectResponse(url="/console/new-quote", status_code=303)
     return serve_template("public/get_started.html")
+
+@app.get("/privacy", response_class=HTMLResponse, tags=["Public Pages"])
+def get_privacy_page():
+    """Public PIPEDA Privacy Policy Page"""
+    return serve_template("public/privacy.html")
 
 # ==========================================
 # PRIVATE CONSOLE PAGES (Route Guarded)
@@ -202,26 +250,13 @@ def get_showcase_page():
 # ==========================================
 
 @app.post("/api/auth/login", tags=["Authentication"])
-def api_login(response: Response, email: str = Form(...), password: str = Form(...)):
-    """Authenticates credentials and issues an HTTP-only session cookie."""
+def api_login(request: Request, response: Response, email: str = Form(...), password: str = Form(...)):
+    """Authenticates credentials and issues an HTTP-only, SameSite=Lax, Secure session cookie."""
     user, token = authenticate_and_create_session(email, password)
     if not user or not token:
         raise HTTPException(status_code=401, detail="Invalid email or password.")
-        
-    response.set_cookie(
-        key="ratesift_session",
-        value=token,
-        max_age=30 * 86400,
-        httponly=True,
-        samesite="lax"
-    )
-    response.set_cookie(
-        key="shipflow_session",
-        value=token,
-        max_age=30 * 86400,
-        httponly=True,
-        samesite="lax"
-    )
+
+    _set_session_cookies(response, token, request)
     return {
         "status": "success",
         "user": user,
@@ -231,29 +266,31 @@ def api_login(response: Response, email: str = Form(...), password: str = Form(.
 
 @app.post("/api/auth/register", tags=["Authentication"])
 def api_register(
+    request: Request,
     response: Response,
     name: str = Form(...),
     email: str = Form(...),
     company: str = Form(...),
     origin_zip: str = Form("TORONTO, ON"),
-    password: str = Form("RateSiftDemo2026!")
+    password: str = Form("RateSiftDemo2026!"),
+    marketing_opt_in: bool = Form(False),
+    form_version: str = Form("v2026.10"),
 ):
-    """Registers account on Free Starter tier and establishes session."""
-    user, token = register_and_create_session(name, email, company, origin_zip, password)
-    response.set_cookie(
-        key="ratesift_session",
-        value=token,
-        max_age=30 * 86400,
-        httponly=True,
-        samesite="lax"
+    """Registers account on Free Starter tier, records CASL consent, and establishes session."""
+    ip_addr = request.client.host if request.client else ""
+    user_agent = request.headers.get("user-agent", "")
+    user, token = register_and_create_session(
+        name=name,
+        email=email,
+        company=company,
+        origin_zip=origin_zip,
+        password=password,
+        marketing_opt_in=bool(marketing_opt_in),
+        ip_address=ip_addr,
+        user_agent=user_agent,
+        form_version=form_version,
     )
-    response.set_cookie(
-        key="shipflow_session",
-        value=token,
-        max_age=30 * 86400,
-        httponly=True,
-        samesite="lax"
-    )
+    _set_session_cookies(response, token, request)
     return {
         "status": "success",
         "user": user,
@@ -264,12 +301,15 @@ def api_register(
 @app.get("/api/auth/logout", tags=["Authentication"])
 def api_logout(request: Request, response: Response):
     """Revokes session and redirects to public landing page."""
-    token = request.cookies.get("ratesift_session") or request.cookies.get("shipflow_session")
+    token = (
+        request.cookies.get("quotelytics_session")
+        or request.cookies.get("ratesift_session")
+        or request.cookies.get("shipflow_session")
+    )
     if token:
         revoke_session(token)
     resp = RedirectResponse(url="/", status_code=303)
-    resp.delete_cookie(key="ratesift_session")
-    resp.delete_cookie(key="shipflow_session")
+    _clear_session_cookies(resp)
     return resp
 
 @app.get("/api/auth/status", tags=["Authentication"])
@@ -584,7 +624,10 @@ def api_confirm_reformatted_batch(
     user_id = user["id"] if user else "usr_alex_rivers"
     user_hq_origin = (user.get("origin_zip") if user else None) or "CALGARY, AB"
     
-    token = payload.analysis_token
+    safe_token = os.path.basename(payload.analysis_token)
+    if not re.match(r"^[A-Za-z0-9_-]+$", safe_token) or safe_token != payload.analysis_token:
+        raise HTTPException(400, "Invalid analysis token")
+    token = safe_token
     payload_path = os.path.join(SCRATCH_DIR, f"staged_analysis_{token}.json")
     if not os.path.exists(payload_path):
         raise HTTPException(status_code=404, detail="Staged analysis expired or not found. Please re-upload.")
@@ -666,8 +709,9 @@ def api_confirm_reformatted_batch(
     # Generate the pristine standardized Excel workbook
     reformatted_bytes = build_reformatted_excel_workbook(rows, meta["filename"])
     reformatted_file_path = os.path.join(SCRATCH_DIR, f"reformatted_{token}.xlsx")
-    with open(reformatted_file_path, "wb") as f:
-        f.write(reformatted_bytes)
+    wb_out = openpyxl.load_workbook(io.BytesIO(reformatted_bytes))
+    sanitize_workbook(wb_out)
+    wb_out.save(reformatted_file_path)
         
     # Rate each shipment deterministically against confirmed tariffs (Rules 8-15)
     from services.ratesift_engine import quote_all_confirmed_carriers
@@ -721,25 +765,29 @@ def api_confirm_reformatted_batch(
         "download_url": f"/api/quotes/download-reformatted/{token}"
     }
 
-@app.get("/api/quotes/download-reformatted/{analysis_token}", tags=["RateSift Excel Re-formatter"])
+@app.get("/api/quotes/download-reformatted/{analysis_token:path}", tags=["RateSift Excel Re-formatter"])
 def api_download_reformatted_excel(analysis_token: str):
     """Downloads the sanitized, reformatted standardized Excel workbook (.xlsx)."""
-    file_path = os.path.join(SCRATCH_DIR, f"reformatted_{analysis_token}.xlsx")
+    safe_token = os.path.basename(analysis_token)
+    if not re.match(r"^[A-Za-z0-9_-]+$", safe_token) or safe_token != analysis_token:
+        raise HTTPException(400, "Invalid analysis token")
+    file_path = os.path.join(SCRATCH_DIR, f"reformatted_{safe_token}.xlsx")
     if not os.path.exists(file_path):
         # Check if raw upload was staged and generate on demand
-        payload_path = os.path.join(SCRATCH_DIR, f"staged_analysis_{analysis_token}.json")
+        payload_path = os.path.join(SCRATCH_DIR, f"staged_analysis_{safe_token}.json")
         if os.path.exists(payload_path):
             with open(payload_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             wb_bytes = build_reformatted_excel_workbook(data["all_rows"], data["meta"]["filename"])
-            with open(file_path, "wb") as f:
-                f.write(wb_bytes)
+            wb_out = openpyxl.load_workbook(io.BytesIO(wb_bytes))
+            sanitize_workbook(wb_out)
+            wb_out.save(file_path)
         else:
             raise HTTPException(status_code=404, detail="Reformatted spreadsheet not found or expired.")
             
     return FileResponse(
         path=file_path,
-        filename=f"reformatted_{analysis_token}.xlsx",
+        filename=f"reformatted_{safe_token}.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
@@ -1133,7 +1181,7 @@ class QuoteRequestPayload(BaseModel):
     accessorials: Optional[List[str]] = None
     shipment_date: Optional[str] = None
     skid_count: Optional[int] = None
-    shipping_mode: Optional[str] = "STANDARD"
+    shipping_mode: Optional[str] = "LTL"
 
 @app.post("/api/ratesift/quotes/calculate", tags=["RateSift Quoting Core"])
 def api_ratesift_calculate_quote(
@@ -1169,10 +1217,21 @@ def api_ratesift_calculate_quote(
     # Purge any previous client proposal from memory upon generating next quote
     _active_proposal_memory.pop(user_id, None)
 
-    # Derive actual weight if rating by LTL skids without explicit scale weight
+    # Derive actual weight from LTL skids if explicit weight was omitted
+    skid_count = payload.skid_count
     actual_weight = payload.actual_weight
-    if (actual_weight is None or actual_weight <= 0) and payload.skid_count and payload.skid_count > 0:
-        actual_weight = float(payload.skid_count * 500.0)
+    if actual_weight is None:
+        skid_count = payload.skid_count or 1
+        actual_weight = float(skid_count * 500.0)
+    elif actual_weight <= 0:
+        if skid_count and skid_count > 0:
+            actual_weight = float(skid_count * 500.0)
+        else:
+            raise HTTPException(status_code=400, detail="Shipment weight must be greater than 0.")
+    else:
+        # actual_weight > 0
+        if not skid_count:
+            skid_count = None
 
     if not actual_weight or actual_weight <= 0:
         raise HTTPException(status_code=400, detail="Shipment weight must be greater than 0.")
@@ -1191,7 +1250,7 @@ def api_ratesift_calculate_quote(
             height=payload.height,
             accessorials=payload.accessorials or [],
             shipment_date=payload.shipment_date,
-            skid_count=payload.skid_count
+            skid_count=skid_count
         )
         return result
     except Exception as e:
@@ -1506,6 +1565,84 @@ async def api_update_password(request: Request):
         raise HTTPException(status_code=400, detail=message)
     return {"status": "success", "message": message}
 
+
+@app.get("/api/user/data-export", tags=["User Profile"])
+def api_export_user_data(request: Request):
+    """PIPEDA Principle 9 Individual Access & Data Portability export."""
+    user = get_current_user_from_request(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    user_id = user["id"]
+    from services.db_service import export_user_data
+    export_payload = export_user_data(user_id)
+    filename = f"quotelytics_data_export_{user_id}.json"
+    return Response(
+        content=json.dumps(export_payload, indent=2, default=str),
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.post("/api/user/account/delete", tags=["User Profile"])
+@app.delete("/api/user/account", tags=["User Profile"])
+async def api_delete_user_account(request: Request, response: Response):
+    """PIPEDA §10 Account & Data Deletion endpoint."""
+    user = get_current_user_from_request(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    user_id = user["id"]
+
+    immediate_purge = True
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        try:
+            body = await request.json()
+            if isinstance(body, dict) and "immediate_purge" in body:
+                immediate_purge = bool(body["immediate_purge"])
+        except Exception:
+            pass
+
+    _active_proposal_memory.pop(user_id, None)
+    from services.db_service import delete_user_account_data
+    result = delete_user_account_data(user_id, immediate_purge=immediate_purge)
+    _clear_session_cookies(response)
+    return result
+
+
+@app.post("/api/user/marketing-consent", tags=["User Profile"])
+async def api_update_marketing_consent(request: Request):
+    """CASL Marketing Consent opt-in / withdrawal endpoint."""
+    user = get_current_user_from_request(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        body = await request.json()
+        consented = bool(body.get("marketing_opt_in", False))
+        form_version = str(body.get("form_version", "v2026.10"))
+    else:
+        form = await request.form()
+        val = str(form.get("marketing_opt_in", "false")).lower()
+        consented = val in ("1", "true", "yes", "on")
+        form_version = str(form.get("form_version", "v2026.10"))
+
+    from services.auth_service import record_marketing_consent
+    consent_id = record_marketing_consent(
+        user_id=user["id"],
+        email=user.get("email", ""),
+        consented=consented,
+        consent_type="ACCOUNT_OPT_IN" if consented else "ACCOUNT_WITHDRAWN",
+        form_version=form_version,
+        ip_address=request.client.host if request.client else "",
+        user_agent=request.headers.get("user-agent", ""),
+    )
+    return {
+        "status": "success",
+        "consent_id": consent_id,
+        "marketing_opt_in": consented,
+        "message": "Marketing communication preferences updated.",
+    }
+
 @app.post("/api/user/api-key/generate", tags=["Business API"])
 def api_generate_key(request: Request, name: str = Form("Production Key")):
     """Generates a new API Key for Embedded Quoting."""
@@ -1568,13 +1705,15 @@ def api_v1_embedded_batch_quotes(
 
 @app.get("/sample-sheets/{filename}", tags=["Sample Data"])
 def get_sample_sheet(filename: str):
-    sample_path = os.path.join(BASE_DIR, "sample_sheets", filename)
-    if not os.path.exists(sample_path):
+    safe_name = os.path.basename(filename)
+    sample_dir = os.path.abspath(os.path.join(BASE_DIR, "sample_sheets"))
+    sample_path = os.path.abspath(os.path.join(sample_dir, safe_name))
+    if not sample_path.startswith(sample_dir) or not os.path.exists(sample_path):
         raise HTTPException(status_code=404, detail="Sample sheet not found")
     return FileResponse(
         sample_path,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        filename=filename
+        filename=safe_name
     )
 
 # ==============================================================================

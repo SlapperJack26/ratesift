@@ -154,7 +154,8 @@ class TestQuoteHistoryFormulaAndWork(unittest.TestCase):
         self.assertIn("/static/images/ratesift-logo.png", html)
         self.assertIn("New Quote", html)
         self.assertIn("Quotes History", html)
-        self.assertIn("RateSift Quoting Engine • Canadian Residency (WHC)", html)
+        self.assertTrue("Quotelytics Quoting Engine" in html or "RateSift Quoting Engine" in html)
+        self.assertIn("Canadian Residency (WHC)", html)
 
         # Formula & Work elements
         self.assertIn("toggleQuoteWorkDrawer", html)

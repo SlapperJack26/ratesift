@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   
-  <title>RateSift | Freight Rating Console & Broker Rater</title>
-  <meta name="title" content="RateSift | Freight Rating Console & Broker Rater">
+  <title>Quotelytics | Freight Rating Console & Broker Rater</title>
+  <meta name="title" content="Quotelytics | Freight Rating Console & Broker Rater">
   <meta name="description" content="Instant deterministic freight rating and carrier comparison engine with cell-level audit breakdown, in-memory re-sorting, and compliance warnings.">
   <meta name="robots" content="noindex, nofollow">
 
   <!-- Tailwind CSS Framework -->
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="/static/js/tailwindcss.min.js"></script>
 
   <style>
     :root {
@@ -51,13 +51,13 @@
 
   <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
     
-    <!-- Top Navigation Bar (Consistent RateSift Console Menu Bar) -->
+    <!-- Top Navigation Bar (Consistent Quotelytics Console Menu Bar) -->
     <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] bg-white relative z-20 m-0 shadow-2xs">
       <div class="flex items-center justify-between w-full max-w-7xl mx-auto">
         <!-- Left: Logo & Nav Links -->
         <div class="flex items-center gap-6 lg:gap-8">
-          <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="RateSift Console">
-            <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-8 w-auto object-contain" />
+          <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Quotelytics Console">
+            <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-8 w-auto object-contain" />
           </a>
 
           <!-- Center/Left Navigation Links -->
@@ -125,7 +125,7 @@
           </div>
           <div>
             <span class="font-bold">No Carrier Tariffs Uploaded Yet</span>
-            <p class="text-blue-700 text-[11px] mt-0.5">RateSift only rates against contracts you upload. To ensure confidentiality, no sample or external sheets are shared. Upload your contract to begin quoting.</p>
+            <p class="text-blue-700 text-[11px] mt-0.5">Quotelytics only rates against contracts you upload. To ensure confidentiality, no sample or external sheets are shared. Upload your contract to begin quoting.</p>
           </div>
         </div>
         <a href="/console/rate-sheets" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-2xs whitespace-nowrap transition-colors">
@@ -164,67 +164,39 @@
       <!-- Quick Preset Lanes Chip Bar -->
       <div id="quick-presets" class="flex flex-wrap items-center gap-2 text-xs">
         <span class="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">Quick Presets:</span>
-        <button type="button" onclick="loadPresetLane('M5V 2T6', 'T2P 1J9', 880, 48, 40, 50, ['liftgate'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
-          Toronto (M5V) → Calgary (T2P) • Deficit 880 lbs
+        <button type="button" onclick="loadPresetLane('M5V 2T6', 'T2P 1J9', 2, 48, 40, 50, ['liftgate'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
+          Toronto (M5V) → Calgary (T2P) • 2 Skids
         </button>
-        <button type="button" onclick="loadPresetLane('CALGARY, AB', 'LINDSAY, ON', 1450, 48, 40, 50, ['liftgate'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
-          Calgary, AB → Lindsay, ON (Day & Ross 1,450 lbs)
+        <button type="button" onclick="loadPresetLane('CALGARY, AB', 'LINDSAY, ON', 4, 48, 40, 50, ['liftgate'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
+          Calgary, AB → Lindsay, ON • 4 Skids
         </button>
-        <button type="button" onclick="loadPresetLane('TORONTO, ON', 'MONTREAL, QC', 500, null, null, null, ['appointment'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
-          Toronto, ON → Montreal, QC (500 lbs)
+        <button type="button" onclick="loadPresetLane('TORONTO, ON', 'MONTREAL, QC', 1, null, null, null, ['appointment'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
+          Toronto, ON → Montreal, QC • 1 Skid
         </button>
       </div>
 
-      <!-- LOADED USER RATE SHEETS TRAY (Automatically Loaded on Login) -->
-      <div id="loaded-tariffs-tray" class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100">
-          <div class="flex items-center gap-2">
-            <span id="loaded-sheets-indicator" class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
-            <span class="text-xs font-bold text-slate-900">Your Uploaded Rate Sheets:</span>
-            <span id="loaded-sheets-count" class="text-xs font-medium text-slate-500">Checking uploaded tariffs...</span>
-          </div>
-          <a href="/console/rate-sheets" class="inline-flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-700 transition-colors">
-            <span>Manage / Upload Rate Sheets</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-        <div id="loaded-carriers-pills" class="flex flex-wrap items-center gap-2 pt-2.5">
-          <span class="text-xs text-slate-400 italic">Loading your uploaded rate sheets...</span>
-        </div>
-      </div>
 
       <!-- MODE 1: INSTANT FREIGHT RATER FORM -->
       <section id="section-instant" class="space-y-4">
         <form id="freight-quote-form" onsubmit="event.preventDefault(); calculateFreightQuote();" class="space-y-4">
           
-          <!-- Shipping Service Mode Selector (Standard vs Ship by LTL) -->
+          <!-- Shipping Service Mode Header (Dedicated Skid-Based LTL Rating) -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
             <div class="flex items-center gap-2">
               <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Shipping Service:</span>
-              <div class="inline-flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium shadow-2xs">
-                <!-- Standard Mode Tab -->
-                <button type="button" id="service-tab-standard" onclick="setShippingServiceMode('standard')" class="px-3.5 py-1.5 rounded-lg bg-white shadow-xs text-red-600 font-bold border border-red-200/80 transition-all flex items-center gap-1.5 ring-1 ring-red-500/20 cursor-pointer">
-                  <span>📦</span>
-                  <span>Standard (by Weight)</span>
-                  <span id="badge-mode-standard" class="ml-1 px-1.5 py-0.2 bg-red-100 text-red-700 rounded-full text-[10px] font-extrabold">ACTIVE</span>
-                </button>
-                
-                <!-- LTL Mode Tab -->
-                <button type="button" id="service-tab-ltl" onclick="setShippingServiceMode('ltl')" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all font-medium flex items-center gap-1.5 cursor-pointer">
-                  <span>🚚</span>
-                  <span>Ship by LTL (by Skids)</span>
-                  <span id="badge-mode-ltl" class="hidden ml-1 px-1.5 py-0.2 bg-red-100 text-red-700 rounded-full text-[10px] font-extrabold">ACTIVE</span>
-                </button>
-              </div>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-red-50 text-red-700 border border-red-200 text-xs font-bold shadow-2xs">
+                <span>🚚</span>
+                <span>LTL Freight (by Skids)</span>
+              </span>
             </div>
 
             <div id="service-mode-status" class="text-xs text-slate-500 flex items-center gap-1.5">
               <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span id="service-mode-status-text">Standard Mode: Rating by <strong>Origin</strong>, <strong>Destination</strong>, and <strong>Weight (lbs)</strong></span>
+              <span id="service-mode-status-text">Rating by <strong>Origin</strong>, <strong>Destination</strong>, and <strong>Number of Skids</strong></span>
             </div>
           </div>
 
-          <!-- 3 Primary Rating Cards: Origin, Destination, Weight (Standard) or Number of Skids (LTL) -->
+          <!-- 3 Primary Rating Cards: Origin, Destination, Number of Skids -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
             
             <!-- Origin Card -->
@@ -253,39 +225,20 @@
               </div>
             </div>
 
-            <!-- 3rd Card - Standard Mode: Actual Weight -->
-            <div id="card-cargo-weight" class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-2">
-              <div class="flex items-center justify-between">
-                <div>
-                  <label for="input-weight" class="block font-bold text-sm text-slate-900">Actual Weight (lbs)</label>
-                  <div class="text-xs text-slate-500">Total shipment scale weight</div>
-                </div>
-                <span class="text-[10px] font-mono text-slate-400 uppercase">Standard</span>
-              </div>
-              <div class="relative">
-                <input id="input-weight" type="number" step="0.1" min="0.1" placeholder="e.g. 880" value="880" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
-                <span class="absolute right-3.5 top-2.5 text-xs font-bold text-slate-400">lbs</span>
-              </div>
-              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 mt-1">
-                <span>⚖️</span>
-                <span>CWT / Hundredweight Tariff</span>
-              </div>
-            </div>
-
-            <!-- 3rd Card - LTL Mode: Number of Skids (Replaces Weight) -->
-            <div id="card-cargo-skids" class="hidden bg-white border border-red-300 rounded-2xl p-5 shadow-2xs space-y-2 ring-2 ring-red-500/10">
+            <!-- 3rd Card: Number of Skids -->
+            <div id="card-cargo-skids" class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-2">
               <div class="flex items-center justify-between">
                 <div>
                   <label for="input-skids" class="block font-bold text-sm text-slate-900 flex items-center gap-1.5">
                     <span>Number of Skids</span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700">LTL</span>
                   </label>
                   <div class="text-xs text-slate-500">Pallet count (48" × 40" standard)</div>
                 </div>
-                <span class="text-[10px] font-mono text-red-600 font-bold uppercase">Replaces Weight</span>
+                <span class="text-[10px] font-mono text-slate-400 uppercase">Standard Pallets</span>
               </div>
               <div class="relative">
-                <input id="input-skids" type="number" step="1" min="1" max="50" placeholder="e.g. 4" value="4" class="w-full bg-white border border-red-400 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+                <input id="input-skids" type="number" step="1" min="1" max="50" placeholder="e.g. 2" value="2" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+                <input id="input-weight" type="hidden" value="1000">
                 <span class="absolute right-3.5 top-2.5 text-xs font-bold text-slate-400">Skids</span>
               </div>
               <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-50 text-red-800 border border-red-200 mt-1">
@@ -436,13 +389,18 @@
                   <span id="btn-calc-spinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 </button>
 
-                <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-medium">
-                  <button type="button" id="tab-instant-btn" onclick="switchMode('instant')" class="px-3 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold transition-all cursor-pointer">
-                    Instant Rater
-                  </button>
-                  <button type="button" id="tab-batch-btn" onclick="switchMode('batch')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
-                    Batch Excel
-                  </button>
+                <!-- Active & Pending Review Rate Sheet Counters (No Sheet Names, Numbers Only) -->
+                <div id="rate-sheets-counters" class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
+                  <div class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white shadow-2xs text-slate-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>Active Rate Sheets:</span>
+                    <span id="active-sheets-count" class="font-bold text-slate-900 ml-0.5">0</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white shadow-2xs text-slate-800">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span>Pending Review:</span>
+                    <span id="pending-sheets-count" class="font-bold text-slate-900 ml-0.5">0</span>
+                  </div>
                 </div>
 
                 <div id="calc-status-indicator" class="text-xs text-slate-500 font-mono flex items-center gap-1.5 hidden sm:flex">
@@ -499,7 +457,7 @@
         </div>
 
         <!-- Excluded Sheets Drawer -->
-        <div id="excluded-sheets-box" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+        <div id="excluded-sheets-box" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
           <div class="flex items-center justify-between text-xs font-bold text-slate-700">
             <span class="flex items-center gap-1.5">
               <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -507,6 +465,19 @@
             </span>
             <span class="text-[10px] text-slate-400 font-normal">Carrier Tariff Compliance</span>
           </div>
+
+          <!-- Selection & Deletion Actions Bar at top of excluded list -->
+          <div class="flex items-center justify-between pt-2 pb-2 border-y border-slate-200/80 text-xs">
+            <label class="flex items-center gap-2 cursor-pointer select-none text-slate-700 font-medium hover:text-slate-900">
+              <input type="checkbox" id="excluded-select-all" class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer" onchange="toggleSelectAllExcluded(this.checked)">
+              <span>Select All</span>
+            </label>
+            <button type="button" id="btn-delete-excluded" onclick="deleteSelectedExcludedSheets()" disabled class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-2xs">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              <span>Delete (<span id="excluded-selected-count">0</span>)</span>
+            </button>
+          </div>
+
           <div id="excluded-list-container" class="space-y-1.5 text-xs text-slate-600 divide-y divide-slate-200/60">
             <!-- Excluded reasons injected here -->
           </div>
@@ -522,26 +493,7 @@
         </div>
       </section>
 
-      <!-- MODE 2: BATCH EXCEL UPLOAD MODE -->
-      <section id="section-batch" class="hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
-        <div class="border-2 border-dashed border-[var(--border)] rounded-xl p-6 flex flex-col items-center justify-center text-center bg-slate-50/40 hover:bg-slate-50/80 hover:border-red-400 transition-all cursor-pointer" onclick="document.getElementById('batch-file-input').click()">
-          <input id="batch-file-input" type="file" accept=".xlsx,.xls" class="hidden" onchange="handleBatchFile(event)">
-          <div class="w-12 h-12 rounded-xl bg-white border border-[var(--border)] flex items-center justify-center text-red-600 mb-3 shadow-2xs">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-          </div>
-          <p id="batch-drop-text" class="text-xs text-[var(--foreground)] font-medium">
-            <span class="font-semibold text-sm">Drag and drop Excel files (.xlsx, .xls)</span> here or <span class="text-red-600 underline">browse</span>
-          </p>
-          <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Multi-row batch quoting with cell coordinate mapping</p>
-        </div>
 
-        <div class="flex items-center justify-between pt-3 border-t border-[var(--border)]">
-          <div id="batch-status-box" class="text-xs text-slate-500 font-mono">Ready for spreadsheet upload</div>
-          <button type="button" id="btn-batch-process" onclick="processBatchQuotes()" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs py-2 px-5 rounded-lg transition-colors cursor-pointer">
-            Process Batch →
-          </button>
-        </div>
-      </section>
 
       <!-- CLARIFICATION & VERIFICATION GATE MODAL -->
       <div id="clarification-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
@@ -551,7 +503,7 @@
           <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
             <div class="space-y-0.5">
               <div class="flex items-center gap-2">
-                <h3 class="text-base font-bold text-slate-900">RateSift Clarification & Verification Gate</h3>
+                <h3 class="text-base font-bold text-slate-900">Quotelytics Clarification & Verification Gate</h3>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
                   Human Verification Gate
                 </span>
@@ -1081,7 +1033,7 @@
                     <div>• Charges subject to actual carrier scale re-weigh and cube verification upon tender.</div>
                     <div>• Transit days are business estimates excluding weekends and statutory holidays.</div>
                     <div class="text-slate-400 text-center not-italic pt-1 font-sans">
-                      RateSift Canada • PIPEDA Compliant • WHC Canadian Data Residency
+                      Quotelytics Canada • PIPEDA Compliant • WHC Canadian Data Residency
                     </div>
                   </div>
 
@@ -1094,7 +1046,7 @@
 
           <!-- Modal Footer -->
           <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs shrink-0">
-            <span class="text-slate-400 text-[11px]">RateSift Canadian Broker Proposal Engine</span>
+            <span class="text-slate-400 text-[11px]">Quotelytics Canadian Broker Proposal Engine</span>
             <button type="button" onclick="closeProposalModal()" class="px-4 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer">
               Close
             </button>
@@ -1108,7 +1060,7 @@
     <!-- Semantic Footer -->
     <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
       <div class="flex flex-wrap items-center gap-6">
-        <img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" />
+        <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" />
         <nav aria-label="Footer Navigation" class="flex flex-wrap items-center gap-4 text-xs font-medium">
           <a href="/console/rate-sheets" class="hover:text-[var(--foreground)] transition-colors">Carrier Tariffs</a>
           <a href="/console/history" class="hover:text-[var(--foreground)] transition-colors">Audit History</a>
@@ -1121,12 +1073,12 @@
       </div>
 
       <div class="text-xs text-[var(--muted-foreground)] font-medium">
-        RateSift Quoting Engine • Canadian Residency (WHC)
+        Quotelytics Quoting Engine • Canadian Residency (WHC)
       </div>
     </footer>
 
     <!-- Floating Red Support Chat Widget (Opens Support & Hotline Drawer) -->
-    <button type="button" onclick="openSupportModal(event)" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-all cursor-pointer z-40 focus:outline-none focus:ring-4 focus:ring-red-200" title="RateSift Canadian Broker Support (Hotline: 289-929-8565)">
+    <button type="button" onclick="openSupportModal(event)" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-all cursor-pointer z-40 focus:outline-none focus:ring-4 focus:ring-red-200" title="Quotelytics Canadian Broker Support (Hotline: 289-929-8565)">
       <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
     </button>
   </div>
@@ -1159,9 +1111,8 @@
     let userUploadedSheetsLoaded = false;
 
     async function loadUserUploadedRateSheets() {
-      const pillsContainer = document.getElementById('loaded-carriers-pills');
-      const countLabel = document.getElementById('loaded-sheets-count');
-      const indicator = document.getElementById('loaded-sheets-indicator');
+      const activeCountEl = document.getElementById('active-sheets-count');
+      const pendingCountEl = document.getElementById('pending-sheets-count');
       const banner = document.getElementById('no-sheets-banner');
 
       try {
@@ -1171,57 +1122,21 @@
         userUploadedSheets = data.sheets || [];
         userUploadedSheetsLoaded = true;
 
-        if (userUploadedSheets.length === 0) {
-          if (countLabel) countLabel.textContent = "0 Active Tariffs";
-          if (indicator) indicator.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
-          if (pillsContainer) {
-            pillsContainer.innerHTML = `
-              <div class="flex items-center gap-2 text-xs text-slate-500 py-0.5">
-                <span>No carrier rate sheets uploaded yet.</span>
-                <a href="/console/rate-sheets" class="font-semibold text-red-600 hover:underline">Upload your first carrier tariff →</a>
-              </div>
-            `;
-          }
-          if (banner) banner.classList.remove('hidden');
-          return;
-        }
-
-        // Hide banner since user has uploaded sheets
-        if (banner) banner.classList.add('hidden');
-
-        // Confirmed vs pending counts
         const confirmedSheets = userUploadedSheets.filter(s => s.confirmation_status === 'CONFIRMED' || s.manual_override === 1);
         const pendingSheets = userUploadedSheets.filter(s => s.confirmation_status !== 'CONFIRMED' && s.manual_override !== 1);
 
-        if (indicator) indicator.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
-        if (countLabel) {
-          countLabel.textContent = `${confirmedSheets.length} Confirmed for Quoting${pendingSheets.length > 0 ? ` • ${pendingSheets.length} Pending Review` : ''}`;
-        }
+        if (activeCountEl) activeCountEl.textContent = confirmedSheets.length;
+        if (pendingCountEl) pendingCountEl.textContent = pendingSheets.length;
 
-        if (pillsContainer) {
-          pillsContainer.innerHTML = userUploadedSheets.map(s => {
-            const isConfirmed = (s.confirmation_status === 'CONFIRMED' || s.manual_override === 1);
-            const statusClass = isConfirmed 
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
-              : 'bg-amber-50 text-amber-800 border-amber-200';
-            const dotClass = isConfirmed ? 'bg-emerald-500' : 'bg-amber-500';
-            const statusText = isConfirmed ? 'Ready to Quote' : 'Pending Review';
-            const modeText = s.mode || 'LTL';
-
-            return `
-              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${statusClass} shadow-2xs">
-                <span class="w-1.5 h-1.5 rounded-full ${dotClass}"></span>
-                <span class="font-bold">${s.carrier_name}</span>
-                <span class="text-[10px] opacity-75 font-normal">(${modeText})</span>
-                <span class="text-[10px] px-1 py-0.5 rounded bg-white/70 font-medium">${statusText}</span>
-              </div>
-            `;
-          }).join('');
+        if (userUploadedSheets.length === 0) {
+          if (banner) banner.classList.remove('hidden');
+        } else {
+          if (banner) banner.classList.add('hidden');
         }
       } catch (err) {
         console.debug("Error loading user rate sheets:", err);
-        if (countLabel) countLabel.textContent = "Error loading tariffs";
-        if (indicator) indicator.className = "w-2.5 h-2.5 rounded-full bg-red-400";
+        if (activeCountEl) activeCountEl.textContent = "0";
+        if (pendingCountEl) pendingCountEl.textContent = "0";
       }
     }
 
@@ -1264,24 +1179,6 @@
       menu.classList.toggle('hidden');
     }
 
-    function switchMode(mode) {
-      const secInstant = document.getElementById('section-instant');
-      const secBatch = document.getElementById('section-batch');
-      const tabInstantBtn = document.getElementById('tab-instant-btn');
-      const tabBatchBtn = document.getElementById('tab-batch-btn');
-
-      if (mode === 'instant') {
-        secInstant.classList.remove('hidden');
-        secBatch.classList.add('hidden');
-        tabInstantBtn.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-red-600 font-bold transition-all cursor-pointer";
-        tabBatchBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
-      } else {
-        secInstant.classList.add('hidden');
-        secBatch.classList.remove('hidden');
-        tabBatchBtn.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-red-600 font-bold transition-all cursor-pointer";
-        tabInstantBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer";
-      }
-    }
 
     // -------------------------------------------------------------
     // Priority 2: Canadian Postal FSA Live Resolution
@@ -1443,45 +1340,16 @@
       });
     }
 
-    let currentShippingMode = 'standard';
+    let currentShippingMode = 'ltl';
 
     function setShippingServiceMode(mode) {
-      currentShippingMode = mode;
-      const tabStd = document.getElementById('service-tab-standard');
-      const tabLtl = document.getElementById('service-tab-ltl');
-      const badgeStd = document.getElementById('badge-mode-standard');
-      const badgeLtl = document.getElementById('badge-mode-ltl');
-      const cardWeight = document.getElementById('card-cargo-weight');
-      const cardSkids = document.getElementById('card-cargo-skids');
-      const statusText = document.getElementById('service-mode-status-text');
-      const btnCalcText = document.getElementById('btn-calc-text');
-
-      if (mode === 'ltl') {
-        if (tabStd) tabStd.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all font-medium flex items-center gap-1.5 cursor-pointer";
-        if (tabLtl) tabLtl.className = "px-3.5 py-1.5 rounded-lg bg-white shadow-xs text-red-600 font-bold border border-red-200/80 transition-all flex items-center gap-1.5 ring-1 ring-red-500/20 cursor-pointer";
-        if (badgeStd) badgeStd.classList.add('hidden');
-        if (badgeLtl) badgeLtl.classList.remove('hidden');
-        if (cardWeight) cardWeight.classList.add('hidden');
-        if (cardSkids) cardSkids.classList.remove('hidden');
-        if (statusText) statusText.innerHTML = "LTL Mode: Rating by <strong>Origin</strong>, <strong>Destination</strong>, and <strong>Number of Skids</strong>";
-        if (btnCalcText) btnCalcText.textContent = "Calculate LTL Rates";
-      } else {
-        if (tabStd) tabStd.className = "px-3.5 py-1.5 rounded-lg bg-white shadow-xs text-red-600 font-bold border border-red-200/80 transition-all flex items-center gap-1.5 ring-1 ring-red-500/20 cursor-pointer";
-        if (tabLtl) tabLtl.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all font-medium flex items-center gap-1.5 cursor-pointer";
-        if (badgeStd) badgeStd.classList.remove('hidden');
-        if (badgeLtl) badgeLtl.classList.add('hidden');
-        if (cardWeight) cardWeight.classList.remove('hidden');
-        if (cardSkids) cardSkids.classList.add('hidden');
-        if (statusText) statusText.innerHTML = "Standard Mode: Rating by <strong>Origin</strong>, <strong>Destination</strong>, and <strong>Weight (lbs)</strong>";
-        if (btnCalcText) btnCalcText.textContent = "Calculate Rates";
-      }
+      // Streamlined to dedicated LTL skid rating
+      currentShippingMode = 'ltl';
     }
 
-    function loadPresetLane(orig, dest, weight, l, w, h, accessorials, skids = 2) {
+    function loadPresetLane(orig, dest, skids = 2, l = null, w = null, h = null, accessorials = []) {
       document.getElementById('input-origin').value = orig;
       document.getElementById('input-destination').value = dest;
-      const weightEl = document.getElementById('input-weight');
-      if (weightEl) weightEl.value = weight;
       const skidsEl = document.getElementById('input-skids');
       if (skidsEl) skidsEl.value = skids;
 
@@ -1508,8 +1376,8 @@
 
       const origin = document.getElementById('input-origin').value.trim();
       const destination = document.getElementById('input-destination').value.trim();
-      let actualWeight = parseFloat(document.getElementById('input-weight')?.value);
-      const skidCount = parseInt(document.getElementById('input-skids')?.value) || null;
+      const skidCount = parseInt(document.getElementById('input-skids')?.value) || 2;
+      const actualWeight = skidCount * 500.0;
       const length = parseFloat(document.getElementById('input-length')?.value) || null;
       const width = parseFloat(document.getElementById('input-width')?.value) || null;
       const height = parseFloat(document.getElementById('input-height')?.value) || null;
@@ -1522,19 +1390,9 @@
         return;
       }
 
-      if (currentShippingMode === 'ltl') {
-        if (!skidCount || skidCount <= 0) {
-          if (!isInitialLoad) alert("Please enter a valid number of skids (at least 1).");
-          return;
-        }
-        if (isNaN(actualWeight) || actualWeight <= 0) {
-          actualWeight = skidCount * 500.0;
-        }
-      } else {
-        if (isNaN(actualWeight) || actualWeight <= 0) {
-          if (!isInitialLoad) alert("Please enter a valid shipment weight greater than 0 lbs.");
-          return;
-        }
+      if (!skidCount || skidCount <= 0) {
+        if (!isInitialLoad) alert("Please enter a valid number of skids (at least 1).");
+        return;
       }
 
       if (userUploadedSheetsLoaded && userUploadedSheets.length === 0) {
@@ -1552,7 +1410,7 @@
       btn.disabled = true;
       spinner.classList.remove('hidden');
       arrow.classList.add('hidden');
-      text.textContent = currentShippingMode === 'ltl' ? "Rating LTL..." : "Rating Carriers...";
+      text.textContent = "Rating LTL...";
       if (statusInd) statusInd.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span><span>Evaluating confirmed rate sheets & surcharges...</span>`;
 
       try {
@@ -1565,8 +1423,8 @@
           height: height,
           accessorials: checkedAcc,
           shipment_date: shipmentDate,
-          skid_count: (currentShippingMode === 'ltl' ? skidCount : (skidCount || null)),
-          shipping_mode: (currentShippingMode === 'ltl' ? 'LTL' : 'STANDARD')
+          skid_count: skidCount,
+          shipping_mode: 'LTL'
         };
 
         const res = await fetch('/api/ratesift/quotes/calculate', {
@@ -1588,9 +1446,7 @@
         document.getElementById('results-lane-title').textContent = `${origin} → ${destination}`;
         document.getElementById('results-count-badge').textContent = `${currentQuotes.length} Option${currentQuotes.length === 1 ? '' : 's'}`;
         document.getElementById('results-specs-subtitle').textContent = 
-          currentShippingMode === 'ltl'
-            ? `LTL Cargo: ${skidCount} Standard Skids (Est. ${actualWeight.toLocaleString()} lbs) • Date: ${shipmentDate || 'Today'}`
-            : `Weight: ${actualWeight.toLocaleString()} lbs • Cargo Dims: ${length ? `${length}×${width}×${height} in` : 'Standard'} • Date: ${shipmentDate || 'Today'}`;
+          `LTL Cargo: ${skidCount} Standard Skid${skidCount !== 1 ? 's' : ''} (48×40 in) • Date: ${shipmentDate || 'Today'}`;
 
         // Render Cards and Excluded
         renderQuoteCards();
@@ -2082,7 +1938,7 @@
         source_coordinate: activeProposalQuote.source_coordinate || activeProposalQuote.source_cell || activeProposalQuote.coordinate || null,
         sheet_id: activeProposalQuote.sheet_id || null,
         formula: activeProposalQuote.formula || null,
-        skid_count: activeProposalQuote.skid_count || (currentShippingMode === 'ltl' ? (parseInt(document.getElementById('input-skids')?.value) || null) : null),
+        skid_count: activeProposalQuote.skid_count || (parseInt(document.getElementById('input-skids')?.value) || 2),
         calculation_trace: activeProposalQuote.calculation_trace || activeProposalQuote.calculation_work || null
       };
 
@@ -2180,7 +2036,7 @@
         source_coordinate: activeProposalQuote.source_coordinate || activeProposalQuote.source_cell || activeProposalQuote.coordinate || null,
         sheet_id: activeProposalQuote.sheet_id || null,
         formula: activeProposalQuote.formula || null,
-        skid_count: activeProposalQuote.skid_count || (currentShippingMode === 'ltl' ? (parseInt(document.getElementById('input-skids')?.value) || null) : null),
+        skid_count: activeProposalQuote.skid_count || (parseInt(document.getElementById('input-skids')?.value) || 2),
         calculation_trace: activeProposalQuote.calculation_trace || activeProposalQuote.calculation_work || null
       };
 
@@ -2197,7 +2053,7 @@
         a.style.display = 'none';
         a.href = url;
         const propId = (activeProposalData && activeProposalData.proposal_id) ? activeProposalData.proposal_id : 'Proposal';
-        a.download = `RateSift_Client_Proposal_${propId}.xlsx`;
+        a.download = `Quotelytics_Client_Proposal_${propId}.xlsx`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -2226,24 +2082,185 @@
       const box = document.getElementById('excluded-sheets-box');
       const container = document.getElementById('excluded-list-container');
       const countEl = document.getElementById('excluded-count');
+      const selectAllCb = document.getElementById('excluded-select-all');
 
       if (!currentExcluded || currentExcluded.length === 0) {
         box.classList.add('hidden');
+        if (selectAllCb) {
+          selectAllCb.checked = false;
+          selectAllCb.indeterminate = false;
+        }
+        updateExcludedSelectionState();
         return;
       }
 
       box.classList.remove('hidden');
       countEl.textContent = currentExcluded.length;
-      container.innerHTML = currentExcluded.map(e => `
-        <div class="py-1.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-          <div class="font-semibold text-slate-800">
-            ${e.carrier} <span class="text-slate-400 font-normal">(${e.service || 'Default'} - V${e.version || 1})</span>
+
+      container.innerHTML = currentExcluded.map((e, idx) => {
+        const sheetId = e.sheet_id || e.id || '';
+        const carrierEscaped = (e.carrier || 'Rate Sheet').replace(/'/g, "\\'");
+        return `
+          <div class="py-2.5 flex items-start sm:items-center justify-between gap-3 group" id="excluded-row-${sheetId || idx}">
+            <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+              ${sheetId ? `
+                <input type="checkbox" class="excluded-sheet-item-cb mt-0.5 sm:mt-0 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer shrink-0" data-sheet-id="${sheetId}" data-carrier="${carrierEscaped}" onchange="updateExcludedSelectionState()">
+              ` : `
+                <span class="w-4 h-4 shrink-0"></span>
+              `}
+              <div class="min-w-0">
+                <div class="font-semibold text-slate-800 text-xs truncate">
+                  ${e.carrier} <span class="text-slate-400 font-normal">(${e.service || 'Default'} - V${e.version || 1})</span>
+                </div>
+                <div class="text-[11px] text-slate-500 font-mono mt-0.5 break-words">
+                  ${e.reason}
+                </div>
+              </div>
+            </div>
+            <div class="shrink-0 flex items-center">
+              ${sheetId ? `
+                <button type="button" onclick="deleteSingleExcludedSheet('${sheetId}', '${carrierEscaped}')" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete this rate sheet">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              ` : ''}
+            </div>
           </div>
-          <div class="text-[11px] text-slate-600 font-mono">
-            ${e.reason}
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+
+      updateExcludedSelectionState();
+    }
+
+    function toggleSelectAllExcluded(checked) {
+      const checkboxes = document.querySelectorAll('.excluded-sheet-item-cb');
+      checkboxes.forEach(cb => {
+        cb.checked = checked;
+      });
+      updateExcludedSelectionState();
+    }
+
+    function updateExcludedSelectionState() {
+      const checkboxes = document.querySelectorAll('.excluded-sheet-item-cb');
+      const checkedBoxes = document.querySelectorAll('.excluded-sheet-item-cb:checked');
+      const countEl = document.getElementById('excluded-selected-count');
+      const deleteBtn = document.getElementById('btn-delete-excluded');
+      const selectAllCb = document.getElementById('excluded-select-all');
+
+      const total = checkboxes.length;
+      const selected = checkedBoxes.length;
+
+      if (countEl) countEl.textContent = selected;
+      if (deleteBtn) {
+        deleteBtn.disabled = selected === 0;
+      }
+
+      if (selectAllCb) {
+        if (total === 0 || selected === 0) {
+          selectAllCb.checked = false;
+          selectAllCb.indeterminate = false;
+        } else if (selected === total) {
+          selectAllCb.checked = true;
+          selectAllCb.indeterminate = false;
+        } else {
+          selectAllCb.checked = false;
+          selectAllCb.indeterminate = true;
+        }
+      }
+    }
+
+    async function deleteSingleExcludedSheet(sheetId, carrierName) {
+      if (!sheetId) return;
+      const cleanName = carrierName ? decodeURIComponent(carrierName) : 'this rate sheet';
+      if (!confirm(`Are you sure you want to delete "${cleanName}"?\n\nThis will permanently delete the rate sheet and all its extracted rates.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/ratesift/sheets/${sheetId}`, {
+          method: 'DELETE'
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || "Failed to delete rate sheet");
+        }
+
+        // Remove from currentExcluded
+        currentExcluded = currentExcluded.filter(e => (e.sheet_id || e.id) !== sheetId);
+        renderExcludedSheets();
+
+        // Refresh rate sheets tray
+        if (typeof loadUserUploadedRateSheets === 'function') {
+          await loadUserUploadedRateSheets();
+        }
+      } catch (err) {
+        alert("Error deleting sheet: " + err.message);
+      }
+    }
+
+    async function deleteSelectedExcludedSheets() {
+      const checkedBoxes = Array.from(document.querySelectorAll('.excluded-sheet-item-cb:checked'));
+      const sheetIds = Array.from(new Set(checkedBoxes.map(cb => cb.dataset.sheetId).filter(Boolean)));
+
+      if (sheetIds.length === 0) return;
+
+      const confirmMsg = sheetIds.length === 1
+        ? "Are you sure you want to delete the selected rate sheet? This will permanently delete it and all its extracted rates."
+        : `Are you sure you want to delete ${sheetIds.length} selected rate sheets? This will permanently delete them and all their extracted rates.`;
+
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+
+      const deleteBtn = document.getElementById('btn-delete-excluded');
+      const originalHtml = deleteBtn ? deleteBtn.innerHTML : '';
+      if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = `
+          <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <span>Deleting...</span>
+        `;
+      }
+
+      try {
+        let deletedIds = new Set();
+        let errors = [];
+
+        for (const sid of sheetIds) {
+          try {
+            const res = await fetch(`/api/ratesift/sheets/${sid}`, { method: 'DELETE' });
+            if (res.ok) {
+              deletedIds.add(sid);
+            } else {
+              const errJson = await res.json().catch(() => ({}));
+              errors.push(errJson.detail || `Sheet ${sid}`);
+            }
+          } catch (e) {
+            errors.push(e.message);
+          }
+        }
+
+        if (deletedIds.size > 0) {
+          // Remove deleted sheets from currentExcluded
+          currentExcluded = currentExcluded.filter(e => !deletedIds.has(e.sheet_id || e.id));
+          renderExcludedSheets();
+
+          // Refresh rate sheets tray
+          if (typeof loadUserUploadedRateSheets === 'function') {
+            await loadUserUploadedRateSheets();
+          }
+        }
+
+        if (errors.length > 0) {
+          alert(`Encountered errors deleting some sheets: ${errors.join(', ')}`);
+        }
+      } catch (err) {
+        alert("Failed to delete selected sheets: " + err.message);
+      } finally {
+        if (deleteBtn) {
+          deleteBtn.innerHTML = originalHtml;
+          updateExcludedSelectionState();
+        }
+      }
     }
 
     // RateSift Agent Re-formatter & Clarification State (Rules 1, 3, 5, 6, 7, 19, 25)

@@ -54,6 +54,20 @@ US_STATES = {
 }
 ALL_PROV_STATE_CODES = CANADIAN_PROVINCES | US_STATES
 
+def _token_matches(cell_lower: str, keywords: set) -> bool:
+    words = set(re.findall(r"[a-z0-9:_-]+", cell_lower))
+    for kw in keywords:
+        if " " in kw or "-" in kw or ":" in kw:
+            if kw in cell_lower:
+                return True
+        else:
+            if kw in words:
+                return True
+            # Also allow prefix match for >=4 char keywords like 'orig', 'dest', 'consignee', 'shipper'
+            if len(kw) >= 4 and any(w.startswith(kw) for w in words):
+                return True
+    return False
+
 def clean_cell(val: Any) -> str:
     if val is None:
         return ""
@@ -158,20 +172,20 @@ class DynamicSheetDetector:
         tokens = [clean_cell(c).lower() for c in row_cells if clean_cell(c)]
         
         # 1. Origin match
-        has_origin = any(any(o in t for o in ORIGIN_TOKENS) for t in tokens)
+        has_origin = any(_token_matches(t, ORIGIN_TOKENS) for t in tokens)
         if has_origin:
             score += 0.35
             reasons.append("Contains origin token")
 
         # 2. Destination match
-        has_dest = any(any(d in t for d in DEST_TOKENS) for t in tokens)
+        has_dest = any(_token_matches(t, DEST_TOKENS) for t in tokens)
         if has_dest:
             score += 0.35
             reasons.append("Contains destination token")
 
         # 3. Rate break metrics (MIN, LTL, CWT:*, FLAT) and cargo parameters (weight, dims)
-        rate_matches = [t for t in tokens if any(r in t for r in RATE_TOKENS)]
-        cargo_matches = [t for t in tokens if any(c in t for c in CARGO_TOKENS)]
+        rate_matches = [t for t in tokens if _token_matches(t, RATE_TOKENS)]
+        cargo_matches = [t for t in tokens if _token_matches(t, CARGO_TOKENS)]
         metric_matches = rate_matches + cargo_matches
         if metric_matches:
             score += min(0.30, len(metric_matches) * 0.08)
@@ -305,7 +319,7 @@ class DynamicSheetDetector:
         # 1. Detect Origin column
         for c_idx, h in enumerate(cleaned_headers):
             h_lower = h.lower()
-            if any(tok in h_lower for tok in ORIGIN_TOKENS):
+            if _token_matches(h_lower, ORIGIN_TOKENS):
                 orig_col_idx = c_idx
                 break
         if orig_col_idx is None and total_cols > 0:
@@ -338,7 +352,7 @@ class DynamicSheetDetector:
         for c_idx in range(start_search_dest, total_cols):
             h = cleaned_headers[c_idx]
             h_lower = h.lower()
-            if any(tok in h_lower for tok in DEST_TOKENS):
+            if _token_matches(h_lower, DEST_TOKENS):
                 dest_col_idx = c_idx
                 break
         if dest_col_idx is None and total_cols > start_search_dest:

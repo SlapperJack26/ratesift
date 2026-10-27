@@ -254,7 +254,7 @@ print(response.json())</pre>
           </div>
 
           <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center text-xs">
-            <span class="text-slate-500 font-mono text-[11px]">Last Updated: October 2026 • WHC Tenant</span>
+            <a href="/privacy" class="text-red-600 font-bold hover:underline">Read Full PIPEDA Privacy Policy →</a>
             <button type="button" onclick="closePrivacyModal()" class="px-4 py-1.5 bg-slate-900 text-white rounded-lg font-bold">Close</button>
           </div>
         </div>

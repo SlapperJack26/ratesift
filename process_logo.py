@@ -1,31 +1,46 @@
 import pygame
 from collections import deque
 import os
+import shutil
 
 pygame.init()
 
-src_path = r'C:\Users\Dylan\.gemini\antigravity\brain\b5a860ed-1691-4f5a-8f2d-ad2b4e7701e4\.user_uploaded\media_1790582729224.jpg'
+src_path = r'C:\Users\Dylan\.gemini\antigravity\brain\ec698020-a512-4f06-ab67-4069143a572d\quotelytics_logo_concept_1_1792265235093.jpg'
 surf = pygame.image.load(src_path)
 w, h = surf.get_size()
 
-# Content bounding box: x=[160, 863], y=[144, 335]
-# Let's add padding of 8px
-pad = 8
-crop_x1 = max(0, 160 - pad)
-crop_y1 = max(0, 144 - pad)
-crop_x2 = min(w - 1, 863 + pad)
-crop_y2 = min(h - 1, 335 + pad)
+# Detect bounding box of non-white pixels
+min_x, max_x = w, 0
+min_y, max_y = h, 0
+
+for x in range(w):
+    for y in range(h):
+        r, g, b, a = surf.get_at((x, y))
+        # Non-white threshold
+        if r < 240 or g < 240 or b < 240:
+            if x < min_x: min_x = x
+            if x > max_x: max_x = x
+            if y < min_y: min_y = y
+            if y > max_y: max_y = y
+
+pad = 12
+crop_x1 = max(0, min_x - pad)
+crop_y1 = max(0, min_y - pad)
+crop_x2 = min(w - 1, max_x + pad)
+crop_y2 = min(h - 1, max_y + pad)
 
 crop_w = crop_x2 - crop_x1 + 1
 crop_h = crop_y2 - crop_y1 + 1
+
+print(f"Detected bounding box: ({min_x}, {min_y}) to ({max_x}, {max_y})")
+print(f"Cropped dimension with padding: {crop_w} x {crop_h}")
 
 # Subsurface
 cropped_surf = pygame.Surface((crop_w, crop_h), pygame.SRCALPHA)
 cropped_surf.blit(surf, (0, 0), (crop_x1, crop_y1, crop_w, crop_h))
 
 # Flood fill outer white to transparent
-# Queue of boundary points
-visited = [[False]*crop_h for _ in range(crop_w)]
+visited = [[False] * crop_h for _ in range(crop_w)]
 queue = deque()
 
 # Add all 4 borders of the cropped image
@@ -43,10 +58,9 @@ while queue:
     if visited[cx][cy]:
         continue
     visited[cx][cy] = True
-    
+
     r, g, b, a = cropped_surf.get_at((cx, cy))
     # Check if nearly white background (r,g,b > 245)
-    # Background in JPEG might have slight compression artifacts (e.g. 248..255)
     if r >= 245 and g >= 245 and b >= 245:
         # Make transparent
         cropped_surf.set_at((cx, cy), (r, g, b, 0))
@@ -58,24 +72,37 @@ while queue:
     elif r >= 230 and g >= 230 and b >= 230:
         # Smooth alpha edge
         avg = (r + g + b) / 3.0
-        # If avg is close to 255, alpha is low
         alpha = int((255 - avg) * (255.0 / 25.0))
         cropped_surf.set_at((cx, cy), (r, g, b, min(255, max(0, alpha))))
 
 os.makedirs('static/images', exist_ok=True)
-# Save transparent cropped PNG
-transparent_path = 'static/images/ratesift-logo.png'
-pygame.image.save(cropped_surf, transparent_path)
 
-# Also save cropped version with white background
+# 1. Quotelytics logo files
+ql_transparent = 'static/images/quotelytics-logo.png'
+pygame.image.save(cropped_surf, ql_transparent)
+
 cropped_white = pygame.Surface((crop_w, crop_h))
 cropped_white.blit(surf, (0, 0), (crop_x1, crop_y1, crop_w, crop_h))
-pygame.image.save(cropped_white, 'static/images/ratesift-logo-white-bg.png')
+ql_white = 'static/images/quotelytics-logo-white-bg.png'
+pygame.image.save(cropped_white, ql_white)
 
-# Also copy original
-with open(src_path, 'rb') as f_in, open('static/images/ratesift-logo-original.jpg', 'wb') as f_out:
+ql_orig = 'static/images/quotelytics-logo-original.jpg'
+with open(src_path, 'rb') as f_in, open(ql_orig, 'wb') as f_out:
     f_out.write(f_in.read())
 
-print(f"Saved: {transparent_path} (size: {crop_w}x{crop_h})")
-print(f"Saved: static/images/ratesift-logo-white-bg.png")
-print(f"Saved: static/images/ratesift-logo-original.jpg")
+# 2. Backward compatibility alias files
+rs_transparent = 'static/images/ratesift-logo.png'
+pygame.image.save(cropped_surf, rs_transparent)
+
+rs_white = 'static/images/ratesift-logo-white-bg.png'
+pygame.image.save(cropped_white, rs_white)
+
+rs_orig = 'static/images/ratesift-logo-original.jpg'
+shutil.copyfile(ql_orig, rs_orig)
+
+print(f"Saved: {ql_transparent} ({crop_w}x{crop_h})")
+print(f"Saved: {ql_white}")
+print(f"Saved: {ql_orig}")
+print(f"Saved alias: {rs_transparent}")
+print(f"Saved alias: {rs_white}")
+print(f"Saved alias: {rs_orig}")

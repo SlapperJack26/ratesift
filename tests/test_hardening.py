@@ -271,3 +271,60 @@ def test_intermodal_equipment_matrix_with_no_rates_triggers_failsafe(tmp_path):
     assert any("no numeric freight rates" in iss.lower() for iss in res["issues"])
     assert "rates" in res["unresolved"]
 
+
+# =========================================================================
+# 5. REVIEW FINDINGS HARDENING VERIFICATION (TASKS 1 - 5)
+# =========================================================================
+
+def test_load_csv_preserves_long_cell_strings(tmp_path):
+    """Verifies _load_csv preserves string contents > 100 characters."""
+    from app.ingest import _load_csv
+    long_note = "Legal terms and conditions disclaimer: " + "X" * 200
+    p = tmp_path / "long_note.csv"
+    p.write_text(f'Origin,Destination,Note\nToronto,Montreal,"{long_note}"\n', encoding="utf-8")
+    rows = _load_csv(str(p), max_rows=5, max_cols=10)
+    assert len(rows) == 2
+    assert rows[1][2] == long_note
+    assert len(rows[1][2]) > 200
+
+
+def test_save_mapping_updates_in_place_without_duplicates():
+    """Verifies save_mapping updates in place rather than inserting duplicate rows for the same fingerprint and tenant."""
+    from app.mappings import save_mapping, list_saved_mappings, delete_saved_mapping
+    fp = "fp_unique_hardening_test_99"
+    tid = "t_hardening_test_99"
+    mapping_payload = {"header_row": 0, "origin": 0, "destination": 1, "rate_columns": [2], "mode": "weight"}
+    headers = ["Origin", "Destination", "LTL"]
+
+    id1 = save_mapping(fp, "u_test", tid, "Sheet1", mapping_payload, 3, headers)
+    id2 = save_mapping(fp, "u_test", tid, "Sheet1", mapping_payload, 3, headers)
+
+    assert id1 == id2, "save_mapping should reuse existing ID for identical (fingerprint, tenant_id)"
+    saved = [m for m in list_saved_mappings(tenant_id=tid) if m["fingerprint"] == fp]
+    assert len(saved) == 1, "Expected exactly 1 saved mapping record, found duplicates"
+    delete_saved_mapping(id1, tenant_id=tid)
+
+
+def test_token_matches_does_not_misclassify_substrings():
+    """Verifies _token_matches does not match words like 'Toronto' or 'Total' to 'to'."""
+    from agent.dynamic_sheet_detector import _token_matches, DEST_TOKENS, RATE_TOKENS
+    assert _token_matches("toronto", DEST_TOKENS) is False
+    assert _token_matches("total", DEST_TOKENS) is False
+    assert _token_matches("terminal", RATE_TOKENS) is False
+    assert _token_matches("admin", RATE_TOKENS) is False
+
+    # True positives must still match
+    assert _token_matches("to", DEST_TOKENS) is True
+    assert _token_matches("ship to", DEST_TOKENS) is True
+    assert _token_matches("destination", DEST_TOKENS) is True
+    assert _token_matches("dest", DEST_TOKENS) is True
+    assert _token_matches("min", RATE_TOKENS) is True
+    assert _token_matches("min charge", RATE_TOKENS) is True
+
+
+def test_api_download_reformatted_excel_rejects_path_traversal():
+    """Verifies download-reformatted endpoint rejects path traversal sequences."""
+    resp = client.get("/api/quotes/download-reformatted/..%2F..%2Fshipflow.db")
+    assert resp.status_code == 400
+    assert "Invalid analysis token" in resp.json()["detail"]
+

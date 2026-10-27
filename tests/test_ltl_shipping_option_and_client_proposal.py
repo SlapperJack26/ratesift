@@ -12,6 +12,8 @@ class TestLTLShippingOptionAndClientProposal(unittest.TestCase):
         update_user_tier(cls.user_id, "TEAM")
         cls.token = create_session(cls.user_id)
         cls.client.cookies.set("shipflow_session", cls.token)
+        from services.import_day_and_ross_guide import import_day_and_ross_tariff
+        cls.sheet_id = import_day_and_ross_tariff(user_id=cls.user_id, auto_confirm=True)
 
     def test_01_new_quote_page_structure(self):
         """Verifies original header, footer, LTL mode selector, and client proposal modal."""
@@ -29,19 +31,18 @@ class TestLTLShippingOptionAndClientProposal(unittest.TestCase):
         self.assertIn("Free Starter", html)
 
         # 2. Original Footer Intact
-        self.assertIn("RateSift Quoting Engine • Canadian Residency (WHC)", html)
+        self.assertTrue("Quotelytics Quoting Engine" in html or "RateSift Quoting Engine" in html)
+        self.assertIn("Canadian Residency (WHC)", html)
         self.assertIn("openSupportModal", html)
 
-        # 3. LTL Option & Dynamic 3-Card Inputs
-        self.assertIn("service-tab-standard", html)
-        self.assertIn("service-tab-ltl", html)
-        self.assertIn("card-cargo-weight", html)
+        # 3. Dedicated LTL Skid Inputs (Weight Card & Toggle Removed)
+        self.assertIn("LTL Freight (by Skids)", html)
         self.assertIn("card-cargo-skids", html)
         self.assertIn("input-origin", html)
         self.assertIn("input-destination", html)
-        self.assertIn("input-weight", html)
         self.assertIn("input-skids", html)
-        self.assertIn("setShippingServiceMode", html)
+        self.assertNotIn("card-cargo-weight", html)
+        self.assertNotIn("service-tab-standard", html)
 
         # 4. Client Proposal Option Preserved
         self.assertIn("Create Client Proposal", html)
@@ -55,7 +56,7 @@ class TestLTLShippingOptionAndClientProposal(unittest.TestCase):
             "destination": "LINDSAY, ON",
             "skid_count": 2,
             "shipping_mode": "LTL",
-            "shipment_date": "2024-06-01",
+            "shipment_date": "2024-03-15",
             "accessorials": ["liftgate"]
         }
         res = self.client.post("/api/ratesift/quotes/calculate", json=calc_payload)

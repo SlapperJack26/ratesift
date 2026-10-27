@@ -6,14 +6,14 @@ HEADER_TARGET_REGEX = re.compile(
     re.DOTALL
 )
 
-HEADER_REPLACEMENT = '<img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src=\'ratesift-logo.png\';" alt="RateSift" class="h-8 md:h-9 w-auto object-contain" />'
+HEADER_REPLACEMENT = '<img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src=\'/static/images/ratesift-logo.png\';" alt="Quotelytics" class="h-8 md:h-9 w-auto object-contain" />'
 
 FOOTER_TARGET_REGEX = re.compile(
     r'<div class="flex items-center gap-2">\s*<div class="w-5 h-5 rounded-md bg-red-600 flex items-center justify-center text-white font-bold text-\[10px\]"[^>]*>ri</div>\s*<span class="font-bold text-sm tracking-tight text-\[var\(--foreground\)\]">r<span class="text-red-600">A</span>tes<span class="text-red-600">i</span>ft</span>\s*</div>',
     re.DOTALL
 )
 
-FOOTER_REPLACEMENT = '<div class="flex items-center"><img src="/static/images/ratesift-logo.png" onerror="this.onerror=null; this.src=\'ratesift-logo.png\';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" /></div>'
+FOOTER_REPLACEMENT = '<div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src=\'/static/images/ratesift-logo.png\';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>'
 
 def process_file(file_path):
     if not os.path.exists(file_path):

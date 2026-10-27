@@ -225,6 +225,47 @@ def normalize_location_string(loc: str) -> str:
     return loc_clean
 
 
+def _cities_match(c1: str, c2: str) -> bool:
+    """
+    Checks if two city strings match, allowing parenthetical hub suffixes (e.g. 'TORONTO (GTA)'
+    or 'MONTREAL METRO') while rejecting directional prefix mismatches (e.g. 'YORK' vs 'NORTH YORK').
+    """
+    s1 = (c1 or "").strip().upper()
+    s2 = (c2 or "").strip().upper()
+    if not s1 or not s2:
+        return False
+    if s1 == s2:
+        return True
+
+    DIRECTIONAL_PREFIXES = {"NORTH", "SOUTH", "EAST", "WEST", "NEW", "OLD", "PORT", "FORT", "SAINT", "ST", "ST."}
+
+    def is_hub_suffix(shorter: str, longer: str) -> bool:
+        tokens_short = shorter.split()
+        tokens_long = longer.split()
+        if not tokens_short or not tokens_long:
+            return False
+        if tokens_long[0] in DIRECTIONAL_PREFIXES and tokens_short[0] != tokens_long[0]:
+            return False
+        if tokens_short[0] in DIRECTIONAL_PREFIXES and tokens_long[0] != tokens_short[0]:
+            return False
+
+        if longer.startswith(shorter):
+            remainder = longer[len(shorter):].strip()
+            if remainder.startswith("(") or any(remainder.startswith(term) for term in ["METRO", "GTA", "GMA", "AREA", "REGION", "HUB"]):
+                return True
+            if remainder and all(ch in " ()/-" or ch.isalnum() for ch in remainder):
+                extra_words = set(re.findall(r"[A-Z0-9]+", remainder))
+                if not extra_words.intersection(DIRECTIONAL_PREFIXES):
+                    return True
+        return False
+
+    if len(s1) < len(s2):
+        return is_hub_suffix(s1, s2)
+    elif len(s2) < len(s1):
+        return is_hub_suffix(s2, s1)
+    return False
+
+
 def match_lane_break(
     breaks: List[Dict[str, Any]],
     origin: str,
@@ -261,13 +302,13 @@ def match_lane_break(
         if not origin_matches and b_orig and "," in norm_origin and "," in b_orig:
             o_city, o_prov = [x.strip() for x in norm_origin.split(",", 1)]
             bo_city, bo_prov = [x.strip() for x in b_orig.split(",", 1)]
-            if o_prov == bo_prov and (o_city in bo_city or bo_city in o_city):
+            if o_prov == bo_prov and _cities_match(o_city, bo_city):
                 origin_matches = True
 
         if not dest_matches and b_dest and "," in norm_dest and "," in b_dest:
             d_city, d_prov = [x.strip() for x in norm_dest.split(",", 1)]
             bd_city, bd_prov = [x.strip() for x in b_dest.split(",", 1)]
-            if d_prov == bd_prov and (d_city in bd_city or bd_city in d_city):
+            if d_prov == bd_prov and _cities_match(d_city, bd_city):
                 dest_matches = True
 
         if origin_matches and dest_matches:
@@ -277,7 +318,14 @@ def match_lane_break(
         return None
 
     # When rating in skid mode, map skid tiers directly and bypass CWT bumping
+    use_skid_tiers = False
     if skid_count is not None and skid_count > 0:
+        if billable_weight <= 0 or abs(float(billable_weight) - float(skid_count * 500.0)) < 1.0:
+            use_skid_tiers = True
+        elif skid_count > 1 and any(b.get("break_name") in ["1M", "2M", "5M", "10M", "L5C", "<5C"] for b in matched_candidates):
+            use_skid_tiers = True
+
+    if use_skid_tiers:
         tier_break = None
         if 1 <= skid_count <= 5:
             tier_break = next(
@@ -436,21 +484,21 @@ def match_skid_break(
         if not origin_matches and b_orig and "," in norm_origin and "," in b_orig:
             o_city, o_prov = [x.strip() for x in norm_origin.split(",", 1)]
             bo_city, bo_prov = [x.strip() for x in b_orig.split(",", 1)]
-            if o_prov == bo_prov and (o_city in bo_city or bo_city in o_city):
+            if o_prov == bo_prov and _cities_match(o_city, bo_city):
                 origin_matches = True
         elif not origin_matches and b_orig and "," in b_orig and "," not in norm_origin:
             bo_city = b_orig.split(",", 1)[0].strip()
-            if norm_origin == bo_city or norm_origin in bo_city:
+            if _cities_match(norm_origin, bo_city):
                 origin_matches = True
 
         if not dest_matches and b_dest and "," in norm_dest and "," in b_dest:
             d_city, d_prov = [x.strip() for x in norm_dest.split(",", 1)]
             bd_city, bd_prov = [x.strip() for x in b_dest.split(",", 1)]
-            if d_prov == bd_prov and (d_city in bd_city or bd_city in d_city):
+            if d_prov == bd_prov and _cities_match(d_city, bd_city):
                 dest_matches = True
         elif not dest_matches and b_dest and "," in b_dest and "," not in norm_dest:
             bd_city = b_dest.split(",", 1)[0].strip()
-            if norm_dest == bd_city or norm_dest in bd_city:
+            if _cities_match(norm_dest, bd_city):
                 dest_matches = True
 
         if origin_matches and dest_matches:
@@ -532,15 +580,21 @@ def match_lane_minimum(
             d_city, d_prov = [x.strip() for x in norm_dest.split(",", 1)]
             mo_city, mo_prov = [x.strip() for x in m_orig.split(",", 1)] if "," in m_orig else (m_orig, "")
             md_city, md_prov = [x.strip() for x in m_dest.split(",", 1)] if "," in m_dest else (m_dest, "")
-            if o_prov == mo_prov and d_prov == md_prov and (o_city in mo_city or mo_city in o_city) and (d_city in md_city or md_city in d_city):
+            if o_prov == mo_prov and d_prov == md_prov and _cities_match(o_city, mo_city) and _cities_match(d_city, md_city):
                 return m
         elif m_orig and m_dest:
             mo_city = m_orig.split(",", 1)[0].strip() if "," in m_orig else m_orig
             md_city = m_dest.split(",", 1)[0].strip() if "," in m_dest else m_dest
-            if (norm_origin == mo_city or norm_origin in mo_city) and (norm_dest == md_city or norm_dest in md_city):
+            if _cities_match(norm_origin, mo_city) and _cities_match(norm_dest, md_city):
                 return m
 
-    return minimums[0] if minimums else None
+    # Only fall back to global/blank-lane minimum, or if single minimum without conflicting lane specs
+    for m in minimums:
+        if not (m.get("origin_spec") or "").strip() and not (m.get("dest_spec") or "").strip():
+            return m
+    if len(minimums) == 1 and not (minimums[0].get("origin_spec") and minimums[0].get("dest_spec")):
+        return minimums[0]
+    return None
 
 
 def _is_fuel_surcharge_row(s: Dict[str, Any]) -> bool:

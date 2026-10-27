@@ -139,18 +139,20 @@ class RelationalJobStore(JobStore):
 
         with self._lock:
             conn = self._get_connection()
-            cur = conn.cursor()
-            cur.execute("""
-            INSERT OR REPLACE INTO failsafe_jobs (
-                id, user_id, tenant_id, status, path, ext, sheet_name, column_count,
-                analysis_json, mapping_json, mapping_source, output_path, created_at, updated_at, expires_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            """, (
-                job_id, user_id, tenant_id, status, path, ext, sheet_name, column_count,
-                analysis_json, mapping_json, mapping_source, output_path, now, now, expires_at
-            ))
-            conn.commit()
-            conn.close()
+            try:
+                cur = conn.cursor()
+                cur.execute("""
+                INSERT OR REPLACE INTO failsafe_jobs (
+                    id, user_id, tenant_id, status, path, ext, sheet_name, column_count,
+                    analysis_json, mapping_json, mapping_source, output_path, created_at, updated_at, expires_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """, (
+                    job_id, user_id, tenant_id, status, path, ext, sheet_name, column_count,
+                    analysis_json, mapping_json, mapping_source, output_path, now, now, expires_at
+                ))
+                conn.commit()
+            finally:
+                conn.close()
 
         data["created_at"] = now
         data["updated_at"] = now
@@ -159,26 +161,27 @@ class RelationalJobStore(JobStore):
     def get(self, job_id: str) -> Optional[Dict[str, Any]]:
         with self._lock:
             conn = self._get_connection()
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM failsafe_jobs WHERE id = ?;", (job_id,))
-            row = cur.fetchone()
-            if not row:
+            try:
+                cur = conn.cursor()
+                cur.execute("SELECT * FROM failsafe_jobs WHERE id = ?;", (job_id,))
+                row = cur.fetchone()
+                if not row:
+                    return None
+
+                now = time.time()
+                new_expires = now + self.default_ttl
+                # Refresh TTL on activity
+                cur.execute("UPDATE failsafe_jobs SET updated_at = ?, expires_at = ? WHERE id = ?;", (now, new_expires, job_id))
+                conn.commit()
+
+                job_dict = dict(row)
+                job_dict["analysis"] = json.loads(job_dict["analysis_json"])
+                job_dict["mapping"] = json.loads(job_dict["mapping_json"]) if job_dict["mapping_json"] else None
+                job_dict["rows"] = job_dict["analysis"].get("preview", [])
+                job_dict["expires_at"] = new_expires
+                return job_dict
+            finally:
                 conn.close()
-                return None
-
-            now = time.time()
-            new_expires = now + self.default_ttl
-            # Refresh TTL on activity
-            cur.execute("UPDATE failsafe_jobs SET updated_at = ?, expires_at = ? WHERE id = ?;", (now, new_expires, job_id))
-            conn.commit()
-            conn.close()
-
-            job_dict = dict(row)
-            job_dict["analysis"] = json.loads(job_dict["analysis_json"])
-            job_dict["mapping"] = json.loads(job_dict["mapping_json"]) if job_dict["mapping_json"] else None
-            job_dict["rows"] = job_dict["analysis"].get("preview", [])
-            job_dict["expires_at"] = new_expires
-            return job_dict
 
     def update(self, job_id: str, updates: Dict[str, Any]) -> bool:
         now = time.time()
@@ -186,61 +189,65 @@ class RelationalJobStore(JobStore):
 
         with self._lock:
             conn = self._get_connection()
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM failsafe_jobs WHERE id = ?;", (job_id,))
-            row = cur.fetchone()
-            if not row:
+            try:
+                cur = conn.cursor()
+                cur.execute("SELECT * FROM failsafe_jobs WHERE id = ?;", (job_id,))
+                row = cur.fetchone()
+                if not row:
+                    return False
+
+                status = updates.get("status", row["status"])
+                sheet_name = updates.get("sheet_name", row["sheet_name"])
+                mapping = updates.get("mapping")
+                mapping_json = json.dumps(mapping) if mapping is not None else row["mapping_json"]
+                mapping_source = updates.get("mapping_source", row["mapping_source"])
+                output_path = updates.get("output_path", row["output_path"] if "output_path" in row.keys() else None)
+
+                analysis = updates.get("analysis")
+                if analysis is not None:
+                    analysis_json = json.dumps(analysis)
+                else:
+                    analysis_json = row["analysis_json"]
+
+                cur.execute("""
+                UPDATE failsafe_jobs SET
+                    status = ?, sheet_name = ?, analysis_json = ?, mapping_json = ?,
+                    mapping_source = ?, output_path = ?, updated_at = ?, expires_at = ?
+                WHERE id = ?;
+                """, (status, sheet_name, analysis_json, mapping_json, mapping_source, output_path, now, new_expires, job_id))
+                conn.commit()
+                return True
+            finally:
                 conn.close()
-                return False
-
-            status = updates.get("status", row["status"])
-            sheet_name = updates.get("sheet_name", row["sheet_name"])
-            mapping = updates.get("mapping")
-            mapping_json = json.dumps(mapping) if mapping is not None else row["mapping_json"]
-            mapping_source = updates.get("mapping_source", row["mapping_source"])
-            output_path = updates.get("output_path", row["output_path"] if "output_path" in row.keys() else None)
-
-            analysis = updates.get("analysis")
-            if analysis is not None:
-                analysis_json = json.dumps(analysis)
-            else:
-                analysis_json = row["analysis_json"]
-
-            cur.execute("""
-            UPDATE failsafe_jobs SET
-                status = ?, sheet_name = ?, analysis_json = ?, mapping_json = ?,
-                mapping_source = ?, output_path = ?, updated_at = ?, expires_at = ?
-            WHERE id = ?;
-            """, (status, sheet_name, analysis_json, mapping_json, mapping_source, output_path, now, new_expires, job_id))
-            conn.commit()
-            conn.close()
-            return True
-
-            conn.commit()
-            conn.close()
-            return True
 
     def delete(self, job_id: str) -> bool:
         with self._lock:
             conn = self._get_connection()
-            cur = conn.cursor()
-            cur.execute("SELECT path FROM failsafe_jobs WHERE id = ?;", (job_id,))
-            row = cur.fetchone()
-            if not row:
+            try:
+                cur = conn.cursor()
+                cur.execute("SELECT path, output_path FROM failsafe_jobs WHERE id = ?;", (job_id,))
+                row = cur.fetchone()
+                if not row:
+                    return False
+
+                file_path = row["path"]
+                if file_path and os.path.exists(file_path):
+                    try:
+                        os.remove(file_path)
+                    except OSError:
+                        pass
+                out_path = row["output_path"]
+                if out_path and os.path.exists(out_path):
+                    try:
+                        os.remove(out_path)
+                    except OSError:
+                        pass
+
+                cur.execute("DELETE FROM failsafe_jobs WHERE id = ?;", (job_id,))
+                conn.commit()
+                return True
+            finally:
                 conn.close()
-                return False
-
-            file_path = row["path"]
-            if file_path and os.path.exists(file_path):
-                try:
-                    os.remove(file_path)
-                except OSError:
-                    pass
-
-            cur.execute("DELETE FROM failsafe_jobs WHERE id = ?;", (job_id,))
-            conn.commit()
-            conn.close()
-            return True
 
     def transition(self, job_id: str, from_status: str, to_status: str) -> bool:
         """
@@ -252,32 +259,33 @@ class RelationalJobStore(JobStore):
         new_expires = now + self.default_ttl
         with self._lock:
             conn = self._get_connection()
-            cur = conn.cursor()
-            cur.execute("""
-            UPDATE failsafe_jobs
-            SET status = ?, updated_at = ?, expires_at = ?
-            WHERE id = ? AND status = ?;
-            """, (to_status, now, new_expires, job_id, from_status))
-            updated_count = cur.rowcount
+            try:
+                cur = conn.cursor()
+                cur.execute("""
+                UPDATE failsafe_jobs
+                SET status = ?, updated_at = ?, expires_at = ?
+                WHERE id = ? AND status = ?;
+                """, (to_status, now, new_expires, job_id, from_status))
+                updated_count = cur.rowcount
 
-            if updated_count == 1:
-                # Also update internal analysis_json status
-                cur.execute("SELECT analysis_json FROM failsafe_jobs WHERE id = ?;", (job_id,))
-                row = cur.fetchone()
-                if row:
-                    try:
-                        an = json.loads(row["analysis_json"])
-                        an["status"] = to_status
-                        cur.execute("UPDATE failsafe_jobs SET analysis_json = ? WHERE id = ?;", (json.dumps(an), job_id))
-                    except Exception:
-                        pass
+                if updated_count == 1:
+                    # Also update internal analysis_json status
+                    cur.execute("SELECT analysis_json FROM failsafe_jobs WHERE id = ?;", (job_id,))
+                    row = cur.fetchone()
+                    if row:
+                        try:
+                            an = json.loads(row["analysis_json"])
+                            an["status"] = to_status
+                            cur.execute("UPDATE failsafe_jobs SET analysis_json = ? WHERE id = ?;", (json.dumps(an), job_id))
+                        except Exception:
+                            pass
+                    conn.commit()
+                    return True
+
                 conn.commit()
+                return False
+            finally:
                 conn.close()
-                return True
-
-            conn.commit()
-            conn.close()
-            return False
 
     def cleanup_expired(self, now: Optional[float] = None, max_processing_seconds: float = 300) -> int:
         """
@@ -291,36 +299,44 @@ class RelationalJobStore(JobStore):
         purged_count = 0
         with self._lock:
             conn = self._get_connection()
-            cur = conn.cursor()
+            try:
+                cur = conn.cursor()
 
-            # 1. Mark hung processing jobs as failed
-            hung_threshold = now - max_processing_seconds
-            cur.execute("""
-            UPDATE failsafe_jobs
-            SET status = 'failed', updated_at = ?
-            WHERE status = 'processing' AND updated_at < ?;
-            """, (now, hung_threshold))
+                # 1. Mark hung processing jobs as failed
+                hung_threshold = now - max_processing_seconds
+                cur.execute("""
+                UPDATE failsafe_jobs
+                SET status = 'failed', updated_at = ?
+                WHERE status = 'processing' AND updated_at < ?;
+                """, (now, hung_threshold))
 
-            # 2. Find expired jobs (excluding processing)
-            cur.execute("""
-            SELECT id, path FROM failsafe_jobs
-            WHERE status != 'processing' AND expires_at < ?;
-            """, (now,))
-            expired_rows = cur.fetchall()
+                # 2. Find expired jobs (excluding processing)
+                cur.execute("""
+                SELECT id, path, output_path FROM failsafe_jobs
+                WHERE status != 'processing' AND expires_at < ?;
+                """, (now,))
+                expired_rows = cur.fetchall()
 
-            for r in expired_rows:
-                job_id = r["id"]
-                file_path = r["path"]
-                if file_path and os.path.exists(file_path):
-                    try:
-                        os.remove(file_path)
-                    except OSError:
-                        pass
-                cur.execute("DELETE FROM failsafe_jobs WHERE id = ?;", (job_id,))
-                purged_count += 1
+                for r in expired_rows:
+                    job_id = r["id"]
+                    file_path = r["path"]
+                    if file_path and os.path.exists(file_path):
+                        try:
+                            os.remove(file_path)
+                        except OSError:
+                            pass
+                    out_path = r["output_path"]
+                    if out_path and os.path.exists(out_path):
+                        try:
+                            os.remove(out_path)
+                        except OSError:
+                            pass
+                    cur.execute("DELETE FROM failsafe_jobs WHERE id = ?;", (job_id,))
+                    purged_count += 1
 
-            conn.commit()
-            conn.close()
+                conn.commit()
+            finally:
+                conn.close()
 
         return purged_count
 
@@ -331,10 +347,12 @@ class RelationalJobStore(JobStore):
         swept = 0
         with self._lock:
             conn = self._get_connection()
-            cur = conn.cursor()
-            cur.execute("SELECT path FROM failsafe_jobs;")
-            active_paths = {row["path"] for row in cur.fetchall() if row["path"]}
-            conn.close()
+            try:
+                cur = conn.cursor()
+                cur.execute("SELECT path FROM failsafe_jobs;")
+                active_paths = {row["path"] for row in cur.fetchall() if row["path"]}
+            finally:
+                conn.close()
 
         # Find .xlsx and .csv files created in temp
         for ext in (".xlsx", ".csv"):

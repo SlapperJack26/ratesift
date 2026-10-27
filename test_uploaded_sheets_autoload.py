@@ -55,8 +55,8 @@ class TestUploadedSheetsAutoLoad(unittest.TestCase):
 
         res = client.get("/console/new-quote", cookies={"ratesift_session": token})
         self.assertEqual(res.status_code, 200)
-        self.assertIn("Your Uploaded Rate Sheets:", res.text)
-        self.assertIn("loaded-tariffs-tray", res.text)
+        self.assertIn("Active Rate Sheets:", res.text)
+        self.assertIn("rate-sheets-counters", res.text)
         # Ensure calculateFreightQuote(true) was removed from DOMContentLoaded
         self.assertNotIn("calculateFreightQuote(true);", res.text, "Directive 2 Violation: calculateFreightQuote(true) must not be present.")
 

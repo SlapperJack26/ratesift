@@ -342,6 +342,8 @@ def analyze_excel_sheet(
         col_confidence["weight"] = 0.50
 
     # Apply explicit column overrides from confirmed failsafe mapping
+    rate_break_col_indices = []
+    base_cost_col_idx = None
     if column_overrides:
         if "origin" in column_overrides and column_overrides["origin"] is not None:
             col_map["origin"] = column_overrides["origin"]
@@ -362,6 +364,12 @@ def analyze_excel_sheet(
             col_confidence["skid_count"] = 1.0
         if column_overrides.get("weight_unit"):
             unit_info["weight_unit"] = column_overrides["weight_unit"]
+        if "rate_columns" in column_overrides and column_overrides["rate_columns"]:
+            rate_break_col_indices = [idx for idx in column_overrides["rate_columns"] if idx is not None]
+        if column_overrides.get("base_cost_column") is not None:
+            base_cost_col_idx = column_overrides["base_cost_column"]
+        elif column_overrides.get("base_cost") is not None:
+            base_cost_col_idx = column_overrides["base_cost"]
 
     # 4. Extract Data Rows (Rule 1: ZERO ASSUMPTIONS, Rule 3: EXACT CELL COORDINATES)
 
@@ -535,8 +543,16 @@ def analyze_excel_sheet(
                     "issue": "Missing shipment weight.",
                     "hint": "Can use nominal tariff minimum or flag as non-critical info."
                 })
-            elif weight_lbs and weight_lbs > 44000.0:
-                row_issues.append("Exceeds standard LTL legal weight of 44,000 lbs (Rule 18).")
+        # Resolve rate break values if rate_columns provided in overrides
+        rate_break_values: Dict[str, Any] = {}
+        if rate_break_col_indices:
+            for r_col in rate_break_col_indices:
+                if isinstance(r_col, int) and 0 <= r_col < len(row_cells):
+                    header_title = header_names[r_col] if r_col < len(header_names) else f"Rate_Col_{r_col}"
+                    rate_break_values[header_title] = row_cells[r_col].value
+        if base_cost_col_idx is not None and isinstance(base_cost_col_idx, int) and 0 <= base_cost_col_idx < len(row_cells):
+            bc_title = header_names[base_cost_col_idx] if base_cost_col_idx < len(header_names) else "Base Cost"
+            rate_break_values[bc_title] = row_cells[base_cost_col_idx].value
 
         staged_rows.append({
             "row_num": excel_row_num,
@@ -549,6 +565,7 @@ def analyze_excel_sheet(
             "weight_raw": str(weight_val) if weight_val is not None else "",
             "weight_lbs": weight_lbs,
             "weight_coord": weight_cell_coord or f"{row_coord_prefix}, Col C",
+            "rate_break_values": rate_break_values,
             "skid_count": skid_count,
             "length": dim_l,
             "width": dim_w,
@@ -654,11 +671,24 @@ def build_reformatted_excel_workbook(rows: List[Dict[str, Any]], filename: str) 
         bottom=Side(style='thin', color='E2E8F0')
     )
 
+    extra_rate_headers = []
+    if rows and any(r.get("rate_break_values") for r in rows):
+        seen_headers = set()
+        for r in rows:
+            for k in (r.get("rate_break_values") or {}).keys():
+                if k not in seen_headers:
+                    seen_headers.add(k)
+                    extra_rate_headers.append(k)
+
     headers_norm = [
-        "Row ID", "Origin Lane", "Destination Lane", "Weight (lbs)",
+        "Row ID", "Origin Lane", "Destination Lane", "Weight (lbs)"
+    ]
+    if extra_rate_headers:
+        headers_norm.extend(extra_rate_headers)
+    headers_norm.extend([
         "Dimensions (LxWxH)", "Accessorials Requested", "Shipment Date",
         "Source Coordinates", "Status"
-    ]
+    ])
 
     ws_norm.append(headers_norm)
     for col_idx in range(1, len(headers_norm) + 1):
@@ -681,12 +711,18 @@ def build_reformatted_excel_workbook(rows: List[Dict[str, Any]], filename: str) 
             r["origin_normalized"] or r["origin_raw"],
             r["dest_normalized"] or r["dest_raw"],
             r["weight_lbs"] if r["weight_lbs"] is not None else "MISSING",
+        ]
+        if extra_rate_headers:
+            rb = r.get("rate_break_values") or {}
+            for h in extra_rate_headers:
+                row_vals.append(rb.get(h, ""))
+        row_vals.extend([
             r.get("dimensions_formatted", ""),
             ", ".join(r.get("accessorials", [])) if r.get("accessorials") else "None",
             r.get("shipment_date", "Standard"),
             source_coords,
             status_label
-        ]
+        ])
         ws_norm.append(row_vals)
         cur_row = ws_norm.max_row
         for col_idx in range(1, len(row_vals) + 1):
