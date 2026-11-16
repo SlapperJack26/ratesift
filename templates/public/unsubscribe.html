@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en-CA" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Quotelytics | Unsubscribe from Marketing Emails</title>
+  <meta name="description" content="Manage your email preferences and unsubscribe from commercial marketing emails from Quotelytics Inc. pursuant to Canada's Anti-Spam Legislation (CASL).">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://quotelytics.ca/unsubscribe">
+  <meta property="og:locale" content="en_CA">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="/static/js/tailwindcss.min.js"></script>
+
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Top Navigation Header -->
+  <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-white relative z-20 m-0">
+    <a href="/" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Quotelytics Home">
+      <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-8 md:h-9 w-auto object-contain" />
+    </a>
+    <div class="flex items-center gap-3 text-xs">
+      <a href="/login" class="font-semibold text-slate-700 hover:text-red-600 transition-colors">Log in</a>
+      <a href="/help" class="font-semibold text-slate-700 hover:text-red-600 transition-colors">Help Centre</a>
+    </div>
+  </header>
+
+  <!-- Unsubscribe Card -->
+  <main role="main" class="flex-1 flex items-center justify-center p-4 sm:p-6">
+    <div class="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl p-6 sm:p-8 space-y-6">
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto text-xl">
+          
+        </div>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+          Email Preferences
+        </h1>
+        <p class="text-xs text-slate-500 leading-relaxed">
+          Manage your subscription to Quotelytics commercial marketing updates and rate tips under Canada's Anti-Spam Legislation (CASL).
+        </p>
+      </div>
+
+      <!-- Form View -->
+      <form id="unsub-form" onsubmit="handleUnsubscribe(event)" class="space-y-4">
+        <div>
+          <label for="unsub-email" class="block text-xs font-bold text-slate-700 mb-1">
+            Email Address
+          </label>
+          <input 
+            type="email" 
+            id="unsub-email" 
+            name="email" 
+            required 
+            placeholder="dispatcher@brokerage.ca"
+            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-red-600 font-mono"
+          />
+        </div>
+
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-500 leading-relaxed space-y-1">
+          <div class="font-semibold text-slate-700">What will change:</div>
+          <div>• You will be removed from product announcements, webinars, and promotional offers.</div>
+          <div>• You will continue receiving mandatory operational and transactional emails (password resets, security alerts, and subscription receipts).</div>
+        </div>
+
+        <button 
+          type="submit" 
+          id="unsub-btn"
+          class="w-full py-2.5 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-colors shadow-xs flex items-center justify-center gap-2"
+        >
+          <span id="unsub-btn-text">Unsubscribe from Marketing</span>
+          <span id="unsub-spinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+        </button>
+      </form>
+
+      <!-- Success Confirmation View (Hidden by default) -->
+      <div id="unsub-success" class="hidden space-y-4 text-center py-4">
+        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-xl font-bold">
+          <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div class="space-y-1">
+          <h2 class="text-base font-bold text-slate-900">Successfully Unsubscribed</h2>
+          <p class="text-xs text-slate-600" id="success-email-text">
+            Your email has been removed from all Quotelytics commercial marketing distributions.
+          </p>
+        </div>
+        <p class="text-[11px] text-slate-400">
+          This change is processed immediately and recorded in accordance with CASL requirements.
+        </p>
+        <div class="pt-2">
+          <a href="/" class="inline-block px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors">
+            Return to Homepage →
+          </a>
+        </div>
+      </div>
+
+      <!-- CASL Statutory Footer -->
+      <div class="pt-4 border-t border-slate-200 text-center text-[10px] text-slate-400 leading-normal space-y-0.5">
+        <div>Quotelytics Inc. • Ontario, Canada</div>
+        <div>support@quotelytics.ca • Priority Hotline: 289-929-8565</div>
+        <div>All unsubscribe requests honored immediately per Canadian CASL standards.</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Semantic Footer -->
+  <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-white m-0">
+    <div>Quotelytics Inc. • CASL Compliance</div>
+    <div class="flex gap-4">
+      <a href="/privacy" class="hover:text-slate-900">Privacy Policy</a>
+      <a href="/terms" class="hover:text-slate-900">Terms of Service</a>
+      <a href="/help" class="hover:text-slate-900">Help Centre</a>
+    </div>
+  </footer>
+
+  <script>
+    // Pre-fill email from query parameter if present
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const email = params.get('email');
+      if (email && document.getElementById('unsub-email')) {
+        document.getElementById('unsub-email').value = email;
+      }
+    });
+
+    async function handleUnsubscribe(e) {
+      e.preventDefault();
+      const email = document.getElementById('unsub-email').value.trim();
+      if (!email) return;
+
+      const btn = document.getElementById('unsub-btn');
+      const btnText = document.getElementById('unsub-btn-text');
+      const spinner = document.getElementById('unsub-spinner');
+
+      btn.disabled = true;
+      btnText.textContent = "Processing...";
+      spinner.classList.remove('hidden');
+
+      try {
+        const res = await fetch('/api/auth/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to process unsubscribe request.");
+
+        document.getElementById('unsub-form').classList.add('hidden');
+        document.getElementById('unsub-success').classList.remove('hidden');
+        document.getElementById('success-email-text').textContent = 
+          `${email} has been unsubscribed from all Quotelytics commercial marketing distributions.`;
+      } catch (err) {
+        alert("Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = "Unsubscribe from Marketing";
+        spinner.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

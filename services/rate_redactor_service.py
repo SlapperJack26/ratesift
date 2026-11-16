@@ -1,7 +1,7 @@
 """
 services/rate_redactor_service.py
 =================================
-RateSift Client-Side Rate Sheet Masker & Redaction Service.
+Quotelytics Client-Side Rate Sheet Masker & Redaction Service.
 
 Safeguards broker confidentiality by detecting and scrubbing proprietary account numbers,
 client identities, internal contract codes, sales contact details, and commission notes from

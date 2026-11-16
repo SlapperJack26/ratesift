@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Quotelytics | Sales &amp; Admin Business API Onboarding Desk</title>
+  <meta name="robots" content="noindex, nofollow">
+  <script src="/static/js/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-slate-50/50 text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0">
+    <!-- Top Navigation Bar -->
+    <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] bg-white relative z-20 m-0 shadow-2xs">
+      <div class="flex items-center justify-between w-full max-w-7xl mx-auto">
+        <div class="flex items-center gap-6 lg:gap-8">
+          <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Quotelytics Console">
+            <img src="/static/images/quotelytics-logo.png" alt="Quotelytics" class="h-8 w-auto object-contain" />
+          </a>
+          <nav role="navigation" aria-label="Main Navigation" class="hidden sm:flex items-center gap-1.5 sm:gap-2 text-xs font-medium">
+            <a href="/console/new-quote" class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">New Quote</a>
+            <a href="/console/history" class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">Quotes History</a>
+            <a href="/console/rate-sheets" class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">Carrier Tariffs</a>
+            <a href="/console/account" class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">Account</a>
+            <a href="/console/admin" aria-current="page" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs relative after:content-[''] after:absolute after:-bottom-3.5 after:left-3 after:right-3 after:h-0.5 after:bg-red-600 whitespace-nowrap">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span>Sales &amp; API Onboarding</span>
+            </a>
+          </nav>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">ADMIN DESK</span>
+          <a href="/api/auth/logout" aria-label="Sign out" class="p-2 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors" title="Sign out">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Sales Rep Onboarding Content -->
+    <main id="main-content" role="main" class="p-6 flex-1 max-w-6xl mx-auto w-full space-y-6">
+      <header class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-slate-900">Sales Rep — Business API Onboarding Desk</h1>
+          <p class="text-xs text-slate-600 mt-1">Zero-code customer setup: search by email, unlock the Business plan in one click, and copy the customer's 3-step welcome instructions.</p>
+        </div>
+        <a href="/console/account#api" class="px-3.5 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors">
+          Preview Customer Developer API Tab →
+        </a>
+      </header>
+
+      <!-- Quick 3-Step Sales Call Cheat Sheet -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-1">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Step 1 (You do this below)</div>
+          <div class="text-xs font-bold text-slate-900">Search Email &amp; Click "Activate Business"</div>
+          <p class="text-[11px] text-slate-500">Unlocks the customer's Developer API &amp; Webhooks tab immediately.</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-1">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Step 2 (On Zoom with customer)</div>
+          <div class="text-xs font-bold text-slate-900">Confirm 1 Tariff &amp; Click "Generate API Key"</div>
+          <p class="text-[11px] text-slate-500">Customer opens <code class="bg-slate-100 px-1 rounded font-mono">/console/account#api</code>, generates their key, and clicks <strong>Verify My API Setup</strong>.</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-1">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Step 3 (Handoff to IT)</div>
+          <div class="text-xs font-bold text-slate-900">Click "Copy Email for IT Team"</div>
+          <p class="text-[11px] text-slate-500">Sends plain-English instructions &amp; endpoints to their TMS developer. Customer shares secret key privately.</p>
+        </div>
+      </section>
+
+      <!-- Search Bar & Customer Table -->
+      <section class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-4">
+        <form onsubmit="event.preventDefault(); searchCustomers();" class="flex flex-wrap items-center gap-2">
+          <input id="admin-customer-search" type="search" placeholder="Search by customer email, name, or brokerage company..." class="flex-1 min-w-[240px] px-3.5 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <button type="submit" class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-black text-white font-bold text-xs transition-colors cursor-pointer">
+            Search Customers
+          </button>
+          <button type="button" onclick="document.getElementById('admin-customer-search').value=''; searchCustomers();" class="px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-600 font-semibold text-xs transition-colors cursor-pointer">
+            Reset
+          </button>
+        </form>
+
+        <div class="text-[11px] text-slate-500">
+          Privacy Notice: This view displays onboarding status counts only. Carrier tariff rates and API secrets are never visible to staff.
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-lg">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-50 border-b border-slate-200 text-[11px] text-slate-600">
+              <tr>
+                <th class="py-2.5 px-3 font-bold">Customer &amp; Company</th>
+                <th class="py-2.5 px-3 font-bold">1. Plan Status</th>
+                <th class="py-2.5 px-3 font-bold">2. Confirmed Tariffs</th>
+                <th class="py-2.5 px-3 font-bold">3. Active API Keys</th>
+                <th class="py-2.5 px-3 font-bold text-right">One-Click Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-customers-tbody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer role="contentinfo" class="w-full px-6 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-slate-500 bg-white">
+      <span>Quotelytics Sales &amp; Onboarding Desk</span>
+      <span>Canadian Data Residency (WHC) • PIPEDA</span>
+    </footer>
+  </div>
+
+  <script>
+    function _getAdminCsrfHeaders(extra = {}) {
+      const headers = Object.assign({}, extra);
+      const match = document.cookie.match(/(?:^|;\s*)quotelytics_csrf=([^;]+)/);
+      if (match && match[1]) {
+        headers['X-CSRF-Token'] = decodeURIComponent(match[1]);
+      }
+      return headers;
+    }
+
+    function _notify(msg, type = 'success') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(msg, type);
+      } else {
+        alert(msg);
+      }
+    }
+
+    function searchCustomers() {
+      const q = (document.getElementById('admin-customer-search').value || '').trim();
+      fetch(`/api/admin/customers?q=${encodeURIComponent(q)}&limit=25`)
+        .then(async r => {
+          const body = await r.json();
+          if (!r.ok) throw new Error(body.detail || 'Could not load customers.');
+          return body;
+        })
+        .then(data => renderCustomers(data.customers || []))
+        .catch(err => _notify(err.message || 'Error searching customers.', 'error'));
+    }
+
+    function renderCustomers(customers) {
+      const tbody = document.getElementById('admin-customers-tbody');
+      tbody.textContent = '';
+
+      if (!customers || customers.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.className = 'py-6 px-3 text-center text-slate-400 text-xs';
+        td.textContent = 'No matching customer accounts found. Ask the customer to create their login at https://quotelytics.ca/get-started first.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      customers.forEach(c => {
+        const tr = document.createElement('tr');
+
+        // Col 1: Customer & Company
+        const tdCust = document.createElement('td');
+        tdCust.className = 'py-3 px-3';
+        const compDiv = document.createElement('div');
+        compDiv.className = 'font-bold text-slate-900';
+        compDiv.textContent = c.company || 'Unnamed Organization';
+        const emailDiv = document.createElement('div');
+        emailDiv.className = 'text-[11px] text-slate-600 font-mono';
+        emailDiv.textContent = c.email || '';
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'text-[11px] text-slate-400';
+        nameDiv.textContent = c.name || '';
+        tdCust.appendChild(compDiv);
+        tdCust.appendChild(emailDiv);
+        tdCust.appendChild(nameDiv);
+        tr.appendChild(tdCust);
+
+        // Col 2: Plan Status
+        const tdPlan = document.createElement('td');
+        tdPlan.className = 'py-3 px-3';
+        const planPill = document.createElement('span');
+        const isBiz = c.tier === 'BUSINESS';
+        planPill.className = isBiz
+          ? 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200'
+          : 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200';
+        planPill.textContent = isBiz ? '✓ BUSINESS (API Unlocked)' : c.tier;
+        tdPlan.appendChild(planPill);
+        tr.appendChild(tdPlan);
+
+        // Col 3: Confirmed Tariffs
+        const tdSheets = document.createElement('td');
+        tdSheets.className = 'py-3 px-3';
+        const shPill = document.createElement('span');
+        const hasSheets = Number(c.confirmed_sheets_count || 0) > 0;
+        shPill.className = hasSheets
+          ? 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200'
+          : 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200';
+        shPill.textContent = hasSheets
+          ? `✓ ${c.confirmed_sheets_count} Confirmed`
+          : 'Needs Tariff Upload';
+        tdSheets.appendChild(shPill);
+        tr.appendChild(tdSheets);
+
+        // Col 4: Active API Keys
+        const tdKeys = document.createElement('td');
+        tdKeys.className = 'py-3 px-3';
+        const keyPill = document.createElement('span');
+        const hasKeys = Number(c.active_api_keys_count || 0) > 0;
+        keyPill.className = hasKeys
+          ? 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200'
+          : 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500';
+        keyPill.textContent = hasKeys
+          ? `✓ ${c.active_api_keys_count} Active Key(s)`
+          : 'No Key Yet';
+        tdKeys.appendChild(keyPill);
+        tr.appendChild(tdKeys);
+
+        // Col 5: One-Click Actions
+        const tdActions = document.createElement('td');
+        tdActions.className = 'py-3 px-3 text-right space-x-2 whitespace-nowrap';
+
+        if (!isBiz) {
+          const btnBiz = document.createElement('button');
+          btnBiz.type = 'button';
+          btnBiz.className = 'px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition-colors cursor-pointer';
+          btnBiz.textContent = 'Activate Business Plan';
+          btnBiz.addEventListener('click', () => activateBusinessForCustomer(c.email, c.company));
+          tdActions.appendChild(btnBiz);
+        }
+
+        const tierSelect = document.createElement('select');
+        tierSelect.ariaLabel = 'Change plan tier';
+        tierSelect.className = 'px-2 py-1 rounded border border-slate-300 text-[11px] bg-white text-slate-700';
+        ['FREE', 'PRO', 'TEAM', 'BUSINESS'].forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t;
+          opt.textContent = t;
+          if (t === c.tier) opt.selected = true;
+          tierSelect.appendChild(opt);
+        });
+        tierSelect.addEventListener('change', () => setCustomerTier(c.email, tierSelect.value));
+        tdActions.appendChild(tierSelect);
+
+        const btnCopy = document.createElement('button');
+        btnCopy.type = 'button';
+        btnCopy.className = 'px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-[11px] transition-colors cursor-pointer';
+        btnCopy.textContent = 'Copy Welcome Steps';
+        btnCopy.addEventListener('click', () => copyCustomerWelcomeSteps(c));
+        tdActions.appendChild(btnCopy);
+
+        tr.appendChild(tdActions);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function activateBusinessForCustomer(email, company) {
+      if (!window.__SKIP_DELETE_CONFIRM__ && !confirm(`Activate the Business Plan & Embedded Quoting API for ${company || email}?`)) return;
+      setCustomerTier(email, 'BUSINESS');
+    }
+
+    function setCustomerTier(email, tier) {
+      fetch('/api/user/upgrade-tier', {
+        method: 'POST',
+        headers: _getAdminCsrfHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ email, tier })
+      })
+        .then(async r => {
+          const body = await r.json();
+          if (!r.ok) throw new Error(body.detail || 'Could not update subscription plan.');
+          _notify(`${email} is now on the ${body.new_tier} plan.`, 'success');
+          searchCustomers();
+        })
+        .catch(err => _notify(err.message || 'Error updating plan.', 'error'));
+    }
+
+    function copyCustomerWelcomeSteps(c) {
+      const text = [
+        `Hi ${c.name || 'Team'},`,
+        ``,
+        `Your ${c.company || 'Quotelytics'} account is now enabled for the Quotelytics Business Embedded Quoting API!`,
+        ``,
+        `3 Quick Steps to Finish Setup (takes ~2 minutes, no coding needed):`,
+        `1. Confirm your LTL carrier rate sheet at: https://quotelytics.ca/console/rate-sheets`,
+        `2. Open your Developer API tab at: https://quotelytics.ca/console/account#api`,
+        `3. Click "Generate API Key", click "Verify My API Setup" to test a live quote, and click "Copy Email for IT Team" to send the connection guide to your developer.`,
+        ``,
+        `Questions? Reply here anytime or reach Canadian Broker Support at 289-929-8565.`
+      ].join('\n');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => _notify('Welcome steps copied to clipboard!', 'success'));
+      }
+    }
+
+    searchCustomers();
+  </script>
+  <script src="/static/js/global-chrome.js?v=20261113b"></script>
+</body>
+</html>

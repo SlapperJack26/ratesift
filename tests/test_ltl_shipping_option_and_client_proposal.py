@@ -1,17 +1,25 @@
 import unittest
+import uuid
 from fastapi.testclient import TestClient
 from main import app
-from services.auth_service import create_session
+from services.auth_service import register_and_create_session
 from services.db_service import update_user_tier
 
 class TestLTLShippingOptionAndClientProposal(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.client = TestClient(app)
-        cls.user_id = "usr_alex_rivers"
+        user, token = register_and_create_session(
+            name="Jordan Freight",
+            email=f"ltl.option.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+            company="Acme Logistics",
+            origin_zip="TORONTO, ON",
+            password="LtlOptionPassword2026!"
+        )
+        cls.user_id = user["id"]
         update_user_tier(cls.user_id, "TEAM")
-        cls.token = create_session(cls.user_id)
-        cls.client.cookies.set("shipflow_session", cls.token)
+        cls.token = token
+        cls.client.cookies.set("quotelytics_session", cls.token)
         from services.import_day_and_ross_guide import import_day_and_ross_tariff
         cls.sheet_id = import_day_and_ross_tariff(user_id=cls.user_id, auto_confirm=True)
 
@@ -22,7 +30,7 @@ class TestLTLShippingOptionAndClientProposal(unittest.TestCase):
         html = resp.text
 
         # 1. Original Logo, Header & Navigation Intact
-        self.assertIn("/static/images/ratesift-logo.png", html)
+        self.assertIn("/static/images/quotelytics-logo.png", html)
         self.assertIn("New Quote", html)
         self.assertIn("Quotes History", html)
         self.assertIn("Carrier Tariffs", html)
@@ -31,7 +39,7 @@ class TestLTLShippingOptionAndClientProposal(unittest.TestCase):
         self.assertIn("Free Starter", html)
 
         # 2. Original Footer Intact
-        self.assertTrue("Quotelytics Quoting Engine" in html or "RateSift Quoting Engine" in html)
+        self.assertTrue("Quotelytics Quoting Engine" in html or "Quotelytics Quoting Engine" in html)
         self.assertIn("Canadian Residency (WHC)", html)
         self.assertIn("openSupportModal", html)
 
@@ -59,7 +67,7 @@ class TestLTLShippingOptionAndClientProposal(unittest.TestCase):
             "shipment_date": "2024-03-15",
             "accessorials": ["liftgate"]
         }
-        res = self.client.post("/api/ratesift/quotes/calculate", json=calc_payload)
+        res = self.client.post("/api/quotelytics/quotes/calculate", json=calc_payload)
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertIn("quotes", data)

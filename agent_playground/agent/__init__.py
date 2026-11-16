@@ -1,10 +1,9 @@
-"""
-RateSift Agent Playground - Isolated Agent Copy Package
-Enables testing agent training ideas, prompt variations, and rule adherence in the IDE.
-Zero website launch or database modifications required.
-"""
-from .rate_agent import RateSiftAgent
-from .rules_spec import RATESIFT_32_RULES
-from .agent_prompts import AGENT_TRAINING_VARIANTS
+"""Thin re-export shim pointing to canonical top-level `agent` package."""
+import os
+import sys
 
-__all__ = ["RateSiftAgent", "RATESIFT_32_RULES", "AGENT_TRAINING_VARIANTS"]
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from agent import *  # noqa: F401,F403

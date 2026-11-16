@@ -39,7 +39,7 @@
         <!-- Left: Logo & Nav Links -->
         <div class="flex items-center gap-6 lg:gap-8">
           <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Quotelytics Console">
-            <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-8 w-auto object-contain" />
+            <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-8 w-auto object-contain" />
           </a>
 
           <!-- Center/Left Navigation Links -->
@@ -81,7 +81,7 @@
           </div>
 
           <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
-            <span>🇨🇦</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">CA</span>
             <span>Hosted in Canada (WHC) • PIPEDA</span>
           </div>
 
@@ -111,10 +111,15 @@
           <h1 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Account & Subscription Center</h1>
           <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Manage your organization profile, track usage limits, control dispatcher seats, and audit operational bottlenecks.</p>
         </div>
-        <button type="button" onclick="openUpgradeModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          <span>Change Subscription Plan</span>
-        </button>
+        <div class="flex items-center gap-2">
+          <a id="admin-onboarding-desk-link" href="/console/admin" class="hidden items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold text-xs transition-colors">
+            <span>Sales &amp; API Onboarding</span>
+          </a>
+          <button type="button" onclick="openUpgradeModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <span>Change Subscription Plan</span>
+          </button>
+        </div>
       </header>
 
       <!-- Settings Layout Grid -->
@@ -160,6 +165,14 @@
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             <span>Security</span>
           </button>
+
+          <button id="tab-btn-api" onclick="switchTab('api')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-black/5 flex items-center justify-between gap-2 transition-colors cursor-pointer">
+            <div class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+              <span>Developer API</span>
+            </div>
+            <span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-indigo-50 text-indigo-700 border border-indigo-200">BUSINESS</span>
+          </button>
         </nav>
 
         <!-- Right Content Panels -->
@@ -172,11 +185,11 @@
                 <h2 id="profile-heading" class="text-xs font-bold text-[var(--foreground)] mb-3 pb-1 border-b border-[var(--border)]">Profile Details</h2>
                 <div class="flex items-center gap-4 mb-5">
                   <div id="profile-avatar" class="w-14 h-14 rounded-full bg-red-100 border-2 border-red-200 flex items-center justify-center font-bold text-red-700 text-sm shadow-inner">
-                    AR
+                    --
                   </div>
                   <div class="space-y-1">
-                    <p id="profile-display-name" class="text-xs font-bold text-slate-800">Alex Rivers</p>
-                    <p id="profile-display-company" class="text-[11px] text-slate-500">TechCorp Logistics</p>
+                    <p id="profile-display-name" class="text-xs font-bold text-slate-800">--</p>
+                    <p id="profile-display-company" class="text-[11px] text-slate-500">--</p>
                   </div>
                 </div>
 
@@ -190,8 +203,14 @@
                     <input id="last-name" type="text" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
                   </div>
                   <div>
-                    <label for="work-email" class="block text-xs font-bold text-[var(--foreground)] mb-1">Email Address</label>
+                    <div class="flex items-center justify-between mb-1">
+                      <label for="work-email" class="block text-xs font-bold text-[var(--foreground)]">Email Address</label>
+                      <span id="email-verified-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">Checking...</span>
+                    </div>
                     <input id="work-email" type="email" readonly class="w-full bg-slate-50 border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-slate-500 cursor-not-allowed">
+                    <div id="resend-verify-wrap" class="hidden mt-1 text-right">
+                      <button type="button" onclick="resendVerificationEmail()" class="text-[11px] text-red-600 hover:underline font-semibold cursor-pointer">Resend verification email →</button>
+                    </div>
                   </div>
                   <div>
                     <label for="company-name" class="block text-xs font-bold text-[var(--foreground)] mb-1">Company / Organization</label>
@@ -224,9 +243,14 @@
                 <h3 id="plan-headline" class="text-lg font-bold mt-1 text-white">Validating Live Freight Rates</h3>
                 <p id="plan-subline" class="text-xs text-slate-300 mt-0.5">Includes deterministic pricing engine, FSA resolver, and multi-carrier comparison.</p>
               </div>
-              <button type="button" onclick="openUpgradeModal()" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-lg transition-all shadow-xs cursor-pointer">
-                Change Plan →
-              </button>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="openCustomerPortal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs rounded-lg transition-all shadow-xs cursor-pointer">
+                  Customer Portal ↗
+                </button>
+                <button type="button" onclick="openUpgradeModal()" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-lg transition-all shadow-xs cursor-pointer">
+                  Upgrade Plan →
+                </button>
+              </div>
             </div>
 
             <!-- 3 Operational Bottleneck Counters -->
@@ -299,7 +323,7 @@
               <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               <div>
                 <p class="font-bold">Automated Bottleneck Protection</p>
-                <p class="mt-0.5 text-amber-700">When your quote calculations, rate sheet ingestion, or team seats hit plan ceilings, RateSift halts execution safely to prevent unauthorized billing spikes and records the event in your Bottleneck Ledger.</p>
+                <p class="mt-0.5 text-amber-700">When your quote calculations, rate sheet ingestion, or team seats hit plan ceilings, Quotelytics halts execution safely to prevent unauthorized billing spikes and records the event in your Bottleneck Ledger.</p>
               </div>
             </div>
           </div>
@@ -344,7 +368,7 @@
                   <div>
                     <label class="block text-[11px] font-semibold text-slate-600 mb-1">Role</label>
                     <div class="flex gap-2">
-                      <select id="invite-role" class="w-full bg-white border border-slate-300 rounded px-2 py-1.5 text-xs text-slate-900">
+                      <select id="invite-role" aria-label="Dispatcher Team Seat Role" class="w-full bg-white border border-slate-300 rounded px-2 py-1.5 text-xs text-slate-900">
                         <option value="DISPATCHER">Dispatcher</option>
                         <option value="AUDITOR">Billing Auditor</option>
                       </select>
@@ -446,7 +470,7 @@
                   <input id="pwd-current" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500" placeholder="••••••••">
                 </div>
                 <div>
-                  <label for="pwd-new" class="block text-xs font-bold text-[var(--foreground)] mb-1">New Password (min. 6 characters)</label>
+                  <label for="pwd-new" class="block text-xs font-bold text-[var(--foreground)] mb-1">New Password (min. 10 characters)</label>
                   <input id="pwd-new" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500" placeholder="••••••••">
                 </div>
                 <div>
@@ -466,7 +490,7 @@
               <h3 class="text-xs font-bold text-[var(--foreground)]">Marketing Communications (CASL)</h3>
               <label class="flex items-center justify-between gap-4 text-xs text-slate-600 cursor-pointer">
                 <span>Receive optional product updates, freight rating tips, and commercial offers from Quotelytics Inc.</span>
-                <input id="account-marketing-opt-in" type="checkbox" onchange="updateMarketingConsent(this.checked)" class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500">
+                <input id="account-marketing-opt-in" aria-label="Receive marketing communications and product updates" type="checkbox" onchange="updateMarketingConsent(this.checked)" class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500">
               </label>
             </div>
 
@@ -490,6 +514,184 @@
               <button type="button" onclick="deleteMyAccount()" class="px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors cursor-pointer">
                 Delete Account
               </button>
+            </div>
+          </div>
+
+          <!-- 7. DEVELOPER API & WEBHOOKS TAB -->
+          <div id="panel-api" class="hidden space-y-5">
+            <!-- Locked Banner for Non-Business Plans -->
+            <div id="api-locked-banner" class="bg-indigo-50/60 border border-indigo-200 rounded-xl p-6 space-y-3">
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800">
+                Business Tier Integration
+              </div>
+              <h2 class="text-base font-bold text-slate-900">Embedded REST Quoting API &amp; Signed Batch Webhooks</h2>
+              <p class="text-xs text-slate-600 leading-relaxed max-w-2xl">
+                Connect your TMS, WMS, ERP, or customer portal directly to your confirmed LTL carrier tariffs via <code class="px-1.5 py-0.5 bg-white rounded border border-indigo-100 font-mono text-[11px]">POST /api/quotelytics/quotes/calculate</code> and <code class="px-1.5 py-0.5 bg-white rounded border border-indigo-100 font-mono text-[11px]">POST /api/v1/quotes/batch</code>, complete with SHA-256 hashed API keys and HMAC-SHA256 signed webhook callbacks.
+              </p>
+              <div class="pt-1 flex flex-wrap items-center gap-3">
+                <button type="button" onclick="openSupportModal(event)" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer">
+                  Contact Sales for Business API Onboarding
+                </button>
+                <button type="button" onclick="openApiModal(event)" class="px-3.5 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors cursor-pointer">
+                  View API Reference
+                </button>
+              </div>
+            </div>
+
+            <!-- Active Business Tier API & Webhooks Workspace -->
+            <div id="api-business-workspace" class="hidden space-y-5">
+              <!-- Guided 3-Step Non-Technical Setup Checklist & 1-Click Handoff -->
+              <div id="api-guided-checklist-card" class="bg-indigo-50/50 border border-indigo-200 rounded-xl p-5 space-y-4">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h2 class="text-sm font-bold text-slate-900">Guided 3-Step API Setup Checklist</h2>
+                    <p class="text-[11px] text-slate-600">No coding needed here — complete these 3 steps, verify your connection in one click, and copy the instructions for your IT team.</p>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" id="btn-verify-api-readiness" onclick="runApiReadinessCheck()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition-colors cursor-pointer">
+                      Verify My API Setup
+                    </button>
+                    <button type="button" id="btn-copy-it-handoff" onclick="copyItTeamHandoffEmail()" class="px-3.5 py-1.5 rounded-lg bg-white border border-indigo-300 hover:bg-indigo-50 text-indigo-800 font-bold text-xs transition-colors cursor-pointer">
+                      Copy Email for IT Team
+                    </button>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div class="bg-white border border-emerald-200 rounded-lg p-3 space-y-1">
+                    <div class="font-bold text-emerald-700">✓ Step 1: Business Plan Active</div>
+                    <div class="text-[11px] text-slate-500">Embedded REST Quoting &amp; Webhooks unlocked.</div>
+                  </div>
+                  <div id="checklist-step-tariffs" class="bg-white border border-slate-200 rounded-lg p-3 space-y-1">
+                    <div id="checklist-step-tariffs-title" class="font-bold text-slate-800">Step 2: Carrier Rate Sheet</div>
+                    <div id="checklist-step-tariffs-sub" class="text-[11px] text-slate-500">Checking confirmed tariffs…</div>
+                    <a id="checklist-step-tariffs-link" href="/console/rate-sheets" class="hidden inline-block mt-1 text-[11px] font-bold text-red-600 hover:underline">Upload &amp; Confirm Rate Sheet →</a>
+                  </div>
+                  <div id="checklist-step-keys" class="bg-white border border-slate-200 rounded-lg p-3 space-y-1">
+                    <div id="checklist-step-keys-title" class="font-bold text-slate-800">Step 3: Production API Key</div>
+                    <div id="checklist-step-keys-sub" class="text-[11px] text-slate-500">Checking active keys…</div>
+                  </div>
+                </div>
+
+                <!-- 1-Click Readiness Verification Result Banner -->
+                <div id="api-readiness-result-box" class="hidden rounded-lg p-3.5 text-xs border"></div>
+              </div>
+
+              <!-- Production API Keys Card -->
+              <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[var(--border)]">
+                  <div>
+                    <h2 class="text-sm font-bold text-[var(--foreground)]">Production API Keys</h2>
+                    <p class="text-[11px] text-slate-500">Keys are hashed with SHA-256 at rest. Pass via the <code class="font-mono bg-slate-100 px-1 rounded">X-API-Key</code> HTTP header.</p>
+                  </div>
+                  <button type="button" onclick="openApiModal(event)" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer">
+                    Integration Docs ↗
+                  </button>
+                </div>
+
+                <form onsubmit="event.preventDefault(); generateApiKey();" class="flex flex-wrap items-end gap-2">
+                  <div class="flex-1 min-w-[200px]">
+                    <label for="api-key-name-input" class="block text-[11px] font-semibold text-slate-700 mb-1">Key Label</label>
+                    <input id="api-key-name-input" type="text" maxlength="80" placeholder="e.g. Production TMS Integration" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  </div>
+                  <button type="submit" id="btn-generate-api-key" class="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white font-bold text-xs transition-colors cursor-pointer">
+                    Generate API Key
+                  </button>
+                </form>
+
+                <!-- One-time Secret Reveal Box -->
+                <div id="api-key-secret-banner" class="hidden bg-emerald-50 border border-emerald-300 rounded-xl p-3.5 space-y-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-emerald-900">Copy Your New API Secret Now — Shown Only Once</span>
+                    <button type="button" onclick="dismissApiKeyBanner()" class="text-[11px] font-semibold text-emerald-800 hover:underline cursor-pointer">Dismiss</button>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <code id="api-key-raw-value" class="flex-1 px-3 py-1.5 bg-white border border-emerald-200 rounded font-mono text-xs text-slate-900 select-all overflow-x-auto"></code>
+                    <button type="button" onclick="copyGeneratedApiKey()" class="px-3 py-1.5 rounded bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs cursor-pointer">Copy</button>
+                  </div>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                  <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-[11px] text-slate-600">
+                      <tr>
+                        <th class="py-2 px-3 font-bold">Label</th>
+                        <th class="py-2 px-3 font-bold">Key Prefix</th>
+                        <th class="py-2 px-3 font-bold">Created</th>
+                        <th class="py-2 px-3 font-bold">Last Used</th>
+                        <th class="py-2 px-3 font-bold">Status</th>
+                        <th class="py-2 px-3 font-bold text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="api-keys-table-body" class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Batch Calculation Webhooks Card -->
+              <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs space-y-4">
+                <div class="pb-2 border-b border-[var(--border)]">
+                  <h2 class="text-sm font-bold text-[var(--foreground)]">Batch Calculation Webhooks</h2>
+                  <p class="text-[11px] text-slate-500">Receive <code class="font-mono bg-slate-100 px-1 rounded">batch.quote.completed</code> callbacks signed with <code class="font-mono bg-slate-100 px-1 rounded">X-Quotelytics-Signature</code> (HMAC-SHA256).</p>
+                </div>
+
+                <form onsubmit="event.preventDefault(); registerWebhookEndpoint();" class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
+                  <div class="sm:col-span-6">
+                    <label for="webhook-url-input" class="block text-[11px] font-semibold text-slate-700 mb-1">HTTPS Endpoint URL</label>
+                    <input id="webhook-url-input" type="url" required placeholder="https://tms.yourcompany.ca/webhooks/quotelytics" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  </div>
+                  <div class="sm:col-span-4">
+                    <label for="webhook-desc-input" class="block text-[11px] font-semibold text-slate-700 mb-1">Description (Optional)</label>
+                    <input id="webhook-desc-input" type="text" maxlength="120" placeholder="ERP Batch Listener" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <button type="submit" class="w-full px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors cursor-pointer">
+                      Add Webhook
+                    </button>
+                  </div>
+                </form>
+
+                <!-- One-time Webhook Signing Secret Reveal -->
+                <div id="webhook-secret-banner" class="hidden bg-indigo-50 border border-indigo-300 rounded-xl p-3.5 space-y-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-indigo-950">Copy Webhook Signing Secret Now — Shown Only Once</span>
+                    <button type="button" onclick="document.getElementById('webhook-secret-banner').classList.add('hidden')" class="text-[11px] font-semibold text-indigo-800 hover:underline cursor-pointer">Dismiss</button>
+                  </div>
+                  <code id="webhook-raw-secret" class="block px-3 py-1.5 bg-white border border-indigo-200 rounded font-mono text-xs text-slate-900 select-all overflow-x-auto"></code>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                  <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-[11px] text-slate-600">
+                      <tr>
+                        <th class="py-2 px-3 font-bold">Destination URL</th>
+                        <th class="py-2 px-3 font-bold">Signing Secret</th>
+                        <th class="py-2 px-3 font-bold">Events</th>
+                        <th class="py-2 px-3 font-bold text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="webhook-endpoints-body" class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
+
+                <div>
+                  <h3 class="text-xs font-bold text-slate-700 mb-2">Recent Webhook Deliveries</h3>
+                  <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                    <table class="w-full text-left text-xs border-collapse">
+                      <thead class="bg-slate-50 border-b border-slate-200 text-[11px] text-slate-600">
+                        <tr>
+                          <th class="py-2 px-3 font-bold">Timestamp</th>
+                          <th class="py-2 px-3 font-bold">Event</th>
+                          <th class="py-2 px-3 font-bold">Batch ID</th>
+                          <th class="py-2 px-3 font-bold">HTTP</th>
+                          <th class="py-2 px-3 font-bold">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="webhook-deliveries-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -523,9 +725,9 @@
                 <span class="text-xs text-slate-500">CAD / mo</span>
               </div>
               <ul class="mt-3 space-y-2 text-xs text-slate-600">
-                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> Up to 3 Rate Sheets</li>
-                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> 50 Quotes / month</li>
-                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> 1 Dispatcher Seat</li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> Up to 3 Rate Sheets</li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> 50 Quotes / month</li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> 1 Dispatcher Seat</li>
               </ul>
             </div>
             <button onclick="switchPlanTo('FREE')" class="mt-4 w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-lg transition-colors cursor-pointer">
@@ -545,10 +747,10 @@
                 <span class="text-xs text-slate-500">CAD / mo</span>
               </div>
               <ul class="mt-3 space-y-2 text-xs text-slate-600">
-                <li class="flex items-center gap-1.5"><span class="text-red-600 font-bold">✓</span> Up to 10 Rate Sheets</li>
-                <li class="flex items-center gap-1.5"><span class="text-red-600 font-bold">✓</span> 2,500 Quotes / month</li>
-                <li class="flex items-center gap-1.5"><span class="text-red-600 font-bold">✓</span> 1 Dispatcher Seat</li>
-                <li class="flex items-center gap-1.5"><span class="text-red-600 font-bold">✓</span> 1-Click Client Proposals</li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> Up to 10 Rate Sheets</li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> 2,500 Quotes / month</li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> 1 Dispatcher Seat</li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> 1-Click Client Proposals</li>
               </ul>
             </div>
             <button onclick="switchPlanTo('PRO')" class="mt-4 w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer">
@@ -565,10 +767,10 @@
                 <span class="text-xs text-slate-500">CAD / mo</span>
               </div>
               <ul class="mt-3 space-y-2 text-xs text-slate-600">
-                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> <strong>Unlimited</strong> Rate Sheets</li>
-                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> 15,000 Quotes / month</li>
-                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> <strong>5 Dispatcher Seats</strong></li>
-                <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> Centralized Team History</li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> <strong>Unlimited</strong> Rate Sheets</li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> 15,000 Quotes / month</li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> <strong>5 Dispatcher Seats</strong></li>
+                <li class="flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> Centralized Team History</li>
               </ul>
             </div>
             <button onclick="switchPlanTo('TEAM')" class="mt-4 w-full py-2 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-lg transition-colors cursor-pointer">
@@ -583,7 +785,7 @@
     <!-- Semantic Footer -->
     <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
       <div class="flex flex-wrap items-center gap-6">
-        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
+        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
         <nav aria-label="Footer Navigation" class="flex flex-wrap items-center gap-4 text-xs font-medium">
           <a href="/console/new-quote" class="hover:text-[var(--foreground)] transition-colors">New Quote</a>
           <a href="/console/history" class="hover:text-[var(--foreground)] transition-colors">Audit History</a>
@@ -610,10 +812,11 @@
     let currentQuota = null;
 
     function switchTab(tabName) {
-      const tabs = ['profile', 'subscription', 'team', 'bottlenecks', 'origin', 'security'];
+      const tabs = ['profile', 'subscription', 'team', 'bottlenecks', 'origin', 'security', 'api'];
       tabs.forEach(t => {
         const btn = document.getElementById(`tab-btn-${t}`);
         const panel = document.getElementById(`panel-${t}`);
+        if (!btn || !panel) return;
         if (t === tabName) {
           btn.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-200 flex items-center justify-between gap-2 transition-colors cursor-pointer";
           panel.classList.remove('hidden');
@@ -625,6 +828,7 @@
       if (tabName === 'subscription' || tabName === 'team') loadQuota();
       if (tabName === 'team') loadTeamMembers();
       if (tabName === 'bottlenecks') loadBottlenecks();
+      if (tabName === 'api') loadDeveloperApiTab();
     }
 
     function openUpgradeModal() {
@@ -674,6 +878,9 @@
       } else if (q.tier === 'TEAM') {
         document.getElementById('plan-headline').textContent = "Broker Team Active ($199 CAD / mo)";
         document.getElementById('plan-subline').textContent = "Unlimited carrier tariffs, 15,000 monthly quotes, and 5 dispatcher seats included.";
+      } else if (q.tier === 'BUSINESS') {
+        document.getElementById('plan-headline').textContent = "Business Embedded API Active";
+        document.getElementById('plan-subline').textContent = "Unlimited carrier tariffs, unlimited quotes, 15 seats, REST Quoting API, and signed batch webhooks.";
       }
 
       // Counter 1: Monthly Quotes
@@ -736,46 +943,107 @@
       }
     }
 
-    function switchPlanTo(tierName) {
-      fetch('/api/user/upgrade-tier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier: tierName })
-      })
-      .then(r => r.json())
-      .then(res => {
+    let currentUserProfile = {};
+
+    async function switchPlanTo(tierName) {
+      const plan = (tierName || 'PRO').toUpperCase();
+      if (plan === 'FREE') {
+        showToast("You are currently on the Free Starter plan. To cancel an active paid subscription, please use the Customer Portal.", "info");
+        return;
+      }
+      // If user is ADMIN, offer direct instant switch OR stripe checkout
+      if (currentUserProfile && currentUserProfile.role === 'ADMIN' && currentUserProfile.id) {
+        const useStripe = plan !== 'BUSINESS' && confirm(`[Admin Mode] Switch to ${plan}:\nClick OK to simulate Stripe Checkout flow,\nor CANCEL to directly change tier in database.`);
+        if (!useStripe) {
+          fetch('/api/user/upgrade-tier', {
+            method: 'POST',
+            headers: _getCsrfHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ user_id: currentUserProfile.id, tier: plan })
+          })
+          .then(async r => {
+            const res = await r.json();
+            if (!r.ok) throw new Error(res.detail || 'Error upgrading tier');
+            closeUpgradeModal();
+            showToast(`Plan successfully switched to ${res.new_tier}!`, "success");
+            loadQuota();
+          })
+          .catch(err => showToast(err.message || "Error upgrading tier.", "error"));
+          return;
+        }
+      }
+
+      if (plan === 'BUSINESS') {
         closeUpgradeModal();
-        alert(`✓ Plan successfully switched to ${res.new_tier}! Your new limits and counters are now active.`);
-        loadQuota();
-      })
-      .catch(err => alert("Error upgrading tier."));
+        showToast("Quotelytics Business Tier requires dedicated API configuration. Opening dispatch support desk...", "info");
+        if (typeof window.openSupportModal === 'function') window.openSupportModal();
+        return;
+      }
+
+      // Initiate Stripe Subscription Checkout Session
+      try {
+        const res = await fetch('/api/billing/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: plan, interval: 'month' })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Could not initialize checkout');
+        if (data.checkout_url) {
+          window.location.href = data.checkout_url;
+        }
+      } catch (err) {
+        showToast("Checkout Error: " + err.message, "error");
+      }
+    }
+
+    async function openCustomerPortal() {
+      try {
+        const res = await fetch('/api/billing/portal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Could not generate billing portal session');
+        if (data.portal_url) {
+          window.location.href = data.portal_url;
+        }
+      } catch (err) {
+        showToast("Billing Portal Error: " + err.message, "error");
+      }
     }
 
     function loadTeamMembers() {
       fetch('/api/team/members')
-        .then(r => r.json())
+        .then(r => (r.ok ? r.json() : null))
         .then(data => {
+          if (!data) return;
           const tbody = document.getElementById('team-table-body');
           tbody.innerHTML = '';
 
-          // Add primary account owner row
-          const ownerRow = document.createElement('tr');
-          ownerRow.innerHTML = `
-            <td class="py-2.5 px-3 font-semibold text-slate-900">
-              <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-bold text-[10px]">AR</span>
-                <div>
-                  <div>Alex Rivers (You)</div>
-                  <div class="text-[11px] text-slate-400">alex.rivers@techcorp.io</div>
+          // Add primary account owner row dynamically from authenticated user's profile
+          if (currentUserProfile && (currentUserProfile.name || currentUserProfile.email)) {
+            const ownerName = currentUserProfile.name || '';
+            const ownerEmail = currentUserProfile.email || '';
+            const ownerInitials = (ownerName || ownerEmail).substring(0, 2).toUpperCase() || '--';
+            const ownerRow = document.createElement('tr');
+            ownerRow.innerHTML = `
+              <td class="py-2.5 px-3 font-semibold text-slate-900">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-bold text-[10px]">${ownerInitials}</span>
+                  <div>
+                    <div>${ownerName ? ownerName + ' (You)' : '(You)'}</div>
+                    <div class="text-[11px] text-slate-400">${ownerEmail}</div>
+                  </div>
                 </div>
-              </div>
-            </td>
-            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">Account Owner</span></td>
-            <td class="py-2.5 px-3"><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">● Active</span></td>
-            <td class="py-2.5 px-3 text-slate-500">Primary Seat</td>
-            <td class="py-2.5 px-3 text-right text-slate-400 text-[11px]">Default</td>
-          `;
-          tbody.appendChild(ownerRow);
+              </td>
+              <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">Account Owner</span></td>
+              <td class="py-2.5 px-3"><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">● Active</span></td>
+              <td class="py-2.5 px-3 text-slate-500">Primary Seat</td>
+              <td class="py-2.5 px-3 text-right text-slate-400 text-[11px]">Default</td>
+            `;
+            tbody.appendChild(ownerRow);
+          }
 
           // Add team members
           if (data.members && data.members.length > 0) {
@@ -818,17 +1086,17 @@
       .then(async r => {
         const body = await r.json();
         if (!r.ok) {
-          alert(`⚠️ ${body.detail ? (body.detail.message || body.detail) : 'Could not invite dispatcher.'}`);
+          showToast(body.detail ? (body.detail.message || body.detail) : "Could not invite dispatcher.", "warning");
           loadQuota();
           return;
         }
-        alert(`✓ Seat allocated and invitation sent to ${email}!`);
+        showToast(`Seat allocated and invitation sent to ${email}!`, "success");
         document.getElementById('invite-email').value = '';
         document.getElementById('invite-name').value = '';
         loadTeamMembers();
         loadQuota();
       })
-      .catch(err => alert("Error communicating with seat manager."));
+      .catch(err => showToast("Error communicating with seat manager.", "error"));
     }
 
     function revokeTeamMember(memberId) {
@@ -836,11 +1104,11 @@
       fetch(`/api/team/members/${memberId}`, { method: 'DELETE' })
         .then(r => r.json())
         .then(res => {
-          alert("✓ Seat revoked and capacity freed.");
+          showToast("Seat revoked and capacity freed.", "success");
           loadTeamMembers();
           loadQuota();
         })
-        .catch(err => alert("Error revoking member."));
+        .catch(err => showToast("Error revoking member.", "error"));
     }
 
     function loadBottlenecks() {
@@ -855,7 +1123,7 @@
               <tr>
                 <td colspan="5" class="py-8 text-center text-slate-500">
                   <div class="flex flex-col items-center justify-center gap-1.5">
-                    <span class="text-emerald-500 font-bold text-sm">✓ No Operational Bottlenecks Detected</span>
+                    <span class="text-emerald-500 font-bold text-sm">No Operational Bottlenecks Detected</span>
                     <span class="text-[11px] text-slate-400">All rate sheet uploads, quote volumes, and seats are operating safely within your subscription thresholds.</span>
                   </div>
                 </td>
@@ -903,34 +1171,56 @@
 
     function loadProfile() {
       fetch('/api/user/profile')
-        .then(r => r.json())
+        .then(r => (r.ok ? r.json() : null))
         .then(data => {
           if (data) {
-            const parts = (data.name || "Alex Rivers").split(" ");
-            document.getElementById('first-name').value = parts[0] || "Alex";
-            document.getElementById('last-name').value = parts.slice(1).join(" ") || "Rivers";
-            document.getElementById('work-email').value = data.email || "alex.rivers@techcorp.io";
-            document.getElementById('company-name').value = data.company || "TechCorp Logistics";
+            currentUserProfile = data;
+            const rawName = (data.name || "").trim();
+            const parts = rawName ? rawName.split(/\s+/) : [];
+            document.getElementById('first-name').value = parts[0] || "";
+            document.getElementById('last-name').value = parts.slice(1).join(" ") || "";
+            document.getElementById('work-email').value = data.email || "";
+            document.getElementById('company-name').value = data.company || "";
             
             if (document.getElementById('phone-number')) {
-              document.getElementById('phone-number').value = data.phone || "+1 (416) 555-0199";
+              document.getElementById('phone-number').value = data.phone || "";
             }
             if (document.getElementById('origin-address')) {
-              document.getElementById('origin-address').value = data.origin_address || "5500 Logistics Way, Bay 12";
+              document.getElementById('origin-address').value = data.origin_address || "";
             }
             if (document.getElementById('origin-zip')) {
-              document.getElementById('origin-zip').value = data.origin_zip || "TORONTO, ON";
+              document.getElementById('origin-zip').value = data.origin_zip || "";
             }
 
             if (document.getElementById('account-marketing-opt-in')) {
               document.getElementById('account-marketing-opt-in').checked = Boolean(data.marketing_opt_in);
             }
 
-            document.getElementById('profile-display-name').textContent = data.name || "Alex Rivers";
-            document.getElementById('profile-display-company').textContent = data.company || "TechCorp Logistics";
+            const verBadge = document.getElementById('email-verified-badge');
+            const resendWrap = document.getElementById('resend-verify-wrap');
+            if (verBadge) {
+              if (data.email_verified) {
+                verBadge.textContent = 'Verified';
+                verBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200';
+                if (resendWrap) resendWrap.classList.add('hidden');
+              } else {
+                verBadge.textContent = 'Unverified';
+                verBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200';
+                if (resendWrap) resendWrap.classList.remove('hidden');
+              }
+            }
+
+            document.getElementById('profile-display-name').textContent = rawName || "";
+            document.getElementById('profile-display-company').textContent = data.company || "";
+            const adminDeskLink = document.getElementById('admin-onboarding-desk-link');
+            if (adminDeskLink && data.role === 'ADMIN') {
+              adminDeskLink.classList.remove('hidden');
+              adminDeskLink.classList.add('inline-flex');
+            }
             
-            const initials = parts.map(p => p[0]).join("").substring(0, 2).toUpperCase() || "AR";
+            const initials = parts.map(p => p[0] || "").join("").substring(0, 2).toUpperCase() || "--";
             document.getElementById('profile-avatar').textContent = initials;
+            loadTeamMembers();
           }
         })
         .catch(err => console.error("Error loading profile:", err));
@@ -958,10 +1248,10 @@
       })
       .then(res => res.json())
       .then(data => {
-        alert("✓ Profile and quoting origin defaults saved successfully!");
+        showToast("Profile and quoting origin defaults saved successfully!", "success");
         loadProfile();
       })
-      .catch(err => alert("Error updating profile."));
+      .catch(err => showToast("Error updating profile.", "error"));
     }
 
     function updatePassword() {
@@ -970,15 +1260,15 @@
       const confirmPassword = document.getElementById('pwd-confirm') ? document.getElementById('pwd-confirm').value : newPassword;
 
       if (!currentPassword) {
-        alert("Please enter your current password.");
+        showToast("Please enter your current password.", "warning");
         return;
       }
-      if (!newPassword || newPassword.length < 6) {
-        alert("New password must be at least 6 characters long.");
+      if (!newPassword || newPassword.length < 10) {
+        showToast("New password must be at least 10 characters long.", "warning");
         return;
       }
       if (newPassword !== confirmPassword) {
-        alert("New password and confirmation do not match.");
+        showToast("New password and confirmation do not match.", "warning");
         return;
       }
 
@@ -998,14 +1288,23 @@
         return data;
       })
       .then(data => {
-        alert("✓ " + (data.message || "Password updated successfully."));
+        showToast(data.message || "Password updated successfully.", "success");
         document.getElementById('pwd-current').value = '';
         document.getElementById('pwd-new').value = '';
         if (document.getElementById('pwd-confirm')) document.getElementById('pwd-confirm').value = '';
       })
       .catch(err => {
-        alert("Error: " + err.message);
+        showToast("Error: " + err.message, "error");
       });
+    }
+
+    function resendVerificationEmail() {
+      fetch('/api/auth/resend-verification', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          showToast(data.message || "Verification email sent.", "success");
+        })
+        .catch(() => showToast("Could not send verification email.", "error"));
     }
 
     function updateMarketingConsent(consented) {
@@ -1016,13 +1315,15 @@
       })
       .then(r => r.json())
       .then(data => {
-        if (data.status !== 'success') alert('Could not update marketing preferences.');
+        if (data.status !== "success") showToast("Could not update marketing preferences.", "warning");
       })
-      .catch(() => alert('Could not update marketing preferences.'));
+      .catch(() => showToast("Could not update marketing preferences.", "error"));
     }
 
-    function deleteMyAccount() {
-      if (!confirm('Are you sure you want to permanently delete your account and purge all uploaded rate sheets and quote history? This action cannot be undone.')) return;
+    function deleteMyAccount(skipPrompt = false) {
+      if (!skipPrompt && !window.__SKIP_DELETE_CONFIRM__) {
+        if (!confirm('Are you sure you want to permanently delete your account and purge all uploaded rate sheets and quote history? This action cannot be undone.')) return;
+      }
       fetch('/api/user/account/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1030,16 +1331,470 @@
       })
       .then(r => r.json())
       .then(() => {
-        window.location.href = '/';
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+        } catch (e) {}
+        window.location.replace('/');
       })
-      .catch(() => alert('Error deleting account.'));
+      .catch(() => showToast("Error deleting account.", "error"));
+    }
+
+    function _getCsrfHeaders(extra = {}) {
+      const headers = Object.assign({}, extra);
+      const match = document.cookie.match(/(?:^|;\s*)quotelytics_csrf=([^;]+)/);
+      if (match && match[1]) {
+        headers['X-CSRF-Token'] = decodeURIComponent(match[1]);
+      }
+      return headers;
+    }
+
+    let latestApiOnboardingSummary = null;
+
+    function loadDeveloperApiTab() {
+      fetch('/api/user/api-keys')
+        .then(r => (r.ok ? r.json() : null))
+        .then(data => {
+          if (!data) return;
+          const lockedBanner = document.getElementById('api-locked-banner');
+          const workspace = document.getElementById('api-business-workspace');
+          if (!data.has_api_access) {
+            lockedBanner.classList.remove('hidden');
+            workspace.classList.add('hidden');
+            return;
+          }
+          lockedBanner.classList.add('hidden');
+          workspace.classList.remove('hidden');
+          latestApiOnboardingSummary = data.onboarding || null;
+          renderApiOnboardingChecklist(data.onboarding || {});
+          renderApiKeysTable(data.keys || []);
+          loadWebhooksPanel();
+        })
+        .catch(() => showToast("Could not load Developer API settings.", "error"));
+    }
+
+    function renderApiOnboardingChecklist(ob) {
+      const sheetCard = document.getElementById('checklist-step-tariffs');
+      const sheetTitle = document.getElementById('checklist-step-tariffs-title');
+      const sheetSub = document.getElementById('checklist-step-tariffs-sub');
+      const sheetLink = document.getElementById('checklist-step-tariffs-link');
+
+      const sheetsCount = Number(ob.confirmed_sheets_count || 0);
+      if (sheetsCount > 0) {
+        sheetCard.className = 'bg-white border border-emerald-200 rounded-lg p-3 space-y-1';
+        sheetTitle.className = 'font-bold text-emerald-700';
+        sheetTitle.textContent = `✓ Step 2: ${sheetsCount} Confirmed Tariff${sheetsCount === 1 ? '' : 's'} Ready`;
+        sheetSub.textContent = ob.sample_lane
+          ? `Ready to quote (e.g. ${ob.sample_lane.carrier}: ${ob.sample_lane.origin} → ${ob.sample_lane.destination}).`
+          : 'Carrier tariff confirmed for deterministic rating.';
+        sheetLink.classList.add('hidden');
+      } else {
+        sheetCard.className = 'bg-amber-50 border border-amber-300 rounded-lg p-3 space-y-1';
+        sheetTitle.className = 'font-bold text-amber-900';
+        sheetTitle.textContent = '⚠ Step 2: Upload a Carrier Tariff';
+        sheetSub.textContent = 'No confirmed LTL rate sheet yet. Upload and confirm at least 1 sheet so the API can return rates.';
+        sheetLink.classList.remove('hidden');
+      }
+
+      const keyCard = document.getElementById('checklist-step-keys');
+      const keyTitle = document.getElementById('checklist-step-keys-title');
+      const keySub = document.getElementById('checklist-step-keys-sub');
+      const keysCount = Number(ob.active_keys_count || 0);
+      if (keysCount > 0) {
+        keyCard.className = 'bg-white border border-emerald-200 rounded-lg p-3 space-y-1';
+        keyTitle.className = 'font-bold text-emerald-700';
+        keyTitle.textContent = `✓ Step 3: ${keysCount} Active API Key${keysCount === 1 ? '' : 's'}`;
+        keySub.textContent = `Active prefix: ${ob.active_key_prefix || 'ql_live_...'}`;
+      } else {
+        keyCard.className = 'bg-white border border-indigo-200 rounded-lg p-3 space-y-1';
+        keyTitle.className = 'font-bold text-indigo-800';
+        keyTitle.textContent = 'Step 3: Generate Your API Key Below';
+        keySub.textContent = 'Enter a label like "Main TMS" and click Generate API Key.';
+      }
+    }
+
+    function runApiReadinessCheck() {
+      const box = document.getElementById('api-readiness-result-box');
+      box.classList.remove('hidden');
+      box.className = 'rounded-lg p-3.5 text-xs border bg-white border-slate-200 text-slate-600';
+      box.textContent = 'Testing your confirmed rate sheet…';
+
+      fetch('/api/user/api-readiness-check', {
+        method: 'POST',
+        headers: _getCsrfHeaders({ 'Content-Type': 'application/json' })
+      })
+        .then(async r => {
+          const body = await r.json();
+          if (!r.ok) throw new Error(body.detail || 'Could not verify API readiness.');
+          return body;
+        })
+        .then(res => {
+          box.textContent = '';
+          if (!res.ready) {
+            box.className = 'rounded-lg p-3.5 text-xs border bg-amber-50 border-amber-300 text-amber-900 font-medium';
+            box.textContent = res.message || 'Please upload and confirm an LTL rate sheet first.';
+            return;
+          }
+          const sq = res.sample_quote || {};
+          box.className = 'rounded-lg p-3.5 text-xs border bg-emerald-50 border-emerald-300 text-emerald-950 space-y-1';
+          const titleDiv = document.createElement('div');
+          titleDiv.className = 'font-bold text-emerald-900';
+          titleDiv.textContent = `✓ API Setup Verified in ${res.elapsed_ms} ms — Ready for Your IT / TMS Team`;
+          const detailDiv = document.createElement('div');
+          detailDiv.textContent = `Sample Quote (${sq.origin} → ${sq.destination}, 1,000 lbs / 2 skids): $${Number(sq.final_rate || 0).toFixed(2)} ${sq.currency || 'CAD'} via ${sq.carrier} (${sq.service}) [Cell ${sq.coordinate || 'Verified'}].`;
+          box.appendChild(titleDiv);
+          box.appendChild(detailDiv);
+        })
+        .catch(err => {
+          box.className = 'rounded-lg p-3.5 text-xs border bg-red-50 border-red-300 text-red-800';
+          box.textContent = err.message || 'Error verifying setup.';
+        });
+    }
+
+    function copyItTeamHandoffEmail() {
+      const ob = latestApiOnboardingSummary || {};
+      const company = ob.company || currentUserProfile.company || 'Our Organization';
+      const prefix = ob.active_key_prefix || 'ql_live_<GENERATE_KEY_IN_ACCOUNT_CENTER>';
+      const handoff = [
+        `Subject: Quotelytics Freight Quoting API Connection Details (${company})`,
+        ``,
+        `Hi Team,`,
+        ``,
+        `Our Quotelytics Business Embedded Quoting API is active and verified against our confirmed LTL carrier tariffs.`,
+        ``,
+        `Connection Summary:`,
+        `- Active API Key Reference: ${prefix} (we will share the full secret key separately via password manager / secure chat)`,
+        `- Auth Header: X-API-Key: <FULL_SECRET_KEY>`,
+        `- Single LTL Quote Endpoint: POST https://quotelytics.ca/api/quotelytics/quotes/calculate`,
+        `- Batch LTL Quote Endpoint (1–100 shipments): POST https://quotelytics.ca/api/v1/quotes/batch`,
+        `- Optional Signed Webhooks (HMAC-SHA256): Configure in https://quotelytics.ca/console/account#api`,
+        ``,
+        `Sample JSON Request (POST https://quotelytics.ca/api/v1/quotes/batch):`,
+        `{"apply_markup": true, "shipments": [{"origin": "TORONTO, ON", "destination": "MONTREAL, QC", "actual_weight": 1850.0, "skid_count": 2, "accessorials": ["TAILGATE"]}]}`,
+        ``,
+        `API Overview: https://quotelytics.ca/pricing#embedded-api-details`
+      ].join('\n');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(handoff).then(() => showToast('IT handoff email copied to clipboard!', 'success'));
+      } else {
+        showToast('Clipboard unavailable in this browser context.', 'warning');
+      }
+    }
+
+    function renderApiKeysTable(keys) {
+      const tbody = document.getElementById('api-keys-table-body');
+      tbody.textContent = '';
+      if (!keys || keys.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.className = 'py-5 px-3 text-center text-slate-400 text-xs';
+        td.textContent = 'No API keys generated yet. Create a key above to authenticate X-API-Key requests.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      keys.forEach(k => {
+        const tr = document.createElement('tr');
+
+        const tdName = document.createElement('td');
+        tdName.className = 'py-2.5 px-3 font-semibold text-slate-900';
+        tdName.textContent = k.name || 'API Key';
+        tr.appendChild(tdName);
+
+        const tdPrefix = document.createElement('td');
+        tdPrefix.className = 'py-2.5 px-3 font-mono text-[11px] text-slate-600';
+        tdPrefix.textContent = k.key_prefix || '';
+        tr.appendChild(tdPrefix);
+
+        const tdCreated = document.createElement('td');
+        tdCreated.className = 'py-2.5 px-3 text-slate-500 text-[11px]';
+        tdCreated.textContent = k.created_at ? new Date(k.created_at).toLocaleDateString() : '—';
+        tr.appendChild(tdCreated);
+
+        const tdLastUsed = document.createElement('td');
+        tdLastUsed.className = 'py-2.5 px-3 text-slate-500 text-[11px]';
+        tdLastUsed.textContent = k.last_used_at ? new Date(k.last_used_at).toLocaleString() : 'Never';
+        tr.appendChild(tdLastUsed);
+
+        const tdStatus = document.createElement('td');
+        tdStatus.className = 'py-2.5 px-3';
+        const badge = document.createElement('span');
+        const isRevoked = Boolean(k.revoked_at) || k.status === 'REVOKED';
+        badge.className = isRevoked
+          ? 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500'
+          : 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+        badge.textContent = isRevoked ? 'Revoked' : 'Active';
+        tdStatus.appendChild(badge);
+        tr.appendChild(tdStatus);
+
+        const tdAction = document.createElement('td');
+        tdAction.className = 'py-2.5 px-3 text-right';
+        if (!isRevoked && k.id) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'text-red-600 hover:text-red-800 font-semibold text-[11px] cursor-pointer';
+          btn.textContent = 'Revoke';
+          btn.addEventListener('click', () => revokeUserApiKey(k.id));
+          tdAction.appendChild(btn);
+        } else {
+          tdAction.textContent = '—';
+        }
+        tr.appendChild(tdAction);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function generateApiKey() {
+      const input = document.getElementById('api-key-name-input');
+      const name = (input.value || '').trim() || 'Production Key';
+      fetch('/api/user/api-key/generate', {
+        method: 'POST',
+        headers: _getCsrfHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ name })
+      })
+      .then(async r => {
+        const body = await r.json();
+        if (!r.ok) throw new Error(body.detail || 'Failed to generate API key.');
+        return body;
+      })
+      .then(data => {
+        input.value = '';
+        document.getElementById('api-key-raw-value').textContent = data.api_key || '';
+        document.getElementById('api-key-secret-banner').classList.remove('hidden');
+        showToast('API key generated. Copy your secret now!', 'success');
+        loadDeveloperApiTab();
+      })
+      .catch(err => showToast(err.message || 'Could not generate API key.', 'error'));
+    }
+
+    function dismissApiKeyBanner() {
+      document.getElementById('api-key-raw-value').textContent = '';
+      document.getElementById('api-key-secret-banner').classList.add('hidden');
+    }
+
+    function copyGeneratedApiKey() {
+      const secret = document.getElementById('api-key-raw-value').textContent || '';
+      if (!secret) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(secret).then(() => showToast('API key copied to clipboard.', 'success'));
+      }
+    }
+
+    function revokeUserApiKey(keyId) {
+      if (!window.__SKIP_DELETE_CONFIRM__ && !confirm('Revoke this API key immediately? Integrations using it will receive HTTP 401.')) return;
+      fetch(`/api/user/api-keys/${encodeURIComponent(keyId)}`, {
+        method: 'DELETE',
+        headers: _getCsrfHeaders()
+      })
+      .then(async r => {
+        const body = await r.json();
+        if (!r.ok) throw new Error(body.detail || 'Could not revoke API key.');
+        showToast('API key revoked.', 'success');
+        loadDeveloperApiTab();
+      })
+      .catch(err => showToast(err.message || 'Error revoking key.', 'error'));
+    }
+
+    function loadWebhooksPanel() {
+      fetch('/api/user/webhooks')
+        .then(r => (r.ok ? r.json() : null))
+        .then(data => {
+          if (!data) return;
+          renderWebhookEndpoints(data.endpoints || []);
+          renderWebhookDeliveries(data.deliveries || []);
+        })
+        .catch(() => {});
+    }
+
+    function renderWebhookEndpoints(endpoints) {
+      const tbody = document.getElementById('webhook-endpoints-body');
+      tbody.textContent = '';
+      if (!endpoints || endpoints.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.className = 'py-4 px-3 text-center text-slate-400 text-xs';
+        td.textContent = 'No webhook endpoints registered.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      endpoints.forEach(ep => {
+        const tr = document.createElement('tr');
+
+        const tdUrl = document.createElement('td');
+        tdUrl.className = 'py-2.5 px-3';
+        const urlDiv = document.createElement('div');
+        urlDiv.className = 'font-mono text-[11px] font-semibold text-slate-900 break-all';
+        urlDiv.textContent = ep.url || '';
+        tdUrl.appendChild(urlDiv);
+        if (ep.description) {
+          const descDiv = document.createElement('div');
+          descDiv.className = 'text-[11px] text-slate-500';
+          descDiv.textContent = ep.description;
+          tdUrl.appendChild(descDiv);
+        }
+        tr.appendChild(tdUrl);
+
+        const tdSec = document.createElement('td');
+        tdSec.className = 'py-2.5 px-3 font-mono text-[11px] text-slate-600';
+        tdSec.textContent = ep.secret_preview || 'whsec_***';
+        tr.appendChild(tdSec);
+
+        const tdEvents = document.createElement('td');
+        tdEvents.className = 'py-2.5 px-3 font-mono text-[11px] text-indigo-700';
+        tdEvents.textContent = ep.events || 'batch.quote.completed';
+        tr.appendChild(tdEvents);
+
+        const tdActions = document.createElement('td');
+        tdActions.className = 'py-2.5 px-3 text-right space-x-3 whitespace-nowrap';
+
+        const testBtn = document.createElement('button');
+        testBtn.type = 'button';
+        testBtn.className = 'text-indigo-600 hover:text-indigo-800 font-semibold text-[11px] cursor-pointer';
+        testBtn.textContent = 'Send Test Ping';
+        testBtn.addEventListener('click', () => testWebhookEndpoint(ep.id));
+        tdActions.appendChild(testBtn);
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'text-red-600 hover:text-red-800 font-semibold text-[11px] cursor-pointer';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', () => deleteWebhookEndpointById(ep.id));
+        tdActions.appendChild(delBtn);
+
+        tr.appendChild(tdActions);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderWebhookDeliveries(deliveries) {
+      const tbody = document.getElementById('webhook-deliveries-body');
+      tbody.textContent = '';
+      if (!deliveries || deliveries.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.className = 'py-4 px-3 text-center text-slate-400 text-xs';
+        td.textContent = 'No webhook deliveries recorded yet.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      deliveries.forEach(d => {
+        const tr = document.createElement('tr');
+
+        const tdTime = document.createElement('td');
+        tdTime.className = 'py-2 px-3 text-slate-500 text-[11px] font-mono';
+        tdTime.textContent = d.created_at ? new Date(d.created_at).toLocaleString() : '—';
+        tr.appendChild(tdTime);
+
+        const tdEvt = document.createElement('td');
+        tdEvt.className = 'py-2 px-3 font-mono text-[11px] text-slate-800';
+        tdEvt.textContent = d.event_type || '';
+        tr.appendChild(tdEvt);
+
+        const tdBatch = document.createElement('td');
+        tdBatch.className = 'py-2 px-3 font-mono text-[11px] text-slate-600';
+        tdBatch.textContent = d.batch_id || '—';
+        tr.appendChild(tdBatch);
+
+        const tdCode = document.createElement('td');
+        tdCode.className = 'py-2 px-3 font-mono text-[11px]';
+        tdCode.textContent = d.response_status ? String(d.response_status) : 'ERR';
+        tr.appendChild(tdCode);
+
+        const tdOk = document.createElement('td');
+        tdOk.className = 'py-2 px-3';
+        const pill = document.createElement('span');
+        pill.className = d.success
+          ? 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700'
+          : 'px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700';
+        pill.textContent = d.success ? 'Delivered' : (d.error_message || 'Failed');
+        tdOk.appendChild(pill);
+        tr.appendChild(tdOk);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function registerWebhookEndpoint() {
+      const urlEl = document.getElementById('webhook-url-input');
+      const descEl = document.getElementById('webhook-desc-input');
+      const url = (urlEl.value || '').trim();
+      const description = (descEl.value || '').trim();
+      if (!url) return;
+
+      fetch('/api/user/webhooks', {
+        method: 'POST',
+        headers: _getCsrfHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ url, description, events: 'batch.quote.completed' })
+      })
+      .then(async r => {
+        const body = await r.json();
+        if (!r.ok) throw new Error(body.detail || 'Invalid webhook endpoint URL.');
+        return body;
+      })
+      .then(data => {
+        urlEl.value = '';
+        descEl.value = '';
+        if (data.endpoint && data.endpoint.secret) {
+          document.getElementById('webhook-raw-secret').textContent = data.endpoint.secret;
+          document.getElementById('webhook-secret-banner').classList.remove('hidden');
+        }
+        showToast('Webhook endpoint registered.', 'success');
+        loadWebhooksPanel();
+      })
+      .catch(err => showToast(err.message || 'Could not register webhook.', 'error'));
+    }
+
+    function deleteWebhookEndpointById(endpointId) {
+      if (!window.__SKIP_DELETE_CONFIRM__ && !confirm('Remove this webhook endpoint?')) return;
+      fetch(`/api/user/webhooks/${encodeURIComponent(endpointId)}`, {
+        method: 'DELETE',
+        headers: _getCsrfHeaders()
+      })
+      .then(async r => {
+        const body = await r.json();
+        if (!r.ok) throw new Error(body.detail || 'Could not remove webhook.');
+        showToast('Webhook endpoint removed.', 'success');
+        loadWebhooksPanel();
+      })
+      .catch(err => showToast(err.message || 'Error deleting webhook.', 'error'));
+    }
+
+    function testWebhookEndpoint(endpointId) {
+      fetch(`/api/user/webhooks/${encodeURIComponent(endpointId)}/test`, {
+        method: 'POST',
+        headers: _getCsrfHeaders()
+      })
+      .then(async r => {
+        const body = await r.json();
+        if (!r.ok) throw new Error(body.detail || 'Could not dispatch test ping.');
+        return body;
+      })
+      .then(data => {
+        const ok = data.receipt && data.receipt.success;
+        showToast(ok ? 'Signed test webhook delivered!' : 'Test ping attempted; inspect Recent Deliveries.', ok ? 'success' : 'warning');
+        loadWebhooksPanel();
+      })
+      .catch(err => showToast(err.message || 'Error testing webhook.', 'error'));
     }
 
     // Initialize on page load
     loadProfile();
     loadQuota();
     loadBottlenecks();
+    if (window.location.hash === '#api') {
+      switchTab('api');
+    }
   </script>
-  <script src="/static/js/global-chrome.js"></script>
+  <script src="/static/js/global-chrome.js?v=20261113b"></script>
 </body>
 </html>

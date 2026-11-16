@@ -1,10 +1,13 @@
 import io
+import uuid
 import openpyxl
 import pytest
 from starlette.testclient import TestClient
 from main import app
-from services.ratesift_db_service import get_connection, list_rate_sheets
-from services.ratesift_engine import quote_all_confirmed_carriers
+from services.quotelytics_db_service import get_connection, list_rate_sheets
+from services.quotelytics_engine import quote_all_confirmed_carriers
+from services.auth_service import register_and_create_session
+from services.db_service import update_user_tier
 
 client = TestClient(app)
 
@@ -23,15 +26,23 @@ def make_test_workbook() -> bytes:
     return out.getvalue()
 
 def test_failsafe_sheet_persists_and_becomes_quotable():
-    user_id = "usr_alex_rivers"
-    tenant_id = "TechCorp Logistics"
+    user, token = register_and_create_session(
+        name="Jordan Freight",
+        email=f"failsafe.persist.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+        company="Acme Logistics",
+        origin_zip="TORONTO, ON",
+        password="FailsafePersistPassword2026!"
+    )
+    user_id = user["id"]
+    update_user_tier(user_id, "BUSINESS")
+    auth_cookies = {"quotelytics_session": token}
     content = make_test_workbook()
 
     # 1. Upload sheet to /jobs
     res = client.post(
         "/jobs",
         files={"file": ("test_tariff_failsafe.xlsx", content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": user_id, "X-Tenant-Id": tenant_id}
+        cookies=auth_cookies
     )
     assert res.status_code == 200
     job_data = res.json()
@@ -52,7 +63,7 @@ def test_failsafe_sheet_persists_and_becomes_quotable():
     map_res = client.post(
         f"/jobs/{job_id}/mapping",
         json=map_payload,
-        headers={"X-User-Id": user_id, "X-Tenant-Id": tenant_id}
+        cookies=auth_cookies
     )
     assert map_res.status_code == 200
     assert map_res.json()["status"] == "ready"
@@ -60,14 +71,14 @@ def test_failsafe_sheet_persists_and_becomes_quotable():
     # 3. Process via gate
     proc_res = client.post(
         f"/jobs/{job_id}/process",
-        headers={"X-User-Id": user_id, "X-Tenant-Id": tenant_id}
+        cookies=auth_cookies
     )
     assert proc_res.status_code == 200
     proc_data = proc_res.json()
     assert proc_data["status"] == "done"
     sheet_id = proc_data.get("sheet_id")
     assert sheet_id is not None
-    assert sheet_id.startswith("rs_sheet_")
+    assert sheet_id.startswith("ql_sheet_")
 
     # 4. Verify sheet is returned by list_rate_sheets
     sheets = list_rate_sheets(user_id=user_id)
@@ -81,7 +92,7 @@ def test_failsafe_sheet_persists_and_becomes_quotable():
     # 5. Verify weight breaks are stored in the database
     conn = get_connection()
     c = conn.cursor()
-    c.execute("SELECT COUNT(*) as cnt FROM rs_weight_breaks WHERE sheet_id = ?", (sheet_id,))
+    c.execute("SELECT COUNT(*) as cnt FROM ql_weight_breaks WHERE sheet_id = ?", (sheet_id,))
     cnt = c.fetchone()["cnt"]
     conn.close()
     assert cnt >= 6  # 3 rows x 2-3 rate columns

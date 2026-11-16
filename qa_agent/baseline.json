@@ -1,0 +1,31 @@
+{
+  "updated_at": "2026-10-30T22:52:18",
+  "findings": [
+    {
+      "phase": "crawl-public",
+      "severity": "info",
+      "category": "External Link Inconclusive",
+      "title": "External link check inconclusive for https://quotelytics.ca",
+      "page_url": "http://127.0.0.1:8000/terms",
+      "description": "External host returned status Network timeout/connect error: [Errno 11001] getaddrinfo failed; marked inconclusive.",
+      "element": "<a href='https://quotelytics.ca'>",
+      "steps_to_reproduce": [],
+      "screenshot_rel": null,
+      "status_delta": "still_open",
+      "fingerprint": "01345b7f2909"
+    },
+    {
+      "phase": "hardening",
+      "severity": "high",
+      "category": "Quota Race Condition",
+      "title": "Quota ceiling was not atomically enforced under race condition",
+      "page_url": "http://127.0.0.1:8000/api/quotelytics/quotes/calculate",
+      "description": "Status codes: [200, 200, 200, 403, 403, 200, 200, 200], Final quotes used: 55/50. Expected 1x 200, 7x 403.",
+      "element": "",
+      "steps_to_reproduce": [],
+      "screenshot_rel": null,
+      "status_delta": "still_open",
+      "fingerprint": "a8ffcac9253e"
+    }
+  ]
+}

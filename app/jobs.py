@@ -1,5 +1,5 @@
 """
-Relational SQLite JobStore implementation for RateSift platform.
+Relational SQLite JobStore implementation for Quotelytics platform.
 Provides atomic status transitions, TTL sweeping, and orphan cleanup.
 Designed to be compatible with PostgreSQL by utilizing standard ANSI SQL queries.
 """
@@ -12,7 +12,7 @@ import threading
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
-DB_PATH_DEFAULT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "shipflow.db")
+DB_PATH_DEFAULT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "quotelytics.db")
 DB_PATH = os.environ.get("FAILSAFE_DB_PATH", DB_PATH_DEFAULT)
 
 

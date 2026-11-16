@@ -2,20 +2,20 @@
  * generate_google_slides.js
  * ============================================================================
  * Google Apps Script to automatically generate the complete 18-Slide
- * RateSift Platform & Business Plan Presentation directly in Google Slides.
+ * Quotelytics Platform & Business Plan Presentation directly in Google Slides.
  * 
  * HOW TO USE IN GOOGLE SLIDES:
  * 1. Open Google Drive (https://drive.google.com) or Google Slides.
  * 2. Go to https://script.google.com and click "New project".
  * 3. Replace the Code.gs editor content with this entire file.
- * 4. Click the "Run" button (select createRateSiftPresentation).
+ * 4. Click the "Run" button (select createQuotelyticsPresentation).
  * 5. Grant permissions if prompted.
  * 6. Check the Execution log for the link to your brand new Google Slides presentation!
  * ============================================================================
  */
 
-function createRateSiftPresentation() {
-  var presentationTitle = "RateSift — Automated Freight Platform & 2026 Business Plan";
+function createQuotelyticsPresentation() {
+  var presentationTitle = "Quotelytics — Automated Freight Platform & 2026 Business Plan";
   var deck = SlidesApp.create(presentationTitle);
   var slides = deck.getSlides();
   
@@ -102,7 +102,7 @@ function createRateSiftPresentation() {
 
   var tb1 = s1.insertTextBox("", 75, 120, 560, 160);
   var t1 = tb1.getText();
-  t1.setText("RateSift Platform Overview & 2026 Business Plan\n");
+  t1.setText("Quotelytics Platform Overview & 2026 Business Plan\n");
   t1.getParagraphs()[0].getTextStyle().setFontSize(26).setBold(true).setForegroundColor(WHITE);
 
   var p1_2 = t1.appendParagraph("Automated Spreadsheet Rating • 100% Deterministic Engine • Strict Zero-Booking Scope\n\n");
@@ -111,7 +111,7 @@ function createRateSiftPresentation() {
   var p1_3 = t1.appendParagraph("Prepared for: Executive Leadership & Investors • Hosted in Canada (WHC) • PIPEDA Compliant");
   p1_3.getTextStyle().setFontSize(10).setForegroundColor(SLATE_MUTED);
 
-  s1.getNotesPage().getSpeakerNotesShape().getText().setText("Welcome everyone. Today we are presenting RateSift, an automated freight and shipping rate comparison platform designed specifically for Canadian freight brokers, forwarders, and 3PLs.");
+  s1.getNotesPage().getSpeakerNotesShape().getText().setText("Welcome everyone. Today we are presenting Quotelytics, an automated freight and shipping rate comparison platform designed specifically for Canadian freight brokers, forwarders, and 3PLs.");
 
   // --------------------------------------------------------------------------
   // SLIDE 2: Executive Summary
@@ -124,14 +124,14 @@ function createRateSiftPresentation() {
     {label: "Error-Prone Markups", text: "Risk of underquoting or missing accessorial surcharges."},
     {label: "Bloated TMS Tools", text: "Legacy software costs $30k–$80k/yr and locks brokers in."}
   ], RED_PRIMARY);
-  addCard(s2, 260, 115, 195, 265, "2. The RateSift Solution", [
+  addCard(s2, 260, 115, 195, 265, "2. The Quotelytics Solution", [
     {label: "Automated Ingestion", text: "Drag-and-drop any carrier Excel spreadsheet; auto-normalizes breaks."},
     {label: "100% Deterministic", text: "Pure Python calculation math—zero LLM hallucinations."},
     {label: "Cell Traceability", text: "Every quoted rate records its exact origin cell coordinate."},
     {label: "1-Click Proposals", text: "Generates branded customer quotes with broker margins."}
   ], EMERALD);
   addCard(s2, 470, 115, 195, 265, "3. Strict Scope Boundary", [
-    {label: "Quoting Focus", text: "RateSift strictly focuses on rating math and carrier comparisons."},
+    {label: "Quoting Focus", text: "Quotelytics strictly focuses on rating math and carrier comparisons."},
     {label: "NO Label Printing", text: "Zero shipping label generation or thermal printer overhead."},
     {label: "NO Booking Workflows", text: "Does not handle carrier dispatch booking or tendering."},
     {label: "NO Tracking Numbers", text: "Eliminates operational tracking baggage."}
@@ -153,7 +153,7 @@ function createRateSiftPresentation() {
   addCard(s3, 260, 115, 195, 265, "Console (5 Views)", [
     {label: "New Quote", text: "Broker rater with FSA lookup and live carrier ranking."},
     {label: "Carrier Tariffs", text: "Rate sheet warehouse and Human Confirmation Gate."},
-    {label: "Quotes History", text: "Audit log warehouse with RS-YYYYMMDD codes."},
+    {label: "Quotes History", text: "Audit log warehouse with QL-YYYYMMDD codes."},
     {label: "Account (/account)", text: "Broker profile, origin hub, and subscription status."},
     {label: "Settings", text: "Default markup (+10%), CAD/USD, and fuel index toggles."}
   ], EMERALD);
@@ -199,7 +199,7 @@ function createRateSiftPresentation() {
   addCard(s5, 370, 115, 300, 265, "Auth Screens ( /login & /get-started )", [
     {label: "Single Centered Card", text: "Clean, distraction-free authentication form centered vertically."},
     {label: "1-Click Demo Auto-Fill", text: "Instant fill for Alex Rivers (Broker Specialist) enables seamless testing."},
-    {label: "Secure 30-Day Sessions", text: "Issues HTTP-only, secure session cookies (ratesift_session)."},
+    {label: "Secure 30-Day Sessions", text: "Issues HTTP-only, secure session cookies (quotelytics_session)."},
     {label: "Frictionless Onboarding", text: "Registrations instantly provision Free Starter access (3 sheets / 50 quotes)."},
     {label: "Smart Gateway Routing", text: "Respects 'next' parameter to return brokers to their intended console screen."}
   ], SLATE_DARK);
@@ -273,7 +273,7 @@ function createRateSiftPresentation() {
   var s9 = deck.appendSlide();
   addHeader(s9, "Console: Quotes History Warehouse & System Preferences", "Console Walkthrough", "09/18");
   addCard(s9, 50, 115, 300, 265, "Quotes History Warehouse (/history)", [
-    {label: "Immutable Audit Trail", text: "Every calculation generates a unique, permanent audit ID (e.g. RS-20261001-A9F3)."},
+    {label: "Immutable Audit Trail", text: "Every calculation generates a unique, permanent audit ID (e.g. QL-20261001-A9F3)."},
     {label: "Real-Time Search", text: "Instant search by Quote ID, carrier name, origin city, or destination postal code."},
     {label: "Sort by Rate", text: "Interactive dropdown to sort archived quotes by total rate (High/Low)."},
     {label: "Coordinate Retention", text: "Historical records retain cell references and applied accessorial details."},
@@ -379,7 +379,7 @@ function createRateSiftPresentation() {
     {label: "Automated Scrubbing", text: "Scans files and replaces accounts, sales emails, phones, and margin formulas."},
     {label: "100% Rate Preservation", text: "Retains all origin/destination lanes, weight breaks, and rates intact."},
     {label: "Audit Privacy Status", text: "Workbook audit logs confirm 'VERIFIED_SCRUBBED' with total redaction count."},
-    {label: "Preview Endpoint", text: "POST /api/ratesift/preview-redaction previews scrubbed files prior to download."}
+    {label: "Preview Endpoint", text: "POST /api/quotelytics/preview-redaction previews scrubbed files prior to download."}
   ], SLATE_DARK);
   addCard(s14, 370, 115, 300, 265, "1-Click Client Proposal Generator", [
     {label: "Instant Conversion", text: "Converts internal carrier comparison into formal price proposals in 1 click."},
@@ -463,7 +463,7 @@ function createRateSiftPresentation() {
     {label: "Webhook Callbacks", text: "Notifies external ERPs and dispatch systems when calculations complete."}
   ], INDIGO);
   addCard(s17, 370, 115, 300, 265, "High-Value Integration Scenarios", [
-    {label: "Shipper Web Portals", text: "3PLs embed RateSift into ordering portals for instant client rates."},
+    {label: "Shipper Web Portals", text: "3PLs embed Quotelytics into ordering portals for instant client rates."},
     {label: "Proprietary TMS/ERPs", text: "Connects internal dispatch systems without building rating logic."},
     {label: "E-Commerce Checkout", text: "Wholesalers display accurate freight shipping options at checkout."},
     {label: "Carrier Post-Audit", text: "Shippers audit carrier invoices against original cell coordinates."},

@@ -5,6 +5,8 @@ __pycache__/
 
 # Environment and keys
 .env
+.agents/discord_config.json
+.agents/discord_bot_state.json
 .venv
 env/
 venv/
@@ -13,7 +15,7 @@ ENV/
 # Large archives and backups
 *.zip
 *.tar.gz
-ratesift_project_backup_*.zip
+quotelytics_project_backup_*.zip
 
 # Tunnel and temporary files
 tunnel_url.txt
@@ -23,12 +25,15 @@ bore.exe
 # Snapshots and test scratch
 .website_snapshots/
 scratch/
+reports/
+qa_agent/.baseline_findings.json
+qa_agent/allowlists/.external_link_cache.json
 
 # Database files
 *.db
 *.sqlite
 *.sqlite3
-shipflow.db
+quotelytics.db
 
 # Helper scripts
 push_to_github.bat

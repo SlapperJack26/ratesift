@@ -1,6 +1,6 @@
 """
 Adapter boundary to the formatting / quoting agent.
-Bridges into services.ratesift_excel_reformatter with column_overrides.
+Bridges into services.quotelytics_excel_reformatter with column_overrides.
 Enforces Rule 12 (Original upload never modified) and Rule 13 (Formula neutralization).
 Includes isolated LLM assist function adhering to Rule 10 & 11.
 """
@@ -16,7 +16,7 @@ import openpyxl
 from app.models import Suggestions
 from app.output_safety import sanitize_workbook
 
-from services.ratesift_excel_reformatter import (
+from services.quotelytics_excel_reformatter import (
     SCRATCH_DIR,
     analyze_excel_sheet,
     build_reformatted_excel_workbook,
@@ -106,6 +106,7 @@ def llm_suggest_mapping(
     headers: List[str],
     sample_rows: List[List[Any]],
     mock_llm_response: Optional[Dict[str, Any]] = None,
+    custom_keywords: Optional[Dict[str, Any]] = None,
 ) -> Optional[Suggestions]:
     """
     Structural guard (Rule 10 & Rule 11):
@@ -114,12 +115,21 @@ def llm_suggest_mapping(
     The function has ZERO access to JobState.status or unresolved.
     """
     # Sanitize and quote cell contents as untrusted data (Rule 11)
+    glossary_payload = {}
+    if custom_keywords:
+        for norm_kw, kw_entry in custom_keywords.items():
+            glossary_payload[norm_kw] = {
+                "definition": kw_entry.get("definition_text"),
+                "category": kw_entry.get("parsed_category"),
+                "rule": kw_entry.get("parsed_rule"),
+            }
     data_payload = {
         "headers": [str(h or "").strip() for h in headers],
         "samples": [
             [str(cell or "").strip() for cell in row[:len(headers)]]
             for row in sample_rows[:5]
-        ]
+        ],
+        "company_keyword_definitions": glossary_payload,
     }
 
     # Delimit clearly as data with prompt injection protection instruction

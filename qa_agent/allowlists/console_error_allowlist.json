@@ -1,0 +1,11 @@
+{
+  "ignored_error_patterns": [
+    "favicon.ico",
+    "chrome-extension://",
+    "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+    "Failed to load resource: net::ERR_BLOCKED_BY_CLIENT",
+    "net::ERR_BLOCKED_BY_CLIENT",
+    "downloadable font: download failed",
+    "ResizeObserver loop completed with undelivered notifications"
+  ]
+}

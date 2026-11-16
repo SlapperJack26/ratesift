@@ -1,7 +1,7 @@
-# Ratesift Responsive Auto-Scaling & Edge-to-Edge Margin System
+# Quotelytics Responsive Auto-Scaling & Edge-to-Edge Margin System
 
 ## 1. Overview & Objectives
-The Ratesift platform is built with **full-bleed edge-to-edge margin alignment and fluid auto-scaling across four standard screen limit categories** while **strictly maintaining all original design rules**:
+The Quotelytics platform is built with **full-bleed edge-to-edge margin alignment and fluid auto-scaling across four standard screen limit categories** while **strictly maintaining all original design rules**:
 - **Header & Footer Margins:** Always inline with the top and bottom of the screen respectively (`m-0` top for header, `m-0 mt-auto` bottom for footer, `min-h-screen flex flex-col justify-between w-full`).
 - **Horizontal Margins:** Always inline with the left and right edges of the screen (`w-full`, zero outer container margins/paddings on all screen sizes).
 - **Mobile Phones** (`< 640px`, e.g., 360px - 480px)

@@ -1,5 +1,5 @@
 """
-RateSift Agent Training Ideas & Benchmark Runner
+Quotelytics Agent Training Ideas & Benchmark Runner
 Runs the isolated copied agent against test scenarios, compares prompt variants,
 audits rule compliance, and optionally exports run JSON for the standalone HTML simulator.
 
@@ -13,17 +13,17 @@ import json
 import argparse
 from typing import Dict, Any
 
-from agent.rate_agent import RateSiftAgent
+from agent.rate_agent import QuotelyticsAgent
 from agent.agent_prompts import AGENT_TRAINING_VARIANTS, TRAINING_TEST_SCENARIOS
 
 def print_banner():
     print("=" * 80)
-    print(" [TEST] RateSift Agent Training Ideas & Ideation Playground")
+    print(" [TEST] Quotelytics Agent Training Ideas & Ideation Playground")
     print(" 100% Isolated Copy - IDE Native - Zero Website Launch Required")
     print("=" * 80)
 
 def run_single_variant_benchmarks(variant_key: str):
-    agent = RateSiftAgent(variant_key)
+    agent = QuotelyticsAgent(variant_key)
     print(f"\n--- Testing Training Variant: {agent.config['name']} ---")
     print(f"Description: {agent.config['description']}\n")
 
@@ -56,7 +56,7 @@ def compare_all_variants():
     print("\n--- Comparative Evaluation Across All Training Variants ---")
     table = []
     for v_key, v_info in AGENT_TRAINING_VARIANTS.items():
-        agent = RateSiftAgent(v_key)
+        agent = QuotelyticsAgent(v_key)
         total_price = 0.0
         successes = 0
         rules_set = set()
@@ -83,7 +83,7 @@ def compare_all_variants():
     print()
 
 def main():
-    parser = argparse.ArgumentParser(description="RateSift Agent Training Playground CLI")
+    parser = argparse.ArgumentParser(description="Quotelytics Agent Training Playground CLI")
     parser.add_argument("--variant", choices=list(AGENT_TRAINING_VARIANTS.keys()), default="variant_1_strict_32_rules", help="Select training variant to test")
     parser.add_argument("--compare-all", action="store_true", help="Compare all training variants side by side")
     parser.add_argument("--export-json", type=str, default=None, help="Export benchmark run as JSON file for HTML simulator")
@@ -97,7 +97,7 @@ def main():
         run_single_variant_benchmarks(args.variant)
 
     if args.export_json:
-        agent = RateSiftAgent(args.variant)
+        agent = QuotelyticsAgent(args.variant)
         runs = []
         for s in TRAINING_TEST_SCENARIOS:
             res = agent.run_benchmark_scenario(s["id"])

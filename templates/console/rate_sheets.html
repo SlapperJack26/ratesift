@@ -33,7 +33,7 @@
         <!-- Left: Logo & Nav Links -->
         <div class="flex items-center gap-6 lg:gap-8">
           <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Quotelytics Console">
-            <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-8 w-auto object-contain" />
+            <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-8 w-auto object-contain" />
           </a>
 
           <!-- Center/Left Navigation Links -->
@@ -67,7 +67,7 @@
           </a>
 
           <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
-            <span>🇨🇦</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">CA</span>
             <span>Hosted in Canada (WHC) • PIPEDA Compliant</span>
           </div>
 
@@ -109,14 +109,14 @@
 
         <div class="flex items-center gap-3">
           <button onclick="openRedactionModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Scrub proprietary accounts and customer names before upload">
-            <span class="text-xs">🛡️</span>
+            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             <span>Scrub & Redact Tariff</span>
           </button>
           <button onclick="document.getElementById('sheet-upload-input').click()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             <span>Upload New Rate Sheet</span>
           </button>
-          <input id="sheet-upload-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="uploadNewSheet(event)">
+          <input id="sheet-upload-input" type="file" accept=".xlsx,.xls,.csv" aria-label="Upload Carrier Rate Sheet (XLSX, CSV, PDF)" class="hidden" onchange="uploadNewSheet(event)">
         </div>
       </div>
 
@@ -157,7 +157,7 @@
     <!-- Semantic Footer -->
     <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
       <div class="flex flex-wrap items-center gap-6">
-        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
+        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
 
         <nav aria-label="Footer Navigation" class="flex flex-wrap items-center gap-4 text-xs font-medium">
           <a href="/console/new-quote" class="hover:text-[var(--foreground)] transition-colors">New Quote</a>
@@ -227,10 +227,10 @@
               </label>
               <div class="grid grid-cols-2 gap-1 p-1 bg-white border border-slate-200 rounded-xl shadow-2xs">
                 <button type="button" id="btn-currency-cad" onclick="setTariffCurrency('CAD')" class="py-1 px-2 rounded-lg text-xs font-bold text-center transition-all cursor-pointer bg-red-600 text-white shadow-2xs">
-                  🇨🇦 CAD
+                  CAD ($)
                 </button>
                 <button type="button" id="btn-currency-usd" onclick="setTariffCurrency('USD')" class="py-1 px-2 rounded-lg text-xs font-semibold text-center text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
-                  🇺🇸 USD
+                  USD ($)
                 </button>
               </div>
             </div>
@@ -256,13 +256,13 @@
                 DIM Divisor
               </label>
               <div class="flex items-center gap-1.5">
-                <select id="select-dim-preset" onchange="onDimPresetChange(this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
+                <select id="select-dim-preset" aria-label="Dimensional Weight Factor Preset" onchange="onDimPresetChange(this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
                   <option value="139.0">139.0 (Domestic Express / Air)</option>
                   <option value="166.0">166.0 (Standard Domestic LTL)</option>
                   <option value="250.0">250.0 (Metric / Heavy)</option>
                   <option value="custom">Custom Divisor...</option>
                 </select>
-                <input id="input-dim-custom" type="number" step="0.5" min="1" value="139.0" oninput="onCustomDimInput(this.value)" class="w-16 hidden bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs font-bold text-slate-800 text-center shadow-2xs">
+                <input id="input-dim-custom" type="number" step="0.5" min="1" value="139.0" aria-label="Custom Dimensional Divisor Value" oninput="onCustomDimInput(this.value)" class="w-16 hidden bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs font-bold text-slate-800 text-center shadow-2xs">
               </div>
             </div>
 
@@ -271,7 +271,7 @@
               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                 Rounding Logic
               </label>
-              <select id="select-rounding-rule" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
+              <select id="select-rounding-rule" aria-label="Weight Rounding Methodology" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
                 <option value="standard_2dp">Standard (2 Decimal Places)</option>
                 <option value="ceil_whole_dollar">Ceil to Next Whole Dollar ($)</option>
               </select>
@@ -303,7 +303,7 @@
               <span>Items Needing Human Verification (<span id="modal-flagged-count">0</span>)</span>
             </div>
             <button type="button" onclick="resolveAllFlags()" class="px-2.5 py-1 rounded-lg bg-amber-200 hover:bg-amber-300 text-amber-900 text-[11px] font-bold transition-colors cursor-pointer shadow-2xs">
-              ✓ Verify & Clear All Flags
+              Verify & Clear All Flags
             </button>
           </div>
           <div id="modal-flagged-list" class="space-y-1.5 text-[11px]"></div>
@@ -312,7 +312,7 @@
         <!-- Banner when all review items are clean -->
         <div id="modal-review-clean-banner" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between text-xs">
           <div class="flex items-center gap-2">
-            <span class="text-emerald-600 font-bold text-sm">✓</span>
+            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
             <span class="font-medium">All cell coordinates, footnotes, and tariff terms verified. No caution flags.</span>
           </div>
           <span class="font-mono text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-bold">Human Verified</span>
@@ -328,14 +328,14 @@
             <div class="flex items-center justify-between gap-3">
               <div class="flex items-center gap-2 flex-1">
                 <button type="button" onclick="openFormattedSheetModal()" class="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer text-center">
-                  <span>👁️ View Formatted Sheet</span>
+                  <span>View Formatted Sheet</span>
                 </button>
                 <button type="button" onclick="openManualEntryFailsafe()" class="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer text-center" title="Manually map columns, headers, and pricing mode through the Failsafe gate">
-                  <span>⚙️ Manual Entry</span>
+                  <span>Manual Entry</span>
                 </button>
               </div>
               <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs shrink-0">
-                <span>🔒 In-Browser Inspection Only • Downloads Disabled</span>
+                <span>In-Browser Inspection Only • Downloads Disabled</span>
               </span>
             </div>
 
@@ -454,11 +454,11 @@
               <!-- Checkbox Toggles -->
               <div class="space-y-2 pt-1 border-t border-slate-100">
                 <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                  <input type="checkbox" id="check-fsc-passthrough" checked onchange="updateMarkupPreview()" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" id="check-fsc-passthrough" checked aria-label="Pass-Through Fuel Surcharge without markup" onchange="updateMarkupPreview()" class="rounded text-red-600 focus:ring-red-500">
                   <span class="font-medium">Pass-Through Fuel FSC (Do not markup carrier fuel surcharge)</span>
                 </label>
                 <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                  <input type="checkbox" id="check-accessorial-markup" onchange="updateMarkupPreview()" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" id="check-accessorial-markup" aria-label="Markup Accessorials and Surcharges by 15 percent" onchange="updateMarkupPreview()" class="rounded text-red-600 focus:ring-red-500">
                   <span class="font-medium">Markup Accessorials & Surcharges (+15%)</span>
                 </label>
               </div>
@@ -502,7 +502,7 @@
                   <div class="text-[11px] text-slate-500 mt-0.5">Allow quoting even if some agent verification items are pending.</div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
-                  <input type="checkbox" id="switch-manual-approval" onchange="handleManualApprovalToggle(this.checked)" class="sr-only peer">
+                  <input type="checkbox" id="switch-manual-approval" aria-label="Manual Broker Approval override switch" onchange="handleManualApprovalToggle(this.checked)" class="sr-only peer">
                   <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                 </label>
               </div>
@@ -511,7 +511,7 @@
               <div id="manual-approval-warning" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-1">
                 <div class="flex items-center gap-1.5 font-bold text-amber-800">
                   <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                  <span>⚠️ Warning: Manual Approval Active</span>
+                  <span>Warning: Manual Approval Active</span>
                 </div>
                 <p class="text-[11px] leading-relaxed text-amber-800">
                   You are overriding pending agent verification to enable this sheet for live quoting. Any unverified cell coordinates will be flagged with caution badges and logged in the immutable audit trail.
@@ -522,7 +522,7 @@
               <div class="pt-2 space-y-2">
                 <button id="modal-confirm-btn" onclick="confirmCurrentSheet()" class="w-full py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                  <span id="modal-confirm-btn-text">✓ Apply Approval & Enable Quoting</span>
+                  <span id="modal-confirm-btn-text">Apply Approval & Enable Quoting</span>
                 </button>
                 <button type="button" onclick="testPreflightLane()" class="w-full py-2 px-4 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
                   <span>Test Pre-Flight Lane →</span>
@@ -559,12 +559,12 @@
       <!-- Header -->
       <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">👁️</div>
+          <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-sm shadow-xs"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></div>
           <div>
             <div class="flex items-center gap-2">
               <h3 class="text-sm font-bold text-slate-900" id="fsm-carrier-title">Formatted Carrier Tariff Matrix</h3>
               <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                🔒 In-Browser Inspection Only
+                In-Browser Inspection Only
               </span>
               <span id="fsm-focused-cell-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">
                 Target Cell: <span id="fsm-target-cell-label" class="ml-1 font-mono font-bold">[C:14]</span>
@@ -581,7 +581,7 @@
       <!-- Highlight Notification Ribbon -->
       <div id="fsm-highlight-banner" class="hidden px-5 py-2.5 bg-amber-50 border-b border-amber-200 flex items-center justify-between text-xs text-amber-950">
         <div class="flex items-center gap-2">
-          <span class="text-amber-700 font-bold">📌 Cell Traceability Focus:</span>
+          <span class="text-amber-700 font-bold">Cell Traceability Focus:</span>
           <span>Showing cell <strong id="fsm-highlight-text" class="font-mono text-red-700 underline font-black">[C:14]</strong> highlighted in amber/red within the active carrier rate matrix.</span>
         </div>
         <span class="font-mono text-[10px] text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 font-bold shrink-0">100% Traceability Lock</span>
@@ -590,7 +590,7 @@
       <!-- Security Notice Ribbon -->
       <div class="px-5 py-2.5 bg-red-50/60 border-b border-red-100 flex items-center justify-between text-xs text-red-900">
         <div class="flex items-center gap-2">
-          <span class="text-red-600 font-bold">🔒 Platform Security Policy:</span>
+          <span class="text-red-600 font-bold">Platform Security Policy:</span>
           <span>Reformatted carrier tariffs are restricted to in-browser inspection only. Downloading, scraping, or exporting spreadsheet files is strictly blocked.</span>
         </div>
         <span class="font-mono text-[10px] text-red-700 shrink-0">Tenant Quarantine & Cell Security</span>
@@ -658,7 +658,7 @@
       <!-- Header -->
       <div class="p-4 sm:p-5 border-b border-slate-200 bg-indigo-50/70 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">🛡️</div>
+          <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-xs"><svg class="w-4 h-4 text-indigo-600 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
           <div>
             <h3 class="text-sm font-bold text-slate-900">Client-Side Tariff Redaction Scrubber</h3>
             <p class="text-[11px] text-slate-500">Scrub proprietary carrier accounts, client names, and broker margins before uploading.</p>
@@ -673,9 +673,9 @@
       <div class="p-5 space-y-4 overflow-y-auto text-xs">
         <!-- Upload Drop Zone -->
         <div id="redact-drop-zone" onclick="document.getElementById('redact-file-input').click()" class="border-2 border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/30 hover:bg-indigo-50/60 rounded-xl p-6 text-center cursor-pointer transition-all">
-          <input id="redact-file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleRedactionFileSelect(event)">
+          <input id="redact-file-input" type="file" accept=".xlsx,.xls,.csv" aria-label="Upload Carrier Rate Sheet for Scrubbing and Redaction" class="hidden" onchange="handleRedactionFileSelect(event)">
           <div class="space-y-1">
-            <div class="text-2xl">📄</div>
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mx-auto"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
             <div class="font-bold text-slate-800">Select or Drop Carrier Rate Sheet (.xlsx, .csv)</div>
             <div class="text-[11px] text-slate-500">Auto-detects and scrubs ACCT numbers, client names, sales rep emails, and broker margins.</div>
           </div>
@@ -707,10 +707,10 @@
           <!-- Action buttons -->
           <div class="pt-2 flex items-center justify-between gap-3">
             <button type="button" onclick="downloadRedactedWorkbook()" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer">
-              <span>📥 Download Scrubbed (.xlsx)</span>
+              <span>Download Scrubbed (.xlsx)</span>
             </button>
             <button type="button" onclick="uploadScrubbedToSheets()" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer">
-              <span>✓ Ingest Scrubbed to Engine →</span>
+              <span>Ingest Scrubbed to Engine →</span>
             </button>
           </div>
         </div>
@@ -959,7 +959,7 @@
       formData.append('file', file);
 
       try {
-        const res = await fetch('/api/ratesift/preview-redaction', {
+        const res = await fetch('/api/quotelytics/preview-redaction', {
           method: 'POST',
           body: formData
         });
@@ -985,7 +985,7 @@
           cellsDiv.innerHTML = '<div class="p-2 text-slate-500 italic">No confidential accounts or customer names detected. File is clean.</div>';
         }
       } catch (err) {
-        alert(err.message);
+        showToast(err.message, "error");
       }
     }
 
@@ -993,8 +993,8 @@
       if (!stagedRedactFile) return;
       const formData = new FormData();
       formData.append('file', stagedRedactFile);
-      const res = await fetch('/api/ratesift/redact-sheet', { method: 'POST', body: formData });
-      if (!res.ok) return alert("Download failed");
+      const res = await fetch('/api/quotelytics/redact-sheet', { method: 'POST', body: formData });
+      if (!res.ok) return showToast("Download failed", "error");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1015,14 +1015,14 @@
       try {
         const redactForm = new FormData();
         redactForm.append('file', stagedRedactFile);
-        const redactRes = await fetch('/api/ratesift/redact-sheet', { method: 'POST', body: redactForm });
+        const redactRes = await fetch('/api/quotelytics/redact-sheet', { method: 'POST', body: redactForm });
         if (!redactRes.ok) throw new Error("Tariff scrubbing failed before upload.");
         const blob = await redactRes.blob();
         const scrubbedFile = new File([blob], `scrubbed_${stagedRedactFile.name}`, { type: blob.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
         const uploadForm = new FormData();
         uploadForm.append('file', scrubbedFile);
-        const uploadRes = await fetch('/api/ratesift/upload-sheet', { method: 'POST', body: uploadForm });
+        const uploadRes = await fetch('/api/quotelytics/upload-sheet', { method: 'POST', body: uploadForm });
         const data = await uploadRes.json();
         if (!uploadRes.ok) throw new Error(data.detail || "Upload failed");
 
@@ -1042,7 +1042,7 @@
 
     async function loadRateSheets() {
       try {
-        const res = await fetch('/api/ratesift/sheets');
+        const res = await fetch('/api/quotelytics/sheets');
         const data = await res.json();
         currentSheetsList = data.sheets || [];
         const tbody = document.getElementById('sheets-tbody');
@@ -1078,14 +1078,14 @@
           const isManual = s.manual_override === 1;
           
           let badgeClass = 'bg-amber-50 text-amber-700 border-amber-300 animate-pulse';
-          let statusText = '⚠ Needs Confirmation';
+          let statusText = 'Needs Confirmation';
           
           if (isConfirmed) {
             badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-            statusText = '✓ Confirmed';
+            statusText = 'Confirmed';
           } else if (isManual) {
             badgeClass = 'bg-amber-100 text-amber-900 border-amber-300';
-            statusText = '⚡ Manual Approval Active';
+            statusText = 'Manual Approval Active';
           }
           
           return `
@@ -1124,7 +1124,7 @@
 
       const statusBox = document.getElementById('upload-status');
       statusBox.className = "p-3 rounded-xl text-xs font-mono bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-2";
-      statusBox.innerHTML = `<span class="animate-spin text-blue-600">⟳</span><span>Scanning ${file.name} through RateSift Header Failsafe...</span>`;
+      statusBox.innerHTML = `<span class="animate-spin text-blue-600">⟳</span><span>Scanning ${file.name} through Quotelytics Header Failsafe...</span>`;
       statusBox.classList.remove('hidden');
 
       const formData = new FormData();
@@ -1136,11 +1136,20 @@
           body: formData
         });
         const job = await res.json();
-        if (!res.ok) throw new Error(job.detail || "Upload failed");
+        if (!res.ok) {
+          const detail = job.detail;
+          const msg = (typeof detail === 'object' && detail !== null) ? detail.message : (detail || "Upload failed");
+          if ((typeof detail === 'object' && detail !== null && detail.code === 'SHEET_LIMIT_REACHED') || res.status === 403) {
+            statusBox.className = "p-3 rounded-xl text-xs font-sans bg-amber-50 text-amber-900 border border-amber-300 flex items-center justify-between";
+            statusBox.innerHTML = `<span><strong>Plan Limit:</strong> ${msg}</span> <a href="/pricing" class="ml-3 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold text-xs whitespace-nowrap">Upgrade Plan</a>`;
+            return;
+          }
+          throw new Error(msg);
+        }
 
         if (job.status === 'needs_mapping') {
           statusBox.className = "p-3 rounded-xl text-xs font-mono bg-amber-50 text-amber-800 border border-amber-200";
-          statusBox.innerHTML = `⚠️ Header ambiguities detected in <strong>${file.name}</strong>. Opening Column Confirmation Gate...`;
+          statusBox.innerHTML = `Header ambiguities detected in <strong>${file.name}</strong>. Opening Column Confirmation Gate...`;
 
           const controller = window.FailsafeModal || (typeof FailsafeModal !== 'undefined' ? FailsafeModal : null);
           if (controller) {
@@ -1158,11 +1167,11 @@
           }
         } else if (job.status === 'ready') {
           statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200";
-          statusBox.innerHTML = `✓ Auto-mapped with high confidence. Processing workbook...`;
+          statusBox.innerHTML = `Auto-mapped with high confidence. Processing workbook...`;
           const procRes = await fetch(`/jobs/${job.job_id}/process`, { method: 'POST' });
           const procData = await procRes.json();
           if (!procRes.ok) throw new Error(procData.detail || "Processing failed");
-          statusBox.innerHTML = `✓ Successfully verified and reformatted <strong>${file.name}</strong>!`;
+          statusBox.innerHTML = `Successfully verified and reformatted <strong>${file.name}</strong>!`;
           loadRateSheets();
         }
       } catch (err) {
@@ -1192,7 +1201,7 @@
                 <span class="text-amber-900 font-medium">${c.review_notes || c.field_name || 'Flagged Coordinate'}</span>
               </div>
               <button type="button" onclick="resolveCellFlag('${c.cell_coord}')" class="px-2.5 py-1 rounded-md bg-white hover:bg-amber-50 text-amber-900 border border-amber-400 font-bold text-[10px] shadow-2xs transition-colors cursor-pointer shrink-0">
-                ✓ Verify & Clear Flag
+                Verify & Clear Flag
               </button>
             </div>
           `).join('');
@@ -1206,7 +1215,7 @@
     async function resolveCellFlag(cellCoord) {
       if (!activeSheetId || !cellCoord) return;
       try {
-        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/cells/resolve`, {
+        const res = await fetch(`/api/quotelytics/sheets/${activeSheetId}/cells/resolve`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cell_coord: cellCoord })
@@ -1217,7 +1226,7 @@
         renderFlaggedList();
         fetchExtractionBreaks();
       } catch (err) {
-        alert("Error resolving cell flag: " + err.message);
+        showToast("Error resolving cell flag: " + err.message, "error");
       }
     }
 
@@ -1228,7 +1237,7 @@
       
       try {
         for (const coord of coords) {
-          await fetch(`/api/ratesift/sheets/${activeSheetId}/cells/resolve`, {
+          await fetch(`/api/quotelytics/sheets/${activeSheetId}/cells/resolve`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ cell_coord: coord })
@@ -1238,7 +1247,7 @@
         renderFlaggedList();
         fetchExtractionBreaks();
       } catch (err) {
-        alert("Error resolving all flags: " + err.message);
+        showToast("Error resolving all flags: " + err.message, "error");
       }
     }
 
@@ -1246,7 +1255,7 @@
     async function toggleSurchargeWaived(surchargeCode, shouldWaive) {
       if (!activeSheetId) return;
       try {
-        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/surcharges/${surchargeCode}/waive`, {
+        const res = await fetch(`/api/quotelytics/sheets/${activeSheetId}/surcharges/${surchargeCode}/waive`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ is_waived: shouldWaive })
@@ -1260,7 +1269,7 @@
         }
         updateMarkupPreview();
       } catch (err) {
-        alert("Error updating surcharge: " + err.message);
+        showToast("Error updating surcharge: " + err.message, "error");
       }
     }
 
@@ -1312,8 +1321,8 @@
         const coord = (b.source_cell || '').trim().toUpperCase();
         const isFlagged = coord && flaggedCellsMap.has(coord);
         const verBadge = isFlagged
-          ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">⚠ Needs Review</span>'
-          : '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">✓ Agent Verified</span>';
+          ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">Needs Review</span>'
+          : '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Agent Verified</span>';
         
         return `
           <tr class="hover:bg-slate-50 transition-colors">
@@ -1347,7 +1356,7 @@
       if (!activeSheetId) return;
       try {
         const queryParam = extractionQuery ? `&query=${encodeURIComponent(extractionQuery)}` : '';
-        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/breaks?page=${extractionPage}&limit=${extractionLimit}${queryParam}`);
+        const res = await fetch(`/api/quotelytics/sheets/${activeSheetId}/breaks?page=${extractionPage}&limit=${extractionLimit}${queryParam}`);
         if (!res.ok) throw new Error("Failed to load breaks");
         const data = await res.json();
         
@@ -1399,7 +1408,7 @@
 
       try {
         // Fast lightweight fetch: limit 50 breaks
-        const res = await fetch(`/api/ratesift/sheets/${sheetId}?limit=50&offset=0`);
+        const res = await fetch(`/api/quotelytics/sheets/${sheetId}?limit=50&offset=0`);
         const data = await res.json();
         currentSheetData = data;
         const sheet = data.sheet;
@@ -1457,23 +1466,23 @@
         if (sheet.confirmation_status === 'CONFIRMED') {
           badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800";
           badge.textContent = `Confirmed by ${sheet.confirmed_by || 'User'}`;
-          confirmBtnText.textContent = "✓ Update Markup & Confirmation Settings";
+          confirmBtnText.textContent = "Update Markup & Confirmation Settings";
           if (ruleStatus) {
             ruleStatus.className = "text-[11px] font-bold text-emerald-700 font-mono";
-            ruleStatus.textContent = "✓ Rules Human-Confirmed";
+            ruleStatus.textContent = "Rules Human-Confirmed";
           }
         } else if (isManual) {
           badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300";
           badge.textContent = "Manual Approval Override Active";
-          confirmBtnText.textContent = "✓ Apply Approval & Enable Quoting";
+          confirmBtnText.textContent = "Apply Approval & Enable Quoting";
           if (ruleStatus) {
             ruleStatus.className = "text-[11px] font-bold text-amber-800 font-mono";
-            ruleStatus.textContent = "⚡ Manual Approval Active";
+            ruleStatus.textContent = "Manual Approval Active";
           }
         } else {
           badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800";
           badge.textContent = "Pending Confirmation";
-          confirmBtnText.textContent = "✓ Apply Approval & Enable Quoting";
+          confirmBtnText.textContent = "Apply Approval & Enable Quoting";
           if (ruleStatus) {
             ruleStatus.className = "text-[11px] font-semibold text-slate-500 font-mono";
             ruleStatus.textContent = "Pending User Confirmation";
@@ -1499,7 +1508,7 @@
 
         updateMarkupPreview();
       } catch (err) {
-        alert("Error loading sheet details: " + err.message);
+        showToast("Error loading sheet details: " + err.message, "error");
       }
     }
 
@@ -1510,7 +1519,7 @@
 
     async function openManualEntryFailsafe() {
       if (!currentSheetData || !currentSheetData.sheet) {
-        alert("Please select or upload a rate sheet first.");
+        showToast("Please select or upload a rate sheet first.", "warning");
         return;
       }
       const sheet = currentSheetData.sheet;
@@ -1547,7 +1556,7 @@
       if (controller) {
         controller.open(failsafeJob);
       } else {
-        alert("Failsafe mapping modal is not available on this page.");
+        showToast("Failsafe mapping modal is not available on this page.", "warning");
       }
     }
 
@@ -1569,7 +1578,7 @@
       };
 
       try {
-        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/confirm`, {
+        const res = await fetch(`/api/quotelytics/sheets/${activeSheetId}/confirm`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -1578,12 +1587,12 @@
         
         const statusBox = document.getElementById('upload-status');
         statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 block";
-        statusBox.innerHTML = `✓ Sheet & tariff rules confirmed! ${payload.manual_override ? '<strong>Manual Broker Approval Override Enabled</strong> for live quoting.' : '<strong>Confirmed for Live Quoting</strong>.'}`;
+        statusBox.innerHTML = `Sheet & tariff rules confirmed! ${payload.manual_override ? '<strong>Manual Broker Approval Override Enabled</strong> for live quoting.' : '<strong>Confirmed for Live Quoting</strong>.'}`;
         
         closeConfirmModal();
         loadRateSheets();
       } catch (err) {
-        alert("Failed to confirm rate sheet: " + err.message);
+        showToast("Failed to confirm rate sheet: " + err.message, "error");
       }
     }
 
@@ -1591,12 +1600,12 @@
       if (!activeSheetId) return;
       if (!confirm("Are you sure you want to delete this rate sheet and all its extracted rates?")) return;
       try {
-        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}`, { method: 'DELETE' });
+        const res = await fetch(`/api/quotelytics/sheets/${activeSheetId}`, { method: 'DELETE' });
         if (!res.ok) throw new Error("Delete failed");
         closeConfirmModal();
         loadRateSheets();
       } catch (err) {
-        alert("Failed to delete sheet: " + err.message);
+        showToast("Failed to delete sheet: " + err.message, "error");
       }
     }
 
@@ -1643,7 +1652,7 @@
       try {
         const queryParam = fsmQuery ? `&query=${encodeURIComponent(fsmQuery)}` : '';
         const cellParam = activeHighlightCell ? `&cell=${encodeURIComponent(activeHighlightCell)}` : '';
-        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/formatted-matrix?page=${fsmPage}&limit=${fsmLimit}${queryParam}${cellParam}`);
+        const res = await fetch(`/api/quotelytics/sheets/${activeSheetId}/formatted-matrix?page=${fsmPage}&limit=${fsmLimit}${queryParam}${cellParam}`);
         if (!res.ok) throw new Error("Failed to load formatted matrix");
         const data = await res.json();
         
@@ -1657,7 +1666,7 @@
         renderFormattedMatrixRows(data.breaks || []);
         updateFsmPaginationControls();
       } catch (err) {
-        alert("Error loading formatted sheet: " + err.message);
+        showToast("Error loading formatted sheet: " + err.message, "error");
       }
     }
 
@@ -1689,7 +1698,7 @@
           <td class="py-2 px-3 text-center">
             ${isTargetCell ? `
               <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-600 text-white animate-pulse">
-                ★ Highlighted Cell
+                Highlighted Cell
               </span>
             ` : `
               <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -1743,7 +1752,7 @@
 
     function preventDownloadAction(e) {
       e.preventDefault();
-      alert("🔒 Platform Security Notice: Reformatted carrier tariffs are restricted to in-browser inspection only. Downloads, exports, and file extractions are permanently disabled.");
+      showToast("Platform Security Notice: Reformatted carrier tariffs are restricted to in-browser inspection only. Downloads, exports, and file extractions are permanently disabled.", "info");
     }
 
     function testPreflightLane() {
@@ -1771,7 +1780,7 @@
       const statusBox = document.getElementById('upload-status');
       if (statusBox) {
         statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 block";
-        statusBox.innerHTML = `✓ Sheet successfully confirmed and added to your quotable carrier tariffs!`;
+        statusBox.innerHTML = `Sheet successfully confirmed and added to your quotable carrier tariffs!`;
       }
       loadRateSheets();
     };
@@ -1812,6 +1821,6 @@
 
   </script>
   {% include "console/components/mapping_modal.html" %}
-  <script src="/static/js/global-chrome.js"></script>
+  <script src="/static/js/global-chrome.js?v=20261113b"></script>
 </body>
 </html>

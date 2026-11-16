@@ -1,5 +1,5 @@
 """
-RateSift Autonomous Agent Controller (Playground Copy)
+Quotelytics Autonomous Agent Controller (Playground Copy)
 Coordinates agent training variants, prompt instructions, rule compliance auditing,
 and deterministic freight rating execution.
 """
@@ -9,7 +9,7 @@ from .tariffs_data import AVAILABLE_TARIFFS
 from .engine_copy import quote_all_tariffs
 from .agent_prompts import AGENT_TRAINING_VARIANTS, TRAINING_TEST_SCENARIOS
 
-class RateSiftAgent:
+class QuotelyticsAgent:
     """
     Autonomous freight rating agent capable of testing different training prompt variants,
     auditing rule compliance, and executing deterministic rating math.

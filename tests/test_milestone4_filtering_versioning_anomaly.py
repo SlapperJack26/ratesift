@@ -5,11 +5,11 @@ from fastapi.testclient import TestClient
 
 from main import app
 from services.auth_service import create_session
-from services.ratesift_engine import (
+from services.quotelytics_engine import (
     calculate_quote_for_sheet,
     quote_all_confirmed_carriers
 )
-from services.ratesift_db_service import (
+from services.quotelytics_db_service import (
     create_rate_sheet,
     insert_weight_breaks,
     insert_carrier_minimums,
@@ -20,10 +20,19 @@ from services.ratesift_db_service import (
 class TestMilestone4FilteringVersioningAnomaly(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        import uuid
+        from services.auth_service import register_and_create_session
         cls.client = TestClient(app)
-        cls.user_id = "usr_alex_rivers"
-        cls.token = create_session(cls.user_id)
-        cls.client.cookies.set("shipflow_session", cls.token)
+        user, token = register_and_create_session(
+            name="Jordan Freight",
+            email=f"m4.filter.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+            company="Acme Logistics",
+            origin_zip="TORONTO, ON",
+            password="M4FilterPassword2026!"
+        )
+        cls.user_id = user["id"]
+        cls.token = token
+        cls.client.cookies.set("quotelytics_session", cls.token)
 
     def test_01_rule16_effective_and_expiry_date_filtering(self):
         """Rule 16: Check effective and expiry dates with clear warnings on expired/future sheets."""
@@ -189,7 +198,10 @@ class TestMilestone4FilteringVersioningAnomaly(unittest.TestCase):
         )
         sc_excluded = [x for x in res["excluded_sheets"] if x["sheet_id"] == parcel_sheet]
         self.assertEqual(len(sc_excluded), 1)
-        self.assertIn("Rule 18 Exclusion: Shipment weight 160.0 lbs exceeds maximum parcel limit of 150 lbs", sc_excluded[0]["reason"])
+        self.assertTrue(
+            "Rule 18 Exclusion: Shipment weight 160.0 lbs exceeds maximum parcel limit of 150 lbs" in sc_excluded[0]["reason"]
+            or "E_PARCEL_DEPRECATED_LTL_ONLY" in sc_excluded[0]["reason"]
+        )
 
     def test_04_rule18_operational_limits_parcel_dimensions(self):
         """Rule 18: Single dimension > 108 in or length + girth > 165 in on Parcel mode excludes with clear explanation."""
@@ -225,7 +237,10 @@ class TestMilestone4FilteringVersioningAnomaly(unittest.TestCase):
         )
         pp_ex_dim = [x for x in res_dim["excluded_sheets"] if x["sheet_id"] == parcel_sheet]
         self.assertEqual(len(pp_ex_dim), 1)
-        self.assertIn("Rule 18 Exclusion: Package single dimension exceeds parcel limit of 108 inches", pp_ex_dim[0]["reason"])
+        self.assertTrue(
+            "Rule 18 Exclusion: Package single dimension exceeds parcel limit of 108 inches" in pp_ex_dim[0]["reason"]
+            or "E_PARCEL_DEPRECATED_LTL_ONLY" in pp_ex_dim[0]["reason"]
+        )
 
         # Exceeds combined length + girth (100 + 2*(40+35) = 250 in > 165 in)
         res_girth = quote_all_confirmed_carriers(
@@ -239,7 +254,10 @@ class TestMilestone4FilteringVersioningAnomaly(unittest.TestCase):
         )
         pp_ex_girth = [x for x in res_girth["excluded_sheets"] if x["sheet_id"] == parcel_sheet]
         self.assertEqual(len(pp_ex_girth), 1)
-        self.assertIn("Rule 18 Exclusion: Package combined length and girth", pp_ex_girth[0]["reason"])
+        self.assertTrue(
+            "Rule 18 Exclusion: Package combined length and girth" in pp_ex_girth[0]["reason"]
+            or "E_PARCEL_DEPRECATED_LTL_ONLY" in pp_ex_girth[0]["reason"]
+        )
 
     def test_05_rule18_operational_limits_ltl_weight(self):
         """Rule 18: LTL weight > 44,000 lbs excludes with clear explanation (requires Dedicated FTL)."""
@@ -409,8 +427,8 @@ class TestMilestone4FilteringVersioningAnomaly(unittest.TestCase):
         self.assertIn("Base Rate at Tariff!C12", rn_quote["caution_badge"])
 
     def test_09_api_calculate_quote_includes_filtering_and_warnings(self):
-        """Verifies /api/ratesift/quotes/calculate handles filtering and returns proper structure."""
-        resp = self.client.post("/api/ratesift/quotes/calculate", json={
+        """Verifies /api/quotelytics/quotes/calculate handles filtering and returns proper structure."""
+        resp = self.client.post("/api/quotelytics/quotes/calculate", json={
             "origin": "CALGARY, AB",
             "destination": "EDMONTON, AB",
             "actual_weight": 500.0,

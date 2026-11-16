@@ -74,7 +74,7 @@
     <!-- Top Showcase Header (Semantic Header) -->
     <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-3 bg-[var(--card)] m-0">
       <div class="flex items-center gap-3">
-        <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-8 md:h-9 w-auto object-contain" />
+        <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-8 md:h-9 w-auto object-contain" />
         <div class="border-l border-slate-200 pl-3">
           <h1 class="text-base font-bold tracking-tight text-[var(--foreground)]">Design Suite</h1>
           <p class="text-xs text-[var(--muted-foreground)]">Side-by-side visual comparison of all 4 application screens</p>
@@ -134,7 +134,7 @@
             <div class="grid grid-cols-2 gap-2">
               <div class="border border-dashed border-slate-300 rounded p-2 text-center bg-slate-50 flex flex-col justify-between h-28">
                 <span class="self-end text-[8px] bg-red-50 text-red-700 px-1 rounded">Batch Mode</span>
-                <span class="text-[9px] text-slate-600 my-auto">📁 Drop Excel file (.xlsx)</span>
+                <span class="text-[9px] text-slate-600 my-auto">Drop Excel file (.xlsx)</span>
                 <span class="text-[8px] text-red-600 underline">Download template</span>
               </div>
               <div class="space-y-1.5">
@@ -204,7 +204,7 @@
                 <th>Quote ID ⇅</th><th>Recipient ⇅</th><th>Excel Ref ⇅</th><th class="text-right">Rate ⇅</th>
               </tr>
               <tr class="text-slate-600"><td>QT-10492</td><td>Sarah K.</td><td>Sheet 1 • R14, Col C</td><td class="text-right font-normal">$124.50</td></tr>
-              <tr class="text-slate-600"><td>QT-10493</td><td>TechCorp</td><td>Sheet 1 • R15, Col C</td><td class="text-right font-normal">$109.99</td></tr>
+              <tr class="text-slate-600"><td>QT-10493</td><td>Acme Freight</td><td>Sheet 1 • R15, Col C</td><td class="text-right font-normal">$109.99</td></tr>
               <tr class="text-slate-600"><td>QT-10494</td><td>LogiCo</td><td>Sheet 2 • R8, Col B</td><td class="text-right font-normal">$129.99</td></tr>
             </table>
             <!-- Mini Footer -->
@@ -234,7 +234,7 @@
                 <span>New Quote</span>
                 <span>History</span>
               </div>
-              <span class="text-red-700 font-bold border border-red-200 rounded px-1 bg-red-50">AR Alex R. ˅</span>
+              <span class="text-red-700 font-bold border border-red-200 rounded px-1 bg-red-50">SK Sarah K. ˅</span>
             </div>
             <!-- Mini Content -->
             <div class="font-bold text-slate-800 text-[11px]">Account Settings</div>
@@ -246,8 +246,8 @@
               </div>
               <div class="col-span-2 space-y-1.5 text-[8px]">
                 <div class="flex items-center gap-1.5">
-                  <div class="w-5 h-5 rounded-full bg-slate-200 font-bold flex items-center justify-center text-[7px]">AR</div>
-                  <span class="text-slate-700 font-bold">Alex Rivers • TechCorp Logistics</span>
+                  <div class="w-5 h-5 rounded-full bg-slate-200 font-bold flex items-center justify-center text-[7px]">SK</div>
+                  <span class="text-slate-700 font-bold">Sarah K. • Acme Freight</span>
                 </div>
                 <div class="border border-slate-200 rounded p-1 bg-slate-50">Default Origin: 1200 Market St, 94103</div>
                 <div class="bg-red-600 text-white rounded text-center py-0.5 text-[8px] font-medium">Save Changes</div>
@@ -294,8 +294,8 @@
                 </div>
               </div>
               <div class="border border-slate-200 rounded p-1.5 bg-slate-50 space-y-0.5 text-slate-600">
-                <div class="flex justify-between"><span>Auto-Detect Excel Header</span><span>✓ Active</span></div>
-                <div class="flex justify-between"><span>Skip Empty Spreadsheet Rows</span><span>✓ Active</span></div>
+                <div class="flex justify-between"><span>Auto-Detect Excel Header</span><span>Active</span></div>
+                <div class="flex justify-between"><span>Skip Empty Spreadsheet Rows</span><span>Active</span></div>
               </div>
             </div>
             <!-- Mini Footer -->
@@ -331,20 +331,20 @@
         <div class="px-4 py-2 bg-slate-50 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-3 text-xs">
           <div class="flex items-center gap-2">
             <span class="font-bold text-slate-700 flex items-center gap-1.5">
-              <span>📐 Device Viewport:</span>
+              <span>Device Viewport:</span>
             </span>
             <div class="inline-flex rounded-lg border border-slate-200 p-0.5 bg-white shadow-2xs gap-1">
               <button id="dev-phone" type="button" onclick="setDeviceViewport('phone')" class="device-btn px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-red-600 transition-all flex items-center gap-1">
-                <span>📱</span> <span>Phone (390px)</span>
+                <span>Phone (390px)</span>
               </button>
               <button id="dev-tablet" type="button" onclick="setDeviceViewport('tablet')" class="device-btn px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-red-600 transition-all flex items-center gap-1">
-                <span>📟</span> <span>iPad / Tablet (768px)</span>
+                <span>iPad / Tablet (768px)</span>
               </button>
               <button id="dev-laptop" type="button" onclick="setDeviceViewport('laptop')" class="device-btn px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-red-600 transition-all flex items-center gap-1">
-                <span>💻</span> <span>Laptop (1024px)</span>
+                <span>Laptop (1024px)</span>
               </button>
               <button id="dev-desktop" type="button" onclick="setDeviceViewport('desktop')" class="device-btn px-2.5 py-1 rounded-md font-semibold bg-red-50 text-red-700 border border-red-200 transition-all flex items-center gap-1">
-                <span>🖥️</span> <span>Desktop (100% Fluid)</span>
+                <span>Desktop (100% Fluid)</span>
               </button>
             </div>
           </div>
@@ -353,7 +353,7 @@
           <div class="flex items-center gap-3">
             <div class="flex items-center gap-1 text-[11px] text-slate-500">
               <span>Scale:</span>
-              <select id="scale-select" onchange="setDeviceScale(this.value)" class="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-700 font-mono">
+              <select id="scale-select" aria-label="Device Viewport Scale Percentage" onchange="setDeviceScale(this.value)" class="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-700 font-mono">
                 <option value="1">100%</option>
                 <option value="0.9">90%</option>
                 <option value="0.8">80%</option>
@@ -362,7 +362,7 @@
             </div>
             
             <span id="viewport-dimension-badge" class="font-mono text-[11px] text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200 font-semibold">
-              🖥️ Desktop: 100% Fluid Monitor
+              Desktop: 100% Fluid Monitor
             </span>
           </div>
         </div>
@@ -382,7 +382,7 @@
     <!-- Semantic Footer (Unified System Footer) -->
     <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
       <div class="flex items-center gap-4">
-        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
+        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
         <span>•</span>
         <a href="/console/new-quote" class="hover:underline">New Quote</a>
         <a href="/console/history" class="hover:underline">History</a>
@@ -466,22 +466,22 @@
         frame.style.maxWidth = '390px';
         iframe.style.height = '844px';
         iframe.className = 'w-full bg-white border-8 border-slate-800 rounded-[36px] shadow-2xl transition-all';
-        badge.innerText = '📱 Phone: 390 × 844 px (iPhone 14/15)';
+        badge.innerText = 'Phone: 390 × 844 px (iPhone 14/15)';
       } else if (device === 'tablet') {
         frame.style.maxWidth = '768px';
         iframe.style.height = '1024px';
         iframe.className = 'w-full bg-white border-8 border-slate-700 rounded-[28px] shadow-xl transition-all';
-        badge.innerText = '📟 iPad: 768 × 1024 px (Portrait)';
+        badge.innerText = 'iPad: 768 × 1024 px (Portrait)';
       } else if (device === 'laptop') {
         frame.style.maxWidth = '1024px';
         iframe.style.height = '768px';
         iframe.className = 'w-full bg-white border-4 border-slate-600 rounded-xl shadow-lg transition-all';
-        badge.innerText = '💻 Laptop: 1024 × 768 px (13-inch)';
+        badge.innerText = 'Laptop: 1024 × 768 px (13-inch)';
       } else if (device === 'desktop') {
         frame.style.maxWidth = '100%';
         iframe.style.height = '620px';
         iframe.className = 'w-full h-[620px] bg-white border border-slate-200 rounded-lg shadow-sm transition-all';
-        badge.innerText = '🖥️ Desktop: 100% Fluid Monitor';
+        badge.innerText = 'Desktop: 100% Fluid Monitor';
       }
       applyDeviceScale();
     }

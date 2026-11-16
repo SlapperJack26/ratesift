@@ -170,6 +170,11 @@ class TestPipedaPrivacyCompliance(unittest.TestCase):
         self.assertEqual(payload["account_data"]["profile"]["email"], email)
         self.assertIn("rate_sheets", payload["customer_data"])
 
+        # Also test /api/pipeda/export alias (Release 2a pre-export requirement)
+        exp_alias = auth_client.get("/api/pipeda/export")
+        self.assertEqual(exp_alias.status_code, 200)
+        self.assertEqual(exp_alias.json()["account_data"]["profile"]["email"], email)
+
         # Delete account and verify data purge + session invalidation
         del_res = auth_client.post("/api/user/account/delete", json={"immediate_purge": True})
         self.assertEqual(del_res.status_code, 200)

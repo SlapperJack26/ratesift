@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en-CA" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Quotelytics | Help Centre & Freight Rating Documentation</title>
+  <meta name="title" content="Quotelytics | Help Centre & Freight Rating Documentation">
+  <meta name="description" content="Comprehensive knowledge base for Canadian freight brokers. Learn how to format Excel rate sheets (.xlsx, .csv), understand CWT deficit rating math, configure fuel surcharges, and resolve Canadian postal FSAs.">
+  <meta name="keywords" content="Quotelytics help, freight rate sheet format, CWT weight breaks, deficit rating calculation, Canadian postal FSA, LTL tariff spreadsheet, broker documentation">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="Quotelytics Inc.">
+  <link rel="canonical" href="https://quotelytics.ca/help">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://quotelytics.ca/help">
+  <meta property="og:site_name" content="Quotelytics">
+  <meta property="og:title" content="Quotelytics Help Centre & Broker Rating Documentation">
+  <meta property="og:description" content="Guides and technical specifications for Excel tariff sheets, CWT deficit pricing, FSA routing, and deterministic freight calculations.">
+  <meta property="og:locale" content="en_CA">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:url" content="https://quotelytics.ca/help">
+  <meta name="twitter:title" content="Quotelytics Help Centre">
+  <meta name="twitter:description" content="Technical guide for broker tariff formatting, deficit rating engine logic, and Canadian postal routing.">
+
+  <!-- Tailwind CSS Framework -->
+  <script src="/static/js/tailwindcss.min.js"></script>
+
+  <!-- Schema.org JSON-LD Structured Data: FAQPage & TechArticle -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "Quotelytics Freight Rating Engine Documentation & Tariff Guide",
+        "description": "Comprehensive reference guide explaining Excel tariff ingestion, CWT deficit calculation logic, and Canadian FSA postal routing.",
+        "author": {
+          "@type": "Organization",
+          "name": "Quotelytics Inc.",
+          "url": "https://quotelytics.ca"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Quotelytics Inc."
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What spreadsheet formats does Quotelytics support?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Quotelytics supports Microsoft Excel (.xlsx, .xls) and Comma-Separated Values (.csv). Multi-tab workbooks are supported, allowing you to select specific carrier rate matrices during upload."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does deterministic deficit rating work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "When a shipment weight approaches the next higher CWT weight break, the engine evaluates both the actual weight charge and the theoretical charge if rated at the next break minimum. If rating at the next break produces a lower total cost, Quotelytics bills the lower amount, protecting brokers from overcharges."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does Quotelytics handle Canadian postal codes and FSAs?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Quotelytics parses Canadian Forward Sortation Areas (the first 3 characters of a postal code) and automatically maps them to major regional carrier delivery zones (such as M for Toronto, H for Montreal, V for Vancouver). Rural FSAs containing '0' as the second character are automatically highlighted with rural beyond surcharge notices."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is my rate data kept isolated from other brokers?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Quotelytics enforces strict tenant isolation and zero-knowledge data residency under Canadian PIPEDA law. Your uploaded tariffs and discounts are stored exclusively in Canadian data centres and are never pooled, shared, or accessible by any other user."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
+  <!-- Accessibility Skip Navigation Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-lg focus:shadow-md text-xs font-semibold">
+    Skip to main content
+  </a>
+
+  <!-- Top Semantic Navigation Bar -->
+  <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] sticky top-0 z-30 m-0 backdrop-blur-xs bg-white/95">
+    <a href="/" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Quotelytics Home">
+      <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-8 md:h-9 w-auto object-contain" />
+    </a>
+
+    <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
+      <a href="/" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Home</a>
+      <a href="/demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Demo</a>
+      <a href="/pricing" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Pricing</a>
+      <a href="/help" class="pub-tab text-red-600 font-semibold border-b-2 border-red-600 py-1" aria-current="page">Help Centre</a>
+      <a href="/terms" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Terms</a>
+      <a href="/privacy" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Privacy</a>
+    </nav>
+
+    <div class="flex items-center gap-3 z-10">
+      <a href="/login" class="text-xs font-semibold text-[var(--foreground)] hover:text-red-600 transition-colors px-2 py-1">Log in</a>
+      <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg shadow-xs transition-colors">Get Started Free</a>
+    </div>
+  </header>
+
+  <!-- Main Documentation Container -->
+  <main id="main-content" role="main" class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <!-- Hero / Knowledge Base Header -->
+    <div class="border-b border-[var(--border)] pb-8 mb-8 space-y-4">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">CA</span>
+        <span>Canadian Freight Documentation • Deterministic Rating Standards</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--foreground)]">
+        Quotelytics Help Centre & Documentation
+      </h1>
+      <p class="text-sm sm:text-base text-[var(--muted-foreground)] max-w-3xl leading-relaxed">
+        Everything Canadian brokers, forwarders, and logistics coordinators need to format carrier Excel tariffs, master deficit rating, configure fuel indices, and automate quoting.
+      </p>
+
+      <!-- Live Search Bar -->
+      <div class="pt-2 max-w-xl">
+        <div class="relative">
+          <input 
+            type="text" 
+            id="help-search-input" 
+            placeholder="Search documentation (e.g., CWT breaks, deficit rating, postal codes, CSV headers)..."
+            oninput="filterHelpTopics()"
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-red-600 focus:bg-white transition-all shadow-xs"
+          />
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-Column Layout: Sidebar Nav & Content Panes -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      
+      <!-- Sticky Left Sidebar -->
+      <aside class="hidden lg:block lg:col-span-1">
+        <div class="sticky top-20 bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-1 text-xs">
+          <div class="font-bold text-slate-900 px-2 py-1 mb-1 tracking-wide uppercase text-[10px]">Table of Contents</div>
+          <a href="#getting-started" class="help-nav-link block px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-red-600 hover:bg-white font-medium transition-colors">1. Getting Started</a>
+          <a href="#sheet-formats" class="help-nav-link block px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-red-600 hover:bg-white font-medium transition-colors">2. Tariff Sheet Structure</a>
+          <a href="#cwt-breaks" class="help-nav-link block px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-red-600 hover:bg-white font-medium transition-colors">3. CWT Weight Breaks</a>
+          <a href="#deficit-rating" class="help-nav-link block px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-red-600 hover:bg-white font-medium transition-colors">4. Deficit Rating Logic</a>
+          <a href="#fsa-routing" class="help-nav-link block px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-red-600 hover:bg-white font-medium transition-colors">5. Canadian FSA Routing</a>
+          <a href="#fuel-surcharges" class="help-nav-link block px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-red-600 hover:bg-white font-medium transition-colors">6. Fuel Surcharges & Accessorials</a>
+          <a href="#billing-quotas" class="help-nav-link block px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-red-600 hover:bg-white font-medium transition-colors">7. Plans, Quotas & PIPEDA</a>
+          <a href="#faq" class="help-nav-link block px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-red-600 hover:bg-white font-medium transition-colors">8. Frequently Asked Questions</a>
+
+          <div class="pt-4 border-t border-slate-200 mt-4 space-y-2">
+            <div class="text-[11px] text-slate-500 font-medium">Need immediate assistance?</div>
+            <button type="button" onclick="openSupportModal(event)" class="w-full text-center bg-white border border-slate-300 hover:border-red-500 text-red-600 font-bold py-1.5 px-3 rounded-lg text-xs transition-colors shadow-xs">
+              Open Support Ticket →
+            </button>
+            <div class="text-[10px] text-slate-400 text-center">Urgent Hotline: 289-929-8565</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Documentation Content Panes -->
+      <div class="lg:col-span-3 space-y-12 text-slate-700 text-xs sm:text-sm leading-relaxed" id="help-articles-container">
+        
+        <!-- SECTION 1: GETTING STARTED -->
+        <section id="getting-started" class="help-topic scroll-mt-24 space-y-4 border-b border-slate-200 pb-10">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 font-black flex items-center justify-center text-xs">1</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Getting Started with Quotelytics</h2>
+          </div>
+          <p>
+            Quotelytics is a deterministic Canadian freight rating engine designed for freight brokerages, forwarders, and 3PLs. Instead of manually retyping shipment dimensions into multiple carrier portals or searching through dozens of carrier spreadsheets, Quotelytics ingests your negotiated Excel rate matrices and evaluates them in parallel in sub-second time.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div class="font-bold text-slate-900 text-xs">1. Upload Tariff</div>
+              <p class="text-xs text-slate-600">Drag & drop your carrier Excel (.xlsx) or CSV rate cards. Human confirmation gate lets you inspect detected brackets before finalizing.</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div class="font-bold text-slate-900 text-xs">2. Quote Shipments</div>
+              <p class="text-xs text-slate-600">Enter origin & destination postal codes (e.g. M5V 2T6 → T2P 1J9) and weight. In milliseconds, all eligible carriers are ranked.</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div class="font-bold text-slate-900 text-xs">3. Verify Cell Trail</div>
+              <p class="text-xs text-slate-600">Click any quote to open the audit drawer. Review exact spreadsheet coordinates, CWT break rates, and fuel surcharge calculations.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 2: TARIFF SHEET STRUCTURE -->
+        <section id="sheet-formats" class="help-topic scroll-mt-24 space-y-4 border-b border-slate-200 pb-10">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 font-black flex items-center justify-center text-xs">2</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Tariff Spreadsheet Structuring Guide</h2>
+          </div>
+          <p>
+            Quotelytics utilizes an automated header harvester and fuzzy matching system that detects common Canadian carrier spreadsheet column names.
+          </p>
+
+          <div class="bg-slate-900 text-slate-100 rounded-xl p-4 overflow-x-auto font-mono text-[11px] leading-relaxed">
+            <div class="text-slate-400 pb-2">// Recommended Standard Spreadsheet Column Headers</div>
+            <table class="w-full text-left">
+              <thead>
+                <tr class="text-emerald-400 border-b border-slate-700">
+                  <th class="py-1 pr-4">Origin Column</th>
+                  <th class="py-1 pr-4">Destination Column</th>
+                  <th class="py-1 pr-4">Min Charge</th>
+                  <th class="py-1 pr-4">Weight Breaks (CWT)</th>
+                  <th class="py-1">Effective Dates</th>
+                </tr>
+              </thead>
+              <tbody class="text-slate-300">
+                <tr>
+                  <td class="py-1 pr-4">Origin / Origin FSA / From Zone</td>
+                  <td class="py-1 pr-4">Destination / Dest FSA / To Zone</td>
+                  <td class="py-1 pr-4">MIN / Minimum</td>
+                  <td class="py-1 pr-4">L5C, M5C, M1M, M2M, M5M, M10M</td>
+                  <td class="py-1">Effective / Expiry</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="space-y-2 pt-2">
+            <h3 class="font-bold text-slate-900 text-sm">Key File Format Rules:</h3>
+            <ul class="list-disc pl-5 space-y-1.5 text-slate-600">
+              <li><strong>Accepted Extensions:</strong> <code>.xlsx</code> (Excel 2007+), <code>.xls</code> (legacy Excel), and <code>.csv</code> (standard comma-separated text). Maximum file size: 25 MB.</li>
+              <li><strong>Multi-Tab Workbooks:</strong> When uploading an Excel file with multiple tabs (e.g., "Ontario LTL", "Western Canada", "Accessorials"), Quotelytics detects all sheets and allows you to confirm which tabs represent rate matrices.</li>
+              <li><strong>Postal Code Formats:</strong> Origins and destinations can be 3-digit Forward Sortation Areas (e.g. <code>M5V</code>, <code>T2P</code>), full Canadian postal codes (e.g. <code>M5V 2T6</code>), or major city names (e.g. <code>TORONTO, ON</code>, <code>MONTREAL, QC</code>).</li>
+              <li><strong>Human Confirmation Gate:</strong> After parsing, Quotelytics displays a visual mapping modal showing detected origin/destination columns, weight break values, and currency. You can adjust mappings with one click prior to saving.</li>
+            </ul>
+          </div>
+
+          <!-- Sample Tariff Download Callout -->
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-wrap items-center justify-between gap-3">
+            <div class="space-y-0.5">
+              <div class="font-bold text-slate-900 text-xs">Want a ready-to-test Canadian tariff template?</div>
+              <p class="text-[11px] text-slate-500">Download our pre-calibrated sample tariff workbook with multi-tier CWT breaks and Canadian hub lanes.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <a href="/api/sample-sheets/download?format=xlsx" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs transition-colors shadow-2xs">
+                <span>Download Sample (.xlsx)</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              </a>
+              <a href="/api/sample-sheets/download?format=csv" class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium rounded-lg text-xs transition-colors">
+                <span>(.csv)</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 3: CWT WEIGHT BREAKS -->
+        <section id="cwt-breaks" class="help-topic scroll-mt-24 space-y-4 border-b border-slate-200 pb-10">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 font-black flex items-center justify-center text-xs">3</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">CWT Weight Breaks & Table Geometry</h2>
+          </div>
+          <p>
+            Canadian Less-Than-Truckload (LTL) tariffs quote rates per <strong>Hundredweight (CWT)</strong>, where 1 CWT = 100 lbs (or per 100 kg in metric sheets). Rates decrease as shipment weight increases into higher weight brackets.
+          </p>
+
+          <div class="overflow-x-auto border border-slate-200 rounded-xl">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold">
+                <tr>
+                  <th class="p-3 border-b">Weight Break Code</th>
+                  <th class="p-3 border-b">Standard Label</th>
+                  <th class="p-3 border-b">Weight Range</th>
+                  <th class="p-3 border-b">Application</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <tr>
+                  <td class="p-3 font-mono font-bold text-red-600">MIN</td>
+                  <td class="p-3">Absolute Minimum Floor</td>
+                  <td class="p-3">Flat fee floor</td>
+                  <td class="p-3">Applies if calculated CWT cost is lower than carrier minimum.</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold">L5C / -500</td>
+                  <td class="p-3">Under 500 lbs</td>
+                  <td class="p-3">1 – 499 lbs</td>
+                  <td class="p-3">Standard base LTL rate per 100 lbs.</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold">M5C / +500</td>
+                  <td class="p-3">500 lbs Break</td>
+                  <td class="p-3">500 – 999 lbs</td>
+                  <td class="p-3">First volume discount break.</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold">M1M / +1000</td>
+                  <td class="p-3">1,000 lbs Break</td>
+                  <td class="p-3">1,000 – 1,999 lbs</td>
+                  <td class="p-3">Substantial rate drop for 1/2-skid to 1-skid loads.</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold">M2M / +2000</td>
+                  <td class="p-3">2,000 lbs Break</td>
+                  <td class="p-3">2,000 – 4,999 lbs</td>
+                  <td class="p-3">Multi-pallet volume break.</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold">M5M / +5000</td>
+                  <td class="p-3">5,000 lbs Break</td>
+                  <td class="p-3">5,000 – 9,999 lbs</td>
+                  <td class="p-3">Heavy LTL break.</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold">M10M / +10000</td>
+                  <td class="p-3">10,000 lbs Break</td>
+                  <td class="p-3">10,000+ lbs (Partial Truckload)</td>
+                  <td class="p-3">Volume / PTL rating bracket.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- SECTION 4: DEFICIT RATING LOGIC -->
+        <section id="deficit-rating" class="help-topic scroll-mt-24 space-y-4 border-b border-slate-200 pb-10">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 font-black flex items-center justify-center text-xs">4</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Deterministic Deficit Rating Math</h2>
+          </div>
+          <p>
+            Deficit weight rating (commonly used in CzarLite®-compatible Canadian tariffs) is an industry-standard freight rating rule that prevents shippers and brokers from being penalized when a shipment is just under a higher discount weight bracket.
+          </p>
+
+          <div class="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+            <div class="font-bold text-red-900 text-sm">Example Real-World Lane Scenario:</div>
+            <p class="text-xs text-red-800">
+              Shipment from <strong>Toronto, ON (M5V)</strong> to <strong>Montreal, QC (H3B)</strong> weighing <strong>850 lbs</strong>.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div class="bg-white p-3 rounded-lg border border-red-100">
+                <div class="font-bold text-slate-800">Option A: Actual Weight (500 lbs Break)</div>
+                <div class="font-mono text-slate-600 mt-1">Rate = $12.50 / CWT</div>
+                <div class="font-mono text-slate-600">Charge = (850 / 100) × $12.50 = <strong>$106.25 CAD</strong></div>
+              </div>
+              <div class="bg-white p-3 rounded-lg border border-red-100">
+                <div class="font-bold text-emerald-800">Option B: Deficit Rating (Next 1,000 lbs Break)</div>
+                <div class="font-mono text-slate-600 mt-1">Rate = $9.50 / CWT at 1,000 lbs min</div>
+                <div class="font-mono text-slate-600">Charge = (1,000 / 100) × $9.50 = <strong>$95.00 CAD</strong></div>
+              </div>
+            </div>
+            <p class="text-xs text-slate-700">
+              <strong>Quotelytics Engine Decision:</strong> Because $95.00 is lower than $106.25, the engine bills at the 1,000 lb threshold ($95.00 CAD), saving $11.25 on this single shipment. Every quote audit drawer provides full visibility into the deficit break applied.
+            </p>
+          </div>
+        </section>
+
+        <!-- SECTION 5: CANADIAN FSA ROUTING -->
+        <section id="fsa-routing" class="help-topic scroll-mt-24 space-y-4 border-b border-slate-200 pb-10">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 font-black flex items-center justify-center text-xs">5</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Canadian Postal FSA Resolution</h2>
+          </div>
+          <p>
+            Canada Post divides the country into over 1,600 Forward Sortation Areas (FSAs), determined by the first three characters of any Canadian postal code (e.g., <code>M5V</code> in Toronto, <code>H3B</code> in Montreal, <code>V6B</code> in Vancouver).
+          </p>
+
+          <div class="space-y-3">
+            <div class="border border-slate-200 rounded-xl p-4 space-y-2 bg-slate-50">
+              <h4 class="font-bold text-slate-900 text-xs">1. Major Metropolitan Delivery Hubs</h4>
+              <p class="text-xs text-slate-600">
+                Quotelytics resolves postal codes into their regional distribution centres:
+                <strong>M</strong> = Toronto Core, <strong>L</strong> = Greater Toronto Area & Central Ontario, <strong>K</strong> = Eastern Ontario & Ottawa, <strong>H/J</strong> = Montreal Metro, <strong>V</strong> = British Columbia Hub, <strong>T</strong> = Alberta (Calgary / Edmonton Corridor).
+              </p>
+            </div>
+
+            <div class="border border-amber-200 rounded-xl p-4 space-y-2 bg-amber-50/50">
+              <h4 class="font-bold text-amber-900 text-xs">2. Rural Postal Code Beyond Charges ('0' in 2nd Position)</h4>
+              <p class="text-xs text-amber-800">
+                In the Canadian postal system, a '0' in the second position of an FSA indicates a rural postal code (such as <code>A0A</code> in Newfoundland, <code>T0E</code> in rural Alberta, or <code>P0L</code> in Northern Ontario). Quotelytics flags these shipments with rural beyond notices, alerting you to potential carrier beyond surcharges or extended transit windows.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 6: FUEL SURCHARGES -->
+        <section id="fuel-surcharges" class="help-topic scroll-mt-24 space-y-4 border-b border-slate-200 pb-10">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 font-black flex items-center justify-center text-xs">6</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Fuel Surcharges & Accessorials</h2>
+          </div>
+          <p>
+            Fuel Surcharge (FSC) is calculated dynamically based on tenant preferences and tariff clauses. Quotelytics supports three precedence modes:
+          </p>
+          <ul class="list-disc pl-5 space-y-2 text-slate-600">
+            <li><strong>Sheet-Defined FSC (Default):</strong> Uses the fuel surcharge percentage explicitly written in the carrier tariff spreadsheet for that lane.</li>
+            <li><strong>Canadian Benchmark Indices:</strong> References current Canadian trucking benchmark indices (including Ontario Trucking Association / OTA weekly diesel survey baselines, Freight Carriers Association / FCA, and Atlantic APTA indices).</li>
+            <li><strong>Tenant Custom Override:</strong> Set a custom brokerage-wide FSC percentage (e.g., 28.5%) in your Account Settings that overrides all external indices.</li>
+          </ul>
+        </section>
+
+        <!-- SECTION 7: PLANS, QUOTAS & PIPEDA -->
+        <section id="billing-quotas" class="help-topic scroll-mt-24 space-y-4 border-b border-slate-200 pb-10">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 font-black flex items-center justify-center text-xs">7</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Plans, Quotas & PIPEDA Zero-Knowledge Sovereignty</h2>
+          </div>
+          <p>
+            Quotelytics enforces strict tenant data boundaries. Under Canadian PIPEDA law, your uploaded rate tariffs are your trade secrets. No tariff data is pooled, benchmarked, or shared with competitors.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div class="border border-slate-200 rounded-xl p-4 space-y-2 bg-white">
+              <div class="text-xs font-bold text-slate-500 uppercase">Free Starter</div>
+              <div class="text-lg font-black text-slate-900">$0 <span class="text-xs font-normal text-slate-500">CAD</span></div>
+              <ul class="text-xs text-slate-600 space-y-1">
+                <li>• Up to 3 active rate sheets</li>
+                <li>• 50 batch quotes / month</li>
+                <li>• Single dispatcher seat</li>
+              </ul>
+            </div>
+            <div class="border-2 border-red-500 rounded-xl p-4 space-y-2 bg-red-50/20">
+              <div class="text-xs font-bold text-red-600 uppercase">Broker Pro</div>
+              <div class="text-lg font-black text-slate-900">$79 <span class="text-xs font-normal text-slate-500">CAD/mo</span></div>
+              <ul class="text-xs text-slate-600 space-y-1">
+                <li>• Up to 10 active rate sheets</li>
+                <li>• 2,500 quotes / month</li>
+                <li>• Client PDF proposal exports</li>
+              </ul>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-4 space-y-2 bg-white">
+              <div class="text-xs font-bold text-slate-500 uppercase">Broker Team</div>
+              <div class="text-lg font-black text-slate-900">$199 <span class="text-xs font-normal text-slate-500">CAD/mo</span></div>
+              <ul class="text-xs text-slate-600 space-y-1">
+                <li>• 30 active rate sheets</li>
+                <li>• 10,000 quotes / month</li>
+                <li>• 5 team seats + Canadian PAD</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 8: FAQ -->
+        <section id="faq" class="help-topic scroll-mt-24 space-y-4 pb-10">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 font-black flex items-center justify-center text-xs">8</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Frequently Asked Questions</h2>
+          </div>
+          
+          <div class="space-y-3">
+            <div class="faq-item border border-slate-200 rounded-xl p-4 space-y-1 bg-white">
+              <h3 class="font-bold text-slate-900 text-xs sm:text-sm">Does Quotelytics book freight or arrange carriage?</h3>
+              <p class="text-xs text-slate-600">
+                No. Quotelytics is strictly an analytical quoting and rating engine. We do not arrange transportation, operate as a freight broker, dispatch trucks, or generate bills of lading. Rates generated are non-binding estimates based on your uploaded tariffs.
+              </p>
+            </div>
+
+            <div class="faq-item border border-slate-200 rounded-xl p-4 space-y-1 bg-white">
+              <h3 class="font-bold text-slate-900 text-xs sm:text-sm">Where are my tariff files and quote history stored?</h3>
+              <p class="text-xs text-slate-600">
+                All data is physically stored in Web Hosting Canada (WHC) data centres in Montreal, Quebec and Halifax, Nova Scotia. Your data never leaves Canadian jurisdiction.
+              </p>
+            </div>
+
+            <div class="faq-item border border-slate-200 rounded-xl p-4 space-y-1 bg-white">
+              <h3 class="font-bold text-slate-900 text-xs sm:text-sm">What happens if my payment fails?</h3>
+              <p class="text-xs text-slate-600">
+                We provide a 7-day grace period for payment resolution. Your account data, uploaded tariffs, and historical quotes are never automatically deleted upon billing lapses.
+              </p>
+            </div>
+
+            <div class="faq-item border border-slate-200 rounded-xl p-4 space-y-1 bg-white">
+              <h3 class="font-bold text-slate-900 text-xs sm:text-sm">How do I submit an emergency dispatch ticket?</h3>
+              <p class="text-xs text-slate-600">
+                Click the "Support" button in the footer or sidebar to open the dispatch desk drawer, or call our priority hotline directly at <strong>289-929-8565</strong> (Monday through Friday, 8:00 AM – 6:00 PM EST).
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Semantic Footer with Crawlable Metadata -->
+  <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-6 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
+    <div class="flex flex-wrap items-center gap-6">
+      <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
+      <nav aria-label="Footer Navigation" class="flex items-center gap-4 text-xs font-medium">
+        <a href="/help" class="text-red-600 font-semibold">Help Centre</a>
+        <a href="/terms" class="hover:text-[var(--foreground)] transition-colors">Terms of Service</a>
+        <a href="/privacy" class="hover:text-[var(--foreground)] transition-colors">Privacy Policy</a>
+        <a href="/refunds" class="hover:text-[var(--foreground)] transition-colors">Refund Policy</a>
+        <a href="/subprocessors" class="hover:text-[var(--foreground)] transition-colors">Sub-processors</a>
+        <a href="/dpa" class="hover:text-[var(--foreground)] transition-colors">DPA</a>
+      </nav>
+    </div>
+    <div class="text-xs text-[var(--muted-foreground)] font-medium">
+      Quotelytics Inc. • Canadian Data Residency (WHC)
+    </div>
+  </footer>
+
+  <!-- Live Client-Side Search Filter Script -->
+  <script>
+    function filterHelpTopics() {
+      const query = document.getElementById('help-search-input').value.toLowerCase().trim();
+      const articles = document.querySelectorAll('.help-topic');
+      
+      articles.forEach(article => {
+        if (!query) {
+          article.classList.remove('hidden');
+          return;
+        }
+        const text = article.innerText.toLowerCase();
+        if (text.includes(query)) {
+          article.classList.remove('hidden');
+        } else {
+          article.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+  <script src="/static/js/global-chrome.js"></script>
+</body>
+</html>

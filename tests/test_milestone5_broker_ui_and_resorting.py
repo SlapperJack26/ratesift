@@ -4,22 +4,31 @@ from fastapi.testclient import TestClient
 from main import app
 from services.auth_service import create_session
 from services.import_day_and_ross_guide import import_day_and_ross_tariff
-from services.ratesift_db_service import (
+from services.quotelytics_db_service import (
     create_rate_sheet,
     insert_weight_breaks,
     insert_carrier_surcharges,
     insert_rate_sheet_cells,
     confirm_rate_sheet
 )
-from services.ratesift_engine import quote_all_confirmed_carriers
+from services.quotelytics_engine import quote_all_confirmed_carriers
 
 class TestMilestone5BrokerUIAndResorting(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        import uuid
+        from services.auth_service import register_and_create_session
         cls.client = TestClient(app)
-        cls.user_id = "usr_alex_rivers"
-        cls.token = create_session(cls.user_id)
-        cls.client.cookies.set("shipflow_session", cls.token)
+        user, token = register_and_create_session(
+            name="Jordan Freight",
+            email=f"m5.ui.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+            company="Acme Logistics",
+            origin_zip="TORONTO, ON",
+            password="M5UiPassword2026!"
+        )
+        cls.user_id = user["id"]
+        cls.token = token
+        cls.client.cookies.set("quotelytics_session", cls.token)
 
         # Import confirmed Day & Ross Guide Tariff (Effective 2024-01-01 to 2024-12-31)
         cls.guide_sheet_id = import_day_and_ross_tariff(user_id=cls.user_id, auto_confirm=True)
@@ -120,7 +129,7 @@ class TestMilestone5BrokerUIAndResorting(unittest.TestCase):
 
     def test_04_rule13_full_line_item_breakdown_returned_in_quote_api(self):
         """Rule 13: Full line-item breakdown is provided for every quote option."""
-        resp = self.client.post("/api/ratesift/quotes/calculate", json={
+        resp = self.client.post("/api/quotelytics/quotes/calculate", json={
             "origin": "CALGARY, AB",
             "destination": "LINDSAY, ON",
             "actual_weight": 1450.0,
@@ -151,7 +160,7 @@ class TestMilestone5BrokerUIAndResorting(unittest.TestCase):
 
     def test_05_rule23_and_rule27_badges_present_in_api(self):
         """Rule 23 & 27: Verify caution_badge and rate_shift_warning keys exist in response objects."""
-        resp = self.client.post("/api/ratesift/quotes/calculate", json={
+        resp = self.client.post("/api/quotelytics/quotes/calculate", json={
             "origin": "CALGARY, AB",
             "destination": "LINDSAY, ON",
             "actual_weight": 1450.0,

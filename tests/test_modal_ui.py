@@ -12,7 +12,7 @@ def test_failsafe_demo_page_renders(client):
     """Verify that the failsafe UI playground endpoint loads with HTTP 200 and renders modal."""
     resp = client.get("/failsafe/demo")
     assert resp.status_code == 200
-    assert "Quotelytics Header Failsafe & Mapping Modal Playground" in resp.text or "RateSift Header Failsafe & Mapping Modal Playground" in resp.text
+    assert "Quotelytics Header Failsafe & Mapping Modal Playground" in resp.text or "Quotelytics Header Failsafe & Mapping Modal Playground" in resp.text
     assert "failsafe-mapping-modal" in resp.text
     assert "FailsafeModal" in resp.text
     assert "Confirm Mapping & Process" in resp.text
@@ -20,8 +20,18 @@ def test_failsafe_demo_page_renders(client):
 
 def test_cancel_endpoint(client, tmp_path):
     """Rule 9 & Rule 12: Cancel cleanly marks job expired without modifying original file."""
-    # Create test workbook
     import openpyxl
+    import uuid
+    from services.auth_service import register_and_create_session
+    _, tok = register_and_create_session(
+        name="UI Cancel User",
+        email=f"ui.cancel.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+        company="Acme UI",
+        origin_zip="TORONTO, ON",
+        password="UiCancelPassword2026!"
+    )
+    auth_headers = {"Authorization": f"Bearer {tok}"}
+
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.append(["ColA", "ColB", "ColC"])
@@ -35,7 +45,7 @@ def test_cancel_endpoint(client, tmp_path):
     upload_res = client.post(
         "/jobs",
         files={"file": ("cancel_test.xlsx", file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": "test_user_ui", "X-Tenant-Id": "test_tenant_ui"}
+        headers=auth_headers
     )
     assert upload_res.status_code == 200
     job_id = upload_res.json()["job_id"]
@@ -43,7 +53,7 @@ def test_cancel_endpoint(client, tmp_path):
     # Call cancel
     cancel_res = client.post(
         f"/jobs/{job_id}/cancel",
-        headers={"X-User-Id": "test_user_ui", "X-Tenant-Id": "test_tenant_ui"}
+        headers=auth_headers
     )
     assert cancel_res.status_code == 200
     assert cancel_res.json()["status"] == "expired"
@@ -62,6 +72,19 @@ def test_modal_workflow_confirmation_and_gated_process(client, tmp_path):
     4. Process executes cleanly and job transitions to done.
     """
     import openpyxl
+    import uuid
+    from services.auth_service import register_and_create_session
+    from services.db_service import update_user_tier
+    u_modal, tok_modal = register_and_create_session(
+        name="UI Modal User",
+        email=f"ui.modal.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+        company="Acme Modal UI",
+        origin_zip="TORONTO, ON",
+        password="UiModalPassword2026!"
+    )
+    update_user_tier(u_modal["id"], "BUSINESS")
+    modal_headers = {"Authorization": f"Bearer {tok_modal}"}
+
     wb = openpyxl.Workbook()
     ws = wb.active
     # Sheet where Origin and Destination are unmapped / ambiguous, but breaks exist
@@ -70,15 +93,11 @@ def test_modal_workflow_confirmation_and_gated_process(client, tmp_path):
     test_path = tmp_path / "modal_flow.xlsx"
     wb.save(test_path)
 
-    import uuid
-    fresh_user = f"user_{uuid.uuid4().hex[:8]}"
-    fresh_tenant = f"tenant_{uuid.uuid4().hex[:8]}"
-
     with open(test_path, "rb") as f:
         res = client.post(
             "/jobs",
             files={"file": ("modal_flow.xlsx", f.read(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-            headers={"X-User-Id": fresh_user, "X-Tenant-Id": fresh_tenant}
+            headers=modal_headers
         )
     assert res.status_code == 200
     job = res.json()
@@ -88,7 +107,7 @@ def test_modal_workflow_confirmation_and_gated_process(client, tmp_path):
     # Gate check: process returns 409
     proc_blocked = client.post(
         f"/jobs/{job_id}/process",
-        headers={"X-User-Id": fresh_user, "X-Tenant-Id": fresh_tenant}
+        headers=modal_headers
     )
     assert proc_blocked.status_code == 409
 
@@ -105,7 +124,7 @@ def test_modal_workflow_confirmation_and_gated_process(client, tmp_path):
     map_res = client.post(
         f"/jobs/{job_id}/mapping",
         json=mapping_payload,
-        headers={"X-User-Id": fresh_user, "X-Tenant-Id": fresh_tenant}
+        headers=modal_headers
     )
     assert map_res.status_code == 200
     assert map_res.json()["status"] == "ready"
@@ -113,7 +132,7 @@ def test_modal_workflow_confirmation_and_gated_process(client, tmp_path):
     # Now process succeeds
     proc_ok = client.post(
         f"/jobs/{job_id}/process",
-        headers={"X-User-Id": fresh_user, "X-Tenant-Id": fresh_tenant}
+        headers=modal_headers
     )
     assert proc_ok.status_code == 200
     assert proc_ok.json()["status"] == "done"

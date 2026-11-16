@@ -1,8 +1,9 @@
 import os
+import uuid
 from services.db_service import init_db, get_connection
 from services.parser_service import parse_excel_rate_sheet
 from services.rating_service import calculate_batch_quotes
-from services.auth_service import authenticate_user, get_user_profile
+from services.auth_service import authenticate_user, get_user_profile, register_and_create_session
 
 def test():
     print("1. Testing Database Initialization...")
@@ -30,8 +31,18 @@ def test():
         print(f"   - Quote {q['quote_id']}: {q['origin_zip']} -> {q['dest_zip']}, {q['weight_lbs']} lbs | {q['carrier']} ({q['service']}) | Base: ${q['base_rate']} -> Final (+10%): ${q['final_rate']} | [{q['coordinate']}]")
 
     print("\n4. Testing User Profile & Auth...")
-    user = authenticate_user("alex.rivers@techcorp.io", "demo123")
-    profile = get_user_profile("usr_alex_rivers")
+    test_email = f"engine.user.{uuid.uuid4().hex[:6]}@acme-freight.ca"
+    test_pwd = "EngineTestPassword2026!"
+    reg_user, _ = register_and_create_session(
+        name="Jordan Freight",
+        email=test_email,
+        company="Acme Freight Systems",
+        origin_zip="M5V 2T6",
+        password=test_pwd
+    )
+    user = authenticate_user(test_email, test_pwd)
+    assert user is not None
+    profile = get_user_profile(reg_user["id"])
     print(f"   Authenticated: {user['name']} ({user['company']}), Tier: {user['tier']}, Origin ZIP: {profile['origin_zip']}")
 
     print("\nALL BACKEND CORE VERIFICATIONS PASSED!")

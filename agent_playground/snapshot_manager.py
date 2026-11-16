@@ -1,5 +1,5 @@
 """
-RateSift Playground Snapshot & Revert Manager
+Quotelytics Playground Snapshot & Revert Manager
 Provides single-command snapshot creation, listing, and rollback for agent_playground.
 Guarantees you can safely test experiments and revert changes immediately if anything fails.
 
@@ -49,7 +49,7 @@ def list_snapshots():
         return
 
     print("=" * 70)
-    print(" Available RateSift Playground Snapshots:")
+    print(" Available Quotelytics Playground Snapshots:")
     print("=" * 70)
     for f in sorted(files, reverse=True):
         f_path = os.path.join(SNAPSHOT_DIR, f)
@@ -78,7 +78,7 @@ def restore_snapshot(tag: str):
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="RateSift Playground Snapshot & Rollback Utility")
+    parser = argparse.ArgumentParser(description="Quotelytics Playground Snapshot & Rollback Utility")
     parser.add_argument("--save", type=str, nargs="?", const="baseline", help="Create a snapshot with given tag (default: baseline)")
     parser.add_argument("--restore", type=str, help="Restore playground to specified snapshot tag")
     parser.add_argument("--list", action="store_true", help="List all available snapshots")

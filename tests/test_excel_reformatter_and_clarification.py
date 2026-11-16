@@ -4,16 +4,24 @@ import openpyxl
 from fastapi.testclient import TestClient
 
 from main import app
-from services.auth_service import create_session
+from services.auth_service import register_and_create_session
 from services.import_day_and_ross_guide import import_day_and_ross_tariff
+import uuid
 
 class TestExcelReformatterAndClarification(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.client = TestClient(app)
-        cls.user_id = "usr_alex_rivers"
-        cls.token = create_session(cls.user_id)
-        cls.client.cookies.set("shipflow_session", cls.token)
+        user, token = register_and_create_session(
+            name="Jordan Freight",
+            email=f"reformatter.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+            company="Acme Logistics",
+            origin_zip="TORONTO, ON",
+            password="ReformatterPassword2026!"
+        )
+        cls.user_id = user["id"]
+        cls.token = token
+        cls.client.cookies.set("quotelytics_session", cls.token)
 
         # Import confirmed Day & Ross Guide Tariff for testing quotes
         cls.guide_sheet_id = import_day_and_ross_tariff(user_id=cls.user_id, auto_confirm=True)

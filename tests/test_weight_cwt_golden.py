@@ -9,8 +9,8 @@ from app.detect import analyze, parse_break_value
 from app.models import JobStatus
 from services.break_header_parser import parse_break_header
 from services.fuel_index_service import record_fuel_index_history
-from services.ratesift_db_service import (
-    init_ratesift_db,
+from services.quotelytics_db_service import (
+    init_quotelytics_db,
     create_rate_sheet,
     confirm_rate_sheet,
     confirm_no_minimum_column,
@@ -23,12 +23,12 @@ from services.ratesift_db_service import (
     insert_rate_sheet_cells,
     set_sheet_manual_override,
 )
-from services.ratesift_engine import (
+from services.quotelytics_engine import (
     calculate_billable_weight,
     calculate_quote_for_sheet,
     quote_all_confirmed_carriers,
 )
-from services.ratesift_extractor import RateSiftExtractor
+from services.quotelytics_extractor import QuotelyticsExtractor
 
 
 def _build_golden_cwt_sheet(
@@ -175,7 +175,7 @@ class TestWeightCwtGoldenSuite(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        init_ratesift_db()
+        init_quotelytics_db()
         cls.user_id = f"usr_golden_{uuid.uuid4().hex[:8]}"
         cls.created_sheets = []
 
@@ -447,15 +447,15 @@ class TestWeightCwtGoldenSuite(unittest.TestCase):
         self.assertEqual(q_50["base_rate"], 17.26)
         self.assertEqual(q_50["final_total"], 17.26)
 
-        # AST Guard: verify services/ratesift_engine.py contains ZERO calls to built-in round()
-        engine_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "services", "ratesift_engine.py")
+        # AST Guard: verify services/quotelytics_engine.py contains ZERO calls to built-in round()
+        engine_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "services", "quotelytics_engine.py")
         with open(engine_path, "r", encoding="utf-8") as f:
             tree = ast.parse(f.read(), filename=engine_path)
         round_calls = [
             node for node in ast.walk(tree)
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "round"
         ]
-        self.assertEqual(len(round_calls), 0, "services/ratesift_engine.py must not call built-in round()")
+        self.assertEqual(len(round_calls), 0, "services/quotelytics_engine.py must not call built-in round()")
 
     # =========================================================================
     # GT-07: Mode-Specific & Per-Piece DIM Weight
@@ -520,15 +520,15 @@ class TestWeightCwtGoldenSuite(unittest.TestCase):
         self.assertEqual(qb["billable_weight"], 834.0)
         self.assertTrue(qb["is_dim_billed"])
 
-        # Case C: PARCEL with divisor 139, 2 pieces:
+        # Case C: LTL with divisor 139, 2 pieces:
         # Piece 1: (40 lb, 30x20x20 in, qty=1) -> DIM = 12000/139 = 86.33 -> 87 lb (max(40, 87)=87)
         # Piece 2: (95 lb, 20x20x20 in, qty=1) -> DIM = 8000/139 = 57.55 -> 58 lb (max(95, 58)=95)
         # Total billable = 87 + 95 = 182.0 lbs (NOT rejected by 150 lb per-piece actual weight limit!)
         sid_parcel = self._track(create_rate_sheet(
             user_id=self.user_id,
-            carrier_name="Parcel Multi-Piece",
-            service_name="Ground",
-            mode="PARCEL",
+            carrier_name="LTL Multi-Piece",
+            service_name="Standard",
+            mode="LTL",
             dim_divisor=139.0,
             weight_rounding_rule="CEIL_1LB",
             confirmation_status="CONFIRMED",
@@ -541,7 +541,7 @@ class TestWeightCwtGoldenSuite(unittest.TestCase):
             "min_weight": 0.0,
             "max_weight": 500.0,
             "is_open_ended": 1,
-            "break_name": "PARCEL_CWT",
+            "break_name": "LTL_CWT",
             "base_rate": 50.00,
             "rate_type": "CWT",
         }])
@@ -556,10 +556,10 @@ class TestWeightCwtGoldenSuite(unittest.TestCase):
         self.assertEqual(qc["billable_weight"], 182.0)
         self.assertEqual(qc["final_total"], 91.00)  # 1.82 * 50.00
 
-        # Case D: PARCEL with dim_divisor=None -> non-quotable (MISSING_PARCEL_DIM_DIVISOR)
+        # Case D: PARCEL mode decommissioned -> E_PARCEL_DEPRECATED_LTL_ONLY
         sid_parcel_no_div = self._track(create_rate_sheet(
             user_id=self.user_id,
-            carrier_name="Parcel Missing Divisor",
+            carrier_name="Parcel Decommissioned",
             service_name="Ground",
             mode="PARCEL",
             dim_divisor=None,
@@ -582,7 +582,7 @@ class TestWeightCwtGoldenSuite(unittest.TestCase):
                 sid_parcel_no_div, self.user_id, "TORONTO, ON", "MONTREAL, QC",
                 actual_weight=20.0, length=10.0, width=10.0, height=10.0,
             )
-        self.assertIn("MISSING_PARCEL_DIM_DIVISOR", str(ctx.exception))
+        self.assertIn("E_PARCEL_DEPRECATED_LTL_ONLY", str(ctx.exception))
 
     # =========================================================================
     # GT-08: Mixed-Currency Guard & Target-Currency FX Conversion
@@ -1028,7 +1028,7 @@ class TestWeightCwtGoldenSuite(unittest.TestCase):
         buf = io.BytesIO()
         wb.save(buf)
 
-        extractor = RateSiftExtractor(buf.getvalue(), "gap_tariff.xlsx", self.user_id)
+        extractor = QuotelyticsExtractor(buf.getvalue(), "gap_tariff.xlsx", self.user_id)
         res = extractor.process()
         sid = self._track(res["sheet_id"])
 
@@ -1067,7 +1067,7 @@ class TestWeightCwtGoldenSuite(unittest.TestCase):
                 ],
             }
         }
-        extractor = RateSiftExtractor(buf.getvalue(), "override_tariff.xlsx", self.user_id, column_overrides=overrides)
+        extractor = QuotelyticsExtractor(buf.getvalue(), "override_tariff.xlsx", self.user_id, column_overrides=overrides)
         res = extractor.process()
         sid = self._track(res["sheet_id"])
 
@@ -1232,7 +1232,7 @@ class TestWeightCwtGoldenSuite(unittest.TestCase):
         buf = io.BytesIO()
         wb.save(buf)
 
-        extractor = RateSiftExtractor(buf.getvalue(), "no_min_tariff.xlsx", self.user_id)
+        extractor = QuotelyticsExtractor(buf.getvalue(), "no_min_tariff.xlsx", self.user_id)
         res = extractor.process()
         sid = self._track(res["sheet_id"])
 

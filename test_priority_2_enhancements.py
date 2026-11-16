@@ -9,6 +9,7 @@ Comprehensive verification suite for Priority 2 Product & Engine Enhancements:
 """
 
 import io
+import uuid
 import openpyxl
 from starlette.testclient import TestClient
 from main import app
@@ -20,8 +21,9 @@ from services.fuel_index_service import (
     resolve_effective_fuel_surcharge
 )
 from services.rate_redactor_service import redact_rate_sheet_bytes
-from services.ratesift_engine import quote_all_confirmed_carriers, match_lane_break
+from services.quotelytics_engine import quote_all_confirmed_carriers, match_lane_break
 from services.seed_canadian_benchmarks import seed_canadian_benchmarks_for_user
+from services.auth_service import register_and_create_session
 
 client = TestClient(app)
 
@@ -29,6 +31,15 @@ def test_priority_2_suite():
     print("\n" + "=" * 70)
     print("RUNNING PRIORITY 2 PRODUCT & ENGINE ENHANCEMENT TEST SUITE")
     print("=" * 70)
+
+    p2_user, p2_token = register_and_create_session(
+        name="Jordan Freight",
+        email=f"p2.broker.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+        company="Acme Logistics",
+        origin_zip="TORONTO, ON",
+        password="Priority2Password2026!"
+    )
+    p2_uid = p2_user["id"]
 
     # -------------------------------------------------------------------------
     # TEST 2.1: CANADIAN POSTAL FSA RESOLVER
@@ -91,22 +102,22 @@ def test_priority_2_suite():
     print(f"   [OK] Loaded {len(benchmarks)} Canadian diesel benchmarks (OTA Baseline: {ota_bench['ltl_surcharge_percent']}%)")
 
     # B. Tenant Settings & Calculation
-    settings = get_tenant_fuel_settings("usr_alex_rivers")
+    settings = get_tenant_fuel_settings(p2_uid)
     assert settings["active_index_code"] == "OTA_LTL_STANDARD"
     assert settings["effective_ltl_percent"] == 31.50
 
-    fsc_result = resolve_effective_fuel_surcharge("usr_alex_rivers", base_freight=1000.0)
+    fsc_result = resolve_effective_fuel_surcharge(p2_uid, base_freight=1000.0)
     assert fsc_result["fsc_percent"] == 31.50
     assert fsc_result["fsc_amount"] == 315.00
     print(f"   [OK] Calculated FSC on $1,000.00 CAD base freight: ${fsc_result['fsc_amount']} CAD ({fsc_result['source']})")
 
     # C. Custom Override
-    update_tenant_fuel_settings("usr_alex_rivers", custom_ltl_percent=35.00)
-    fsc_custom = resolve_effective_fuel_surcharge("usr_alex_rivers", base_freight=1000.0)
+    update_tenant_fuel_settings(p2_uid, custom_ltl_percent=35.00)
+    fsc_custom = resolve_effective_fuel_surcharge(p2_uid, base_freight=1000.0)
     assert fsc_custom["fsc_percent"] == 35.00
     assert fsc_custom["fsc_amount"] == 350.00
     # Reset back to default OTA
-    update_tenant_fuel_settings("usr_alex_rivers", custom_ltl_percent=None)
+    update_tenant_fuel_settings(p2_uid, custom_ltl_percent=None)
     print("   [OK] Broker custom FSC percentage override and reset verified")
 
     # D. REST API Endpoints
@@ -116,7 +127,7 @@ def test_priority_2_suite():
 
     res_fuel_settings = client.get(
         "/api/fuel-indices/settings",
-        cookies={"ratesift_session": "session_demo_alex_rivers"}
+        cookies={"quotelytics_session": p2_token}
     )
     assert res_fuel_settings.status_code == 200
     print("   [OK] REST API Endpoints /api/fuel-indices/benchmarks & settings verified")
@@ -168,12 +179,13 @@ def test_priority_2_suite():
 
     # Redaction API Test
     res_redact_api = client.post(
-        "/api/ratesift/preview-redaction",
-        files={"file": ("test_tariff.xlsx", raw_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
+        "/api/quotelytics/preview-redaction",
+        files={"file": ("test_tariff.xlsx", raw_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+        cookies={"quotelytics_session": p2_token}
     )
     assert res_redact_api.status_code == 200
     assert res_redact_api.json()["audit"]["total_redactions"] >= 4
-    print("   [OK] REST API Endpoint /api/ratesift/preview-redaction verified")
+    print("   [OK] REST API Endpoint /api/quotelytics/preview-redaction verified")
 
     # -------------------------------------------------------------------------
     # TEST 2.4: SMC3 CZARLITE & DEFICIT WEIGHT RATING ENGINE
@@ -205,9 +217,14 @@ def test_priority_2_suite():
     print(f"   [OK] Deficit Rating triggered for 880 lbs: Billed as 1,000 lbs @ $34.00/CWT = $340.00 (Saved ${matched_880['deficit_savings']})")
 
     # Test 2: Postal Code Input (M5V 2T6 -> H3B 1A1) in Engine
-    seed_canadian_benchmarks_for_user("usr_alex_rivers", force=True)
+    seed_canadian_benchmarks_for_user(p2_uid, force=True)
+    from services.quotelytics_db_service import get_connection
+    conn = get_connection()
+    conn.execute("UPDATE ql_rate_sheets SET is_benchmark = 0 WHERE user_id = ?", (p2_uid,))
+    conn.commit()
+    conn.close()
     res_postal_engine = quote_all_confirmed_carriers(
-        user_id="usr_alex_rivers",
+        user_id=p2_uid,
         origin="M5V 2T6",
         destination="H3B 1A1",
         actual_weight=650.0,

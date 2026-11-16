@@ -1,5 +1,7 @@
+import uuid
 from fastapi.testclient import TestClient
 import main
+from services.auth_service import register_and_create_session
 
 client = TestClient(main.app)
 
@@ -18,21 +20,30 @@ def test_phase2():
     print("   [OK] /console/history correctly redirected unauthenticated request to /login")
 
     print("\n2. Testing Authentication & Session Cookie Generation...")
+    p2_email = f"phase2.broker.{uuid.uuid4().hex[:6]}@acme-logistics.ca"
+    p2_pwd = "Phase2AuthTest2026!"
+    register_and_create_session(
+        name="Jordan Freight",
+        email=p2_email,
+        company="Acme Logistics",
+        origin_zip="TORONTO, ON",
+        password=p2_pwd
+    )
     login_data = {
-        "email": "alex.rivers@techcorp.io",
-        "password": "ShipFlowDemo2026!"
+        "email": p2_email,
+        "password": p2_pwd
     }
     res = client.post("/api/auth/login", data=login_data)
     assert res.status_code == 200, f"Login failed: {res.text}"
     body = res.json()
     assert body["status"] == "success"
-    assert "ratesift_session" in res.cookies
-    token = res.cookies["ratesift_session"]
+    assert "quotelytics_session" in res.cookies
+    token = res.cookies["quotelytics_session"]
     print(f"   [OK] Login successful! Session token issued: {token[:12]}...")
 
     print("\n3. Testing Authenticated Route Access...")
     # Use session cookie
-    auth_client = TestClient(main.app, cookies={"ratesift_session": token})
+    auth_client = TestClient(main.app, cookies={"quotelytics_session": token})
     res = auth_client.get("/console/new-quote")
     assert res.status_code == 200
     assert "Freight Rating Engine" in res.text or "New Quote" in res.text
@@ -47,8 +58,8 @@ def test_phase2():
     assert res.status_code == 200
     status_data = res.json()
     assert status_data["authenticated"] is True
-    assert status_data["user"]["name"] == "Alex Rivers"
-    assert status_data["user"]["company"] == "TechCorp Logistics"
+    assert status_data["user"]["name"] == "Jordan Freight"
+    assert status_data["user"]["company"] == "Acme Logistics"
     print(f"   [OK] Session active for {status_data['user']['name']} ({status_data['user']['company']})")
 
     print("\n5. Testing Subscription Quota Tracking...")
@@ -73,7 +84,7 @@ def test_phase2():
     reg_body = res.json()
     assert reg_body["status"] == "success"
     assert reg_body["user"]["name"] == "Jordan Case"
-    assert "shipflow_session" in res.cookies
+    assert "quotelytics_session" in res.cookies
     print(f"   [OK] Registered new user {reg_body['user']['name']} with session cookie")
 
     print("\n7. Testing Logout & Session Revocation...")

@@ -3,9 +3,10 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import pytest
+import uuid
 from starlette.testclient import TestClient
 from main import app
-from services.auth_service import create_session
+from services.auth_service import register_and_create_session
 
 client = TestClient(app)
 
@@ -17,8 +18,14 @@ def test_new_quote_batch_excel_removed_and_counters_displayed():
     3. Sheet names are NOT listed (only numbers are displayed).
     4. The list of uploaded rate sheets above the quoting information box is removed.
     """
-    token = create_session("usr_alex_rivers")
-    client.cookies.set("ratesift_session", token)
+    _, token = register_and_create_session(
+        name="Jordan Freight",
+        email=f"counters.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+        company="Acme Logistics",
+        origin_zip="TORONTO, ON",
+        password="CountersPassword2026!"
+    )
+    client.cookies.set("quotelytics_session", token)
     response = client.get("/console/new-quote")
     assert response.status_code == 200
     html = response.text

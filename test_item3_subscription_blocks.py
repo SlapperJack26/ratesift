@@ -42,7 +42,7 @@ def test_item3_subscription_blocks():
     conn.commit()
     conn.close()
 
-    auth_client = TestClient(app, cookies={"shipflow_session": token})
+    auth_client = TestClient(app, cookies={"quotelytics_session": token})
 
     print("\n--- 1. Testing Quota Profile & Counters ---")
     res = auth_client.get("/api/user/quota")
@@ -122,11 +122,11 @@ def test_item3_subscription_blocks():
     c = conn.cursor()
     for i in range(3):
         c.execute("""
-        INSERT INTO rs_rate_sheets (
+        INSERT INTO ql_rate_sheets (
             id, user_id, carrier_name, service_name, tariff_ref,
             source_filename, storage_region, created_at, confirmation_status, is_benchmark
         ) VALUES (?, ?, 'Carrier Test', 'LTL', 'TAR-1', 'test.xlsx', 'CA_CENTRAL_WHC', '2026-10-01', 'CONFIRMED', 0)
-        """, (f"rs_test_{uuid.uuid4().hex[:6]}", test_user_id))
+        """, (f"ql_test_{uuid.uuid4().hex[:6]}", test_user_id))
     conn.commit()
     conn.close()
 
@@ -138,7 +138,7 @@ def test_item3_subscription_blocks():
     # Attempt to upload 4th sheet
     dummy_xlsx = b"PK\x03\x04" + b"\x00" * 50
     files = {"file": ("excess_tariff.xlsx", dummy_xlsx, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
-    res = auth_client.post("/api/ratesift/sheets/upload", files=files)
+    res = auth_client.post("/api/quotelytics/sheets/upload", files=files)
     assert res.status_code == 403, f"Expected 403 sheet quota rejection, got {res.status_code}"
     print(f"   [OK] 4th Rate Sheet upload rejected: {res.json()['detail']}")
 
@@ -155,7 +155,7 @@ def test_item3_subscription_blocks():
     month_now = "2026-10-02T12:00:00"
     for i in range(50):
         c.execute("""
-        INSERT INTO rs_quote_audit_logs (
+        INSERT INTO ql_quote_audit_logs (
             id, user_id, timestamp, shipment_input_json, sheets_considered_json,
             sheets_excluded_json, calculation_trace_json, final_results_json
         ) VALUES (?, ?, ?, '{}', '[]', '[]', '[]', '[]')
@@ -169,7 +169,7 @@ def test_item3_subscription_blocks():
     print(f"   [OK] Exhausted 50/50 quotes for this month: can_quote={q_quotes_full['can_quote']}")
 
     # Attempt deterministic calculation
-    res = auth_client.post("/api/ratesift/quotes/calculate", json={
+    res = auth_client.post("/api/quotelytics/quotes/calculate", json={
         "origin": "Toronto, ON",
         "destination": "Montreal, QC",
         "actual_weight": 500.0
@@ -195,8 +195,8 @@ def test_item3_subscription_blocks():
     c.execute("DELETE FROM users WHERE id = ?", (test_user_id,))
     c.execute("DELETE FROM sessions WHERE user_id = ?", (test_user_id,))
     c.execute("DELETE FROM organization_members WHERE organization_id = ?", (test_user_id,))
-    c.execute("DELETE FROM rs_rate_sheets WHERE user_id = ?", (test_user_id,))
-    c.execute("DELETE FROM rs_quote_audit_logs WHERE user_id = ?", (test_user_id,))
+    c.execute("DELETE FROM ql_rate_sheets WHERE user_id = ?", (test_user_id,))
+    c.execute("DELETE FROM ql_quote_audit_logs WHERE user_id = ?", (test_user_id,))
     c.execute("DELETE FROM bottleneck_events WHERE user_id = ?", (test_user_id,))
     conn.commit()
     conn.close()

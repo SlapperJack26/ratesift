@@ -218,6 +218,19 @@ def test_api_strict_gating_unmapped_sheet(tmp_path):
 
 def test_file_immutability_throughout_lifecycle(tmp_path):
     """Rule 12: Original uploaded file bytes remain 100% byte-identical after analyze, mapping, and process."""
+    import uuid
+    from services.auth_service import register_and_create_session
+    from services.db_service import update_user_tier
+    u_audit, tok_audit = register_and_create_session(
+        name="Audit User",
+        email=f"audit.user.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+        company="Audit Corp",
+        origin_zip="TORONTO, ON",
+        password="AuditPassword2026!"
+    )
+    update_user_tier(u_audit["id"], "BUSINESS")
+    audit_headers = {"Authorization": f"Bearer {tok_audit}"}
+
     rows = [
         ["Origin", "Destination", "-45 (lbs)", "+100 (lbs)"],
         ["Toronto", "Montreal", 1.25, 0.95],
@@ -226,7 +239,7 @@ def test_file_immutability_throughout_lifecycle(tmp_path):
     res = client.post(
         "/jobs",
         files={"file": ("immutability_test.xlsx", orig_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": "u_audit", "X-Tenant-Id": "t_audit"}
+        headers=audit_headers
     )
     assert res.status_code == 200
     data = res.json()
@@ -236,7 +249,7 @@ def test_file_immutability_throughout_lifecycle(tmp_path):
     # Run processing
     proc_res = client.post(
         f"/jobs/{job_id}/process",
-        headers={"X-User-Id": "u_audit", "X-Tenant-Id": "t_audit"}
+        headers=audit_headers
     )
     assert proc_res.status_code == 200
 
@@ -324,7 +337,19 @@ def test_token_matches_does_not_misclassify_substrings():
 
 def test_api_download_reformatted_excel_rejects_path_traversal():
     """Verifies download-reformatted endpoint rejects path traversal sequences."""
-    resp = client.get("/api/quotes/download-reformatted/..%2F..%2Fshipflow.db")
+    import uuid
+    from services.auth_service import register_and_create_session
+    _, tok = register_and_create_session(
+        name="Traversal Check User",
+        email=f"traversal.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+        company="Acme Logistics",
+        origin_zip="TORONTO, ON",
+        password="TraversalPassword2026!"
+    )
+    resp = client.get(
+        "/api/quotes/download-reformatted/..%2F..%2Fquotelytics.db",
+        cookies={"quotelytics_session": tok}
+    )
     assert resp.status_code == 400
     assert "Invalid analysis token" in resp.json()["detail"]
 

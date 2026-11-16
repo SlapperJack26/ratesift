@@ -4,18 +4,26 @@ import openpyxl
 from fastapi.testclient import TestClient
 
 from main import app
-from services.auth_service import create_session
+from services.auth_service import register_and_create_session
 from agent.dynamic_sheet_detector import DynamicSheetDetector
-from agent.rules_spec import RATESIFT_36_RULES
-from services.ratesift_excel_reformatter import analyze_excel_sheet
+from agent.rules_spec import QUOTELYTICS_36_RULES
+from services.quotelytics_excel_reformatter import analyze_excel_sheet
+import uuid
 
 class TestAgentDynamicDetectionAndRules(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.client = TestClient(app)
-        cls.user_id = "usr_alex_rivers"
-        cls.token = create_session(cls.user_id)
-        cls.client.cookies.set("shipflow_session", cls.token)
+        user, token = register_and_create_session(
+            name="Jordan Freight",
+            email=f"agent.rules.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+            company="Acme Logistics",
+            origin_zip="TORONTO, ON",
+            password="AgentRulesPassword2026!"
+        )
+        cls.user_id = user["id"]
+        cls.token = token
+        cls.client.cookies.set("quotelytics_session", cls.token)
 
     def _create_sample_excel(self, preamble_rows, headers, data_rows):
         """Helper to create an in-memory workbook with preamble metadata and tables."""

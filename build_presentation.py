@@ -1,7 +1,7 @@
 """
 build_presentation.py
 =====================
-Builds an 18-slide executive Google Slides / PowerPoint presentation for RateSift:
+Builds an 18-slide executive Google Slides / PowerPoint presentation for Quotelytics:
 - Complete website page walkthrough (Public & Private Console)
 - Deep explanation of functions (Deterministic quoting, FSA resolver, CzarLite deficit rating, FSC manager, redaction, proposal generator)
 - Updated business plan summary (4-tier pricing, embedded API, ICP, financial projections)
@@ -30,8 +30,8 @@ COLOR_INDIGO      = RGBColor(79, 70, 229)     # #4F46E5
 COLOR_EMERALD     = RGBColor(5, 150, 105)     # #059669
 COLOR_AMBER       = RGBColor(217, 119, 6)     # #D97706
 
-LOGO_PATH = os.path.abspath("static/images/ratesift-logo.png")
-MOCKUP_PATH = os.path.abspath("static/images/ratesift_console_mockup.jpg")
+LOGO_PATH = os.path.abspath("static/images/quotelytics-logo.png")
+MOCKUP_PATH = os.path.abspath("static/images/quotelytics_console_mockup.jpg")
 
 prs = Presentation()
 prs.slide_width = Inches(13.333)
@@ -179,7 +179,7 @@ tb = slide1.shapes.add_textbox(Inches(1.5), Inches(3.1), Inches(10.0), Inches(2.
 tf = tb.text_frame
 tf.word_wrap = True
 p1 = tf.paragraphs[0]
-p1.text = "RateSift Platform Overview & 2026 Business Plan"
+p1.text = "Quotelytics Platform Overview & 2026 Business Plan"
 p1.font.size = Pt(32)
 p1.font.bold = True
 p1.font.color.rgb = COLOR_WHITE
@@ -197,7 +197,7 @@ p3.font.size = Pt(11)
 p3.font.color.rgb = COLOR_SLATE_MUTED
 
 set_speaker_notes(slide1, 
-    "Welcome everyone. Today we are presenting RateSift, an automated freight and shipping rate comparison platform designed specifically for Canadian freight brokers, forwarders, and 3PLs.\n\n"
+    "Welcome everyone. Today we are presenting Quotelytics, an automated freight and shipping rate comparison platform designed specifically for Canadian freight brokers, forwarders, and 3PLs.\n\n"
     "In this presentation, we will walk through all 11 core website views, dive into the functional intelligence powering the engine—including our 100% deterministic rating, Canadian FSA resolver, and deficit rating math—and review the updated 2026 commercial business plan."
 )
 
@@ -220,7 +220,7 @@ add_card(slide2, Inches(0.8), Inches(1.8), Inches(3.7), Inches(5.0),
 )
 
 add_card(slide2, Inches(4.8), Inches(1.8), Inches(3.7), Inches(5.0),
-    "2. The RateSift Solution",
+    "2. The Quotelytics Solution",
     [
         ("Automated Ingestion:", "Drag-and-drop any carrier Excel spreadsheet; auto-normalizes columns and weight breaks."),
         ("100% Deterministic:", "Every rate is computed via pure Python algorithms—zero LLM guessing or hallucinations."),
@@ -233,7 +233,7 @@ add_card(slide2, Inches(4.8), Inches(1.8), Inches(3.7), Inches(5.0),
 add_card(slide2, Inches(8.8), Inches(1.8), Inches(3.7), Inches(5.0),
     "3. Strict Scope Boundary",
     [
-        ("Quoting Intelligence Only:", "RateSift strictly focuses on rating math, carrier comparison, and client proposals."),
+        ("Quoting Intelligence Only:", "Quotelytics strictly focuses on rating math, carrier comparison, and client proposals."),
         ("NO Label Printing:", "Zero carrier shipping label generation or thermal printer overhead."),
         ("NO Booking Workflows:", "Does not handle carrier dispatch booking or tender confirmation."),
         ("NO Tracking Numbers:", "Eliminates operational tracking clutter to maintain sub-second computational agility.")
@@ -244,7 +244,7 @@ add_card(slide2, Inches(8.8), Inches(1.8), Inches(3.7), Inches(5.0),
 set_speaker_notes(slide2,
     "The core opportunity in freight brokerage is unbundling rating intelligence from bloated legacy TMS software. "
     "Brokers waste hours every day manually cross-referencing multi-tab spreadsheets from carriers like Day & Ross, Manitoulin, Midland, and Bison. "
-    "RateSift solves this with zero-baggage quoting: pure calculation and side-by-side comparison. By intentionally refusing to handle labels or tracking, we remain lightning fast, laser-focused, and non-threatening to existing dispatch tools."
+    "Quotelytics solves this with zero-baggage quoting: pure calculation and side-by-side comparison. By intentionally refusing to handle labels or tracking, we remain lightning fast, laser-focused, and non-threatening to existing dispatch tools."
 )
 
 # =============================================================================
@@ -271,7 +271,7 @@ add_card(slide3, Inches(4.8), Inches(1.8), Inches(3.7), Inches(5.0),
     [
         ("Instant Freight Rater (/console/new-quote):", "Broker cockpit with dropzone, Canadian FSA rater, and live multi-carrier ranker."),
         ("Carrier Tariffs (/console/rate-sheets):", "Rate sheet library, cell coordinate inspector, and Human Confirmation Gate."),
-        ("Quotes History (/console/history):", "Audit warehouse with RS-YYYYMMDD quote codes, cell references, and Excel export."),
+        ("Quotes History (/console/history):", "Audit warehouse with QL-YYYYMMDD quote codes, cell references, and Excel export."),
         ("Account Settings (/console/account):", "Broker profile, company branding, default origin hub, and subscription status."),
         ("System Preferences (/console/settings):", "Default markup (+10%), CAD/USD currencies, lb/kg units, and fuel index toggles.")
     ],
@@ -290,7 +290,7 @@ add_card(slide3, Inches(8.8), Inches(1.8), Inches(3.7), Inches(5.0),
 )
 
 set_speaker_notes(slide3,
-    "The RateSift platform is architected into three clear zones: the crawlable Public Domain for organic search acquisition, the Authenticated Console where brokers perform their daily rating workflows, and the Developer Showcase and API layer. "
+    "The Quotelytics platform is architected into three clear zones: the crawlable Public Domain for organic search acquisition, the Authenticated Console where brokers perform their daily rating workflows, and the Developer Showcase and API layer. "
     "Every route is guarded with session cookies. If an unauthenticated user attempts to visit the console, they are smoothly redirected to login with their intended destination preserved."
 )
 
@@ -355,7 +355,7 @@ add_card(slide5, Inches(6.8), Inches(1.8), Inches(5.7), Inches(5.0),
     [
         ("Single Centered Card Design:", "Distraction-free authentication form centered vertically and horizontally on all viewports."),
         ("1-Click Demo Auto-Fill:", "Instant auto-fill button for Alex Rivers (Broker Specialist) enables seamless 1-click evaluation."),
-        ("Secure 30-Day Sessions:", "Issues HTTP-only, secure session cookies (ratesift_session) for authenticated console access."),
+        ("Secure 30-Day Sessions:", "Issues HTTP-only, secure session cookies (quotelytics_session) for authenticated console access."),
         ("Frictionless Onboarding:", "New registrations automatically provision Free Starter access (3 sheets / 50 monthly quotes)."),
         ("Smart Post-Login Routing:", "Respects the 'next' URL parameter to return users to their exact workflow after logging in.")
     ],
@@ -414,7 +414,7 @@ p2.font.size = Pt(10)
 p2.font.color.rgb = COLOR_SLATE_MUTED
 
 set_speaker_notes(slide6,
-    "This is the heart of RateSift: the Instant Freight Rater console. "
+    "This is the heart of Quotelytics: the Instant Freight Rater console. "
     "Brokers enter origin and destination postal codes, input weight and accessorials, and instantly receive ranked quotes from all confirmed carriers. "
     "Notice the in-memory re-sorting: brokers can switch between lowest price, fastest transit, and best value instantaneously on the client side without triggering slow server round-trips."
 )
@@ -495,9 +495,9 @@ add_card(slide8, Inches(6.8), Inches(1.8), Inches(5.7), Inches(5.0),
 )
 
 set_speaker_notes(slide8,
-    "Rule 3 is a major competitive differentiator for RateSift: complete Source Traceability. "
+    "Rule 3 is a major competitive differentiator for Quotelytics: complete Source Traceability. "
     "Every single number—base rates, CWT breaks, accessorial percentages—tracks its exact source coordinate back to the original spreadsheet. "
-    "In freight brokerage, disputes over billed charges are common. With RateSift, a broker can defend any quote instantly by citing the exact spreadsheet row and column."
+    "In freight brokerage, disputes over billed charges are common. With Quotelytics, a broker can defend any quote instantly by citing the exact spreadsheet row and column."
 )
 
 # =============================================================================
@@ -510,7 +510,7 @@ add_header(slide9, "Console: Quotes History Warehouse & System Preferences", "Co
 add_card(slide9, Inches(0.8), Inches(1.8), Inches(5.6), Inches(5.0),
     "Quotes History Warehouse ( /console/history )",
     [
-        ("Immutable Audit Trail (Rule 30):", "Every calculation generates a unique, permanent audit ID (e.g. RS-20261001-A9F3)."),
+        ("Immutable Audit Trail (Rule 30):", "Every calculation generates a unique, permanent audit ID (e.g. QL-20261001-A9F3)."),
         ("Real-Time Search & Filtering:", "Instant client-side search by Quote ID, carrier name, origin city, or destination postal code."),
         ("Sort by Rate:", "Interactive dropdown to sort archived quotes by total rate (High-to-Low or Low-to-High)."),
         ("Coordinate Retention:", "Historical records retain cell references and applied accessorial details indefinitely."),
@@ -533,7 +533,7 @@ add_card(slide9, Inches(6.8), Inches(1.8), Inches(5.7), Inches(5.0),
 
 set_speaker_notes(slide9,
     "The Quotes History Warehouse provides an immutable audit trail. "
-    "Every quote calculation is archived with an RS-formatted identifier, timestamps, input parameters, and exact cell coordinates. "
+    "Every quote calculation is archived with an QL-formatted identifier, timestamps, input parameters, and exact cell coordinates. "
     "Under System Preferences, brokers can configure default markups, preferred diesel indices, and dispatch hubs so that rating calculations reflect their exact commercial strategy."
 )
 
@@ -575,7 +575,7 @@ add_card(slide10, Inches(8.8), Inches(1.8), Inches(3.7), Inches(5.0),
 )
 
 set_speaker_notes(slide10,
-    "A foundational design principle of RateSift is Rule 8: 100% Deterministic Pricing. "
+    "A foundational design principle of Quotelytics is Rule 8: 100% Deterministic Pricing. "
     "In freight logistics, quoting an incorrect number by even a few dollars can destroy broker margins or lose key accounts. We never use language models to calculate rates. "
     "Our engine enforces hundredweight scaling, carrier minimum floors, and dimensional weight rules mathematically with zero hallucinations."
 )
@@ -613,7 +613,7 @@ add_card(slide11, Inches(6.8), Inches(1.8), Inches(5.7), Inches(5.0),
 
 set_speaker_notes(slide11,
     "Canadian freight rating depends entirely on Postal Code FSAs—the first three characters of the postal code. "
-    "RateSift incorporates a comprehensive database of over 1,600 Canadian FSAs. "
+    "Quotelytics incorporates a comprehensive database of over 1,600 Canadian FSAs. "
     "When a broker enters 'M5V 2T6', the system instantly resolves it to Toronto, maps the carrier's proprietary zone, identifies the corridor, and applies any rural territory accessorials automatically."
 )
 
@@ -652,7 +652,7 @@ add_card(slide12, Inches(6.8), Inches(1.8), Inches(5.7), Inches(5.0),
 set_speaker_notes(slide12,
     "Deficit weight rating is an essential technique used by top freight brokers. "
     "When a shipment is near a weight break—such as 880 lbs—bumping the billed weight to the 1,000 lb threshold drops the rate per hundredweight enough to produce a cheaper total price. "
-    "RateSift calculates this automatically across every carrier and weight break, saving shippers money and giving brokers an immediate competitive edge."
+    "Quotelytics calculates this automatically across every carrier and weight break, saving shippers money and giving brokers an immediate competitive edge."
 )
 
 # =============================================================================
@@ -689,7 +689,7 @@ add_card(slide13, Inches(6.8), Inches(1.8), Inches(5.7), Inches(5.0),
 set_speaker_notes(slide13,
     "Fuel surcharges represent 25% to 35% of total freight costs in Canada. "
     "Because diesel prices change weekly, hardcoding fuel into static spreadsheets is a recipe for margin erosion. "
-    "RateSift integrates weekly diesel benchmarks from the Ontario Trucking Association and regional freight councils. "
+    "Quotelytics integrates weekly diesel benchmarks from the Ontario Trucking Association and regional freight councils. "
     "Brokers can update fuel once in System Preferences, and the engine immediately recalculates fuel across every carrier quote."
 )
 
@@ -707,7 +707,7 @@ add_card(slide14, Inches(0.8), Inches(1.8), Inches(5.6), Inches(5.0),
         ("Automated Data Scrubbing:", "Scans workbooks and replaces account numbers, sales emails, phone numbers, and margin targets with redaction tags."),
         ("100% Rate Preservation:", "Retains all origin/destination lanes, weight breaks, and numeric rates intact."),
         ("Audit Privacy Status:", "Workbook audit logs confirm 'VERIFIED_SCRUBBED' with total redaction count."),
-        ("REST Endpoint:", "POST /api/ratesift/preview-redaction previews scrubbed files before downloading.")
+        ("REST Endpoint:", "POST /api/quotelytics/preview-redaction previews scrubbed files before downloading.")
     ],
     COLOR_SLATE_DARK
 )
@@ -728,7 +728,7 @@ set_speaker_notes(slide14,
     "These two commercial tools complete the broker's daily workflow. "
     "The Rate Sheet Masker protects broker confidentiality by scrubbing carrier account numbers, sales rep emails, and target margins before sharing rate sheets. "
     "The 1-Click Client Proposal Generator turns winning carrier rates into professional client quotes in seconds. "
-    "Brokers set their target margin, and RateSift produces a branded proposal hiding wholesale carrier net costs."
+    "Brokers set their target margin, and Quotelytics produces a branded proposal hiding wholesale carrier net costs."
 )
 
 # =============================================================================
@@ -861,8 +861,8 @@ add_card(slide17, Inches(0.8), Inches(1.8), Inches(5.6), Inches(5.0),
 add_card(slide17, Inches(6.8), Inches(1.8), Inches(5.7), Inches(5.0),
     "High-Value B2B Integration Scenarios",
     [
-        ("Customer-Facing Shipper Portals:", "3PLs embed RateSift into their client ordering portals, giving shippers instant rate estimates."),
-        ("Proprietary Brokerage TMS & ERPs:", "Brokers connect internal dispatch systems to RateSift without building rating logic in-house."),
+        ("Customer-Facing Shipper Portals:", "3PLs embed Quotelytics into their client ordering portals, giving shippers instant rate estimates."),
+        ("Proprietary Brokerage TMS & ERPs:", "Brokers connect internal dispatch systems to Quotelytics without building rating logic in-house."),
         ("E-Commerce & B2B Checkout:", "Wholesalers display accurate freight shipping options at online checkout for heavy freight."),
         ("Carrier Audit & Reconciliation:", "Shippers run post-billing freight audits against stored cell coordinates to catch billing errors."),
         ("Dedicated Canadian Cloud Tenant:", "Enterprise tier includes isolated database instances hosted in Montreal or Toronto.")
@@ -872,8 +872,8 @@ add_card(slide17, Inches(6.8), Inches(1.8), Inches(5.7), Inches(5.0),
 
 set_speaker_notes(slide17,
     "Our longer-term expansion strategy centers on the Embedded Quoting API. "
-    "Instead of 3PLs building their own complex rating engines from scratch, they call RateSift via REST API with an API key. "
-    "With sub-second latency and guaranteed Canadian data residency, RateSift becomes the quoting infrastructure behind third-party freight portals, ERPs, and e-commerce checkouts."
+    "Instead of 3PLs building their own complex rating engines from scratch, they call Quotelytics via REST API with an API key. "
+    "With sub-second latency and guaranteed Canadian data residency, Quotelytics becomes the quoting infrastructure behind third-party freight portals, ERPs, and e-commerce checkouts."
 )
 
 # =============================================================================
@@ -919,19 +919,12 @@ add_card(slide18, Inches(8.8), Inches(1.8), Inches(3.7), Inches(5.0),
 set_speaker_notes(slide18,
     "To conclude, our financial model is anchored by exceptional unit economics. Because our calculation engine is deterministic Python rather than generative AI, our server compute costs are minimal, yielding gross margins above 85%. "
     "We project reaching $180,000 CAD ARR in Year 1, scaling to $750,000 CAD in Year 2 and $2.4M CAD in Year 3. "
-    "RateSift is production-ready, fully tested with 47 automated tests, and positioned to become the premier freight rate engine in Canada."
+    "Quotelytics is production-ready, fully tested with 47 automated tests, and positioned to become the premier freight rate engine in Canada."
 )
 
 # -----------------------------------------------------------------------------
 # SAVE PRESENTATION
 # -----------------------------------------------------------------------------
-output_path = os.path.abspath("RateSift_Platform_Presentation.pptx")
+output_path = os.path.abspath("Quotelytics_Platform_Presentation.pptx")
 prs.save(output_path)
 print(f"Presentation saved successfully to: {output_path}")
-
-# Also save a copy in the artifact directory if accessible
-artifact_dir = r"C:\Users\Dylan\.gemini\antigravity\brain\379ddefd-12de-409c-9457-0d28b0a07b22"
-if os.path.exists(artifact_dir):
-    artifact_copy = os.path.join(artifact_dir, "RateSift_Platform_Presentation.pptx")
-    prs.save(artifact_copy)
-    print(f"Copy saved to artifact directory: {artifact_copy}")

@@ -52,6 +52,12 @@ class JobState(BaseModel):
     expires_at: Optional[float] = None
 
 
+class CompoundLocationMapping(BaseModel):
+    city_column: int = Field(ge=0)
+    region_column: Optional[int] = Field(default=None, ge=0)
+    postal_fsa_column: Optional[int] = Field(default=None, ge=0)
+
+
 class SkidTierMapping(BaseModel):
     column: int = Field(ge=0)
     skid_range: str = "1"
@@ -62,23 +68,34 @@ class SkidTierMapping(BaseModel):
 
 class MappingRequest(BaseModel):
     header_row: int = Field(ge=0)
+    header_row_confirmed: bool = False
     sheet_name: Optional[str] = None
-    mode: Mode
-    origin: int = Field(ge=0)
-    destination: int = Field(ge=0)
-    rate_columns: List[int] = Field(min_length=1)
-    base_cost_column: Optional[int] = Field(default=None, ge=0)
-    max_skid_capacity: Optional[int] = Field(default=10, ge=1, le=50)
+    table_segment_id: Optional[str] = None
+    mode: Mode = Mode.weight
+    rate_basis: str = "PER_CWT"
+    currency: Optional[str] = None
+    weight_unit: Optional[str] = None
+    origin_type: str = "column"
+    origin: Optional[Any] = None
+    fixed_origin_value: Optional[str] = None
+    destination: Optional[Any] = None
+    rate_columns: List[int] = []
+    base_cost_column: Optional[int] = None
+    user_break_weights: Optional[Dict[Any, float]] = None
+    max_skid_capacity: Optional[int] = None
     skid_tiers: Optional[List[SkidTierMapping]] = None
-    skid_count_column: Optional[int] = Field(default=None, ge=0)
-    weight_unit: Optional[str] = Field(default=None, pattern="^(lb|kg)$")
+    skid_count_column: Optional[int] = None
+    allow_deficit_rating: Optional[bool] = None
+    carrier_max_weight: Optional[float] = None
+    acknowledged_finding_ids: List[str] = []
+    override_notes: Optional[Dict[str, str]] = None
     remember_mapping: bool = False
 
-    @model_validator(mode="after")
-    def _mode_needs_unit(self):
-        if self.mode == Mode.weight and not self.weight_unit:
-            raise ValueError("weight_unit is required when mode is 'weight'")
-        return self
+
+class DryRunRequest(BaseModel):
+    seq_id: int = 1
+    mapping: Dict[str, Any]
+    selected_row_index: Optional[int] = None
 
 
 class SavedMappingResponse(BaseModel):

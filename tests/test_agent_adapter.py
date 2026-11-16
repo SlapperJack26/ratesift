@@ -1,6 +1,6 @@
 """
 Unit and integration tests for Phase 3:
-- Formatting agent adapter integration with ratesift_excel_reformatter
+- Formatting agent adapter integration with quotelytics_excel_reformatter
 - Confirmed mapping strictly overrides downstream reformatter detection
 - Original file immutability (Rule 12)
 - Formula neutralization in output (Rule 13)

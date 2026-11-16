@@ -1,11 +1,11 @@
 """
-RateSift Rules Specification & Compliance Auditor (Expanded to 36 Rules)
-Provides programmatic definitions, validators, and audit trackers for all RateSift Rules.
+Quotelytics Rules Specification & Compliance Auditor (Expanded to 36 Rules)
+Provides programmatic definitions, validators, and audit trackers for all Quotelytics Rules.
 Incorporates the 7-tier classification and cell-level distinction specifications.
 """
 from typing import Dict, Any, List
 
-RATESIFT_36_RULES = {
+QUOTELYTICS_36_RULES = {
     1: {"name": "Explicit extraction & stated surcharge values", "desc": "Never guess or interpolate missing rates/breaks. Only apply surcharge values stated as specific numbers or percentages; never infer surcharge amounts from vague language."},
     2: {"name": "Normalized schema", "desc": "Convert all sheets into standard matrix tables before quoting."},
     3: {"name": "Source traceability", "desc": "Record cell coordinates (Sheet!Row,Col) for every extracted value."},
@@ -45,7 +45,7 @@ RATESIFT_36_RULES = {
 }
 
 # Backward compatibility alias
-RATESIFT_32_RULES = RATESIFT_36_RULES
+QUOTELYTICS_32_RULES = QUOTELYTICS_36_RULES
 
 class RuleComplianceAuditor:
     """Tracks which rules were actively verified or executed in an agent run."""
@@ -58,7 +58,7 @@ class RuleComplianceAuditor:
             self.fired_rules.append(rule_num)
         self.audit_trace.append({
             "rule_number": rule_num,
-            "rule_name": RATESIFT_36_RULES.get(rule_num, {}).get("name", "Unknown"),
+            "rule_name": QUOTELYTICS_36_RULES.get(rule_num, {}).get("name", "Unknown"),
             "context": context,
             "status": status
         })
@@ -72,7 +72,7 @@ class RuleComplianceAuditor:
 
 def get_rules_summary() -> Dict[str, Any]:
     return {
-        "total_rules": len(RATESIFT_36_RULES),
+        "total_rules": len(QUOTELYTICS_36_RULES),
         "categories": {
             "Reading and parsing rate sheets": [1, 2, 3, 4, 5, 6, 7],
             "Calculating quotes": [8, 9, 10, 11, 12, 13, 14, 15],

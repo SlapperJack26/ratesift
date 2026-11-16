@@ -25,11 +25,11 @@ def test_item2_tenant_isolation():
         "password": "Password123!"
     })
     assert reg_a.status_code == 200, reg_a.text
-    session_a = reg_a.cookies.get("shipflow_session")
-    client_a = TestClient(app, cookies={"shipflow_session": session_a})
+    session_a = reg_a.cookies.get("quotelytics_session")
+    client_a = TestClient(app, cookies={"quotelytics_session": session_a})
 
     print("\n--- 1. Testing Zero-Sample Seed on Fresh Registration ---")
-    res_a_sheets = client_a.get("/api/ratesift/sheets")
+    res_a_sheets = client_a.get("/api/quotelytics/sheets")
     assert res_a_sheets.status_code == 200
     sheets_a = res_a_sheets.json()["sheets"]
     assert len(sheets_a) == 0, f"Expected 0 sheets for fresh user, found {len(sheets_a)}"
@@ -51,22 +51,22 @@ def test_item2_tenant_isolation():
         "password": "Password123!"
     })
     assert reg_b.status_code == 200
-    session_b = reg_b.cookies.get("shipflow_session")
-    client_b = TestClient(app, cookies={"shipflow_session": session_b})
+    session_b = reg_b.cookies.get("quotelytics_session")
+    client_b = TestClient(app, cookies={"quotelytics_session": session_b})
 
-    res_b_sheets = client_b.get("/api/ratesift/sheets")
+    res_b_sheets = client_b.get("/api/quotelytics/sheets")
     assert len(res_b_sheets.json()["sheets"]) == 0
     print("   [OK] Fresh User B has exactly 0 rate sheets.")
 
     print("\n--- 2. Testing Tenant Upload Isolation ---")
     # User A uploads a custom rate sheet
     user_a_id = reg_a.json()["user"]["id"]
-    sheet_a_id = f"rs_custom_{uuid.uuid4().hex[:8]}"
+    sheet_a_id = f"ql_custom_{uuid.uuid4().hex[:8]}"
     
     conn = get_connection()
     c = conn.cursor()
     c.execute("""
-    INSERT INTO rs_rate_sheets (
+    INSERT INTO ql_rate_sheets (
         id, user_id, carrier_name, service_name, tariff_ref,
         source_filename, storage_region, created_at, confirmation_status, is_benchmark
     ) VALUES (?, ?, 'Private Carrier X', 'Dedicated LTL', 'PRIV-2026', 'private_contract.xlsx', 'CA_CENTRAL_WHC', '2026-10-02', 'CONFIRMED', 0)
@@ -74,37 +74,37 @@ def test_item2_tenant_isolation():
     
     # Insert zone and break for User A
     c.execute("""
-    INSERT INTO rs_carrier_zones (id, sheet_id, user_id, origin_spec, dest_spec, zone_code, transit_days)
+    INSERT INTO ql_carrier_zones (id, sheet_id, user_id, origin_spec, dest_spec, zone_code, transit_days)
     VALUES (?, ?, ?, 'B3H', 'M5V', 'ZONE-1', 2)
     """, (f"zn_{uuid.uuid4().hex[:6]}", sheet_a_id, user_a_id))
 
     c.execute("""
-    INSERT INTO rs_weight_breaks (id, sheet_id, user_id, zone_code, min_weight, max_weight, break_name, base_rate, rate_type)
+    INSERT INTO ql_weight_breaks (id, sheet_id, user_id, zone_code, min_weight, max_weight, break_name, base_rate, rate_type)
     VALUES (?, ?, ?, 'ZONE-1', 0.0, 5000.0, '500', 15.50, 'CWT')
     """, (f"wb_{uuid.uuid4().hex[:6]}", sheet_a_id, user_a_id))
     conn.commit()
     conn.close()
 
     # User A sees 1 sheet
-    sheets_a = client_a.get("/api/ratesift/sheets").json()["sheets"]
+    sheets_a = client_a.get("/api/quotelytics/sheets").json()["sheets"]
     assert len(sheets_a) == 1
     assert sheets_a[0]["id"] == sheet_a_id
     assert sheets_a[0]["carrier_name"] == "Private Carrier X"
     print("   [OK] User A sees their uploaded private rate sheet.")
 
     # User B MUST see 0 sheets!
-    sheets_b = client_b.get("/api/ratesift/sheets").json()["sheets"]
+    sheets_b = client_b.get("/api/quotelytics/sheets").json()["sheets"]
     assert len(sheets_b) == 0, f"Cross-tenant leak! User B saw {len(sheets_b)} sheets."
     print("   [OK] User B sees 0 sheets (Strict Tenant Isolation verified).")
 
     # User B attempts to access User A's sheet details directly
-    res_b_direct = client_b.get(f"/api/ratesift/sheets/{sheet_a_id}")
+    res_b_direct = client_b.get(f"/api/quotelytics/sheets/{sheet_a_id}")
     assert res_b_direct.status_code == 404, f"Expected 404 for cross-tenant sheet inspection, got {res_b_direct.status_code}"
     print("   [OK] User B direct access to User A's sheet blocked with HTTP 404.")
 
     print("\n--- 3. Testing Quoting Engine Isolation & Empty Message ---")
     # User B calculates quote with 0 uploaded sheets
-    res_quote_b = client_b.post("/api/ratesift/quotes/calculate", json={
+    res_quote_b = client_b.post("/api/quotelytics/quotes/calculate", json={
         "origin": "B3H 1A1",
         "destination": "M5V 2T6",
         "actual_weight": 500.0
@@ -117,7 +117,7 @@ def test_item2_tenant_isolation():
     print(f"   [OK] User B received 0 quotes with clear message: '{quote_data_b['message']}'")
 
     # User A calculates quote against their own sheet
-    res_quote_a = client_a.post("/api/ratesift/quotes/calculate", json={
+    res_quote_a = client_a.post("/api/quotelytics/quotes/calculate", json={
         "origin": "B3H 1A1",
         "destination": "M5V 2T6",
         "actual_weight": 500.0
@@ -133,9 +133,9 @@ def test_item2_tenant_isolation():
     c = conn.cursor()
     c.execute("DELETE FROM users WHERE id IN (?, ?)", (user_a_id, reg_b.json()["user"]["id"]))
     c.execute("DELETE FROM sessions WHERE user_id IN (?, ?)", (user_a_id, reg_b.json()["user"]["id"]))
-    c.execute("DELETE FROM rs_rate_sheets WHERE id = ?", (sheet_a_id,))
-    c.execute("DELETE FROM rs_carrier_zones WHERE sheet_id = ?", (sheet_a_id,))
-    c.execute("DELETE FROM rs_weight_breaks WHERE sheet_id = ?", (sheet_a_id,))
+    c.execute("DELETE FROM ql_rate_sheets WHERE id = ?", (sheet_a_id,))
+    c.execute("DELETE FROM ql_carrier_zones WHERE sheet_id = ?", (sheet_a_id,))
+    c.execute("DELETE FROM ql_weight_breaks WHERE sheet_id = ?", (sheet_a_id,))
     conn.commit()
     conn.close()
 

@@ -69,7 +69,7 @@
         <!-- Left: Logo & Nav Links -->
         <div class="flex items-center gap-6 lg:gap-8">
           <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Quotelytics Console">
-            <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-8 w-auto object-contain" />
+            <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-8 w-auto object-contain" />
           </a>
 
           <!-- Center/Left Navigation Links -->
@@ -103,7 +103,7 @@
           </a>
 
           <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
-            <span>🇨🇦</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">CA</span>
             <span>Hosted in Canada (WHC) • PIPEDA Compliant</span>
           </div>
 
@@ -221,9 +221,49 @@
           </div>
         </section>
 
+        <!-- 3. AI Mapping & Header Keyword Definitions -->
+        <section id="keyword-definitions-section" aria-labelledby="keyword-definitions-heading" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs">
+          <div class="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-[var(--border)]">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+              </svg>
+              <h2 id="keyword-definitions-heading" class="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">AI Mapping &amp; Header Keyword Definitions</h2>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200">Auto-Applied on Upload</span>
+          </div>
+
+          <p class="text-[11px] text-[var(--muted-foreground)] mb-3.5">
+            Define custom spreadsheet header codes or abbreviations used across your company's Excel rate sheets (for example, <code class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 font-mono text-[10px]">L5C</code> = <span class="italic text-slate-700">"less than 5 skids"</span>). The AI mapping tool and tariff extractor will automatically apply these definitions whenever you upload a sheet.
+          </p>
+
+          <!-- Add Keyword Definition Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end bg-slate-50/70 border border-slate-200/80 rounded-lg p-3 mb-4">
+            <div class="sm:col-span-3">
+              <label for="kw-code-input" class="block text-[11px] font-bold text-[var(--foreground)] mb-1">Keyword / Header Code</label>
+              <input id="kw-code-input" type="text" placeholder="e.g. L5C" class="w-full bg-white border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs font-mono text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addKeywordDefinition();}">
+            </div>
+            <div class="sm:col-span-6">
+              <label for="kw-meaning-input" class="block text-[11px] font-bold text-[var(--foreground)] mb-1">Definition / Meaning</label>
+              <input id="kw-meaning-input" type="text" placeholder='e.g. less than 5 skids' class="w-full bg-white border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addKeywordDefinition();}">
+            </div>
+            <div class="sm:col-span-3">
+              <button id="add-keyword-btn" type="button" onclick="addKeywordDefinition()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Add Definition</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Saved Keyword Definitions List -->
+          <div id="keyword-definitions-list" class="divide-y divide-slate-200/80 border border-slate-200/80 rounded-lg bg-white overflow-hidden">
+            <div class="p-3.5 text-center text-xs text-slate-400">Loading saved keyword definitions...</div>
+          </div>
+        </section>
+
         <!-- Action Buttons -->
         <div class="pt-2 flex items-center justify-end gap-2.5">
-          <button type="button" onclick="alert('Settings reset to default.');" class="px-3 py-1.5 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+          <button type="button" onclick="showToast('Settings reset to default.', 'info');" class="px-3 py-1.5 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
             Reset to Defaults
           </button>
           <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-4 py-1.5 rounded-lg transition-colors shadow-xs">
@@ -236,7 +276,7 @@
     <!-- Semantic Footer -->
     <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
       <div class="flex flex-wrap items-center gap-6">
-        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
+        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
 
         <nav aria-label="Footer Navigation" class="flex flex-wrap items-center gap-4 text-xs font-medium">
           <a href="/console/new-quote" class="hover:text-[var(--foreground)] transition-colors">New Quote</a>
@@ -327,10 +367,10 @@
       })
       .then(r => r.json())
       .then(data => {
-        alert("✓ Quoting settings and preferences saved successfully!");
+        showToast("Quoting settings and preferences saved successfully!", "success");
       })
       .catch(err => {
-        alert("Error saving settings. Please try again.");
+        showToast("Error saving settings. Please try again.", "error");
       });
     }
 
@@ -357,9 +397,125 @@
         })
         .catch(err => console.debug("Quota header load:", err));
     }
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function renderKeywordDefinitions(items) {
+      const container = document.getElementById('keyword-definitions-list');
+      if (!container) return;
+      if (!items || items.length === 0) {
+        container.innerHTML = `
+          <div class="p-4 text-center">
+            <p class="text-xs font-medium text-slate-600">No custom keyword definitions added yet.</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Example: Add <span class="font-mono font-semibold text-slate-600">L5C</span> &rarr; <span class="italic text-slate-600">less than 5 skids</span> so the AI mapper automatically treats L5C columns as 1&ndash;4 skid tiers.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 hover:bg-slate-50/70 transition-colors" data-keyword-id="${escapeHtml(item.id)}">
+          <div class="flex flex-wrap items-center gap-2.5 min-w-0">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-white font-mono text-xs font-bold tracking-wide">${escapeHtml(item.keyword)}</span>
+            <span class="text-slate-400 text-xs">&rarr;</span>
+            <span class="text-xs font-medium text-slate-800">"${escapeHtml(item.definition_text)}"</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">${escapeHtml(item.badge_label || item.parsed_category)}</span>
+          </div>
+          <button type="button" onclick="deleteKeywordDefinition('${escapeHtml(item.id)}')" class="text-[11px] font-semibold text-slate-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors cursor-pointer">
+            Delete
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function loadKeywordDefinitions() {
+      fetch('/api/settings/keywords')
+        .then(r => r.json())
+        .then(data => {
+          renderKeywordDefinitions((data && data.keywords) ? data.keywords : []);
+        })
+        .catch(err => {
+          console.error('Error loading keyword definitions:', err);
+          renderKeywordDefinitions([]);
+        });
+    }
+
+    function addKeywordDefinition() {
+      const codeInput = document.getElementById('kw-code-input');
+      const meaningInput = document.getElementById('kw-meaning-input');
+      const keyword = (codeInput ? codeInput.value : '').trim();
+      const definitionText = (meaningInput ? meaningInput.value : '').trim();
+
+      if (!keyword || !definitionText) {
+        if (typeof showToast === 'function') {
+          showToast('Please enter both a keyword code (e.g. L5C) and its definition.', 'error');
+        }
+        return;
+      }
+
+      fetch('/api/settings/keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          keyword: keyword,
+          definition_text: definitionText
+        })
+      })
+      .then(async r => {
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.detail || 'Failed to save keyword definition.');
+        }
+        return res;
+      })
+      .then(res => {
+        if (codeInput) codeInput.value = '';
+        if (meaningInput) meaningInput.value = '';
+        loadKeywordDefinitions();
+        const badge = (res.keyword_definition && res.keyword_definition.badge_label) ? ` (${res.keyword_definition.badge_label})` : '';
+        if (typeof showToast === 'function') {
+          showToast(`Saved keyword "${keyword}"${badge}`, 'success');
+        }
+      })
+      .catch(err => {
+        if (typeof showToast === 'function') {
+          showToast(err.message || 'Error saving keyword definition.', 'error');
+        }
+      });
+    }
+
+    function deleteKeywordDefinition(keywordId) {
+      if (!keywordId) return;
+      fetch(`/api/settings/keywords/${encodeURIComponent(keywordId)}`, {
+        method: 'DELETE'
+      })
+      .then(r => {
+        if (!r.ok) throw new Error('Failed to delete keyword definition.');
+        return r.json();
+      })
+      .then(() => {
+        loadKeywordDefinitions();
+        if (typeof showToast === 'function') {
+          showToast('Keyword definition removed.', 'info');
+        }
+      })
+      .catch(err => {
+        if (typeof showToast === 'function') {
+          showToast(err.message || 'Error deleting keyword definition.', 'error');
+        }
+      });
+    }
+
     updateHeaderQuota();
     loadSettings();
+    loadKeywordDefinitions();
   </script>
-  <script src="/static/js/global-chrome.js"></script>
+  <script src="/static/js/global-chrome.js?v=20261113b"></script>
 </body>
 </html>

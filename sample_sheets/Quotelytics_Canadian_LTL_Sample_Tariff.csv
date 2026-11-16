@@ -1,0 +1,11 @@
+Carrier Name,Origin FSA / City,Destination FSA / City,Service Level,Min Charge (CAD),L5C (<500 lbs),M5C (500+),"M1M (1,000+)","M2M (2,000+)","M5M (5,000+)","M10M (10,000+)",Effective Date,Expiry Date,FSC Mode,FSC Surcharge %
+Apex Canadian Freight,"M5V (Toronto, ON)","H3B (Montreal, QC)",Standard LTL,85.0,18.5,15.2,12.4,9.8,7.9,5.5,2026-01-01,2026-12-31,SHEET_FIRST,18.5
+Apex Canadian Freight,"M5V (Toronto, ON)","T2P (Calgary, AB)",Trans-Provincial LTL,145.0,34.0,29.5,24.8,20.1,16.5,12.8,2026-01-01,2026-12-31,SHEET_FIRST,22.0
+Apex Canadian Freight,"M5V (Toronto, ON)","V6B (Vancouver, BC)",Pacific Coast LTL,165.0,38.5,33.2,28.0,22.9,18.7,14.5,2026-01-01,2026-12-31,SHEET_FIRST,23.5
+Apex Canadian Freight,"H3B (Montreal, QC)","M5V (Toronto, ON)",Standard LTL,85.0,18.5,15.2,12.4,9.8,7.9,5.5,2026-01-01,2026-12-31,SHEET_FIRST,18.5
+Apex Canadian Freight,"H3B (Montreal, QC)","B3H (Halifax, NS)",Atlantic Express,110.0,26.5,22.8,19.1,15.4,12.2,9.4,2026-01-01,2026-12-31,SHEET_FIRST,19.5
+Apex Canadian Freight,"T2P (Calgary, AB)","V6B (Vancouver, BC)",Mountain Corridor,95.0,21.0,17.8,14.5,11.9,9.2,7.1,2026-01-01,2026-12-31,SHEET_FIRST,19.0
+Apex Canadian Freight,"T2P (Calgary, AB)","M5V (Toronto, ON)",Trans-Provincial LTL,145.0,34.0,29.5,24.8,20.1,16.5,12.8,2026-01-01,2026-12-31,SHEET_FIRST,22.0
+Apex Canadian Freight,"V6B (Vancouver, BC)","T2P (Calgary, AB)",Mountain Corridor,95.0,21.0,17.8,14.5,11.9,9.2,7.1,2026-01-01,2026-12-31,SHEET_FIRST,19.0
+Apex Canadian Freight,"K1P (Ottawa, ON)","M5V (Toronto, ON)",Capital Direct,75.0,16.2,13.5,10.9,8.7,6.8,4.9,2026-01-01,2026-12-31,SHEET_FIRST,17.5
+Apex Canadian Freight,"L4W (Mississauga, ON)","H3B (Montreal, QC)",GTA Express LTL,85.0,18.5,15.2,12.4,9.8,7.9,5.5,2026-01-01,2026-12-31,SHEET_FIRST,18.5

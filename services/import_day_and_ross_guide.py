@@ -2,7 +2,7 @@ import csv
 import os
 import re
 from typing import Dict, Any, List
-from services.ratesift_db_service import (
+from services.quotelytics_db_service import (
     create_rate_sheet,
     confirm_rate_sheet,
     insert_rate_sheet_cells,
@@ -14,9 +14,9 @@ from services.ratesift_db_service import (
 
 SAMPLE_CSV = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sample_sheets", "day_and_ross_guide_tariff.csv")
 
-def import_day_and_ross_tariff(user_id: str = "usr_alex_rivers", auto_confirm: bool = True) -> str:
+def import_day_and_ross_tariff(user_id: str, auto_confirm: bool = True) -> str:
     """
-    Parses and imports the Day & Ross Guide Tariff into RateSift's normalized schema.
+    Parses and imports the Day & Ross Guide Tariff into Quotelytics's normalized schema.
     Extracts terms & conditions, accessorials, CWT rate tables, and PTL flat lanes.
     Preserves exact cell/row coordinates for Rule 3 traceability.
     """
@@ -357,9 +357,13 @@ def import_day_and_ross_tariff(user_id: str = "usr_alex_rivers", auto_confirm: b
     return sheet_id
 
 if __name__ == "__main__":
-    print("Importing Day & Ross Guide Tariff for Alex Rivers...")
-    sid = import_day_and_ross_tariff("usr_alex_rivers", auto_confirm=True)
-    rules = get_sheet_full_rules(sid, "usr_alex_rivers")
+    import sys
+    if len(sys.argv) < 2:
+        raise SystemExit("Usage: python -m services.import_day_and_ross_guide <user_id>")
+    target_uid = sys.argv[1]
+    print(f"Importing Day & Ross Guide Tariff for {target_uid}...")
+    sid = import_day_and_ross_tariff(target_uid, auto_confirm=True)
+    rules = get_sheet_full_rules(sid, target_uid)
     print(f"Successfully imported Sheet ID: {sid}")
     print(f"- Surcharges Extracted: {len(rules['surcharges'])}")
     print(f"- Rate Breaks Extracted: {len(rules['breaks'])}")

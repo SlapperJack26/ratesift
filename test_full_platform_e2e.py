@@ -1,14 +1,16 @@
 import io
+import uuid
 import openpyxl
 from fastapi.testclient import TestClient
 import main
 from services.db_service import get_connection
+from services.auth_service import register_and_create_session
 
 client = TestClient(main.app)
 
 def test_full_platform_e2e():
     print("=" * 70)
-    print("SHIPFLOW FULL PLATFORM END-TO-END VERIFICATION SUITE")
+    print("QUOTELYTICS FULL PLATFORM END-TO-END VERIFICATION SUITE")
     print("=" * 70)
 
     # ---------------------------------------------------------
@@ -28,17 +30,28 @@ def test_full_platform_e2e():
     assert res.status_code == 303 and "/login" in res.headers["location"]
     print("   [OK] Unauthenticated visit to /console/new-quote redirected to /login")
 
-    # Login as Alex Rivers
+    # Provision a dedicated test account and log in
+    e2e_email = f"e2e.broker.{uuid.uuid4().hex[:6]}@acme-logistics.ca"
+    e2e_pwd = "E2ePlatformTest2026!"
+    e2e_user, _ = register_and_create_session(
+        name="Jordan Freight",
+        email=e2e_email,
+        company="Acme Logistics Corp",
+        origin_zip="TORONTO, ON",
+        password=e2e_pwd
+    )
+    e2e_uid = e2e_user["id"]
+
     login_payload = {
-        "email": "alex.rivers@techcorp.io",
-        "password": "ShipFlowDemo2026!"
+        "email": e2e_email,
+        "password": e2e_pwd
     }
     res = client.post("/api/auth/login", data=login_payload)
     assert res.status_code == 200
-    token = res.cookies["shipflow_session"]
-    print(f"   [OK] Logged in Alex Rivers. Session Token: {token[:14]}...")
+    token = res.cookies["quotelytics_session"]
+    print(f"   [OK] Logged in test broker. Session Token: {token[:14]}...")
 
-    auth_client = TestClient(main.app, cookies={"shipflow_session": token})
+    auth_client = TestClient(main.app, cookies={"quotelytics_session": token})
 
     # Access console with token
     res = auth_client.get("/console/new-quote")
@@ -50,15 +63,15 @@ def test_full_platform_e2e():
     # ---------------------------------------------------------
     print("\n[PHASE 3 & 4] Testing Excel Batch Ingestion & Rate Engine...")
     
-    # Ensure Alex Rivers starts on clean FREE tier state with 3 existing sheets (max on Free tier)
+    # Ensure test user starts on clean FREE tier state with 3 existing sheets (max on Free tier)
     conn = get_connection()
     c = conn.cursor()
-    c.execute("DELETE FROM quote_batches WHERE user_id = 'usr_alex_rivers'")
-    c.execute("INSERT OR REPLACE INTO quote_batches (id, user_id, filename, total_rows, processed_rows, created_at) VALUES ('qb_demo_001', 'usr_alex_rivers', 'Q1_Tariff.xlsx', 5, 5, '2026-09-28T07:00:00')")
-    c.execute("INSERT OR REPLACE INTO quote_batches (id, user_id, filename, total_rows, processed_rows, created_at) VALUES ('qb_demo_002', 'usr_alex_rivers', 'Q2_Tariff.xlsx', 5, 5, '2026-09-28T07:01:00')")
-    c.execute("INSERT OR REPLACE INTO quote_batches (id, user_id, filename, total_rows, processed_rows, created_at) VALUES ('qb_demo_003', 'usr_alex_rivers', 'Q3_Tariff.xlsx', 5, 5, '2026-09-28T07:02:00')")
-    c.execute("UPDATE users SET tier = 'FREE', company = 'TechCorp Logistics', origin_zip = 'TORONTO, ON' WHERE id = 'usr_alex_rivers'")
-    c.execute("UPDATE user_settings SET markup_pct = 10.0 WHERE user_id = 'usr_alex_rivers'")
+    c.execute("DELETE FROM quote_batches WHERE user_id = ?", (e2e_uid,))
+    c.execute("INSERT OR REPLACE INTO quote_batches (id, user_id, filename, total_rows, processed_rows, created_at) VALUES (?, ?, 'Q1_Tariff.xlsx', 5, 5, '2026-09-28T07:00:00')", (f"qb_1_{e2e_uid}", e2e_uid))
+    c.execute("INSERT OR REPLACE INTO quote_batches (id, user_id, filename, total_rows, processed_rows, created_at) VALUES (?, ?, 'Q2_Tariff.xlsx', 5, 5, '2026-09-28T07:01:00')", (f"qb_2_{e2e_uid}", e2e_uid))
+    c.execute("INSERT OR REPLACE INTO quote_batches (id, user_id, filename, total_rows, processed_rows, created_at) VALUES (?, ?, 'Q3_Tariff.xlsx', 5, 5, '2026-09-28T07:02:00')", (f"qb_3_{e2e_uid}", e2e_uid))
+    c.execute("UPDATE users SET tier = 'FREE', company = 'Acme Logistics Corp', origin_zip = 'TORONTO, ON' WHERE id = ?", (e2e_uid,))
+    c.execute("UPDATE user_settings SET markup_pct = 10.0 WHERE user_id = ?", (e2e_uid,))
     conn.commit()
     conn.close()
 
@@ -78,10 +91,10 @@ def test_full_platform_e2e():
     assert "Tier limit exceeded" in res.json()["detail"]
     print("   [OK] Quota enforcement verified: 4th sheet on Free Starter tier rejected with HTTP 403")
 
-    # Upgrade Alex Rivers to PRO tier (10 sheets, 2,500 quotes) to continue multi-sheet testing
+    # Upgrade test user to PRO tier (10 sheets, 2,500 quotes) to continue multi-sheet testing
     conn = get_connection()
     c = conn.cursor()
-    c.execute("UPDATE users SET tier = 'PRO' WHERE id = 'usr_alex_rivers'")
+    c.execute("UPDATE users SET tier = 'PRO' WHERE id = ?", (e2e_uid,))
     conn.commit()
     conn.close()
     print("   [OK] Upgraded user to Broker Pro tier (10 sheets, 2,500 quotes/mo)")
@@ -138,15 +151,15 @@ def test_full_platform_e2e():
     # ---------------------------------------------------------
     print("\n[PHASE 6] Testing Account & System Settings Synchronization...")
     acc_update = {
-        "name": "Alex Rivers",
-        "company": "TechCorp Global Logistics Inc.",
+        "name": "Jordan Freight",
+        "company": "Acme Global Logistics Inc.",
         "origin_zip": "94107"
     }
     res = auth_client.post("/api/user/account/update", data=acc_update)
     assert res.status_code == 200
 
     prof = auth_client.get("/api/user/profile").json()
-    assert prof["company"] == "TechCorp Global Logistics Inc."
+    assert prof["company"] == "Acme Global Logistics Inc."
     assert prof["origin_zip"] == "94107"
     print("   [OK] Account profile and origin ZIP updated to 94107")
 
@@ -168,15 +181,63 @@ def test_full_platform_e2e():
     # 6. EMBEDDED QUOTING API (BUSINESS TIER)
     # ---------------------------------------------------------
     print("\n[PHASE 7] Testing Business Tier Embedded Quoting API...")
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("UPDATE users SET tier = 'BUSINESS' WHERE id = ?", (e2e_uid,))
+    conn.commit()
+    conn.close()
+
+    from services.quotelytics_db_service import (
+        create_rate_sheet,
+        insert_weight_breaks,
+        confirm_rate_sheet,
+    )
+    e2e_sheet_id = create_rate_sheet(
+        user_id=e2e_uid,
+        carrier_name="Day & Ross LTL",
+        service_name="Standard LTL",
+        currency="USD",
+        version=1,
+    )
+    insert_weight_breaks(
+        e2e_sheet_id,
+        e2e_uid,
+        [
+            {
+                "zone_code": "ON_QC",
+                "origin_spec": "TORONTO, ON",
+                "dest_spec": "MONTREAL, QC",
+                "min_weight": 0.0,
+                "max_weight": 99999.0,
+                "base_rate": 40.00,
+                "break_name": "LTL",
+                "rate_type": "CWT",
+                "source_cell": "Tariff!C4",
+            },
+            {
+                "zone_code": "ON_AB",
+                "origin_spec": "TORONTO, ON",
+                "dest_spec": "CALGARY, AB",
+                "min_weight": 0.0,
+                "max_weight": 99999.0,
+                "base_rate": 60.00,
+                "break_name": "LTL",
+                "rate_type": "CWT",
+                "source_cell": "Tariff!D8",
+            },
+        ],
+    )
+    confirm_rate_sheet(e2e_sheet_id, e2e_uid, "Jordan Freight")
+
     res = auth_client.post("/api/user/api-key/generate", data={"name": "3PL ERP Key"})
     assert res.status_code == 200
     api_key = res.json()["api_key"]
-    print(f"   [OK] Generated Business API Key: {api_key}")
+    print(f"   [OK] Generated Business API Key: {res.json()['key_prefix']}")
 
     api_payload = {
         "shipments": [
-            {"origin_zip": "94107", "dest_zip": "10001", "weight_lbs": 35.0, "service": "Priority Overnight"},
-            {"origin_zip": "94107", "dest_zip": "30301", "weight_lbs": 420.0, "service": "Freight Standard"}
+            {"origin": "TORONTO, ON", "destination": "MONTREAL, QC", "actual_weight": 1000.0, "skid_count": 2},
+            {"origin_zip": "TORONTO, ON", "dest_zip": "CALGARY, AB", "weight_lbs": 2000.0, "skids": 4, "service": "Freight Standard"}
         ]
     }
     api_res = client.post(
@@ -188,21 +249,20 @@ def test_full_platform_e2e():
     api_body = api_res.json()
     assert api_body["status"] == "success"
     assert api_body["total_quotes"] == 2
+    assert api_body["quoted_count"] == 2
+    assert api_body["quotes"][0]["status"] == "quoted"
     assert api_body["quotes"][0]["markup_pct"] == 15.0  # Confirms dynamic setting integration
-    print(f"   [OK] Embedded Quoting API returned 2 instant quotes using active +15% markup")
+    assert api_body["quotes"][0]["base_rate"] == 400.00  # 10 CWT * $40.00
+    assert api_body["quotes"][0]["final_rate"] == 460.00  # $400.00 * 1.15
+    assert api_body["quotes"][0]["coordinate"] == "Tariff!C4"
+    assert api_body["quotes"][1]["base_rate"] == 1200.00  # 20 CWT * $60.00
+    assert api_body["quotes"][1]["final_rate"] == 1380.00  # $1200.00 * 1.15
+    print("   [OK] Embedded Quoting API returned 2 deterministic tariff quotes using active +15% markup")
 
     # ---------------------------------------------------------
     # 7. LOGOUT & SESSION TERMINATION
     # ---------------------------------------------------------
     print("\n[PHASE 8] Testing Logout & Cleanup...")
-    # Reset user back to initial state for subsequent test suites
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute("UPDATE users SET tier = 'FREE', company = 'TechCorp Logistics', origin_zip = 'TORONTO, ON' WHERE id = 'usr_alex_rivers'")
-    c.execute("UPDATE user_settings SET markup_pct = 10.0 WHERE user_id = 'usr_alex_rivers'")
-    conn.commit()
-    conn.close()
-
     res = auth_client.get("/api/auth/logout", follow_redirects=False)
     assert res.status_code == 303
     print("   [OK] Session terminated successfully")

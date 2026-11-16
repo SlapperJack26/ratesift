@@ -1,0 +1,14 @@
+{
+  "intentional_brand_mentions": [
+    {
+      "page": "/privacy",
+      "exact_string": "formerly RateSift",
+      "reason": "Historical legal notice"
+    },
+    {
+      "page": "/terms",
+      "exact_string": "formerly known as RateSift",
+      "reason": "Historical legal notice"
+    }
+  ]
+}

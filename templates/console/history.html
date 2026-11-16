@@ -91,7 +91,7 @@
         <!-- Left: Logo & Nav Links -->
         <div class="flex items-center gap-6 lg:gap-8">
           <a href="/console/new-quote" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Quotelytics Console">
-            <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-8 w-auto object-contain" />
+            <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-8 w-auto object-contain" />
           </a>
 
           <!-- Center/Left Navigation Links -->
@@ -125,7 +125,7 @@
           </a>
 
           <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
-            <span>🇨🇦</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">CA</span>
             <span>Hosted in Canada (WHC) • PIPEDA Compliant</span>
           </div>
 
@@ -400,7 +400,7 @@
                 <!-- Header Banner -->
                 <div class="bg-slate-900 text-white p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <h2 class="text-base font-black tracking-tight" id="prev-broker-company">TECHCORP LOGISTICS</h2>
+                    <h2 class="text-base font-black tracking-tight" id="prev-broker-company">--</h2>
                     <div class="text-[11px] font-bold text-red-400 tracking-wider uppercase mt-0.5">FREIGHT RATE QUOTE PROPOSAL</div>
                     <div class="text-[10px] text-slate-400 mt-1">Ref: <span id="prev-proposal-id" class="font-mono text-slate-200">PROP-20261001-A1B2</span></div>
                   </div>
@@ -420,7 +420,7 @@
                   </div>
                   <div>
                     <span class="text-[10px] font-bold text-slate-400 uppercase block">Issued By:</span>
-                    <strong class="text-slate-900 block" id="prev-broker-name">Alex Rivers</strong>
+                    <strong class="text-slate-900 block" id="prev-broker-name">--</strong>
                     <span class="text-slate-500 text-[10px]" id="prev-broker-hub">Dispatch Hub: Toronto, ON</span>
                   </div>
                 </div>
@@ -511,12 +511,12 @@
           <!-- Header -->
           <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">👁️</div>
+              <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-sm shadow-xs"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></div>
               <div>
                 <div class="flex items-center gap-2">
                   <h3 class="text-sm font-bold text-slate-900" id="fsm-carrier-title">Formatted Carrier Tariff Matrix</h3>
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                    🔒 In-Browser Inspection Only
+                    In-Browser Inspection Only
                   </span>
                   <span id="fsm-focused-cell-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">
                     Target Cell: <span id="fsm-target-cell-label" class="ml-1 font-mono font-bold">[C:14]</span>
@@ -539,7 +539,7 @@
           <!-- Highlight Notification Ribbon -->
           <div id="fsm-highlight-banner" class="hidden px-5 py-2.5 bg-amber-50 border-b border-amber-200 flex items-center justify-between text-xs text-amber-950">
             <div class="flex items-center gap-2">
-              <span class="text-amber-700 font-bold">📌 Cell Traceability Focus:</span>
+              <span class="text-amber-700 font-bold">Cell Traceability Focus:</span>
               <span>Showing cell <strong id="fsm-highlight-text" class="font-mono text-red-700 underline font-black">[C:14]</strong> highlighted in amber/red within the active carrier rate matrix.</span>
             </div>
             <span class="font-mono text-[10px] text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 font-bold shrink-0">100% Traceability Lock</span>
@@ -548,7 +548,7 @@
           <!-- Security Policy Ribbon -->
           <div class="px-5 py-2.5 bg-red-50/60 border-b border-red-100 flex items-center justify-between text-xs text-red-900">
             <div class="flex items-center gap-2">
-              <span class="text-red-600 font-bold">🔒 Platform Security Policy:</span>
+              <span class="text-red-600 font-bold">Platform Security Policy:</span>
               <span>Reformatted carrier tariffs are restricted to in-browser inspection only. Downloading, scraping, or exporting spreadsheet files is strictly blocked.</span>
             </div>
             <span class="font-mono text-[10px] text-red-700 shrink-0">Tenant Quarantine & Cell Security</span>
@@ -613,7 +613,7 @@
     <!-- Semantic Footer -->
     <footer role="contentinfo" class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)] bg-slate-50/40 m-0 mt-auto">
       <div class="flex flex-wrap items-center gap-6">
-        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
+        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
 
         <nav aria-label="Footer Navigation" class="flex flex-wrap items-center gap-4 text-xs font-medium">
           <a href="/console/new-quote" class="hover:text-[var(--foreground)] transition-colors">New Quote</a>
@@ -972,7 +972,7 @@
       if (!targetSheetId) {
         try {
           if (!cachedRegisteredSheets) {
-            const res = await fetch('/api/ratesift/sheets');
+            const res = await fetch('/api/quotelytics/sheets');
             const data = await res.json();
             cachedRegisteredSheets = data.sheets || [];
           }
@@ -1037,7 +1037,7 @@
       try {
         const queryParam = fsmQuery ? `&query=${encodeURIComponent(fsmQuery)}` : '';
         const cellParam = activeHighlightCell ? `&cell=${encodeURIComponent(activeHighlightCell)}` : '';
-        const res = await fetch(`/api/ratesift/sheets/${activeSheetId}/formatted-matrix?page=${fsmPage}&limit=${fsmLimit}${queryParam}${cellParam}`);
+        const res = await fetch(`/api/quotelytics/sheets/${activeSheetId}/formatted-matrix?page=${fsmPage}&limit=${fsmLimit}${queryParam}${cellParam}`);
         if (!res.ok) throw new Error("Failed to load formatted matrix");
         const data = await res.json();
         
@@ -1051,7 +1051,7 @@
         renderFormattedMatrixRows(data.breaks || []);
         updateFsmPaginationControls();
       } catch (err) {
-        alert("Error loading formatted sheet: " + err.message);
+        showToast("Error loading formatted sheet: " + err.message, "error");
       }
     }
 
@@ -1085,7 +1085,7 @@
           <td class="py-2 px-3 text-center">
             ${isTargetCell ? `
               <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-600 text-white animate-pulse">
-                ★ Highlighted Cell
+                Highlighted Cell
               </span>
             ` : `
               <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -1139,7 +1139,7 @@
 
     function preventDownloadAction(e) {
       e.preventDefault();
-      alert("🔒 Platform Security Notice: Reformatted carrier tariffs are restricted to in-browser inspection only. Downloads, exports, and file extractions are permanently disabled.");
+      showToast("Platform Security Notice: Reformatted carrier tariffs are restricted to in-browser inspection only. Downloads, exports, and file extractions are permanently disabled.", "info");
     }
 
     function openHistoryProposal(quoteId) {
@@ -1323,7 +1323,7 @@
         a.click();
         window.URL.revokeObjectURL(url);
       } catch (err) {
-        alert("Error generating proposal workbook: " + err.message);
+        showToast("Error generating proposal workbook: " + err.message, "error");
       }
     }
 
@@ -1472,6 +1472,6 @@
     updateHeaderQuota();
     loadQuotes();
   </script>
-  <script src="/static/js/global-chrome.js"></script>
+  <script src="/static/js/global-chrome.js?v=20261113b"></script>
 </body>
 </html>

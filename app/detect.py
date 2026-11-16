@@ -47,16 +47,20 @@ from services.break_header_parser import (
     is_numeric_range_header,
     parse_break_header,
     parse_break_value as _shared_parse_break_value,
+    parse_skid_break_from_keywords,
 )
 
 
-def parse_break_value(h: Any) -> Tuple[Optional[float], Optional[str]]:
+def parse_break_value(
+    h: Any,
+    custom_keywords: Optional[Dict[str, Any]] = None,
+) -> Tuple[Optional[float], Optional[str]]:
     """
     Parses a header cell into (break_value, weight_unit) using the unified break_header_parser.
     Handles: L5C, M5C, M1M..M10M, 1,000 to 1,999 lbs, CWT:2000, 10,000+ lbs, -45, 500-999, etc.
     Rejects rate-unit labels like 'Rate per CWT'.
     """
-    return _shared_parse_break_value(h)
+    return _shared_parse_break_value(h, custom_keywords=custom_keywords)
 
 
 # ---------------------------------------------------------------- loading
@@ -68,7 +72,10 @@ def load_rows(path: str, ext: str, max_rows: int = MAX_SCAN_ROWS) -> List[List[A
 
 
 # ---------------------------------------------------------------- header row
-def find_header_row(rows: List[List[Any]]) -> Optional[int]:
+def find_header_row(
+    rows: List[List[Any]],
+    custom_keywords: Optional[Dict[str, Any]] = None,
+) -> Optional[int]:
     """Finds the first row (in top 25) with >= 3 text-ish cells followed by data."""
     for i, row in enumerate(rows[:25]):
         cells = [_s(c) for c in row if _s(c)]
@@ -77,9 +84,10 @@ def find_header_row(rows: List[List[Any]]) -> Optional[int]:
 
         texty = 0
         for c in cells:
-            b_val, _ = parse_break_value(c)
+            b_val, _ = parse_break_value(c, custom_keywords=custom_keywords)
+            skid_kw = parse_skid_break_from_keywords(c, custom_keywords=custom_keywords)
             # Break pattern headers or non-numeric strings count as text-ish
-            if not _is_num(c) or b_val is not None:
+            if not _is_num(c) or b_val is not None or skid_kw is not None:
                 texty += 1
 
         nxt = [_s(c) for c in rows[i + 1] if _s(c)]
@@ -88,7 +96,11 @@ def find_header_row(rows: List[List[Any]]) -> Optional[int]:
     return None
 
 
-def detect_and_flatten_headers(rows: List[List[Any]], hdr_idx: int) -> Tuple[List[str], int]:
+def detect_and_flatten_headers(
+    rows: List[List[Any]],
+    hdr_idx: int,
+    custom_keywords: Optional[Dict[str, Any]] = None,
+) -> Tuple[List[str], int]:
     """
     Detects two-row headers (e.g. category band above break row) and flattens them.
     Returns (flattened_headers, effective_hdr_idx).
@@ -100,17 +112,29 @@ def detect_and_flatten_headers(rows: List[List[Any]], hdr_idx: int) -> Tuple[Lis
     next_row = [_s(c) for c in rows[hdr_idx + 1]]
 
     # Check if next row looks like sub-headers (contains weight breaks or skid headers)
-    next_has_breaks = any(parse_break_value(c)[0] is not None for c in next_row)
-    curr_has_breaks = any(parse_break_value(c)[0] is not None for c in curr_row)
+    next_has_breaks = any(
+        parse_break_value(c, custom_keywords=custom_keywords)[0] is not None
+        or parse_skid_break_from_keywords(c, custom_keywords=custom_keywords) is not None
+        for c in next_row
+    )
+    curr_has_breaks = any(
+        parse_break_value(c, custom_keywords=custom_keywords)[0] is not None
+        or parse_skid_break_from_keywords(c, custom_keywords=custom_keywords) is not None
+        for c in curr_row
+    )
     
     # If current row already contains origin, destination, AND breaks, it's a complete header row
-    has_orig = any(_header_score(c, "origin") >= 0.7 for c in curr_row)
-    has_dest = any(_header_score(c, "destination") >= 0.7 for c in curr_row)
+    has_orig = any(_header_score(c, "origin", custom_keywords=custom_keywords) >= 0.7 for c in curr_row)
+    has_dest = any(_header_score(c, "destination", custom_keywords=custom_keywords) >= 0.7 for c in curr_row)
     if has_orig and has_dest and curr_has_breaks:
         return curr_row, hdr_idx
 
     # If next row contains breaks (or locations) and row after next has numeric data, flatten them
-    next_has_locations = any(_header_score(c, "origin") >= 0.7 or _header_score(c, "destination") >= 0.7 for c in next_row)
+    next_has_locations = any(
+        _header_score(c, "origin", custom_keywords=custom_keywords) >= 0.7
+        or _header_score(c, "destination", custom_keywords=custom_keywords) >= 0.7
+        for c in next_row
+    )
     if (next_has_breaks or next_has_locations) and len(rows) > hdr_idx + 2:
         nxt_data = [_s(c) for c in rows[hdr_idx + 2] if _s(c)]
         if len(nxt_data) >= 2 and any(_is_num(c) for c in nxt_data):
@@ -120,14 +144,29 @@ def detect_and_flatten_headers(rows: List[List[Any]], hdr_idx: int) -> Tuple[Lis
 
 
 # ---------------------------------------------------------------- scoring
-def _header_score(header: str, field: str) -> float:
+def _header_score(
+    header: str,
+    field: str,
+    custom_keywords: Optional[Dict[str, Any]] = None,
+) -> float:
+    if custom_keywords and header:
+        norm_kw = " ".join(str(header).strip().upper().split())
+        kw_entry = custom_keywords.get(norm_kw)
+        if kw_entry:
+            cat = kw_entry.get("parsed_category")
+            rule = kw_entry.get("parsed_rule") or {}
+            if cat == "COLUMN_ROLE":
+                return 1.0 if rule.get("role") == field else 0.0
+            if cat in ("SKID_BREAK", "WEIGHT_BREAK", "SURCHARGE_SYNONYM"):
+                return 0.0
+
     norm = normalize_header(header)
     if not norm:
         return 0.0
 
     # Never classify a weight break or numeric range (e.g. "1,000 to 1,999 lbs") as Origin or Destination
     if field in ("origin", "destination"):
-        if is_numeric_range_header(header) or parse_break_header(header) is not None:
+        if is_numeric_range_header(header) or parse_break_header(header, custom_keywords=custom_keywords) is not None:
             return 0.0
 
     synonyms = SYNONYMS.get(field, [])
@@ -167,6 +206,7 @@ def score_single_field(
     hdr_row: int,
     field: str,
     exclude: Tuple[int, ...] = (),
+    custom_keywords: Optional[Dict[str, Any]] = None,
 ) -> Tuple[Optional[int], float, List[Tuple[int, float]]]:
     """Scores all candidate columns for a field. Returns (best_col, best_score, all_candidates)."""
     candidates: List[Tuple[int, float]] = []
@@ -174,10 +214,13 @@ def score_single_field(
     for c, h in enumerate(headers):
         if c in exclude or not _s(h):
             continue
-        hs = _header_score(_s(h), field)
+        hs = _header_score(_s(h), field, custom_keywords=custom_keywords)
         sc = 0.7 * hs + 0.3 * _content_score(_column(rows, hdr_row, c), field)
+        # If user explicitly defined this header as the column role in Settings, honor 100% confidence
+        if hs >= 1.0 and custom_keywords and " ".join(_s(h).upper().split()) in custom_keywords:
+            sc = 1.0
         # Content alone must never auto-map a hard-required field
-        if hs < 0.4:
+        elif hs < 0.4:
             sc = min(sc, LOW - 0.05)
         sc = round(sc, 2)
         if sc >= LOW:
@@ -216,10 +259,16 @@ def detect_weight_unit(rows: List[List[Any]], hdr_row: int, break_units: List[st
     return None
 
 
-def detect_break_columns(rows: List[List[Any]], headers: List[str], hdr_row: int) -> Dict[str, Any]:
+def detect_break_columns(
+    rows: List[List[Any]],
+    headers: List[str],
+    hdr_row: int,
+    custom_keywords: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """Finds weight-break columns, skid columns, and skid-row layouts."""
     weight_cols, skid_cols, weight_vals, break_units = [], [], [], []
-    skid_count_col, skid_rate_col = None, None
+    skid_tiers: List[Dict[str, Any]] = []
+    skid_count_col, skid_rate_col, base_cost_col = None, None, None
 
     for c, h in enumerate(headers):
         h_str = _s(h)
@@ -228,10 +277,46 @@ def detect_break_columns(rows: List[List[Any]], headers: List[str], hdr_row: int
         data = [v for v in _column(rows, hdr_row, c) if _s(v)]
         numeric_data = bool(data) and sum(_is_num(v) for v in data) / len(data) >= 0.8
 
-        b_val, b_unit = parse_break_value(h_str)
+        # Check user-defined custom keywords first
+        if custom_keywords:
+            norm_kw = " ".join(h_str.upper().split())
+            kw_entry = custom_keywords.get(norm_kw)
+            if kw_entry:
+                cat = kw_entry.get("parsed_category")
+                rule = kw_entry.get("parsed_rule") or {}
+                if cat == "SKID_BREAK" and numeric_data:
+                    skid_cols.append(c)
+                    min_u = int(rule.get("min_units", 1))
+                    max_u = int(rule["max_units"]) if rule.get("max_units") is not None else max(10, min_u)
+                    skid_tiers.append({
+                        "col": c,
+                        "header": h_str,
+                        "min_skids": min_u,
+                        "max_skids": max_u,
+                    })
+                    continue
+                if cat == "COLUMN_ROLE":
+                    role = rule.get("role")
+                    if role == "skid_count" and skid_count_col is None:
+                        skid_count_col = c
+                        continue
+                    if role == "base_cost" and base_cost_col is None:
+                        base_cost_col = c
+                        continue
+
+        b_val, b_unit = parse_break_value(h_str, custom_keywords=custom_keywords)
 
         if SKID_HDR.match(h_str):
             skid_cols.append(c)
+            m_num = re.search(r"(\d+)", h_str)
+            if m_num:
+                n_skid = int(m_num.group(1))
+                skid_tiers.append({
+                    "col": c,
+                    "header": h_str,
+                    "min_skids": n_skid,
+                    "max_skids": n_skid,
+                })
         elif b_val is not None and numeric_data:
             weight_cols.append(c)
             weight_vals.append(b_val)
@@ -259,18 +344,24 @@ def detect_break_columns(rows: List[List[Any]], headers: List[str], hdr_row: int
     skid_label_col = next((c for c, h in enumerate(headers) if SKID_WORD.search(_s(h)) and c not in skid_cols), None)
 
     return {
-        "weight_cols": weight_cols if len(weight_cols) >= 2 else [],
-        "weight_vals": weight_vals if len(weight_cols) >= 2 else [],
+        "weight_cols": weight_cols if len(weight_cols) >= 2 else (weight_cols if (weight_cols and custom_keywords) else []),
+        "weight_vals": weight_vals if len(weight_cols) >= 2 else (weight_vals if (weight_cols and custom_keywords) else []),
         "break_units": break_units,
         "skid_cols": skid_cols,
+        "skid_tiers": skid_tiers,
         "skid_label_col": skid_label_col,
         "skid_count_col": skid_count_col,
         "skid_rate_col": skid_rate_col,
+        "base_cost_col": base_cost_col,
     }
 
 
 # ---------------------------------------------------------------- analyze
-def analyze(rows: List[List[Any]], sheet_name: Optional[str] = None) -> Dict[str, Any]:
+def analyze(
+    rows: List[List[Any]],
+    sheet_name: Optional[str] = None,
+    custom_keywords: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """Analyzes spreadsheet rows. Returns analysis dictionary for JobState."""
     issues: List[str] = []
     guesses: List[Dict[str, Any]] = []
@@ -278,7 +369,7 @@ def analyze(rows: List[List[Any]], sheet_name: Optional[str] = None) -> Dict[str
     suggestions: Dict[str, int] = {}
     conflicts: List[Dict[str, Any]] = []
 
-    raw_hdr = find_header_row(rows)
+    raw_hdr = find_header_row(rows, custom_keywords=custom_keywords)
     if raw_hdr is None:
         return {
             "status": "needs_mapping",
@@ -294,14 +385,14 @@ def analyze(rows: List[List[Any]], sheet_name: Optional[str] = None) -> Dict[str
         }
 
     # Flatten two-row headers if present
-    headers, hdr = detect_and_flatten_headers(rows, raw_hdr)
+    headers, hdr = detect_and_flatten_headers(rows, raw_hdr, custom_keywords=custom_keywords)
 
     # Score origin and destination
     candidates_by_field: Dict[str, List[Tuple[int, float]]] = {}
     best_by_field: Dict[str, Tuple[Optional[int], float]] = {}
 
     for fld in ("origin", "destination"):
-        col, conf, cands = score_single_field(rows, headers, hdr, fld)
+        col, conf, cands = score_single_field(rows, headers, hdr, fld, custom_keywords=custom_keywords)
         best_by_field[fld] = (col, conf)
         candidates_by_field[fld] = cands
 
@@ -373,7 +464,7 @@ def analyze(rows: List[List[Any]], sheet_name: Optional[str] = None) -> Dict[str
                 })
 
     # Break columns & mode detection
-    br = detect_break_columns(rows, headers, hdr)
+    br = detect_break_columns(rows, headers, hdr, custom_keywords=custom_keywords)
     has_w = bool(br["weight_cols"])
     has_s = bool(br["skid_cols"] or (br["skid_count_col"] is not None and br["skid_rate_col"] is not None) or br["skid_label_col"] is not None)
 
@@ -409,11 +500,13 @@ def analyze(rows: List[List[Any]], sheet_name: Optional[str] = None) -> Dict[str
             })
         else:
             cols = br["skid_cols"] or ([br["skid_label_col"]] if br["skid_label_col"] is not None else [])
+            all_tiers_resolved = bool(br.get("skid_tiers")) and len(br["skid_tiers"]) == len(cols) and bool(custom_keywords)
             guesses.append({
                 "field": "skid_rates",
                 "columns": cols,
-                "confidence": 0.8,
-                "needs_confirmation": True,
+                "confidence": 0.95 if all_tiers_resolved else 0.8,
+                "needs_confirmation": not all_tiers_resolved,
+                "skid_tiers": br.get("skid_tiers") or [],
             })
     else:
         issues.append("No weight breaks or skid/pallet columns found - is this priced by weight or by skid?")
@@ -434,7 +527,7 @@ def analyze(rows: List[List[Any]], sheet_name: Optional[str] = None) -> Dict[str
     needs_conf = any(g.get("needs_confirmation") for g in guesses)
     status = "ready" if (not unresolved and not conflicts and not needs_conf) else "needs_mapping"
 
-    return {
+    result_dict = {
         "status": status,
         "header_row": hdr,
         "sheet_name": sheet_name,
@@ -446,6 +539,11 @@ def analyze(rows: List[List[Any]], sheet_name: Optional[str] = None) -> Dict[str
         "issues": issues,
         "suggestions": suggestions,
     }
+    if br.get("skid_tiers"):
+        result_dict["skid_tiers"] = br["skid_tiers"]
+    if br.get("base_cost_col") is not None:
+        result_dict["base_cost_column"] = br["base_cost_col"]
+    return result_dict
 
 
 # ---------------------------------------------------------------- validation of user choices
@@ -460,6 +558,7 @@ def validate_mapping(
     skid_count_column: Optional[int] = None,
     base_cost_column: Optional[int] = None,
     skid_tiers: Optional[List[Any]] = None,
+    custom_keywords: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
     """Return a list of human-readable problems; empty list = OK."""
     errs: List[str] = []
@@ -500,7 +599,7 @@ def validate_mapping(
             errs.append("Choose a valid weight unit (lb or kg).")
         vals: List[float] = []
         for c in rate_columns:
-            val, _ = parse_break_value(_s(rows[header_row][c]))
+            val, _ = parse_break_value(_s(rows[header_row][c]), custom_keywords=custom_keywords)
             if val is None:
                 errs.append(f"Column {c + 1} header '{_s(rows[header_row][c])}' doesn't look like a weight break.")
             else:

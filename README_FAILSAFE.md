@@ -6,7 +6,7 @@
 
 ## 1. System Overview & Architecture
 
-RateSift allows freight brokers to upload carrier rate sheets (`.xlsx`, `.csv`). The **Rate-Sheet Header Failsafe** intercepts every spreadsheet, performs deep structural inspections, detects pricing modes, computes confidence scores, and gates processing until column assignments are 100% verified.
+Quotelytics allows freight brokers to upload carrier rate sheets (`.xlsx`, `.csv`). The **Rate-Sheet Header Failsafe** intercepts every spreadsheet, performs deep structural inspections, detects pricing modes, computes confidence scores, and gates processing until column assignments are 100% verified.
 
 ```
 Uploaded Sheet (.xlsx, .csv)
@@ -84,7 +84,7 @@ Uploaded Sheet (.xlsx, .csv)
 
 ## 3. Database Schema (SQLite / PostgreSQL Compatible)
 
-The job store is backed by SQLite (`shipflow.db`) with standard ANSI SQL for seamless PostgreSQL migration:
+The job store is backed by SQLite (`quotelytics.db`) with standard ANSI SQL for seamless PostgreSQL migration:
 
 ### `failsafe_jobs`
 | Column | Type | Description |
@@ -109,8 +109,20 @@ The job store is backed by SQLite (`shipflow.db`) with standard ANSI SQL for sea
 Stores position-aware column fingerprints: `hash(((col_idx, normalized_header)...) + col_count + tenant_id)`.
 Allows recurring uploads from known carriers to auto-map safely without prompts.
 
-### `failsafe_audit_logs`
-Logs every action (`upload`, `auto`, `confirmed`, `cancelled`) with tenant ID, user ID, timestamp, and payload for full compliance traceability.
+### `failsafe_audit_logs` (Append-Only Trigger Protected)
+Logs every rate sheet confirmation (`confirmed`) with tenant ID, sheet SHA-256 hash, timestamps, and structured mapping summary. Prohibits UPDATE and DELETE operations via SQLite triggers (`trg_failsafe_audit_prevent_update`, `trg_failsafe_audit_prevent_delete`). Excludes PII and unvalidated free-text.
+
+### `failsafe_override_attributions` (PIPEDA Detachable)
+Stores human override attributions, user IDs, client IP addresses, and user-provided notes. Detachable under PIPEDA/GDPR right-to-be-forgotten without violating audit log immutability.
+
+### `failsafe_shadow_logs`
+Records shadow-mode evaluations when `FAILSAFE_MODE="shadow"`, logging blocker and warning findings for post-hoc analysis without blocking live brokerage operations.
+
+### `failsafe_rejection_counters`
+Tracks validation rejections per tenant and client IP to power rolling anomaly detection. Pruned every 7 calendar days.
+
+### `system_settings`
+Key-value store for platform deployment governance, tenant allowlists (`failsafe_tenant_allowlist`), deploy timestamp (`failsafe_deploy_timestamp`), and immutable sunset timestamp (`failsafe_sunset_timestamp`).
 
 ---
 
@@ -120,7 +132,8 @@ All routes are mounted at root `/` and `/api/failsafe/`:
 
 - `POST /jobs`: Upload spreadsheet file (`multipart/form-data`). Runs scan ingestion, computes confidence, matches saved layouts, and returns `JobState`.
 - `GET /jobs/{id}`: Returns current `JobState` (enforces Tenant isolation via HTTP 404).
-- `POST /jobs/{id}/mapping`: Submits user-confirmed column mapping (`MappingRequest`). Validates headers and transitions job to `ready`.
+- `POST /jobs/{id}/dry-run`: Ephemeral zero-database preview calculation engine. Executes in-memory canonical math with cooperative 3.0s deadline and monotonic `seq_id` race guard.
+- `POST /jobs/{id}/mapping`: Submits user-confirmed column mapping (`MappingRequest`). Evaluates blockers and warnings, logs shadow/audit records, and transitions job.
 - `POST /jobs/{id}/cancel`: Aborts job and marks status as `expired` without modifying original file.
 - `POST /jobs/{id}/process`: Quoting execution gate. Atomically transitions `ready` $\rightarrow$ `processing`, verifies full load limits, executes `run_agent()`, and sets `done`.
 - `GET /jobs/{id}/download`: Downloads sanitized reformatted workbook (`.xlsx`).
@@ -130,10 +143,32 @@ All routes are mounted at root `/` and `/api/failsafe/`:
 
 ---
 
-## 5. Running Tests
+## 5. Operational Governance & Releases (v6.2)
 
-Execute the complete failsafe test suite:
+### Tri-State Governance Modes (`FAILSAFE_MODE`)
+- `FAILSAFE_MODE="off"`: Legacy mode; validation checks disabled.
+- `FAILSAFE_MODE="shadow"`: Validates in background and logs to `failsafe_shadow_logs`; never blocks confirmation (fails open).
+- `FAILSAFE_MODE="enforce"`: Hard enforcement; blockers reject with HTTP 422 (`E_BLOCKER_VIOLATION`); unacknowledged warnings reject with HTTP 409 (`E_UNACKNOWLEDGED_WARNING`). Allowlisted pilot tenants can be enforced while global mode remains in shadow.
+
+### Database Backup & Archival Migration
 ```bash
-python -m pytest tests/test_detect.py tests/test_ingest.py tests/test_api.py tests/test_security.py tests/test_agent_adapter.py tests/test_modal_ui.py tests/test_hardening.py
+python scripts/backup_and_migrate_release_2b.py
 ```
-Total coverage: 48 automated test cases covering edge cases, memory caps, zip bombs, formula injection, concurrent transitions, and contract invariants.
+1. Verifies free disk space $\ge 2.5\times$ DB+WAL on backup target and temp directory.
+2. Performs atomic `VACUUM INTO` backup.
+3. Verifies `PRAGMA integrity_check;` and table-by-table row count matching.
+4. Transactionally archives all legacy parcel rate sheets (`is_legacy_parcel = 1`, `confirmation_status = 'ARCHIVED'`).
+
+---
+
+## 6. Running Tests
+
+Execute the complete 50-scenario Failsafe and LTL transition verification suite:
+```bash
+pytest tests/test_failsafe_release_0_and_1a.py tests/test_failsafe_release_1b.py tests/test_failsafe_release_2a.py tests/test_failsafe_release_2b.py -v
+```
+
+Execute the full platform test suite (119 automated test scenarios):
+```bash
+pytest tests/test_failsafe_*.py tests/test_weight_cwt_golden.py tests/test_skid_based_ltl_rating.py tests/test_skid_failsafe_tier_rating.py tests/test_milestone*.py -q
+```

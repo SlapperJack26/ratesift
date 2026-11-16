@@ -6,12 +6,12 @@ from fastapi.testclient import TestClient
 from main import app
 from services.auth_service import create_session
 from services.import_day_and_ross_guide import import_day_and_ross_tariff
-from services.ratesift_engine import (
+from services.quotelytics_engine import (
     calculate_billable_weight,
     calculate_quote_for_sheet,
     quote_all_confirmed_carriers
 )
-from services.ratesift_db_service import (
+from services.quotelytics_db_service import (
     create_rate_sheet,
     get_rate_sheet,
     get_quote_audit_log,
@@ -21,10 +21,19 @@ from services.ratesift_db_service import (
 class TestMilestone3DeterministicQuotingEngine(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        import uuid
+        from services.auth_service import register_and_create_session
         cls.client = TestClient(app)
-        cls.user_id = "usr_alex_rivers"
-        cls.token = create_session(cls.user_id)
-        cls.client.cookies.set("shipflow_session", cls.token)
+        user, token = register_and_create_session(
+            name="Jordan Freight",
+            email=f"m3.engine.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+            company="Acme Logistics",
+            origin_zip="TORONTO, ON",
+            password="M3EnginePassword2026!"
+        )
+        cls.user_id = user["id"]
+        cls.token = token
+        cls.client.cookies.set("quotelytics_session", cls.token)
 
         # Import confirmed Day & Ross Guide Tariff
         cls.sheet_id = import_day_and_ross_tariff(user_id=cls.user_id, auto_confirm=True)
@@ -178,7 +187,7 @@ class TestMilestone3DeterministicQuotingEngine(unittest.TestCase):
         self.assertIn("Rule 19 Violation", str(ctx.exception))
 
     def test_08_quoting_api_endpoint_integration(self):
-        """Tests POST /api/ratesift/quotes/calculate and audit logging."""
+        """Tests POST /api/quotelytics/quotes/calculate and audit logging."""
         payload = {
             "origin": "CALGARY, AB",
             "destination": "LINDSAY, ON",
@@ -189,7 +198,7 @@ class TestMilestone3DeterministicQuotingEngine(unittest.TestCase):
             "accessorials": ["appointment", "liftgate"],
             "shipment_date": "2024-01-15"
         }
-        res = self.client.post("/api/ratesift/quotes/calculate", json=payload)
+        res = self.client.post("/api/quotelytics/quotes/calculate", json=payload)
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertIn("quote_id", data)
@@ -202,7 +211,7 @@ class TestMilestone3DeterministicQuotingEngine(unittest.TestCase):
         self.assertEqual(len(quote["surcharges"]), 2)
 
         # Test audit log retrieval via API (Rule 30)
-        audit_res = self.client.get(f"/api/ratesift/quotes/audit/{data['quote_id']}")
+        audit_res = self.client.get(f"/api/quotelytics/quotes/audit/{data['quote_id']}")
         self.assertEqual(audit_res.status_code, 200)
         audit_data = audit_res.json()
         self.assertEqual(audit_data["id"], data["quote_id"])

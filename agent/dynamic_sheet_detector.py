@@ -1,5 +1,5 @@
 """
-RateSift Autonomous Dynamic Sheet Detector & Multi-Segment Parsing Engine
+Quotelytics Autonomous Dynamic Sheet Detector & Multi-Segment Parsing Engine
 Detects rate table headers, classifies disclaimers & company metadata without hardcoded row numbers.
 Enforces Rule 1 (Explicit extraction), Rule 4 (Footnote resolution), Rule 6 (Needs review),
 Rule 7 (Human confirmation gate), Rule 33 (7-category classification), Rule 34 (Letterhead exclusion),

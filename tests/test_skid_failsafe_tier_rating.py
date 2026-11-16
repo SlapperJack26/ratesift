@@ -1,9 +1,12 @@
 import io
+import uuid
 import pytest
 import openpyxl
 from starlette.testclient import TestClient
 from main import app
-from services.ratesift_engine import quote_all_confirmed_carriers
+from services.quotelytics_engine import quote_all_confirmed_carriers
+from services.auth_service import register_and_create_session
+from services.db_service import update_user_tier
 
 client = TestClient(app)
 
@@ -29,12 +32,23 @@ def create_sample_skid_excel() -> bytes:
     return buf.getvalue()
 
 def test_skid_tier_mapping_and_rating():
+    user, token = register_and_create_session(
+        name="Jordan Freight",
+        email=f"skid.tier.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+        company="Acme Logistics",
+        origin_zip="TORONTO, ON",
+        password="SkidTierPassword2026!"
+    )
+    user_id = user["id"]
+    update_user_tier(user_id, "BUSINESS")
+    auth_cookies = {"quotelytics_session": token}
+
     # 1. Upload workbook
     content = create_sample_skid_excel()
     up_res = client.post(
         "/jobs",
         files={"file": ("Direct_Skid_Carrier.xlsx", content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": "usr_alex_rivers", "X-Tenant-Id": "usr_alex_rivers"}
+        cookies=auth_cookies
     )
     assert up_res.status_code == 200
     job_id = up_res.json()["job_id"]
@@ -60,25 +74,25 @@ def test_skid_tier_mapping_and_rating():
     map_res = client.post(
         f"/jobs/{job_id}/mapping",
         json=mapping_payload,
-        headers={"X-User-Id": "usr_alex_rivers", "X-Tenant-Id": "usr_alex_rivers"}
+        cookies=auth_cookies
     )
     assert map_res.status_code == 200
     assert map_res.json()["status"] == "ready"
 
-    # 3. Process job (Gated process triggers ingestion into rs_rate_sheets & rs_weight_breaks & rs_carrier_minimums)
+    # 3. Process job (Gated process triggers ingestion into ql_rate_sheets & ql_weight_breaks & ql_carrier_minimums)
     proc_res = client.post(
         f"/jobs/{job_id}/process",
-        headers={"X-User-Id": "usr_alex_rivers", "X-Tenant-Id": "usr_alex_rivers"}
+        cookies=auth_cookies
     )
     assert proc_res.status_code == 200
     assert proc_res.json()["status"] in ("done", "processed")
     assert proc_res.json().get("sheet_id") is not None
 
-    # 4. Verify RateSift Engine quotes accurately based on Skid Tiers and Base Cost MC
+    # 4. Verify Quotelytics Engine quotes accurately based on Skid Tiers and Base Cost MC
     # Scenario A: 2 skids Toronto -> Montreal
     # Base Cost = $50.00 MC, 1-2 Skids rate = $75.00/skid -> 2 * 75 = 150 + 50 MC = 200.00 base charge
     res_2skids = quote_all_confirmed_carriers(
-        user_id="usr_alex_rivers",
+        user_id=user_id,
         origin="Toronto, ON",
         destination="Montreal, QC",
         actual_weight=2000.0,
@@ -94,7 +108,7 @@ def test_skid_tier_mapping_and_rating():
     # Scenario B: 4 skids Toronto -> Montreal
     # Base Cost = $50.00 MC, 3-4 Skids rate = $65.00/skid -> 4 * 65 = 260 + 50 MC = 310.00 base charge
     res_4skids = quote_all_confirmed_carriers(
-        user_id="usr_alex_rivers",
+        user_id=user_id,
         origin="Toronto, ON",
         destination="Montreal, QC",
         actual_weight=4000.0,
@@ -108,7 +122,7 @@ def test_skid_tier_mapping_and_rating():
     # Scenario C: 7 skids Toronto -> Montreal
     # Base Cost = $50.00 MC, 5-8 Skids rate = $55.00/skid -> 7 * 55 = 385 + 50 MC = 435.00 base charge
     res_7skids = quote_all_confirmed_carriers(
-        user_id="usr_alex_rivers",
+        user_id=user_id,
         origin="Toronto, ON",
         destination="Montreal, QC",
         actual_weight=7000.0,
@@ -122,7 +136,7 @@ def test_skid_tier_mapping_and_rating():
     # Scenario D: 9 skids Toronto -> Montreal (Exceeds max_skid_capacity = 8)
     # Must be excluded under Rule 18 (Exceeds maximum carrier LTL capacity)
     res_9skids = quote_all_confirmed_carriers(
-        user_id="usr_alex_rivers",
+        user_id=user_id,
         origin="Toronto, ON",
         destination="Montreal, QC",
         actual_weight=9000.0,

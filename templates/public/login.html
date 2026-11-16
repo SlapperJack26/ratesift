@@ -20,7 +20,7 @@
   <meta property="og:title" content="Quotelytics | Account Login & Quoting Console Access">
   <meta property="og:description" content="Access your saved rate sheets, spreadsheet coordinate archives, and custom margin rules.">
   <meta property="og:image" content="https://quotelytics.ca/assets/og-login.jpg">
-  <meta property="og:locale" content="en_US">
+  <meta property="og:locale" content="en_CA">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
@@ -87,7 +87,7 @@
     <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative z-20 m-0">
       <!-- Left: Brand Identity -->
       <a href="/" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Quotelytics Home">
-        <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-8 md:h-9 w-auto object-contain" />
+        <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-8 md:h-9 w-auto object-contain" />
       </a>
 
       <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
@@ -130,24 +130,15 @@
         
         <!-- Header Text -->
         <div class="text-center space-y-2">
-          <div class="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 text-red-600 flex items-center justify-center mx-auto text-xl shadow-2xs font-bold" aria-hidden="true">ri</div>
+          <div class="flex items-center justify-center mx-auto mb-2">
+            <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-10 md:h-11 w-auto object-contain" />
+          </div>
           <h1 class="text-2xl font-extrabold tracking-tight text-[var(--foreground)]">
             Welcome back
           </h1>
           <p class="text-xs text-[var(--muted-foreground)] max-w-sm mx-auto leading-relaxed">
             Enter your credentials to access your rate calculation console, saved spreadsheets, and coordinate history.
           </p>
-        </div>
-
-        <!-- 1-Click Interactive Demo Fast-Fill Alert -->
-        <div class="p-3 bg-red-50/70 border border-red-200 rounded-xl flex items-center justify-between text-xs text-red-900">
-          <div class="flex items-center gap-2">
-            <span aria-hidden="true">💡</span>
-            <span>Testing the demo?</span>
-          </div>
-          <button type="button" onclick="prefillDemoUser()" class="px-2.5 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold text-[11px] transition-colors shadow-2xs">
-            Auto-fill Alex Rivers
-          </button>
         </div>
 
         <!-- Accessible Authentication Form -->
@@ -181,7 +172,7 @@
                 <label for="login-password" class="block text-xs font-bold text-[var(--foreground)]">
                   Password
                 </label>
-                <a href="#" onclick="alert('Password reset link sent to registered email address.'); return false;" class="text-[11px] text-red-600 hover:underline font-medium">
+                <a href="/forgot-password" class="text-[11px] text-red-600 hover:underline font-medium">
                   Forgot password?
                 </a>
               </div>
@@ -203,7 +194,7 @@
                   aria-label="Toggle password visibility" 
                   class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 text-xs focus:outline-hidden"
                 >
-                  <span id="pwd-icon-show">👁️</span>
+                  <span id="pwd-icon-show"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></span>
                 </button>
               </div>
               <div id="password-error" class="hidden text-[11px] text-red-600 font-medium">Password is required.</div>
@@ -217,6 +208,7 @@
                   id="remember-me" 
                   name="remember" 
                   checked 
+                  aria-label="Remember this browser for 30 days"
                   class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 focus:ring-1"
                 >
                 <span class="text-xs text-[var(--muted-foreground)]">Remember this browser for 30 days</span>
@@ -251,11 +243,11 @@
           <!-- Enterprise SSO Button -->
           <button 
             type="button" 
-            onclick="prefillDemoUser(); document.getElementById('submit-btn').click();" 
+            onclick="showToast('Enterprise SSO is available on Business plans. Please sign in with your work email and password.', 'info');" 
             class="w-full py-2 px-3 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-slate-50 text-[var(--foreground)] font-medium text-xs transition-colors flex items-center justify-center gap-2"
           >
             <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-            <span>Single Sign-On (SAML / Okta)</span>
+            <span>Single Sign-On</span>
           </button>
 
         </div>
@@ -270,13 +262,9 @@
           </p>
 
           <div class="flex items-center justify-center gap-4 text-[11px] text-[var(--muted-foreground)] pt-1">
-            <span class="flex items-center gap-1">
-              <span>🔒</span> 256-bit TLS Encryption
-            </span>
+            <span>256-bit TLS Encryption</span>
             <span>•</span>
-            <span class="flex items-center gap-1">
-              <span>📊</span> Spreadsheet Data Privacy
-            </span>
+            <span>Spreadsheet Data Privacy</span>
           </div>
         </div>
 
@@ -288,7 +276,7 @@
     <footer role="contentinfo" class="mt-8 px-6 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-4 bg-[var(--card)]">
       <!-- Left: Logo & Crawlable Navigation Links -->
       <div class="flex flex-wrap items-center gap-6">
-        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/ratesift-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
+        <div class="flex items-center"><img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" /></div>
 
         <!-- Crawlable Footer Links -->
         <nav aria-label="Footer Legal and Support Navigation" class="flex items-center gap-4 text-xs font-medium text-[var(--muted-foreground)]">
@@ -308,24 +296,15 @@
 
   <!-- Interactive Login Page Script -->
   <script>
-    function prefillDemoUser() {
-      document.getElementById('login-email').value = "alex.rivers@techcorp.io";
-      document.getElementById('login-password').value = "ShipFlowDemo2026!";
-      
-      const status = document.getElementById('login-status');
-      status.className = "text-center text-xs text-red-600 font-semibold";
-      status.textContent = "Alex Rivers credentials loaded. Click 'Log in' to access console.";
-    }
-
     function togglePasswordVisibility() {
       const pwd = document.getElementById('login-password');
       const icon = document.getElementById('pwd-icon-show');
       if (pwd.type === 'password') {
         pwd.type = 'text';
-        icon.textContent = '🙈';
+        icon.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>';
       } else {
         pwd.type = 'password';
-        icon.textContent = '👁️';
+        icon.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>';
       }
     }
 
@@ -376,7 +355,7 @@
       })
       .then(data => {
         status.className = "text-center text-xs text-emerald-600 font-semibold";
-        status.textContent = "✓ Authentication successful! Loading Quoting Console...";
+        status.textContent = "Authentication successful! Loading Quoting Console...";
         setTimeout(() => {
           window.location.href = data.redirect || "/console/new-quote";
         }, 400);

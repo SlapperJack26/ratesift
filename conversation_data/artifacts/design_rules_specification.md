@@ -1,6 +1,6 @@
-# Ratesift Design System Specification: Public vs. Private Pages
+# Quotelytics Design System Specification: Public vs. Private Pages
 
-This document outlines the strict design principles, component guidelines, layout rules, and scope boundaries governing the **Ratesift** platform across both **Public** and **Private (Authenticated)** views.
+This document outlines the strict design principles, component guidelines, layout rules, and scope boundaries governing the **Quotelytics** platform across both **Public** and **Private (Authenticated)** views.
 
 ---
 
@@ -12,14 +12,14 @@ These core guidelines apply across **every page** in the application:
   * Clean, high-contrast, modern light theme using Tailwind CSS (`bg-white`, `bg-slate-50`, `text-slate-900`, `text-slate-500`).
   * Pure white container cards (`bg-white`) bordered by subtle slate boundaries (`border border-slate-200`) and soft shadows (`shadow-xs` / `shadow-sm`).
 * **Brand Identity & Visual Logo:**
-  * **Header & Footer:** Uses the official visual brand logo image (`RateSift` with red rounded filter icon and subtitle "Shipping rate comparison") across all top headers (`h-8 md:h-9`) and footers (`h-6 md:h-7`).
-  * **Everywhere Else:** Spelled with standard punctuation and proper noun capitalization as **Ratesift** (headings, body copy, pricing cards, FAQs, `<title>`, `<meta>`, Schema JSON-LD, and exported files).
+  * **Header & Footer:** Uses the official visual brand logo image (`Quotelytics` with red rounded filter icon and subtitle "Shipping rate comparison") across all top headers (`h-8 md:h-9`) and footers (`h-6 md:h-7`).
+  * **Everywhere Else:** Spelled with standard punctuation and proper noun capitalization as **Quotelytics** (headings, body copy, pricing cards, FAQs, `<title>`, `<meta>`, Schema JSON-LD, and exported files).
   * **Primary Action Color:** Crimson Red (`bg-red-600`, hover: `bg-red-700`).
 * **Strict Scope Boundary:**
   * **Quoting Only:** The platform exclusively calculates batch rate quotes from Excel spreadsheets (`.xlsx`, `.xls`).
   * **Strictly Prohibited:** No booking workflows, no label generation, no shipping manifests, and no tracking number generation.
 * **Persistent Footer Specification:**
-  * **Left:** Visual RateSift logo image + 4 crawlable links: `Documentation`, `Support`, `API`, `Privacy`.
+  * **Left:** Visual Quotelytics logo image + 4 crawlable links: `Documentation`, `Support`, `API`, `Privacy`.
   * **Right:** Current date stamp: `September 28, 2026`.
 
 ---
@@ -30,7 +30,7 @@ These core guidelines apply across **every page** in the application:
 
 ### A. Navigation & Header
 * **Three-Zone Public Header:**
-  * **Left:** Brand logo and name (`SF SHIPFLOW`).
+  * **Left:** Brand logo and name (`SF QUOTELYTICS`).
   * **Center:** Crawlable main menu (`Home`, `Demo`, `Pricing`).
   * **Right:** Secondary text link `Log in`, primary conversion button `Get Started` (blue button with focus ring).
 * Active page marked semantically with `aria-current="page"`.
@@ -55,7 +55,7 @@ These core guidelines apply across **every page** in the application:
 
 ### A. Navigation & Header
 * **Console Header Structure:**
-  * **Left:** Brand mark (`SF SHIPFLOW`) linking directly to the console home (`New Rate Sheet`).
+  * **Left:** Brand mark (`SF QUOTELYTICS`) linking directly to the console home (`New Rate Sheet`).
   * **Center:** Primary app switcher tabs: `New Quote` and `History`. The active tab is indicated with an active state pill/underline.
   * **Right:** User profile dropdown trigger (`AR Alex R. ˅`).
 * **User Profile Dropdown Menu:**

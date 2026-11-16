@@ -1,6 +1,6 @@
-# RateSift — Automated Freight & Shipping Rate Comparison Platform
+# Quotelytics — Automated Freight & Shipping Rate Comparison Platform
 
-RateSift is a modern SaaS platform designed for Canadian freight brokers, forwarders, and 3PLs to ingest carrier Excel rate cards (`.xlsx`, `.xls`, `.csv`), calculate deterministic quotes across CWT breaks and accessorials, and rank competing carrier options side-by-side.
+Quotelytics is a modern SaaS platform designed for Canadian freight brokers, forwarders, and 3PLs to ingest carrier Excel rate cards (`.xlsx`, `.xls`, `.csv`), calculate deterministic quotes across CWT breaks and accessorials, and rank competing carrier options side-by-side.
 
 > **Strict Scope Boundary:** The platform **only quotes and compares rates**; it strictly **does not handle booking, tracking numbers, or label generation**. Data is resident in Canada with zero third-party rate sharing.
 

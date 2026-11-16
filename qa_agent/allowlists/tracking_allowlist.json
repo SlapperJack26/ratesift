@@ -1,0 +1,9 @@
+{
+  "tracking_request_patterns": [
+    "/api/analytics",
+    "/api/telemetry",
+    "google-analytics.com",
+    "googletagmanager.com",
+    "segment.io"
+  ]
+}

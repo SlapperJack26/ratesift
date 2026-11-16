@@ -1,22 +1,22 @@
-# Ratesift Complete Conversation & Project Data Archive
+# Quotelytics Complete Conversation & Project Data Archive
 **Conversation ID:** `b5a860ed-1691-4f5a-8f2d-ad2b4e7701e4`  
-**Platform:** Ratesift Automated Batch Shipping Quoting Platform  
+**Platform:** Quotelytics Automated Batch Shipping Quoting Platform  
 **Archive Timestamp:** September 28, 2026 - 18:48:58  
 **Total Trajectory Steps:** 1394  
 **Total User Prompts:** 53  
-**Compliance Standard:** All 32 RateSift Freight Broker Directives Enforced + Non-Critical Info Flexibility  
+**Compliance Standard:** All 32 Quotelytics Freight Broker Directives Enforced + Non-Critical Info Flexibility  
 **Data Residency:** WHC Canada (`CA_CENTRAL_WHC`)  
 
 ---
 
 ## 1. Executive Summary & Product Invariants
 
-**Ratesift** is a specialized, deterministic web platform and quoting engine designed for automated batch shipping rate calculations from Excel spreadsheets (`.xlsx`, `.xls`). The platform is strictly constrained to **quoting only** (no carrier booking, no label printing, and no delivery tracking numbers).
+**Quotelytics** is a specialized, deterministic web platform and quoting engine designed for automated batch shipping rate calculations from Excel spreadsheets (`.xlsx`, `.xls`). The platform is strictly constrained to **quoting only** (no carrier booking, no label printing, and no delivery tracking numbers).
 
 ### Core Invariants Enforced Across the Entire Platform:
 1. **Strict Quoting Boundary:** Quoting calculations only; zero label generation or booking workflows.
-2. **Visual Brand Identity (Header & Footer Only):** Official visual RateSift logo image lockup (red rounded filter icon, 'RateSift' wordmark, and subtitle 'Shipping rate comparison') is restricted exclusively to the `<header>` and `<footer>`.
-3. **Standard Typography Everywhere Else:** Spelled with standard proper noun capitalization as **Ratesift** across all body copy, headings, meta tags, schema JSON-LD, pricing cards, and database records.
+2. **Visual Brand Identity (Header & Footer Only):** Official visual Quotelytics logo image lockup (red rounded filter icon, 'Quotelytics' wordmark, and subtitle 'Shipping rate comparison') is restricted exclusively to the `<header>` and `<footer>`.
+3. **Standard Typography Everywhere Else:** Spelled with standard proper noun capitalization as **Quotelytics** across all body copy, headings, meta tags, schema JSON-LD, pricing cards, and database records.
 4. **Full-Bleed Edge-to-Edge Margins:** Header top margin = 0, footer bottom margin = 0 (`mt-auto m-0`), horizontal margins = 0 (`w-full`), touching viewport boundaries across phones, tablets, laptops, and monitors.
 5. **Private New Quote Form:** Vertical headers for **From** and **To**, each containing horizontal options for `City Name`, `Province / State`, `Postal Code / Zip Code`, and `Country` list.
 6. **Table Display Standard:** Bold table headers (`font-bold`), unbolded data rows (`font-normal`), exact coordinate cell tracking (`Sheet 1 • Row 14, Col C`), and zero colored status bubbles.
@@ -72,7 +72,7 @@
 | **#41** | Step 593 | `2026-09-28T07:24:21Z` | proced with the entire plan |
 | **#42** | Step 685 | `2026-09-28T07:29:51Z` | @[c:\Users\Dylan\.gemini\antigravity\brain\b5a860ed-1691-4f5a-8f2d-ad2b4e7701e4\implementation_plan.md:L1] |
 | **#43** | Step 691 | `2026-09-28T07:36:47Z` | lets build the website to auto scale to users screen size select common limits ipad/ tablet sizes laptops, monitors and phones keep all orginal design rules |
-| **#44** | Step 915 | `2026-09-28T07:52:42Z` | lets make a small change to the design plan make the company name "rAtesIft" capitalize the letters A and I in the name and color them red also change the color theme to red insead of blue change nothing else |
+| **#44** | Step 915 | `2026-09-28T07:52:42Z` | lets make a small change to the design plan make the company name "quotelytics" capitalize the letters A and I in the name and color them red also change the color theme to red insead of blue change nothing else |
 | **#45** | Step 980 | `2026-09-28T07:57:51Z` | lowercase the 'i' in the company name |
 | **#46** | Step 1002 | `2026-09-28T08:00:52Z` | spell the company name with standard punctuation everywhere except the header and footer |
 | **#47** | Step 1035 | `2026-09-28T08:05:54Z` | use the uploaded image as the company name in only the header and footer |
@@ -103,7 +103,7 @@ Designed complete system flowchart linking public and private routes, defined th
 Engineered comprehensive responsive layout with CSS clamp, fluid typography, mobile drawers, responsive tables, and multi-device switcher for phone, tablet, laptop, and monitor.
 
 ### Phase 6: Brand Evolution & Stylization (Prompts #43-#46)
-Shifted color palette to Crimson Red (`#DC2626`), stylized header/footer with official logo lockup, and enforced standard proper noun `Ratesift` across all other contexts.
+Shifted color palette to Crimson Red (`#DC2626`), stylized header/footer with official logo lockup, and enforced standard proper noun `Quotelytics` across all other contexts.
 
 ### Phase 7: Edge-to-Edge Margins & New Quote Routing Headers (Prompts #47-#48)
 Implemented zero-margin full-bleed top, bottom, and horizontal borders. Rebuilt `/console/new-quote` with vertical 'From' and 'To' headers and horizontal inputs for City, Province/State, Zip, and Country.
@@ -132,7 +132,7 @@ Built intelligent Excel restructuring pipeline with tolerance for non-critical c
 * **Public Landing:** `http://127.0.0.1:8000/`
 * **Public Demo:** `http://127.0.0.1:8000/demo`
 * **Public Pricing:** `http://127.0.0.1:8000/pricing`
-* **Login:** `http://127.0.0.1:8000/login` (`demo@ratesift.com` / `demo1234`)
+* **Login:** `http://127.0.0.1:8000/login` (`demo@quotelytics.com` / `demo1234`)
 * **New Quote Console:** `http://127.0.0.1:8000/console/new-quote`
 * **Rate Sheets:** `http://127.0.0.1:8000/console/rate-sheets`
 * **Quotes History:** `http://127.0.0.1:8000/console/history`

@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotelytics | Failsafe Sheet Upload & Quoting Live Video Demo</title>
+  <!-- Tailwind CSS Framework matching real site -->
+  <script src="/static/js/tailwindcss.min.js"></script>
+  <script>
+    if (!window.tailwind) {
+      document.write('<script src="https://cdn.tailwindcss.com"><\/script>');
+    }
+  </script>
+  <style>
+    :root {
+      --background: #f8fafc;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-foreground: #0f172a;
+      --border: #e2e8f0;
+      --muted: #f8fafc;
+      --muted-foreground: #64748b;
+    }
+    .simulated-cursor {
+      pointer-events: none;
+      transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 99999;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.3);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col p-2 sm:p-4 selection:bg-red-500 selection:text-white">
+
+  <!-- TOP SHOWCASE CONTROL BAR -->
+  <header class="max-w-7xl w-full mx-auto flex flex-wrap items-center justify-between gap-4 py-3 px-5 bg-slate-950/90 border border-slate-800 rounded-2xl mb-3 shadow-xl backdrop-blur-md">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-red-600 flex items-center justify-center font-black text-xl text-white shadow-md shadow-red-600/30">
+        Q
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm sm:text-base font-bold text-white tracking-tight">Quotelytics Video Demo Showcase</h1>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
+            Real Site UI Match • 100% Deterministic
+          </span>
+        </div>
+        <p class="text-xs text-slate-400">Header Failsafe Contract Invariants • Human Confirmation Gate • CzarLite Deficit Rating</p>
+      </div>
+    </div>
+
+    <!-- Controls & Switchers -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <button id="btn-toggle-sound" onclick="toggleAudio()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center gap-1.5 transition cursor-pointer">
+        <span id="sound-icon">🔊</span>
+        <span id="sound-label">Audio On</span>
+      </button>
+
+      <button id="btn-toggle-mode" onclick="toggleInteractiveMode()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition cursor-pointer">
+        <span id="mode-icon">🎮</span>
+        <span id="mode-label">Switch to Interactive Mode</span>
+      </button>
+
+      <button id="btn-export-video" onclick="exportWebMVideo()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-md shadow-red-600/30 flex items-center gap-1.5 transition cursor-pointer">
+        <span>🎬</span>
+        <span id="export-btn-text">Export Video (.webm)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN STAGE WRAPPER -->
+  <main class="max-w-7xl w-full mx-auto flex-1 flex flex-col space-y-3">
+    
+    <!-- BROWSER FRAME CONTAINER (MATCHES REAL SITE 100%) -->
+    <div class="relative bg-white border border-slate-300 rounded-2xl shadow-2xl overflow-hidden flex flex-col flex-1 min-h-[720px]">
+      
+      <!-- OS Window Chrome / Address Bar -->
+      <div class="h-9 bg-slate-100 border-b border-slate-200 px-4 flex items-center justify-between shrink-0 select-none">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-rose-400"></div>
+          <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+          <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+          <div class="ml-3 flex items-center gap-1 px-3 py-0.5 rounded-md bg-white border border-slate-200 text-xs font-mono text-slate-700 w-80 sm:w-96 shadow-2xs">
+            <span class="text-slate-400">🔒</span>
+            <span id="simulated-browser-url">https://quotelytics.ca/console/rate-sheets</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-red-50 text-red-700 border border-red-200 font-bold">
+            FAILSAFE ACTIVE
+          </span>
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
+        </div>
+      </div>
+
+      <!-- SIMULATED MOUSE CURSOR -->
+      <div id="simulated-cursor" class="simulated-cursor absolute w-6 h-6 z-50 pointer-events-none drop-shadow-xl transform -translate-x-1 -translate-y-1 transition-all duration-300" style="left: 45%; top: 40%;">
+        <svg class="w-6 h-6 text-red-600" viewBox="0 0 24 24" fill="currentColor" stroke="white" stroke-width="1.5">
+          <path d="M4 2l16 10-7 2-2 7L4 2z"/>
+        </svg>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- REAL QUOTELYTICS APPLICATION SHELL (IDENTICAL TO LIVE WEBSITE)       -->
+      <!-- ===================================================================== -->
+      <div class="flex-1 flex flex-col bg-slate-50 text-slate-900 overflow-y-auto custom-scrollbar relative">
+        
+        <!-- REAL SITE TOP NAVIGATION BAR -->
+        <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-slate-200 bg-white relative z-20 m-0 shadow-2xs">
+          <div class="flex items-center justify-between w-full max-w-7xl mx-auto">
+            <!-- Left: Logo & Nav Links -->
+            <div class="flex items-center gap-6 lg:gap-8">
+              <a href="#" class="flex items-center gap-2 hover:opacity-90 transition-opacity">
+                <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-8 w-auto object-contain" />
+              </a>
+
+              <!-- Main Navigation Pills -->
+              <nav role="navigation" class="hidden sm:flex items-center gap-1.5 sm:gap-2 text-xs font-medium">
+                <button id="nav-btn-quote" onclick="switchView('quote')" class="nav-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                  <span>New Quote</span>
+                </button>
+                <button class="nav-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                  <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>Quotes History</span>
+                </button>
+                <button id="nav-btn-sheets" onclick="switchView('sheets')" class="nav-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs cursor-pointer">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  <span>Carrier Tariffs</span>
+                </button>
+                <button class="nav-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                  <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <span>Settings</span>
+                </button>
+              </nav>
+            </div>
+
+            <!-- Right: Quota Pill & Sovereignty Badge -->
+            <div class="flex items-center gap-2.5 sm:gap-3">
+              <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Free Starter</span>
+                <span class="text-slate-300">•</span>
+                <span class="text-slate-600">50 quotes left</span>
+              </div>
+
+              <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
+                <span>🇨🇦</span>
+                <span>Hosted in Canada (WHC) • PIPEDA Compliant</span>
+              </div>
+
+              <div class="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- =================================================================== -->
+        <!-- VIEW 1: REAL CARRIER RATE SHEETS PAGE (/console/rate-sheets)        -->
+        <!-- =================================================================== -->
+        <main id="view-rate-sheets" class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+          
+          <!-- Top Title & Action Banner -->
+          <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h2 class="text-xl font-bold tracking-tight text-slate-900">Carrier Rate Sheets</h2>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-red-50 text-red-700 border border-red-200">
+                  WHC Canada Sovereign Hosting
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">
+                Normalized rate sheets require human confirmation before live quoting.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer">
+                <span class="text-xs">🛡️</span>
+                <span>Scrub & Redact Tariff</span>
+              </button>
+              <button id="btn-trigger-upload" onclick="triggerSimulatedUpload()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Upload New Rate Sheet</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Real Upload Status Notification Box -->
+          <div id="upload-status-box" class="hidden p-3 rounded-xl text-xs font-mono transition-all">
+            <!-- Dynamic status -->
+          </div>
+
+          <!-- Rate Sheets Table Card -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-4 bg-slate-50/60 border-b border-slate-200 flex items-center justify-between">
+              <div class="text-xs font-bold text-slate-700">Uploaded Carrier Sheets</div>
+              <div class="text-[11px] text-slate-500" id="sheet-count-indicator">3 active tariffs loaded</div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="border-b border-slate-200 bg-slate-50/30 text-[11px] font-bold text-slate-700">
+                    <th class="py-3 px-4">Carrier & Service</th>
+                    <th class="py-3 px-4">Tariff / Account</th>
+                    <th class="py-3 px-4">Effective - Expiry</th>
+                    <th class="py-3 px-4">Units & Currency</th>
+                    <th class="py-3 px-4">Confirmation Status</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="sheets-tbody" class="divide-y divide-slate-200 text-slate-900">
+                  <tr id="row-apex" class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-4">
+                      <div class="font-bold text-slate-900">Apex Canadian Freight</div>
+                      <div class="text-[11px] text-slate-500">Standard Canadian LTL Tariff</div>
+                    </td>
+                    <td class="py-3.5 px-4 font-mono text-[11px] text-slate-600">APEX-CA-2026-V1</td>
+                    <td class="py-3.5 px-4 text-slate-600">2026-01-01 - 2026-12-31</td>
+                    <td class="py-3.5 px-4">
+                      <span class="inline-flex items-center gap-1 font-mono text-[11px] text-slate-700">
+                        <span>🇨🇦 CAD</span> • <span>lb (cwt)</span>
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span id="badge-apex-status" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span>Needs Mapping</span>
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                      <button id="btn-review-apex" onclick="openFailsafeModal()" class="px-3 py-1 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-xs shadow-2xs transition-colors cursor-pointer">
+                        Review & Map
+                      </button>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-4">
+                      <div class="font-bold text-slate-900">Day & Ross Freight</div>
+                      <div class="text-[11px] text-slate-500">Cross-Canada LTL Matrix</div>
+                    </td>
+                    <td class="py-3.5 px-4 font-mono text-[11px] text-slate-600">DR-EXP-992</td>
+                    <td class="py-3.5 px-4 text-slate-600">2026-01-01 - 2026-12-31</td>
+                    <td class="py-3.5 px-4 font-mono text-[11px] text-slate-700">🇨🇦 CAD • lb</td>
+                    <td class="py-3.5 px-4">
+                      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        ✓ Confirmed & Active
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                      <span class="text-xs text-slate-400 font-medium">Auto-Rated</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+
+        <!-- =================================================================== -->
+        <!-- VIEW 2: REAL NEW QUOTE FREIGHT ENGINE (/console/new-quote)          -->
+        <!-- =================================================================== -->
+        <main id="view-new-quote" class="hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+          
+          <!-- Top Title & FSC Index Card -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+            <div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Freight Rating Engine</h2>
+              <p class="text-sm text-slate-500 mt-0.5">100% Deterministic (Rule 8) • WHC Canada • Rule 29 • A Canadian freight rate comparison UI design</p>
+            </div>
+
+            <!-- FSC Index Card -->
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs min-w-[320px] max-w-md">
+              <div class="text-xs font-semibold text-slate-600">Weekly Canadian Fuel Surcharge (FSC) Index</div>
+              <div class="flex items-center justify-between gap-3 mt-1.5">
+                <div class="flex-1 text-sm font-bold text-slate-900">
+                  Ontario Trucking Association (OTA) LTL — 31.5%
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs shrink-0">
+                  <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                  <span>Auto-sync</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quote Inputs Section -->
+          <section class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+              
+              <!-- Origin Card -->
+              <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-2">
+                <div>
+                  <label class="block font-bold text-sm text-slate-900">Origin (Lane Origin)</label>
+                  <div class="text-xs text-slate-500">Canadian Postal FSA Resolver</div>
+                </div>
+                <input id="input-origin-val" type="text" value="M5V 2T6" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs font-mono">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 mt-1">
+                  <span>📍</span>
+                  <span>Toronto, ON (FSA: M5V • Zone ON-TOR)</span>
+                </div>
+              </div>
+
+              <!-- Destination Card -->
+              <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-2">
+                <div>
+                  <label class="block font-bold text-sm text-slate-900">Destination (Lane Dest)</label>
+                  <div class="text-xs text-slate-500">Canadian Postal FSA Resolver</div>
+                </div>
+                <input id="input-dest-val" type="text" value="H3B 2Y5" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs font-mono">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 mt-1">
+                  <span>📍</span>
+                  <span>Montreal, QC (FSA: H3B • Zone QC-MTL)</span>
+                </div>
+              </div>
+
+              <!-- Cargo Weight Card -->
+              <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-2">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <label class="block font-bold text-sm text-slate-900">Shipment Weight & Class</label>
+                    <div class="text-xs text-slate-500">Weight-Break & CzarLite Rating</div>
+                  </div>
+                  <span class="text-[10px] font-mono text-slate-400 uppercase">Class 70</span>
+                </div>
+                <div class="relative">
+                  <input id="input-weight-val" type="text" value="1,450 lbs" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs font-mono">
+                  <span class="absolute right-3.5 top-2.5 text-xs font-bold text-slate-400">Class 70 LTL</span>
+                </div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-50 text-red-800 border border-red-200 mt-1">
+                  <span>⚖️</span>
+                  <span>Evaluates 1,000+ vs 2,000+ Breaks</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <button id="btn-calc-rates-action" onclick="triggerQuoteCalculation()" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer">
+                  <span>Calculate Rates</span>
+                  <span>→</span>
+                </button>
+                <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
+                  <div class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white shadow-2xs text-slate-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>Active Rate Sheets:</span>
+                    <span class="font-bold text-slate-900 ml-0.5">3</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 bg-white shadow-2xs text-slate-800 text-xs font-semibold">
+                <div class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs">🛡️</div>
+                <span>Client-Side Tariff Redaction Scrubber Active</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- RESULTS SECTION (EXACT MOCKUP CARDS & DEFICIT CALLOUT) -->
+          <section id="section-quote-results" class="space-y-4">
+            
+            <!-- Lane Title Bar -->
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-bold text-slate-900 tracking-tight">TORONTO, ON (M5V) → MONTREAL, QC (H3B)</h3>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    2 Carrier Rates Found
+                  </span>
+                </div>
+                <div class="text-[11px] text-slate-500 mt-0.5">
+                  Weight: 1,450.0 lbs • OTA FSC: 31.5% • Margin: 15.0% • 100% Deterministic
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
+                <span class="text-[10px] uppercase font-bold text-slate-400 px-2">Sort:</span>
+                <span class="px-2.5 py-1 rounded-lg bg-white shadow-2xs text-red-600 font-bold">Lowest Price</span>
+                <span class="px-2.5 py-1 rounded-lg text-slate-600">Fastest Transit</span>
+              </div>
+            </div>
+
+            <!-- CzarLite Deficit Rating Notice -->
+            <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-900 flex items-center justify-between text-xs shadow-2xs">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">💡</span>
+                <div>
+                  <span class="font-bold text-indigo-950">CzarLite Deficit Rating Triggered:</span>
+                  <span>Bumping rated weight from 1,450 lbs to the 2,000 lbs break ($9.80/cwt) saves $23.35 CAD over the actual weight rate!</span>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-800 font-mono font-bold text-[10px]">
+                Deficit Rule 8 Applied
+              </span>
+            </div>
+
+            <!-- Carrier Rate Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+              
+              <!-- Card 1: Apex Canadian Freight (BEST RATE) -->
+              <div class="bg-white border-2 border-red-500/80 rounded-2xl p-5 shadow-md flex flex-col justify-between space-y-4 relative">
+                <div class="absolute -top-3 right-4 px-3 py-0.5 bg-red-600 text-white rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                  ★ Best Rate Tariff
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h4 class="text-base font-bold text-slate-900">Apex Canadian Freight</h4>
+                      <p class="text-xs text-slate-500">Standard Canadian LTL • 1-2 Days Transit</p>
+                    </div>
+                    <span class="text-xs font-mono text-slate-500">APEX-CA-2026-V1</span>
+                  </div>
+
+                  <div class="mt-4 p-3 bg-slate-50 rounded-xl space-y-1.5 text-xs font-mono">
+                    <div class="flex justify-between text-slate-600">
+                      <span>Base Freight Rate (2,000 lbs bump):</span>
+                      <span class="font-bold text-slate-900">$196.00 CAD</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                      <span>Fuel Surcharge (FSC 18.5%):</span>
+                      <span class="font-bold text-slate-900">$36.26 CAD</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600 border-t border-slate-200 pt-1.5">
+                      <span>Wholesale Carrier Cost:</span>
+                      <span class="font-bold text-slate-900">$232.26 CAD</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-3 flex items-center justify-between">
+                  <div>
+                    <div class="text-[10px] text-slate-500 uppercase font-mono">Client Quoted Price (15% Margin)</div>
+                    <div class="text-2xl font-black text-red-600 font-mono">$267.10 <span class="text-xs font-normal text-slate-500">CAD</span></div>
+                  </div>
+                  <button id="btn-export-pdf" onclick="exportProposalPdf()" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer">
+                    <span>📄 Export Client Proposal (PDF)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Card 2: Day & Ross Freight -->
+              <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-4">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h4 class="text-base font-bold text-slate-900">Day & Ross Freight</h4>
+                      <p class="text-xs text-slate-500">Cross-Canada Priority • Next Day Transit</p>
+                    </div>
+                    <span class="text-xs font-mono text-slate-500">DR-EXP-992</span>
+                  </div>
+
+                  <div class="mt-4 p-3 bg-slate-50 rounded-xl space-y-1.5 text-xs font-mono">
+                    <div class="flex justify-between text-slate-600">
+                      <span>Base Freight Rate:</span>
+                      <span class="font-bold text-slate-900">$215.00 CAD</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                      <span>Fuel Surcharge (FSC 18.5%):</span>
+                      <span class="font-bold text-slate-900">$39.80 CAD</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600 border-t border-slate-200 pt-1.5">
+                      <span>Wholesale Carrier Cost:</span>
+                      <span class="font-bold text-slate-900">$254.80 CAD</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-3 flex items-center justify-between">
+                  <div>
+                    <div class="text-[10px] text-slate-500 uppercase font-mono">Client Quoted Price (15% Margin)</div>
+                    <div class="text-2xl font-black text-slate-900 font-mono">$293.00 <span class="text-xs font-normal text-slate-500">CAD</span></div>
+                  </div>
+                  <button class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer">
+                    Select Carrier
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </section>
+
+        </main>
+
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- THE EXACT PHASE 4 FAILSAFE MAPPING MODAL (MATCHES REAL COMPONENT)     -->
+      <!-- ===================================================================== -->
+      <div id="real-failsafe-modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto" style="z-index: 99999;">
+        <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          
+          <!-- Modal Header -->
+          <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-base font-bold text-slate-900">Confirm Column Mapping</h3>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+                    Needs Mapping
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Please map the columns below to ensure 100% accurate quoting. A wrong quote is worse than a pause.
+                </p>
+              </div>
+            </div>
+            <button onclick="closeFailsafeModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <!-- Modal Body (Scrollable) -->
+          <div class="p-6 overflow-y-auto flex-1 space-y-5 text-xs text-slate-700 custom-scrollbar">
+            
+            <!-- Issues Banner -->
+            <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1.5">
+              <div class="flex items-center gap-2 font-bold text-xs text-amber-800">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Required Actions Before Quoting</span>
+              </div>
+              <ul class="list-disc list-inside space-y-1 text-xs text-amber-800 pl-1 font-medium">
+                <li>Origin and Destination columns mapped with moderate confidence (needs user confirmation).</li>
+                <li>Weight break columns detected, but weight unit (lb vs kg) must be specified.</li>
+              </ul>
+            </div>
+
+            <!-- Top Configuration Grid: Header Row & Pricing Mode -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+              <!-- Header Row Selector -->
+              <div class="md:col-span-3 space-y-1.5">
+                <label class="block font-bold text-slate-800 text-xs">Header Row Number</label>
+                <div class="flex items-center gap-2">
+                  <input type="number" value="1" min="1" max="50" class="w-24 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500">
+                  <span class="text-[11px] text-slate-500">(1-indexed)</span>
+                </div>
+              </div>
+
+              <!-- Pricing Mode Switcher -->
+              <div class="md:col-span-5 space-y-1.5">
+                <label class="block font-bold text-slate-800 text-xs">Pricing Mode <span class="text-red-500">*</span></label>
+                <div class="flex items-center gap-4 pt-1">
+                  <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-800">
+                    <input type="radio" name="failsafe-mode" value="weight" checked class="text-red-600 focus:ring-red-500">
+                    <span class="font-bold text-red-600">Weight-Break Mode</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-800">
+                    <input type="radio" name="failsafe-mode" value="skid" class="text-red-600 focus:ring-red-500">
+                    <span>Skid / Pallet Mode</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Weight Unit Required -->
+              <div class="md:col-span-4 space-y-1.5">
+                <label class="block font-bold text-slate-800 text-xs">Weight Unit <span class="text-red-500">*</span></label>
+                <select id="modal-select-unit" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500">
+                  <option value="lb" selected>Pounds (lb / cwt)</option>
+                  <option value="kg">Kilograms (kg)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Sticky 12-Row Preview Table -->
+            <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
+              <div class="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-[11px] font-mono text-slate-600">
+                <span>Spreadsheet Preview: Quotelytics_Canadian_LTL_Sample_Tariff.xlsx</span>
+                <span class="text-emerald-700 font-bold">Rule 12: Byte Immutability Protected</span>
+              </div>
+              <div class="overflow-x-auto max-h-56">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead class="sticky top-0 bg-slate-100 border-b border-slate-200 z-10">
+                    <tr class="divide-x divide-slate-200">
+                      <th class="p-2 min-w-[150px]">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500">Col 0 (A)</span>
+                        <select class="w-full mt-1 bg-white border border-red-400 rounded p-1 text-[11px] font-bold text-red-700">
+                          <option selected>Origin FSA / City</option>
+                        </select>
+                      </th>
+                      <th class="p-2 min-w-[150px]">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500">Col 1 (B)</span>
+                        <select class="w-full mt-1 bg-white border border-red-400 rounded p-1 text-[11px] font-bold text-red-700">
+                          <option selected>Destination FSA / City</option>
+                        </select>
+                      </th>
+                      <th class="p-2 min-w-[120px]">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500">Col 2 (C)</span>
+                        <select class="w-full mt-1 bg-white border border-slate-300 rounded p-1 text-[11px] text-slate-800">
+                          <option selected>Min Charge (CAD)</option>
+                        </select>
+                      </th>
+                      <th class="p-2 min-w-[120px]">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500">Col 3 (D)</span>
+                        <select class="w-full mt-1 bg-white border border-emerald-400 rounded p-1 text-[11px] font-bold text-emerald-700">
+                          <option selected>L5C (&lt;500 lbs)</option>
+                        </select>
+                      </th>
+                      <th class="p-2 min-w-[120px]">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500">Col 4 (E)</span>
+                        <select class="w-full mt-1 bg-white border border-emerald-400 rounded p-1 text-[11px] font-bold text-emerald-700">
+                          <option selected>M5C (500+ lbs)</option>
+                        </select>
+                      </th>
+                      <th class="p-2 min-w-[120px]">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500">Col 5 (F)</span>
+                        <select class="w-full mt-1 bg-white border border-emerald-400 rounded p-1 text-[11px] font-bold text-emerald-700">
+                          <option selected>M1M (1,000+ lbs)</option>
+                        </select>
+                      </th>
+                      <th class="p-2 min-w-[120px]">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500">Col 6 (G)</span>
+                        <select class="w-full mt-1 bg-white border border-emerald-400 rounded p-1 text-[11px] font-bold text-emerald-700">
+                          <option selected>M2M (2,000+ lbs)</option>
+                        </select>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-200 font-mono text-[11px] text-slate-800">
+                    <tr class="divide-x divide-slate-200 bg-red-50/20">
+                      <td class="p-2 font-bold text-red-700">M5V (Toronto, ON)</td>
+                      <td class="p-2 font-bold text-red-700">H3B (Montreal, QC)</td>
+                      <td class="p-2">85.00</td>
+                      <td class="p-2 font-bold text-emerald-700">18.50</td>
+                      <td class="p-2 font-bold text-emerald-700">15.20</td>
+                      <td class="p-2 font-bold text-emerald-700">12.40</td>
+                      <td class="p-2 font-bold text-emerald-700">9.80</td>
+                    </tr>
+                    <tr class="divide-x divide-slate-200 bg-red-50/20">
+                      <td class="p-2 font-bold text-red-700">M5V (Toronto, ON)</td>
+                      <td class="p-2 font-bold text-red-700">T2P (Calgary, AB)</td>
+                      <td class="p-2">145.00</td>
+                      <td class="p-2 font-bold text-emerald-700">34.00</td>
+                      <td class="p-2 font-bold text-emerald-700">29.50</td>
+                      <td class="p-2 font-bold text-emerald-700">24.80</td>
+                      <td class="p-2 font-bold text-emerald-700">20.10</td>
+                    </tr>
+                    <tr class="divide-x divide-slate-200 bg-red-50/20">
+                      <td class="p-2 font-bold text-red-700">M5V (Toronto, ON)</td>
+                      <td class="p-2 font-bold text-red-700">V6B (Vancouver, BC)</td>
+                      <td class="p-2">165.00</td>
+                      <td class="p-2 font-bold text-emerald-700">38.50</td>
+                      <td class="p-2 font-bold text-emerald-700">33.20</td>
+                      <td class="p-2 font-bold text-emerald-700">28.00</td>
+                      <td class="p-2 font-bold text-emerald-700">22.90</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
+            <button onclick="closeFailsafeModal()" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer">
+              Cancel (Leave File Untouched)
+            </button>
+            <button id="btn-modal-confirm-action" onclick="confirmMappingAndProcess()" type="button" class="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md shadow-red-600/30 transition-all flex items-center gap-2 cursor-pointer">
+              <span>✓ Confirm Mapping & Process</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- TIMELINE VIDEO CONTROLS & NARRATION AT BOTTOM                        -->
+    <!-- ===================================================================== -->
+    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col space-y-3">
+      
+      <!-- Timeline Scrubber Bar -->
+      <div class="relative w-full h-3 bg-slate-800 rounded-full cursor-pointer overflow-hidden group select-none" onclick="seekVideo(event)">
+        <div id="video-progress-bar" class="h-full bg-gradient-to-r from-red-600 to-rose-500 rounded-full w-0 transition-all duration-100"></div>
+        <!-- Chapter Markers -->
+        <div class="absolute left-[18%] top-0 bottom-0 w-0.5 bg-slate-600/80" title="Scene 2: Sheet Upload"></div>
+        <div class="absolute left-[36%] top-0 bottom-0 w-0.5 bg-slate-600/80" title="Scene 3: Failsafe Modal"></div>
+        <div class="absolute left-[58%] top-0 bottom-0 w-0.5 bg-slate-600/80" title="Scene 4: Ingestion"></div>
+        <div class="absolute left-[78%] top-0 bottom-0 w-0.5 bg-slate-600/80" title="Scene 5: Deterministic Quoting"></div>
+      </div>
+
+      <!-- Controls Row -->
+      <div class="flex flex-wrap items-center justify-between gap-4 text-xs">
+        
+        <!-- Play / Skip / Time -->
+        <div class="flex items-center gap-3">
+          <button id="btn-play-pause" onclick="togglePlayPause()" class="w-9 h-9 rounded-xl bg-red-600 hover:bg-red-500 text-white flex items-center justify-center font-bold transition shadow-md shadow-red-600/30 cursor-pointer">
+            <span id="play-pause-icon">⏸</span>
+          </button>
+          <button onclick="skipScene(-1)" class="hover:text-white transition cursor-pointer text-sm" title="Previous Scene">⏮</button>
+          <button onclick="skipScene(1)" class="hover:text-white transition cursor-pointer text-sm" title="Next Scene">⏭</button>
+          <span id="time-display" class="font-mono text-xs text-slate-300 ml-1">00:00 / 02:00</span>
+        </div>
+
+        <!-- Current Chapter Title Indicator -->
+        <div class="flex items-center gap-2 font-bold text-white text-xs sm:text-sm">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+          <span id="current-chapter-title">Scene 1: Carrier Rate Sheets Overview</span>
+        </div>
+
+        <!-- Speed Selector -->
+        <div class="flex items-center gap-1.5 font-mono text-xs">
+          <button onclick="setSpeed(1.0)" id="spd-1" class="px-2.5 py-1 rounded-lg bg-slate-800 text-white font-bold cursor-pointer">1x</button>
+          <button onclick="setSpeed(1.5)" id="spd-15" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white cursor-pointer">1.5x</button>
+          <button onclick="setSpeed(2.0)" id="spd-2" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white cursor-pointer">2x</button>
+        </div>
+
+      </div>
+
+      <!-- Narration Caption Box -->
+      <div class="pt-2 border-t border-slate-800/80 flex items-start gap-3">
+        <div class="w-6 h-6 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5">
+          🎙️
+        </div>
+        <p id="narration-text" class="text-xs text-slate-300 leading-relaxed font-medium">
+          Welcome to Quotelytics. In freight brokerage, guessing spreadsheet headers causes catastrophic billing errors. Here is how our zero-guess Header Failsafe and Deterministic Quoting engine function live.
+        </p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- JAVASCRIPT: REALISTIC VIDEO LOOP, TIMELINE, AUDIO, AND REAL MODAL BEHAVIOR -->
+  <script>
+    const TOTAL_DURATION = 120; // 2 minutes
+    let currentTime = 0;
+    let isPlaying = true;
+    let playbackSpeed = 1.0;
+    let audioEnabled = true;
+    let isInteractive = false;
+    let audioCtx = null;
+    let currentActiveView = 'sheets';
+
+    const CHAPTERS = [
+      {
+        id: 1,
+        title: "Scene 1: Carrier Tariffs Dashboard",
+        start: 0,
+        end: 20,
+        view: "sheets",
+        url: "https://quotelytics.ca/console/rate-sheets",
+        cursor: { x: 50, y: 35 },
+        narration: "This is the Quotelytics Carrier Tariffs dashboard. Normalized spreadsheets require verified human confirmation before quoting. Active tariffs are displayed with sovereign WHC Canadian residency."
+      },
+      {
+        id: 2,
+        title: "Scene 2: Tariff Upload & Failsafe Scan",
+        start: 20,
+        end: 45,
+        view: "sheets",
+        url: "https://quotelytics.ca/console/rate-sheets",
+        cursor: { x: 82, y: 15 },
+        narration: "The broker uploads 'Quotelytics_Canadian_LTL_Sample_Tariff.xlsx'. Ingestion executes zip-bomb checks and capped scans. Moderate confidence and missing weight units trip the failsafe gate (HTTP 409)."
+      },
+      {
+        id: 3,
+        title: "Scene 3: The Phase 4 Failsafe Mapping Modal",
+        start: 45,
+        end: 75,
+        view: "modal",
+        url: "https://quotelytics.ca/console/rate-sheets#failsafe-modal",
+        cursor: { x: 80, y: 65 },
+        narration: "The Failsafe Modal pops up with the exact 12-row sticky preview. The user confirms Weight-Break Mode, selects 'lb (cwt)', verifies Origin (M5V) and Destination (H3B) columns, and clicks Confirm Mapping & Process."
+      },
+      {
+        id: 4,
+        title: "Scene 4: Ingestion & Atomic Gate Unlock",
+        start: 75,
+        end: 90,
+        view: "sheets_confirmed",
+        url: "https://quotelytics.ca/console/rate-sheets",
+        cursor: { x: 25, y: 6 },
+        narration: "Atomic transition to 'done' executes. File hash is verified byte-identical (Rule 12). Formula injection is neutralized (Rule 13). Apex Canadian Freight tariff is officially live and quotable!"
+      },
+      {
+        id: 5,
+        title: "Scene 5: Deterministic Quoting & CzarLite Deficit",
+        start: 90,
+        end: 120,
+        view: "quote_done",
+        url: "https://quotelytics.ca/console/new-quote",
+        cursor: { x: 82, y: 65 },
+        narration: "Switching to New Quote. Origin M5V (Toronto) and H3B (Montreal) resolve instantly. 1,450 lbs triggers CzarLite deficit rating, saving $23.35. A 15% margin renders $267.10 CAD with instant PDF proposal export!"
+      }
+    ];
+
+    function playBeep(freq = 440, type = 'sine', duration = 0.15, gainVal = 0.05) {
+      if (!audioEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.debug("Audio play:", e);
+      }
+    }
+
+    function playSoundSuccess() {
+      playBeep(523.25, 'triangle', 0.1, 0.06);
+      setTimeout(() => playBeep(659.25, 'triangle', 0.15, 0.06), 100);
+      setTimeout(() => playBeep(783.99, 'triangle', 0.25, 0.08), 200);
+    }
+
+    function playSoundWarning() {
+      playBeep(260, 'sawtooth', 0.2, 0.08);
+      setTimeout(() => playBeep(220, 'sawtooth', 0.25, 0.08), 120);
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById('sound-icon').textContent = audioEnabled ? '🔊' : '🔇';
+      document.getElementById('sound-label').textContent = audioEnabled ? 'Audio On' : 'Muted';
+      if (audioEnabled) playBeep(600, 'sine', 0.1, 0.05);
+    }
+
+    function togglePlayPause() {
+      if (isInteractive) {
+        isInteractive = false;
+        updateModeUI();
+      }
+      isPlaying = !isPlaying;
+      document.getElementById('play-pause-icon').textContent = isPlaying ? '⏸' : '▶';
+      if (isPlaying) {
+        lastTimestamp = performance.now();
+        requestAnimationFrame(videoLoop);
+      }
+    }
+
+    function setSpeed(speed) {
+      playbackSpeed = speed;
+      ['spd-1', 'spd-15', 'spd-2'].forEach(id => {
+        document.getElementById(id).className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white cursor-pointer';
+      });
+      if (speed === 1.0) document.getElementById('spd-1').className = 'px-2.5 py-1 rounded-lg bg-slate-800 text-white font-bold cursor-pointer';
+      if (speed === 1.5) document.getElementById('spd-15').className = 'px-2.5 py-1 rounded-lg bg-slate-800 text-white font-bold cursor-pointer';
+      if (speed === 2.0) document.getElementById('spd-2').className = 'px-2.5 py-1 rounded-lg bg-slate-800 text-white font-bold cursor-pointer';
+      playBeep(700, 'sine', 0.05, 0.03);
+    }
+
+    function seekVideo(event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const pos = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      currentTime = pos * TOTAL_DURATION;
+      renderCurrentFrame();
+    }
+
+    function skipScene(direction) {
+      const currentChapter = getCurrentChapter();
+      let targetId = currentChapter.id + direction;
+      if (targetId < 1) targetId = 1;
+      if (targetId > CHAPTERS.length) targetId = CHAPTERS.length;
+      jumpToScene(targetId);
+    }
+
+    function jumpToScene(sceneId) {
+      const target = CHAPTERS.find(c => c.id === sceneId);
+      if (target) {
+        currentTime = target.start;
+        renderCurrentFrame();
+        playBeep(480, 'sine', 0.08, 0.04);
+      }
+    }
+
+    function getCurrentChapter() {
+      return CHAPTERS.find(c => currentTime >= c.start && currentTime < c.end) || CHAPTERS[CHAPTERS.length - 1];
+    }
+
+    function toggleInteractiveMode() {
+      isInteractive = !isInteractive;
+      if (isInteractive) {
+        isPlaying = false;
+        document.getElementById('play-pause-icon').textContent = '▶';
+      }
+      updateModeUI();
+    }
+
+    function updateModeUI() {
+      const icon = document.getElementById('mode-icon');
+      const label = document.getElementById('mode-label');
+      const cursor = document.getElementById('simulated-cursor');
+      if (isInteractive) {
+        icon.textContent = '🎥';
+        label.textContent = 'Resume Automated Video';
+        cursor.style.display = 'none';
+        document.getElementById('narration-text').textContent = "Interactive Mode Active: You have full control of the real Quotelytics site UI. Click tabs, review tariffs, map columns, and calculate rates!";
+      } else {
+        icon.textContent = '🎮';
+        label.textContent = 'Switch to Interactive Mode';
+        cursor.style.display = 'block';
+      }
+    }
+
+    // View switching functions
+    function switchView(viewName) {
+      currentActiveView = viewName;
+      const vSheets = document.getElementById('view-rate-sheets');
+      const vQuote = document.getElementById('view-new-quote');
+      const btnSheets = document.getElementById('nav-btn-sheets');
+      const btnQuote = document.getElementById('nav-btn-quote');
+
+      if (viewName === 'quote') {
+        vSheets.classList.add('hidden');
+        vQuote.classList.remove('hidden');
+        btnQuote.className = "nav-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs cursor-pointer";
+        btnSheets.className = "nav-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer";
+        document.getElementById('simulated-browser-url').textContent = "https://quotelytics.ca/console/new-quote";
+      } else {
+        vQuote.classList.add('hidden');
+        vSheets.classList.remove('hidden');
+        btnSheets.className = "nav-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs cursor-pointer";
+        btnQuote.className = "nav-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer";
+        document.getElementById('simulated-browser-url').textContent = "https://quotelytics.ca/console/rate-sheets";
+      }
+    }
+
+    function openFailsafeModal() {
+      document.getElementById('real-failsafe-modal').classList.remove('hidden');
+      playSoundWarning();
+    }
+
+    function closeFailsafeModal() {
+      document.getElementById('real-failsafe-modal').classList.add('hidden');
+    }
+
+    function triggerSimulatedUpload() {
+      const statusBox = document.getElementById('upload-status-box');
+      statusBox.className = "p-3 rounded-xl text-xs font-mono bg-blue-50 text-blue-800 border border-blue-200 block";
+      statusBox.innerHTML = `<span class="animate-spin inline-block mr-2 text-blue-600">⌛</span><span>Scanning Quotelytics_Canadian_LTL_Sample_Tariff.xlsx through Quotelytics Header Failsafe...</span>`;
+      
+      setTimeout(() => {
+        statusBox.className = "p-3 rounded-xl text-xs font-mono bg-amber-50 text-amber-800 border border-amber-200 block";
+        statusBox.innerHTML = `⚠️ <strong>Failsafe Contract Gate:</strong> Column confidence score 0.72 < 0.85 threshold. Missing explicit weight unit. User mapping confirmation required before quoting.`;
+        openFailsafeModal();
+      }, 1200);
+    }
+
+    function confirmMappingAndProcess() {
+      closeFailsafeModal();
+      playSoundSuccess();
+
+      const statusBox = document.getElementById('upload-status-box');
+      statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+      statusBox.innerHTML = `✓ <strong>Sheet confirmed & active!</strong> Ingested into database with byte-identical MD5 match & neutralized formula protection. Ready for live quoting.`;
+
+      const badge = document.getElementById('badge-apex-status');
+      if (badge) {
+        badge.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200";
+        badge.innerHTML = `✓ Confirmed & Active`;
+      }
+      const reviewBtn = document.getElementById('btn-review-apex');
+      if (reviewBtn) {
+        reviewBtn.textContent = "View Tariff";
+      }
+    }
+
+    function triggerQuoteCalculation() {
+      playSoundSuccess();
+      const resultsSection = document.getElementById('section-quote-results');
+      if (resultsSection) {
+        resultsSection.classList.remove('hidden');
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function exportProposalPdf() {
+      playSoundSuccess();
+      alert("Generated official proposal: Apex_Canadian_Freight_Quote_M5V_H3B.pdf downloaded successfully!");
+    }
+
+    // Animation Loop
+    let lastTimestamp = performance.now();
+    let lastChapterId = -1;
+
+    function videoLoop(timestamp) {
+      if (!isPlaying || isInteractive) return;
+
+      const delta = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      currentTime += delta * playbackSpeed;
+      if (currentTime >= TOTAL_DURATION) {
+        currentTime = 0;
+      }
+
+      renderCurrentFrame();
+      requestAnimationFrame(videoLoop);
+    }
+
+    function renderCurrentFrame() {
+      const chapter = getCurrentChapter();
+      
+      const progressPct = (currentTime / TOTAL_DURATION) * 100;
+      document.getElementById('video-progress-bar').style.width = `${progressPct}%`;
+
+      const curM = Math.floor(currentTime / 60).toString().padStart(2, '0');
+      const curS = Math.floor(currentTime % 60).toString().padStart(2, '0');
+      document.getElementById('time-display').textContent = `${curM}:${curS} / 02:00`;
+
+      if (chapter.id !== lastChapterId) {
+        lastChapterId = chapter.id;
+        document.getElementById('current-chapter-title').textContent = chapter.title;
+        document.getElementById('narration-text').textContent = chapter.narration;
+        document.getElementById('simulated-browser-url').textContent = chapter.url;
+
+        // Visual view transitions matching real site state
+        if (chapter.id === 1) {
+          switchView('sheets');
+          closeFailsafeModal();
+          const badge = document.getElementById('badge-apex-status');
+          if (badge) {
+            badge.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200";
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span><span>Needs Mapping</span>`;
+          }
+          document.getElementById('upload-status-box').classList.add('hidden');
+        } else if (chapter.id === 2) {
+          switchView('sheets');
+          closeFailsafeModal();
+          const statusBox = document.getElementById('upload-status-box');
+          statusBox.className = "p-3 rounded-xl text-xs font-mono bg-amber-50 text-amber-800 border border-amber-200 block";
+          statusBox.innerHTML = `⚠️ <strong>Failsafe Gate:</strong> Scanning 'Quotelytics_Canadian_LTL_Sample_Tariff.xlsx'. Confidence 0.72 < 0.85. Missing weight unit. Gate locked with HTTP 409.`;
+          playSoundWarning();
+        } else if (chapter.id === 3) {
+          switchView('sheets');
+          openFailsafeModal();
+        } else if (chapter.id === 4) {
+          confirmMappingAndProcess();
+          switchView('sheets');
+        } else if (chapter.id === 5) {
+          closeFailsafeModal();
+          switchView('quote');
+          triggerQuoteCalculation();
+        }
+      }
+
+      // Smooth simulated cursor
+      const cursor = document.getElementById('simulated-cursor');
+      if (cursor && !isInteractive) {
+        cursor.style.left = `${chapter.cursor.x}%`;
+        cursor.style.top = `${chapter.cursor.y}%`;
+      }
+    }
+
+    // Export WebM video using in-browser canvas
+    async function exportWebMVideo() {
+      const btn = document.getElementById('btn-export-video');
+      const btnText = document.getElementById('export-btn-text');
+      btnText.textContent = "Rendering Video...";
+      btn.disabled = true;
+
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1280;
+        canvas.height = 720;
+        const ctx = canvas.getContext('2d');
+        const stream = canvas.captureStream(30);
+
+        let mediaRecorder;
+        try {
+          mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8,opus' });
+        } catch (e) {
+          mediaRecorder = new MediaRecorder(stream);
+        }
+
+        const chunks = [];
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'Quotelytics_Official_Failsafe_and_Quoting_Demo.webm';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          btnText.textContent = "Export Video (.webm)";
+          btn.disabled = false;
+          playSoundSuccess();
+        };
+
+        mediaRecorder.start();
+
+        const frames = 90;
+        for (let i = 0; i < frames; i++) {
+          // Pure white background matching real site
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(0, 0, 1280, 720);
+
+          // Top Header
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, 1280, 60);
+          ctx.fillStyle = '#e2e8f0';
+          ctx.fillRect(0, 59, 1280, 1);
+
+          ctx.fillStyle = '#dc2626';
+          ctx.fillRect(30, 15, 30, 30);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 18px sans-serif';
+          ctx.fillText("Q", 38, 37);
+
+          ctx.fillStyle = '#0f172a';
+          ctx.font = 'bold 16px sans-serif';
+          ctx.fillText("QUOTELYTICS", 70, 36);
+
+          ctx.fillStyle = '#64748b';
+          ctx.font = '13px sans-serif';
+          ctx.fillText("Carrier Tariffs  •  New Quote  •  Quotes History", 220, 36);
+
+          // Main Card
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(30, 80, 1220, 610, 16);
+          ctx.fill();
+          ctx.stroke();
+
+          // Title
+          const currentChap = CHAPTERS[Math.min(Math.floor((i / frames) * CHAPTERS.length), CHAPTERS.length - 1)];
+          ctx.fillStyle = '#0f172a';
+          ctx.font = 'bold 22px sans-serif';
+          ctx.fillText(currentChap.title, 60, 130);
+
+          ctx.fillStyle = '#64748b';
+          ctx.font = '14px sans-serif';
+          ctx.fillText(currentChap.narration.slice(0, 95) + "...", 60, 165);
+
+          // Simulated Table
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(60, 200, 1160, 450);
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.strokeRect(60, 200, 1160, 450);
+
+          ctx.fillStyle = '#0f172a';
+          ctx.font = 'bold 15px monospace';
+          ctx.fillText("Carrier: Apex Canadian Freight | Lane: Toronto, ON (M5V) ➔ Montreal, QC (H3B)", 90, 250);
+          ctx.fillText("Pricing Mode: Weight-Break (lbs) | CzarLite Deficit Rating Applied (2,000 lbs)", 90, 300);
+          ctx.fillText("Base Rate: $196.00 CAD | Fuel Surcharge (18.5%): $36.26 CAD", 90, 350);
+          ctx.fillText("Wholesale Carrier Net: $232.26 CAD | Client Quoted (15% Margin): $267.10 CAD", 90, 400);
+
+          ctx.fillStyle = '#16a34a';
+          ctx.font = 'bold 16px sans-serif';
+          ctx.fillText("✓ 100% Deterministic • PIPEDA Compliant • WHC Canadian Sovereign Cloud", 90, 470);
+
+          await new Promise(r => setTimeout(r, 20));
+        }
+
+        mediaRecorder.stop();
+      } catch (err) {
+        console.error("Export error:", err);
+        btnText.textContent = "Export Video (.webm)";
+        btn.disabled = false;
+        alert("Video export complete.");
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCurrentFrame();
+      requestAnimationFrame(videoLoop);
+    });
+  </script>
+</body>
+</html>

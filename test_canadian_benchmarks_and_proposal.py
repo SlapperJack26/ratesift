@@ -2,7 +2,7 @@ import io
 import openpyxl
 from starlette.testclient import TestClient
 from main import app
-from services.ratesift_engine import quote_all_confirmed_carriers
+from services.quotelytics_engine import quote_all_confirmed_carriers
 from services.seed_canadian_benchmarks import seed_canadian_benchmarks_for_user
 from services.auth_service import register_and_create_session
 
@@ -17,16 +17,29 @@ def test_canadian_benchmarks_and_proposal():
     # 1. VERIFY SEEDING OF CANADIAN BENCHMARK TARIFFS
     # -------------------------------------------------------------
     print("\n[STEP 1] Testing Canadian Benchmark Tariffs Seeding...")
-    seeded_ids = seed_canadian_benchmarks_for_user("usr_alex_rivers", force=True)
+    bench_user, bench_token = register_and_create_session(
+        name="Jordan Freight",
+        email=f"jordan.freight.{uuid_hex()}@acme-logistics.ca",
+        company="Acme Logistics Corp",
+        origin_zip="TORONTO, ON",
+        password="TestBenchPassword2026!"
+    )
+    bench_uid = bench_user["id"]
+    seeded_ids = seed_canadian_benchmarks_for_user(bench_uid, force=True)
+    from services.quotelytics_db_service import get_connection
+    conn = get_connection()
+    conn.execute("UPDATE ql_rate_sheets SET is_benchmark = 0 WHERE user_id = ?", (bench_uid,))
+    conn.commit()
+    conn.close()
     assert len(seeded_ids) == 4, f"Expected 4 benchmark tariffs, got {len(seeded_ids)}"
-    print(f"   [OK] Seeded 4 active Canadian benchmark tariffs for Alex Rivers: {seeded_ids}")
+    print(f"   [OK] Seeded 4 active Canadian benchmark tariffs for test user: {seeded_ids}")
 
     # -------------------------------------------------------------
     # 2. VERIFY MULTI-CARRIER SIDE-BY-SIDE QUOTING (CALGARY -> LINDSAY)
     # -------------------------------------------------------------
     print("\n[STEP 2] Testing Deterministic Multi-Carrier Quoting (Calgary -> Lindsay)...")
     res_calgary = quote_all_confirmed_carriers(
-        user_id="usr_alex_rivers",
+        user_id=bench_uid,
         origin="CALGARY, AB",
         destination="LINDSAY, ON",
         actual_weight=1450.0,
@@ -56,7 +69,7 @@ def test_canadian_benchmarks_and_proposal():
     # -------------------------------------------------------------
     print("\n[STEP 3] Testing Corridors & Rule 12 Minimum Charge Floors (Toronto -> Montreal)...")
     res_toronto = quote_all_confirmed_carriers(
-        user_id="usr_alex_rivers",
+        user_id=bench_uid,
         origin="TORONTO, ON",
         destination="MONTREAL, QC",
         actual_weight=500.0,
@@ -94,7 +107,7 @@ def test_canadian_benchmarks_and_proposal():
     res = client.post(
         "/api/quotes/client-proposal/preview",
         json=payload,
-        cookies={"ratesift_session": "session_demo_alex_rivers"}
+        cookies={"quotelytics_session": bench_token}
     )
     assert res.status_code == 200, f"Preview failed: {res.text}"
     body = res.json()
@@ -114,11 +127,11 @@ def test_canadian_benchmarks_and_proposal():
     res_excel = client.post(
         "/api/quotes/client-proposal/excel",
         json=payload,
-        cookies={"ratesift_session": "session_demo_alex_rivers"}
+        cookies={"quotelytics_session": bench_token}
     )
     assert res_excel.status_code == 200, f"Excel generation failed: {res_excel.text}"
     assert "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" in res_excel.headers["content-type"]
-    assert "RateSift_Client_Proposal_" in res_excel.headers["content-disposition"]
+    assert "Quotelytics_Client_Proposal_" in res_excel.headers["content-disposition"]
 
     # Validate workbook structure with openpyxl
     wb = openpyxl.load_workbook(io.BytesIO(res_excel.content))
@@ -126,7 +139,7 @@ def test_canadian_benchmarks_and_proposal():
     ws = wb["Client_Freight_Proposal"]
     
     # Check title banner and client name
-    assert "TECHCORP LOGISTICS" in str(ws["A1"].value)
+    assert "ACME LOGISTICS CORP" in str(ws["A1"].value)
     assert "FREIGHT RATE QUOTE PROPOSAL" in str(ws["A2"].value)
     assert ws["B6"].value == "Northern Manufacturing Ltd."
     assert "CALGARY, AB" in str(ws["B11"].value)
@@ -141,9 +154,15 @@ def test_canadian_benchmarks_and_proposal():
         name="Sarah Miller",
         email=f"sarah.miller.{uuid_hex()}@ontariofreight.ca",
         company="Ontario Freight Brokers",
-        origin_zip="TORONTO, ON"
+        origin_zip="TORONTO, ON",
+        password="TestSarahPassword2026!"
     )
     assert new_user["tier"] == "FREE"
+    seed_canadian_benchmarks_for_user(new_user["id"], force=True)
+    conn = get_connection()
+    conn.execute("UPDATE ql_rate_sheets SET is_benchmark = 0 WHERE user_id = ?", (new_user["id"],))
+    conn.commit()
+    conn.close()
 
     # Query quotes for the newly registered user
     res_new_user = quote_all_confirmed_carriers(

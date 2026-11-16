@@ -5,19 +5,28 @@ from fastapi.testclient import TestClient
 from main import app
 from services.auth_service import create_session
 from services.db_service import update_user_tier
-from services.ratesift_extractor import RateSiftExtractor
-from services.ratesift_db_service import init_ratesift_db, confirm_rate_sheet, delete_rate_sheet
-from services.ratesift_engine import calculate_quote_for_sheet
+from services.quotelytics_extractor import QuotelyticsExtractor
+from services.quotelytics_db_service import init_quotelytics_db, confirm_rate_sheet, delete_rate_sheet
+from services.quotelytics_engine import calculate_quote_for_sheet
 
 class TestQuoteHistoryFormulaAndWork(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        init_ratesift_db()
+        import uuid
+        from services.auth_service import register_and_create_session
+        init_quotelytics_db()
         cls.client = TestClient(app)
-        cls.user_id = "usr_alex_rivers"
+        user, token = register_and_create_session(
+            name="Jordan Freight",
+            email=f"formula.work.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+            company="Acme Logistics",
+            origin_zip="TORONTO, ON",
+            password="FormulaWorkPassword2026!"
+        )
+        cls.user_id = user["id"]
         update_user_tier(cls.user_id, "TEAM")
-        cls.token = create_session(cls.user_id)
-        cls.client.cookies.set("shipflow_session", cls.token)
+        cls.token = token
+        cls.client.cookies.set("quotelytics_session", cls.token)
 
         # Create mock skid rate sheet
         wb = openpyxl.Workbook()
@@ -32,7 +41,7 @@ class TestQuoteHistoryFormulaAndWork(unittest.TestCase):
         buf = io.BytesIO()
         wb.save(buf)
 
-        extractor = RateSiftExtractor(buf.getvalue(), "tariff_formula_test.xlsx", cls.user_id)
+        extractor = QuotelyticsExtractor(buf.getvalue(), "tariff_formula_test.xlsx", cls.user_id)
         res = extractor.process()
         cls.sheet_id = res["sheet_id"]
         confirm_rate_sheet(
@@ -101,7 +110,7 @@ class TestQuoteHistoryFormulaAndWork(unittest.TestCase):
             "skid_count": 1,
             "shipping_mode": "LTL"
         }
-        res_calc = self.client.post("/api/ratesift/quotes/calculate", json=calc_payload)
+        res_calc = self.client.post("/api/quotelytics/quotes/calculate", json=calc_payload)
         self.assertEqual(res_calc.status_code, 200)
         quotes = res_calc.json()["quotes"]
         self.assertGreater(len(quotes), 0)
@@ -151,10 +160,10 @@ class TestQuoteHistoryFormulaAndWork(unittest.TestCase):
         html = resp.text
 
         # Header, logo, and footer remain intact
-        self.assertIn("/static/images/ratesift-logo.png", html)
+        self.assertIn("/static/images/quotelytics-logo.png", html)
         self.assertIn("New Quote", html)
         self.assertIn("Quotes History", html)
-        self.assertTrue("Quotelytics Quoting Engine" in html or "RateSift Quoting Engine" in html)
+        self.assertTrue("Quotelytics Quoting Engine" in html or "Quotelytics Quoting Engine" in html)
         self.assertIn("Canadian Residency (WHC)", html)
 
         # Formula & Work elements

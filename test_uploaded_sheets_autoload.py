@@ -15,7 +15,7 @@ import openpyxl
 from starlette.testclient import TestClient
 from main import app
 from services.auth_service import register_and_create_session, authenticate_and_create_session
-from services.ratesift_db_service import list_rate_sheets, confirm_rate_sheet
+from services.quotelytics_db_service import list_rate_sheets, confirm_rate_sheet
 
 client = TestClient(app)
 
@@ -37,7 +37,7 @@ class TestUploadedSheetsAutoLoad(unittest.TestCase):
         self.assertEqual(len(db_sheets), 0, "Directive 1 Violation: Brand new user must not have benchmark sheets auto-seeded.")
 
         # Check API endpoint via authenticated session
-        res = client.get("/api/ratesift/sheets", cookies={"ratesift_session": token})
+        res = client.get("/api/quotelytics/sheets", cookies={"quotelytics_session": token})
         self.assertEqual(res.status_code, 200)
         api_sheets = res.json().get("sheets", [])
         self.assertEqual(len(api_sheets), 0, "Directive 1 Violation: API must return 0 sheets for new user.")
@@ -53,7 +53,7 @@ class TestUploadedSheetsAutoLoad(unittest.TestCase):
             password="SecurePassword123!"
         )
 
-        res = client.get("/console/new-quote", cookies={"ratesift_session": token})
+        res = client.get("/console/new-quote", cookies={"quotelytics_session": token})
         self.assertEqual(res.status_code, 200)
         self.assertIn("Active Rate Sheets:", res.text)
         self.assertIn("rate-sheets-counters", res.text)
@@ -76,9 +76,9 @@ class TestUploadedSheetsAutoLoad(unittest.TestCase):
         with open(guide_csv_path, "rb") as f:
             file_bytes = f.read()
 
-        client.cookies.set("ratesift_session", token1)
+        client.cookies.set("quotelytics_session", token1)
         upload_res = client.post(
-            "/api/ratesift/sheets/upload",
+            "/api/quotelytics/sheets/upload",
             files={"file": ("day_and_ross_custom_upload.csv", file_bytes, "text/csv")}
         )
         self.assertEqual(upload_res.status_code, 200, f"Upload failed: {upload_res.text}")
@@ -106,10 +106,10 @@ class TestUploadedSheetsAutoLoad(unittest.TestCase):
         self.assertIsNotNone(token2)
 
         # Set new session cookie
-        client.cookies.set("ratesift_session", token2)
+        client.cookies.set("quotelytics_session", token2)
 
-        # Verify that upon login, GET /api/ratesift/sheets automatically returns the user's uploaded sheet
-        sheets_res = client.get("/api/ratesift/sheets")
+        # Verify that upon login, GET /api/quotelytics/sheets automatically returns the user's uploaded sheet
+        sheets_res = client.get("/api/quotelytics/sheets")
         self.assertEqual(sheets_res.status_code, 200)
         loaded_sheets = sheets_res.json().get("sheets", [])
         self.assertEqual(len(loaded_sheets), 1, "Uploaded rate sheet must automatically load upon login.")
@@ -132,9 +132,9 @@ class TestUploadedSheetsAutoLoad(unittest.TestCase):
         with open(guide_csv_path, "rb") as f:
             file_bytes = f.read()
 
-        client.cookies.set("ratesift_session", token)
+        client.cookies.set("quotelytics_session", token)
         upload_res = client.post(
-            "/api/ratesift/sheets/upload",
+            "/api/quotelytics/sheets/upload",
             files={"file": ("day_and_ross_quote_sheet.csv", file_bytes, "text/csv")}
         )
         self.assertEqual(upload_res.status_code, 200)
@@ -157,7 +157,7 @@ class TestUploadedSheetsAutoLoad(unittest.TestCase):
             "shipment_date": "2026-10-01"
         }
         quote_res = client.post(
-            "/api/ratesift/quotes/calculate",
+            "/api/quotelytics/quotes/calculate",
             json=payload
         )
         self.assertEqual(quote_res.status_code, 200, f"Quoting failed: {quote_res.text}")

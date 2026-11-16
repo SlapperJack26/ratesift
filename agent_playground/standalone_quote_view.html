@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>RateSift Agent Playground | IDE Quote Simulator & Training Lab</title>
-  <meta name="description" content="Standalone RateSift Agent Playground for testing agent training ideas directly in the IDE without launching the website.">
+  <title>Quotelytics Agent Playground | IDE Quote Simulator & Training Lab</title>
+  <meta name="description" content="Standalone Quotelytics Agent Playground for testing agent training ideas directly in the IDE without launching the website.">
   
   <!-- Tailwind CSS Framework -->
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
@@ -31,10 +31,10 @@
 </head>
 <body class="bg-slate-50 text-[var(--foreground)] antialiased m-0 p-0 min-h-screen flex flex-col justify-between w-full">
 
-  <!-- Header: RateSift Official Brand Lockup & IDE Playground Banner -->
+  <!-- Header: Quotelytics Official Brand Lockup & IDE Playground Banner -->
   <header class="w-full px-3 sm:px-6 py-2.5 sm:py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-white sticky top-0 z-30 shadow-xs">
     <div class="flex items-center gap-2 sm:gap-3">
-      <img src="../static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='ratesift-logo.png';" alt="RateSift" class="h-7 sm:h-8 md:h-9 w-auto object-contain" />
+      <img src="../static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='quotelytics-logo.png';" alt="Quotelytics" class="h-7 sm:h-8 md:h-9 w-auto object-contain" />
       <div class="h-4 w-px bg-slate-300 mx-0.5 hidden sm:block"></div>
       <span class="text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
         🧪 Playground
@@ -726,8 +726,8 @@
   <!-- Semantic Footer -->
   <footer class="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-500 bg-white mt-auto">
     <div class="flex items-center gap-3">
-      <img src="../static/images/ratesift-logo.png" onerror="this.onerror=null; this.src='../static/images/ratesift-logo.jpg';" alt="RateSift" class="h-6 md:h-7 w-auto object-contain" />
-      <span>RateSift Agent Training Lab • Isolated Sandbox</span>
+      <img src="../static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='../static/images/quotelytics-logo.jpg';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" />
+      <span>Quotelytics Agent Training Lab • Isolated Sandbox</span>
     </div>
     <div class="text-xs text-slate-400 font-mono">
       WHC Canada Residency (Rule 29) • Standalone Zero-Server Execution
@@ -1267,7 +1267,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
       const dlAnchor = document.createElement("a");
       dlAnchor.setAttribute("href", dataStr);
-      dlAnchor.setAttribute("download", `ratesift_agent_run_${Date.now()}.json`);
+      dlAnchor.setAttribute("download", `quotelytics_agent_run_${Date.now()}.json`);
       dlAnchor.click();
     }
 

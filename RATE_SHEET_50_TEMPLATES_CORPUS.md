@@ -1,8 +1,8 @@
-# RateSift Agent — 50 Rate Sheet Templates & Formats Corpus
+# Quotelytics Agent — 50 Rate Sheet Templates & Formats Corpus
 
 This corpus catalogs **50 distinct freight rate sheet formats and templates** spanning Canadian and North American road freight, LTL, FTL, courier/parcel, intermodal, drayage, ocean, air cargo, and specialized transport. 
 
-It serves as the comprehensive benchmark and training/testing suite for the RateSift parsing and rating engines, ensuring strict compliance with all 32 RateSift Agent Rules.
+It serves as the comprehensive benchmark and training/testing suite for the Quotelytics parsing and rating engines, ensuring strict compliance with all 32 Quotelytics Agent Rules.
 
 ---
 
@@ -86,7 +86,7 @@ It serves as the comprehensive benchmark and training/testing suite for the Rate
 
 ---
 
-## Technical Integration into RateSift Architecture
+## Technical Integration into Quotelytics Architecture
 
 ### 1. Ingestion Pipeline & Layout Classification Heuristic
 Before parsing, the Sheet Inspector classifies the workbook layout into one of 7 meta-categories:

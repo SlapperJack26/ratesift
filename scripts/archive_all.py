@@ -39,25 +39,25 @@ def main():
 
     # 4. Generate CONVERSATION_ARCHIVE.md
     md = []
-    md.append("# Ratesift Complete Conversation & Project Data Archive")
+    md.append("# Quotelytics Complete Conversation & Project Data Archive")
     md.append(f"**Conversation ID:** `b5a860ed-1691-4f5a-8f2d-ad2b4e7701e4`  ")
-    md.append(f"**Platform:** Ratesift Automated Batch Shipping Quoting Platform  ")
+    md.append(f"**Platform:** Quotelytics Automated Batch Shipping Quoting Platform  ")
     md.append(f"**Archive Timestamp:** {now_str}  ")
     md.append(f"**Total Trajectory Steps:** {timeline['total_steps']}  ")
     md.append(f"**Total User Prompts:** {len(prompts)}  ")
-    md.append(f"**Compliance Standard:** All 32 RateSift Freight Broker Directives Enforced + Non-Critical Info Flexibility  ")
+    md.append(f"**Compliance Standard:** All 32 Quotelytics Freight Broker Directives Enforced + Non-Critical Info Flexibility  ")
     md.append(f"**Data Residency:** WHC Canada (`CA_CENTRAL_WHC`)  ")
     md.append("")
     md.append("---")
     md.append("")
     md.append("## 1. Executive Summary & Product Invariants")
     md.append("")
-    md.append("**Ratesift** is a specialized, deterministic web platform and quoting engine designed for automated batch shipping rate calculations from Excel spreadsheets (`.xlsx`, `.xls`). The platform is strictly constrained to **quoting only** (no carrier booking, no label printing, and no delivery tracking numbers).")
+    md.append("**Quotelytics** is a specialized, deterministic web platform and quoting engine designed for automated batch shipping rate calculations from Excel spreadsheets (`.xlsx`, `.xls`). The platform is strictly constrained to **quoting only** (no carrier booking, no label printing, and no delivery tracking numbers).")
     md.append("")
     md.append("### Core Invariants Enforced Across the Entire Platform:")
     md.append("1. **Strict Quoting Boundary:** Quoting calculations only; zero label generation or booking workflows.")
-    md.append("2. **Visual Brand Identity (Header & Footer Only):** Official visual RateSift logo image lockup (red rounded filter icon, 'RateSift' wordmark, and subtitle 'Shipping rate comparison') is restricted exclusively to the `<header>` and `<footer>`.")
-    md.append("3. **Standard Typography Everywhere Else:** Spelled with standard proper noun capitalization as **Ratesift** across all body copy, headings, meta tags, schema JSON-LD, pricing cards, and database records.")
+    md.append("2. **Visual Brand Identity (Header & Footer Only):** Official visual Quotelytics logo image lockup (red rounded filter icon, 'Quotelytics' wordmark, and subtitle 'Shipping rate comparison') is restricted exclusively to the `<header>` and `<footer>`.")
+    md.append("3. **Standard Typography Everywhere Else:** Spelled with standard proper noun capitalization as **Quotelytics** across all body copy, headings, meta tags, schema JSON-LD, pricing cards, and database records.")
     md.append("4. **Full-Bleed Edge-to-Edge Margins:** Header top margin = 0, footer bottom margin = 0 (`mt-auto m-0`), horizontal margins = 0 (`w-full`), touching viewport boundaries across phones, tablets, laptops, and monitors.")
     md.append("5. **Private New Quote Form:** Vertical headers for **From** and **To**, each containing horizontal options for `City Name`, `Province / State`, `Postal Code / Zip Code`, and `Country` list.")
     md.append("6. **Table Display Standard:** Bold table headers (`font-bold`), unbolded data rows (`font-normal`), exact coordinate cell tracking (`Sheet 1 • Row 14, Col C`), and zero colored status bubbles.")
@@ -99,7 +99,7 @@ def main():
     md.append("Engineered comprehensive responsive layout with CSS clamp, fluid typography, mobile drawers, responsive tables, and multi-device switcher for phone, tablet, laptop, and monitor.")
     md.append("")
     md.append("### Phase 6: Brand Evolution & Stylization (Prompts #43-#46)")
-    md.append("Shifted color palette to Crimson Red (`#DC2626`), stylized header/footer with official logo lockup, and enforced standard proper noun `Ratesift` across all other contexts.")
+    md.append("Shifted color palette to Crimson Red (`#DC2626`), stylized header/footer with official logo lockup, and enforced standard proper noun `Quotelytics` across all other contexts.")
     md.append("")
     md.append("### Phase 7: Edge-to-Edge Margins & New Quote Routing Headers (Prompts #47-#48)")
     md.append("Implemented zero-margin full-bleed top, bottom, and horizontal borders. Rebuilt `/console/new-quote` with vertical 'From' and 'To' headers and horizontal inputs for City, Province/State, Zip, and Country.")
@@ -128,7 +128,7 @@ def main():
     md.append("* **Public Landing:** `http://127.0.0.1:8000/`")
     md.append("* **Public Demo:** `http://127.0.0.1:8000/demo`")
     md.append("* **Public Pricing:** `http://127.0.0.1:8000/pricing`")
-    md.append("* **Login:** `http://127.0.0.1:8000/login` (`demo@ratesift.com` / `demo1234`)")
+    md.append("* **Login:** `http://127.0.0.1:8000/login` (`demo@quotelytics.com` / `demo1234`)")
     md.append("* **New Quote Console:** `http://127.0.0.1:8000/console/new-quote`")
     md.append("* **Rate Sheets:** `http://127.0.0.1:8000/console/rate-sheets`")
     md.append("* **Quotes History:** `http://127.0.0.1:8000/console/history`")
@@ -148,7 +148,7 @@ def main():
     print("Saved brain artifact conversation_archive.md")
 
     # 5. Create zip bundle of conversation data
-    zip_path = os.path.join(conv_dir, "ratesift_conversation_full_archive.zip")
+    zip_path = os.path.join(conv_dir, "quotelytics_conversation_full_archive.zip")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for root, dirs, files in os.walk(conv_dir):
             for file in files:
@@ -160,7 +160,7 @@ def main():
     print(f"Created conversation zip archive: {zip_path} ({os.path.getsize(zip_path)} bytes)")
 
     # 6. Create full project repository backup
-    project_backup_zip = os.path.join(project_dir, "ratesift_project_backup_latest.zip")
+    project_backup_zip = os.path.join(project_dir, "quotelytics_project_backup_latest.zip")
     exclude_dirs = {"__pycache__", ".git", "venv", ".pytest_cache"}
     with zipfile.ZipFile(project_backup_zip, "w", zipfile.ZIP_DEFLATED) as zf:
         for root, dirs, files in os.walk(project_dir):

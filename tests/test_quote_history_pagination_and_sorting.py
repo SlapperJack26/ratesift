@@ -1,13 +1,24 @@
 import unittest
+import uuid
 from fastapi.testclient import TestClient
 from main import app
 from services.db_service import get_connection, save_proposal_quote_item
+from services.auth_service import register_and_create_session
 
 class TestQuoteHistoryPaginationAndSorting(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
+        self.test_email = f"hist.page.{uuid.uuid4().hex[:6]}@acme-logistics.ca"
+        self.test_pwd = "HistPaginationPassword2026!"
+        register_and_create_session(
+            name="Jordan Freight",
+            email=self.test_email,
+            company="Acme Logistics",
+            origin_zip="TORONTO, ON",
+            password=self.test_pwd
+        )
         # Login with test credentials
-        res = self.client.post("/api/auth/login", data={"email": "alex.rivers@techcorp.io", "password": "RateSiftDemo2026!"})
+        res = self.client.post("/api/auth/login", data={"email": self.test_email, "password": self.test_pwd})
         self.assertEqual(res.status_code, 200)
 
     def test_save_proposal_quote_and_persistence(self):
@@ -51,7 +62,7 @@ class TestQuoteHistoryPaginationAndSorting(unittest.TestCase):
 
         # 3. Simulate user logout and re-login
         self.client.get("/api/auth/logout")
-        login_res = self.client.post("/api/auth/login", data={"email": "alex.rivers@techcorp.io", "password": "RateSiftDemo2026!"})
+        login_res = self.client.post("/api/auth/login", data={"email": self.test_email, "password": self.test_pwd})
         self.assertEqual(login_res.status_code, 200)
 
         # 4. Quotes History data loaded every time user logs in

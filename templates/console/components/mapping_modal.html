@@ -1,48 +1,114 @@
 <!-- =========================================================================
-     Quotelytics Rate-Sheet Header Failsafe & Column Mapping Modal (Phase 4)
+     Quotelytics Rate-Sheet Failsafe Guide & Column Mapping Modal (Release 1b)
      Contract Compliance:
-     - Rule 1: Origin and Destination required
-     - Rule 2: Exactly one mode (Weight mode + unit, or Skid mode)
-     - Rule 3: Clarify mode if ambiguous; never guess
-     - Rule 6: Show conflict badges and explanations
-     - Rule 7: Gate process until mapping is confirmed
-     - Rule 9 & 12: Cancel cleanly leaves file untouched
-     - First 12 preview rows, sticky table header, max 60 cols with show-more
+     - Step 0 Tab Selector (classifying tabs into [Rate Grid], [Notes Only], [Hidden])
+     - Standard View vs. Guided Wizard mode toggle (persisted in localStorage)
+     - Compound location inputs (City + Region) and Fixed Origin with preamble click
+     - Live dry-run calculation card strip with seq_id race guard
+     - Expandable calculation trace drawer displaying "checked N of M checks"
+     - Multi-tab completion transition banner
+     - Accessible column color badges + text labels and glossary tooltips
+     - Strict Decimal parity with canonical quoting engine
      ========================================================================= -->
 
-<div id="failsafe-mapping-modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto" style="z-index: 99999;">
-  <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+<div id="failsafe-mapping-modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto" style="z-index: 99999;" role="dialog" aria-modal="true" aria-labelledby="failsafe-modal-title">
+  <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-6xl max-h-[94vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
     
     <!-- Modal Header -->
-    <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
+    <div class="px-6 py-3.5 border-b border-slate-200 bg-slate-50/90 flex items-center justify-between shrink-0">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600">
+        <div class="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-600 font-bold">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
           </svg>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h2 class="text-base font-bold text-slate-900">Confirm Column Mapping</h2>
+            <h2 id="failsafe-modal-title" class="text-base font-bold text-slate-900">Rate Sheet Failsafe Guide</h2>
             <span id="failsafe-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
               Needs Mapping
             </span>
           </div>
           <p class="text-xs text-slate-500 mt-0.5" id="failsafe-modal-subtitle">
-            Please map the columns below to ensure 100% accurate quoting. A wrong quote is worse than a pause.
+            Configure tariff layout, rate breaks, and origin rules with real-time dry-run verification.
           </p>
         </div>
       </div>
-      <button type="button" onclick="FailsafeModal.cancel()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer" title="Cancel mapping">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
+
+      <!-- Mode Toggle & Close -->
+      <div class="flex items-center gap-3">
+        <div class="inline-flex rounded-lg border border-slate-300 p-0.5 bg-slate-100 text-xs font-semibold">
+          <button type="button" id="failsafe-view-wizard-btn" onclick="FailsafeModal.switchViewMode('wizard')" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-colors cursor-pointer">
+            Guided Wizard
+          </button>
+          <button type="button" id="failsafe-view-standard-btn" onclick="FailsafeModal.switchViewMode('standard')" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-colors cursor-pointer">
+            Standard View
+          </button>
+        </div>
+        <button type="button" onclick="FailsafeModal.cancel()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer" title="Cancel mapping" aria-label="Close modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 0 Tab Selector (Multi-Tab Regional Workbooks) -->
+    <div id="failsafe-tab-selector-bar" class="hidden px-6 py-2 bg-slate-100/80 border-b border-slate-200 flex items-center justify-between text-xs overflow-x-auto shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Workbook Tabs:</span>
+        <div id="failsafe-tab-chips-container" class="flex items-center gap-1.5">
+          <!-- Dynamically populated tab pills: [Rate Grid], [Notes Only], [Hidden] -->
+        </div>
+      </div>
+      <div id="failsafe-tab-progress-label" class="text-[11px] text-slate-500 font-medium shrink-0 ml-3"></div>
+    </div>
+
+    <!-- Multi-Tab Completion Transition Banner -->
+    <div id="failsafe-tab-transition-banner" class="hidden mx-6 mt-3 p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center justify-between text-xs animate-in fade-in">
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <span id="failsafe-tab-transition-msg" class="font-bold"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" id="failsafe-map-next-tab-btn" onclick="FailsafeModal.mapNextTab()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs cursor-pointer shadow-xs">
+          Map Next Tab
+        </button>
+        <button type="button" onclick="FailsafeModal.finishAndClose()" class="px-3 py-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-lg text-xs cursor-pointer">
+          Finish & Close
+        </button>
+      </div>
+    </div>
+
+    <!-- Wizard Step Progress Header (Wizard Mode Only) -->
+    <div id="failsafe-wizard-steps-header" class="hidden px-6 pt-3 pb-2 border-b border-slate-100 bg-white flex items-center justify-between text-xs shrink-0">
+      <div class="flex items-center gap-4 w-full max-w-2xl">
+        <div id="wiz-step-pill-1" class="flex items-center gap-1.5 font-bold text-red-600 cursor-pointer" onclick="FailsafeModal.jumpToStep(1)">
+          <span class="w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px]">1</span>
+          <span>Header & Currency</span>
+        </div>
+        <div class="w-6 h-px bg-slate-300"></div>
+        <div id="wiz-step-pill-2" class="flex items-center gap-1.5 text-slate-400 cursor-pointer" onclick="FailsafeModal.jumpToStep(2)">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">2</span>
+          <span>Rate Basis</span>
+        </div>
+        <div class="w-6 h-px bg-slate-300"></div>
+        <div id="wiz-step-pill-3" class="flex items-center gap-1.5 text-slate-400 cursor-pointer" onclick="FailsafeModal.jumpToStep(3)">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">3</span>
+          <span>Locations</span>
+        </div>
+        <div class="w-6 h-px bg-slate-300"></div>
+        <div id="wiz-step-pill-4" class="flex items-center gap-1.5 text-slate-400 cursor-pointer" onclick="FailsafeModal.jumpToStep(4)">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">4</span>
+          <span>Rate Breaks</span>
+        </div>
+      </div>
+      <div class="text-[11px] text-slate-400">Step <span id="wiz-current-step-num">1</span> of 4</div>
     </div>
 
     <!-- Modal Body (Scrollable) -->
     <div class="p-6 overflow-y-auto flex-1 space-y-5 text-xs text-slate-700">
       
       <!-- Issues Banner -->
-      <div id="failsafe-issues-banner" class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1.5 hidden">
+      <div id="failsafe-issues-banner" class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1.5 hidden">
         <div class="flex items-center gap-2 font-bold text-xs text-amber-800">
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <span>Required Actions Before Quoting</span>
@@ -50,19 +116,26 @@
         <ul id="failsafe-issues-list" class="list-disc list-inside space-y-1 text-xs text-amber-800 pl-1 font-medium"></ul>
       </div>
 
-      <!-- Conflicts Alert Box -->
-      <div id="failsafe-conflicts-banner" class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 space-y-1.5 hidden">
-        <div class="flex items-center gap-2 font-bold text-xs text-red-800">
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-          <span>Column Header Conflicts Detected</span>
+      <!-- Live Failsafe Finding Warnings Banner (Overridable 409s) -->
+      <div id="failsafe-warnings-banner" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 font-bold text-xs text-amber-800">
+            <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            <span>Failsafe Advisory Warnings Detected</span>
+          </div>
+          <span class="text-[10px] text-amber-700">Check boxes to acknowledge & confirm</span>
         </div>
-        <div id="failsafe-conflicts-list" class="space-y-1 text-xs text-red-800 pl-1 font-medium"></div>
+        <div id="failsafe-warnings-checklist" class="space-y-1.5 pl-1"></div>
+        <div id="failsafe-override-note-container" class="hidden pt-2 border-t border-amber-200">
+          <label class="block font-bold text-[11px] text-amber-900 mb-1">Override Reason Note (Required for Outliers / Parcel):</label>
+          <input type="text" id="failsafe-override-note-input" placeholder="e.g. Verified specialized flatbed tariff with carrier broker dispatch" class="w-full bg-white border border-amber-300 rounded px-2 py-1 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
       </div>
 
       <!-- Saved Mapping Match Banner -->
       <div id="failsafe-saved-match-banner" class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 flex items-center justify-between text-xs hidden">
         <div class="flex items-center gap-2">
-          <span class="text-blue-600 font-bold">ℹ️ Matching Layout Found:</span>
+          <span class="text-blue-600 font-bold">Matching Layout Found:</span>
           <span id="failsafe-saved-match-desc">Found a previously saved mapping matching this column structure.</span>
         </div>
         <button type="button" onclick="FailsafeModal.applySavedMapping()" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs cursor-pointer shadow-xs transition-colors">
@@ -70,30 +143,76 @@
         </button>
       </div>
 
-      <!-- Top Configuration Grid: Header Row & Pricing Mode -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+      <!-- SECTION / STEP 1: Header Row & Currency -->
+      <div id="failsafe-section-step1" class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
         <!-- Header Row Selector -->
-        <div class="md:col-span-3 space-y-1.5">
-          <label class="block font-bold text-slate-800 text-xs">Header Row Number</label>
+        <div class="md:col-span-4 space-y-1.5">
+          <div class="flex items-center gap-1.5">
+            <label class="block font-bold text-slate-800 text-xs">Header Row Number <span class="text-red-500">*</span></label>
+            <span class="cursor-pointer text-slate-400 hover:text-slate-600" title="The spreadsheet row containing column titles (Origin, Dest, Break weights).">ⓘ</span>
+          </div>
           <div class="flex items-center gap-2">
-            <input type="number" id="failsafe-header-row-input" min="1" max="50" class="w-24 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.onHeaderRowChange(this.value)">
+            <input type="number" id="failsafe-header-row-input" min="1" max="50" aria-label="Tariff Header Row Index" class="w-24 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.onHeaderRowChange(this.value)">
             <span class="text-[11px] text-slate-500">(1-indexed)</span>
+          </div>
+          <label class="inline-flex items-center gap-1.5 text-[11px] text-slate-600 pt-1">
+            <input type="checkbox" id="failsafe-header-confirmed-cb" aria-label="Confirm Header Row Selection" class="rounded text-red-600 focus:ring-red-500" onchange="FailsafeModal.validate()">
+            <span>I explicitly verify this is the header row</span>
+          </label>
+        </div>
+
+        <!-- Currency Selector -->
+        <div class="md:col-span-4 space-y-1.5">
+          <div class="flex items-center gap-1.5">
+            <label class="block font-bold text-slate-800 text-xs">Currency <span class="text-red-500">*</span></label>
+            <span class="cursor-pointer text-slate-400 hover:text-slate-600" title="ISO 4217 Currency of quoted rates (CAD or USD). Required for multi-currency quoting.">ⓘ</span>
+          </div>
+          <div class="flex items-center gap-4 pt-1">
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-slate-800">
+              <input type="radio" name="failsafe-currency" value="CAD" checked aria-label="Canadian Dollar (CAD)" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.triggerDryRun()">
+              <span>CAD ($)</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-slate-800">
+              <input type="radio" name="failsafe-currency" value="USD" aria-label="United States Dollar (USD)" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.triggerDryRun()">
+              <span>USD ($)</span>
+            </label>
           </div>
         </div>
 
+        <!-- Tariff Reference / Carrier Note -->
+        <div class="md:col-span-4 space-y-1.5">
+          <label class="block font-bold text-slate-800 text-xs">Tariff Code / Reference</label>
+          <input type="text" id="failsafe-tariff-ref-input" placeholder="e.g. 2026-Q1-LTL" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500">
+        </div>
+      </div>
+
+      <!-- SECTION / STEP 2: Rate Basis & Weight Unit -->
+      <div id="failsafe-section-step2" class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
         <!-- Pricing Mode Switcher -->
-        <div class="md:col-span-5 space-y-1.5">
-          <label class="block font-bold text-slate-800 text-xs">Pricing Mode <span class="text-red-500">*</span></label>
+        <div class="md:col-span-4 space-y-1.5">
+          <label class="block font-bold text-slate-800 text-xs">Rating Method <span class="text-red-500">*</span></label>
           <div class="flex items-center gap-4 pt-1">
             <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-800">
-              <input type="radio" name="failsafe-mode" value="weight" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.onModeChange('weight')">
+              <input type="radio" name="failsafe-mode" value="weight" checked aria-label="Weight-Break Rating Mode" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.onModeChange('weight')">
               <span>Weight-Break Mode</span>
             </label>
             <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-800">
-              <input type="radio" name="failsafe-mode" value="skid" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.onModeChange('skid')">
+              <input type="radio" name="failsafe-mode" value="skid" aria-label="Skid Pallet Rating Mode" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.onModeChange('skid')">
               <span>Skid / Pallet Mode</span>
             </label>
           </div>
+        </div>
+
+        <!-- Rate Basis (PER_CWT vs FLAT_BREAK) -->
+        <div id="failsafe-rate-basis-container" class="md:col-span-4 space-y-1.5">
+          <div class="flex items-center gap-1.5">
+            <label class="block font-bold text-slate-800 text-xs">Rate Basis <span class="text-red-500">*</span></label>
+            <span class="cursor-pointer text-slate-400 hover:text-slate-600" title="PER_CWT: Rate is $/hundredweight. FLAT_BREAK: Rate is a flat dollar charge for that tier.">ⓘ</span>
+          </div>
+          <select id="failsafe-rate-basis-select" aria-label="Rating Basis Specification" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.onRateBasisChange()">
+            <option value="PER_CWT">PER_CWT (Price per hundredweight $/cwt)</option>
+            <option value="FLAT_BREAK">FLAT_BREAK (Flat total charge per tier $)</option>
+          </select>
         </div>
 
         <!-- Weight Unit (Visible only in weight mode) -->
@@ -101,84 +220,145 @@
           <label class="block font-bold text-slate-800 text-xs">Weight Unit <span class="text-red-500">*</span></label>
           <div class="flex items-center gap-3 pt-1">
             <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-slate-800">
-              <input type="radio" name="failsafe-weight-unit" value="lb" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.validate()">
+              <input type="radio" name="failsafe-weight-unit" value="lb" checked aria-label="Weight Unit Pounds" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.validate()">
               <span>Pounds (lb)</span>
             </label>
             <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-slate-800">
-              <input type="radio" name="failsafe-weight-unit" value="kg" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.validate()">
+              <input type="radio" name="failsafe-weight-unit" value="kg" aria-label="Weight Unit Kilograms" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.validate()">
               <span>Kilograms (kg)</span>
             </label>
           </div>
         </div>
       </div>
 
-      <!-- Mapping Form Controls -->
-      <div class="border border-slate-200 rounded-xl p-4 bg-white space-y-4">
-        <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider border-b border-slate-100 pb-2">
-          Column Assignments
+      <!-- SECTION / STEP 3: Geographic Coverage (Compound Origin & Destination) -->
+      <div id="failsafe-section-step3" class="border border-slate-200 rounded-xl p-4 bg-white space-y-4">
+        <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center justify-between">
+          <span>Geographic Lane Mapping</span>
+          <span class="text-[11px] text-slate-500 font-normal">Supports single column or compound City + Region</span>
         </h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Origin (Required) -->
-          <div class="space-y-1">
-            <label class="block font-bold text-slate-800 text-xs">
-              Origin Column <span class="text-red-500">*</span>
-            </label>
-            <select id="failsafe-col-origin" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
-              <option value="">-- Select Origin Column --</option>
-            </select>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Origin Configuration -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-slate-900 text-xs flex items-center gap-2">
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">Origin</span>
+                <span>Lane Origin <span class="text-red-500">*</span></span>
+              </label>
+              <div class="flex items-center gap-3 text-xs">
+                <label class="inline-flex items-center gap-1 cursor-pointer">
+                  <input type="radio" name="failsafe-origin-type" value="column" checked aria-label="Lane Origin From Column" class="text-red-600" onchange="FailsafeModal.onOriginTypeChange('column')">
+                  <span>From Column</span>
+                </label>
+                <label class="inline-flex items-center gap-1 cursor-pointer">
+                  <input type="radio" name="failsafe-origin-type" value="fixed" aria-label="Lane Origin Fixed" class="text-red-600" onchange="FailsafeModal.onOriginTypeChange('fixed')">
+                  <span>Fixed Origin</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Origin Column Selectors -->
+            <div id="failsafe-origin-col-fields" class="space-y-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-700">Origin City / Postal Column <span class="text-red-500">*</span></label>
+                <select id="failsafe-col-origin" aria-label="Origin City or Postal Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+                  <option value="">-- Select Origin Column --</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-medium text-slate-600">Origin Province / State Column (Optional)</label>
+                <select id="failsafe-col-origin-region" aria-label="Origin Province or State Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+                  <option value="">-- None (Single Column Location) --</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Fixed Origin Value Input -->
+            <div id="failsafe-origin-fixed-fields" class="hidden space-y-2">
+              <label class="block text-[11px] font-semibold text-slate-700">Fixed Origin Location <span class="text-red-500">*</span></label>
+              <input type="text" id="failsafe-fixed-origin-input" placeholder="e.g. Toronto, ON or V5K 0A1" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" oninput="FailsafeModal.validate()">
+              <div id="failsafe-origin-preamble-suggestion" class="hidden text-[11px] text-blue-700">
+                Preamble detected: <button type="button" id="failsafe-origin-preamble-btn" onclick="FailsafeModal.applyFixedOriginPreamble()" class="underline font-bold hover:text-blue-900 cursor-pointer"></button>
+              </div>
+            </div>
           </div>
 
-          <!-- Destination (Required) -->
-          <div class="space-y-1">
-            <label class="block font-bold text-slate-800 text-xs">
-              Destination Column <span class="text-red-500">*</span>
+          <!-- Destination Configuration -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <label class="font-bold text-slate-900 text-xs flex items-center gap-2">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">Destination</span>
+              <span>Lane Destination <span class="text-red-500">*</span></span>
             </label>
-            <select id="failsafe-col-destination" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
-              <option value="">-- Select Destination Column --</option>
-            </select>
+            <div class="space-y-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-700">Destination City / Postal Column <span class="text-red-500">*</span></label>
+                <select id="failsafe-col-destination" aria-label="Destination City or Postal Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+                  <option value="">-- Select Destination Column --</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-medium text-slate-600">Destination Province / State Column (Optional)</label>
+                <select id="failsafe-col-destination-region" aria-label="Destination Province or State Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+                  <option value="">-- None (Single Column Location) --</option>
+                </select>
+              </div>
+            </div>
           </div>
 
-          <!-- Base Cost / Minimum Charge (Optional) -->
-          <div class="space-y-1">
-            <label class="block font-bold text-slate-800 text-xs">
-              Base Cost / Min Charge Column <span class="text-slate-400 font-normal">(Optional)</span>
+        </div>
+      </div>
+
+      <!-- SECTION / STEP 4: Rate Breaks, Base Cost & Deficit Rating -->
+      <div id="failsafe-section-step4" class="border border-slate-200 rounded-xl p-4 bg-white space-y-4">
+        <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center justify-between">
+          <span>Rate Columns & Minimum Charges</span>
+          <div class="flex items-center gap-3">
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] font-semibold text-slate-800">
+              <input type="checkbox" id="failsafe-allow-deficit-cb" checked aria-label="Allow Deficit Weight Rating Calculation" class="rounded text-red-600 focus:ring-red-500" onchange="FailsafeModal.triggerDryRun()">
+              <span>Allow Deficit Rating</span>
+              <span class="cursor-pointer text-slate-400 hover:text-slate-600" title="Deficit Rating: Rates shipment at the next higher break weight if the total cost is lower.">ⓘ</span>
             </label>
-            <select id="failsafe-col-base-cost" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+          </div>
+        </h3>
+
+        <!-- Base Cost / Minimum Charge Selector -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">Min Charge</span>
+              <label class="font-bold text-slate-800 text-xs">Minimum Charge Column (Optional)</label>
+              <span class="cursor-pointer text-slate-400 hover:text-slate-600" title="The absolute minimum floor price for a lane.">ⓘ</span>
+            </div>
+            <select id="failsafe-col-base-cost" aria-label="Minimum Charge Column" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
               <option value="">-- Optional (No Base Charge / MC) --</option>
             </select>
           </div>
-        </div>
-
-        <!-- Skid Mode Configuration: Max Capacity Breakpoint -->
-        <div id="failsafe-skid-config-panel" class="hidden p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 space-y-2">
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="font-bold text-xs text-amber-900">Skid Rating Breakpoint (Rule 18)</span>
-              <p class="text-[11px] text-amber-700">Brokers specify skid count at quote time. Beyond maximum skid capacity, dedicated FTL is required.</p>
-            </div>
+          <div class="space-y-1">
+            <label id="failsafe-carrier-max-cap-label" class="block font-bold text-slate-800 text-xs">Carrier Legal Maximum Weight (Optional)</label>
             <div class="flex items-center gap-2">
-              <label class="font-bold text-xs text-amber-900">Max LTL Skid Cap:</label>
-              <input type="number" id="failsafe-max-skid-cap" value="10" min="1" max="30" class="w-20 bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500" onchange="FailsafeModal.validate()">
-              <span class="text-[11px] text-amber-800 font-medium">skids</span>
+              <input type="number" id="failsafe-carrier-max-weight" placeholder="e.g. 45000" class="w-32 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.triggerDryRun()">
+              <span id="failsafe-carrier-max-cap-unit" class="text-[11px] text-slate-500">lbs (flags breaks exceeding capacity)</span>
             </div>
           </div>
         </div>
 
-        <!-- Weight Mode Rate Columns Multi-Select / Checkbox Grid -->
+        <!-- Weight Mode Rate Columns Grid -->
         <div id="failsafe-weight-rate-container" class="space-y-2 pt-2 border-t border-slate-100">
           <div class="flex items-center justify-between">
-            <label class="font-bold text-slate-800 text-xs">
-              Weight Break Columns <span class="text-red-500">*</span> 
-              <span class="text-slate-400 font-normal text-[11px]">(Select all columns containing weight rates, e.g. Min, L5C, 1M, 2M...)</span>
+            <label class="font-bold text-slate-800 text-xs flex items-center gap-2">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Rate Breaks</span>
+              <span>Weight Break Columns <span class="text-red-500">*</span></span>
+              <span class="text-slate-400 font-normal text-[11px]">(e.g. Min, L5C, 1M, 2M, 5M, 10M...)</span>
             </label>
-            <div class="flex gap-2">
-              <button type="button" onclick="FailsafeModal.selectAllRateCols(true)" class="text-[11px] text-red-600 hover:underline">Select All</button>
+            <div class="flex gap-2 text-xs">
+              <button type="button" onclick="FailsafeModal.selectAllRateCols(true)" class="text-red-600 hover:underline">Select All</button>
               <span class="text-slate-300">|</span>
-              <button type="button" onclick="FailsafeModal.selectAllRateCols(false)" class="text-[11px] text-slate-500 hover:underline">Clear All</button>
+              <button type="button" onclick="FailsafeModal.selectAllRateCols(false)" class="text-slate-500 hover:underline">Clear All</button>
             </div>
           </div>
-          <div id="failsafe-rate-cols-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg max-h-36 overflow-y-auto">
+          <div id="failsafe-rate-cols-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg max-h-40 overflow-y-auto">
             <!-- Dynamically populated checkboxes -->
           </div>
         </div>
@@ -190,7 +370,7 @@
               <label class="font-bold text-slate-800 text-xs">
                 Skid Rate Columns & Skid Ranges <span class="text-red-500">*</span>
               </label>
-              <p class="text-[11px] text-slate-500">Check each rate column and enter the number or range of skids it covers (e.g. 1, 1-2, 3-4, 5-8).</p>
+              <p class="text-[11px] text-slate-500">Check each rate column and enter the number or range of skids it covers (e.g. 1, 1-2, 3-4).</p>
             </div>
             <div class="flex gap-2">
               <button type="button" onclick="FailsafeModal.selectAllSkidTiers(true)" class="text-[11px] text-red-600 hover:underline">Select All</button>
@@ -217,11 +397,50 @@
         </div>
       </div>
 
+      <!-- LIVE REPRESENTATIVE CALCULATION CARD STRIP -->
+      <div id="failsafe-dry-run-container" class="border border-slate-200 rounded-xl p-4 bg-slate-50/80 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
+              Live Representative Quotes (5 Positional Lanes)
+            </h4>
+            <span id="failsafe-dry-run-status-pill" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-200 text-slate-700">
+              Idle
+            </span>
+          </div>
+          <button type="button" id="failsafe-toggle-drawer-btn" onclick="FailsafeModal.toggleTraceDrawer()" class="text-xs text-red-600 hover:text-red-700 font-bold underline cursor-pointer">
+            View Calculation Trace & Invariants
+          </button>
+        </div>
+
+        <!-- 5 Cards Strip -->
+        <div id="failsafe-dry-run-cards-strip" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <!-- Dynamically populated 5 representative quote cards -->
+        </div>
+
+        <!-- EXPANDABLE CALCULATION TRACE DRAWER -->
+        <div id="failsafe-trace-drawer" class="hidden border border-slate-200 rounded-lg bg-white p-3.5 space-y-3 animate-in fade-in">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-xs text-slate-800">Mathematical Calculation Audit</span>
+              <span id="failsafe-checks-count-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-blue-100 text-blue-800">
+                checked 0 of 0 checks
+              </span>
+            </div>
+            <button type="button" onclick="FailsafeModal.toggleTraceDrawer()" class="text-slate-400 hover:text-slate-600 text-xs">Close Drawer</button>
+          </div>
+          <div id="failsafe-trace-drawer-content" class="text-[11px] font-mono space-y-2 max-h-48 overflow-y-auto">
+            <!-- Dynamically populated trace steps & invariant results -->
+          </div>
+        </div>
+      </div>
+
       <!-- Preview Table: Sticky headers, 12 rows, max 60 cols with show-more -->
       <div class="border border-slate-200 rounded-xl overflow-hidden shadow-2xs space-y-2 p-3 bg-white">
         <div class="flex items-center justify-between">
           <div class="font-bold text-slate-800 text-xs flex items-center gap-2">
-            <span>Data Preview (First 12 Rows)</span>
+            <span>Spreadsheet Preview (First 12 Rows)</span>
             <span id="failsafe-preview-dim-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 text-slate-600 border border-slate-200"></span>
           </div>
           <div id="failsafe-cols-overflow-msg" class="text-[11px] text-amber-700 hidden">
@@ -230,7 +449,7 @@
           </div>
         </div>
 
-        <div class="overflow-x-auto max-h-72 border border-slate-200 rounded-lg">
+        <div class="overflow-x-auto max-h-64 border border-slate-200 rounded-lg">
           <table id="failsafe-preview-table" class="w-full text-left text-[11px] border-collapse">
             <thead id="failsafe-table-thead" class="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold sticky top-0 z-10 font-mono">
               <!-- Dynamically rendered sticky header row -->
@@ -245,10 +464,10 @@
       <!-- Remember this layout -->
       <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
         <label class="inline-flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-800">
-          <input type="checkbox" id="failsafe-remember-mapping" class="rounded text-red-600 focus:ring-red-500 w-4 h-4">
+          <input type="checkbox" id="failsafe-remember-mapping" aria-label="Remember column layout for future carrier sheets" class="rounded text-red-600 focus:ring-red-500 w-4 h-4">
           <span>Remember this column layout for future sheets from this carrier</span>
         </label>
-        <span class="text-[11px] text-slate-500">Saves layout fingerprint to bypass prompts on subsequent uploads</span>
+        <span class="text-[11px] text-slate-500">Saves SHA-256 layout fingerprint to bypass prompts on future uploads</span>
       </div>
 
       <!-- Inline Validation Error Box -->
@@ -257,10 +476,21 @@
     </div>
 
     <!-- Modal Footer -->
-    <div class="px-6 py-3.5 border-t border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
-      <button type="button" onclick="FailsafeModal.cancel()" class="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer transition-colors shadow-2xs">
-        Cancel & Abort
-      </button>
+    <div class="px-6 py-3.5 border-t border-slate-200 bg-slate-50/90 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="FailsafeModal.cancel()" class="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer transition-colors shadow-2xs">
+          Cancel & Abort
+        </button>
+        <!-- Wizard Navigation Buttons (Wizard Mode Only) -->
+        <div id="failsafe-wizard-nav-btns" class="hidden flex items-center gap-2">
+          <button type="button" id="wiz-prev-btn" onclick="FailsafeModal.wizardPrev()" disabled class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold cursor-pointer disabled:opacity-40">
+            ← Previous
+          </button>
+          <button type="button" id="wiz-next-btn" onclick="FailsafeModal.wizardNext()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold cursor-pointer">
+            Next Step →
+          </button>
+        </div>
+      </div>
 
       <div class="flex items-center gap-3">
         <span id="failsafe-confirm-hint" class="text-xs text-slate-500 font-medium"></span>
@@ -275,38 +505,52 @@
 
 <script>
 /**
- * FailsafeModal JavaScript Controller
- * Intercepts needs_mapping responses, manages sticky preview, handles conflict highlights,
- * validates mapping choices, and cleanly gates POST /jobs/{id}/process.
+ * FailsafeModal Controller (Release 1b)
+ * Complete implementation of Guided Wizard, Step 0 Tab Selector,
+ * Live Dry-Run Calculation Drawer, Multi-Tab Transitions, and Race Protection.
  */
 const FailsafeModal = {
   currentJobId: null,
   jobData: null,
+  currentTabName: null,
   maxDisplayCols: 60,
   showAllColsFlag: false,
+  viewMode: 'wizard', // 'wizard' | 'standard'
+  currentStep: 1,
+  dryRunSeqId: 0,
+  dryRunDebounceTimer: null,
+  latestDryRunData: null,
+  acknowledgedFindings: new Set(),
 
   /** Open modal with job state object */
   open(job) {
     if (!job) {
-      console.error("FailsafeModal.open called with undefined or null job");
+      console.error("FailsafeModal.open called with null job");
       return;
     }
     this.jobData = job;
     this.currentJobId = job.job_id;
     this.showAllColsFlag = false;
+    this.acknowledgedFindings.clear();
+    this.currentTabName = job.sheet_name || null;
 
     const modal = document.getElementById('failsafe-mapping-modal');
-    if (!modal) {
-      console.error("FailsafeModal: Element #failsafe-mapping-modal not found in DOM.");
-      return;
-    }
+    if (!modal) return;
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
 
-    // Populate header row input (1-indexed for human UI)
+    // Load saved view mode preference (default: wizard)
+    const savedMode = localStorage.getItem('quotelytics_mapping_mode') || 'wizard';
+    this.switchViewMode(savedMode, false);
+
+    // Setup Multi-Tab Selector (Step 0)
+    this.setupTabSelector();
+
+    // Populate header row
     const headerRowInput = document.getElementById('failsafe-header-row-input');
     const headerIdx = (job.header_row !== null && job.header_row !== undefined) ? job.header_row : 0;
     headerRowInput.value = headerIdx + 1;
+    document.getElementById('failsafe-header-confirmed-cb').checked = !!job.header_row_confirmed;
 
     // Set Status Badge
     const statusBadge = document.getElementById('failsafe-status-badge');
@@ -327,22 +571,6 @@ const FailsafeModal = {
       issuesBanner.classList.add('hidden');
     }
 
-    // Set Conflicts
-    const conflictsBanner = document.getElementById('failsafe-conflicts-banner');
-    const conflictsList = document.getElementById('failsafe-conflicts-list');
-    conflictsList.innerHTML = '';
-    if (job.conflicts && job.conflicts.length > 0) {
-      job.conflicts.forEach(c => {
-        const div = document.createElement('div');
-        div.className = "flex items-start gap-1.5";
-        div.innerHTML = `<span class="font-bold text-red-900">• Field [${c.field}]:</span> <span>${c.reason} (Columns: ${c.columns.map(idx => 'Col ' + String.fromCharCode(65 + idx)).join(', ')})</span>`;
-        conflictsList.appendChild(div);
-      });
-      conflictsBanner.classList.remove('hidden');
-    } else {
-      conflictsBanner.classList.add('hidden');
-    }
-
     // Set Saved Mapping Match
     const savedBanner = document.getElementById('failsafe-saved-match-banner');
     if (job.saved_mapping_suggestion) {
@@ -353,31 +581,217 @@ const FailsafeModal = {
       savedBanner.classList.add('hidden');
     }
 
-    // Set Mode Radio
-    const modeRadios = document.getElementsByName('failsafe-mode');
-    let selectedMode = job.mode || 'weight';
-    modeRadios.forEach(r => {
-      r.checked = (r.value === selectedMode);
-    });
+    // Set Currency & Mode
+    const currency = job.currency || 'CAD';
+    document.getElementsByName('failsafe-currency').forEach(r => { r.checked = (r.value === currency); });
+
+    const selectedMode = job.mode || 'weight';
+    document.getElementsByName('failsafe-mode').forEach(r => { r.checked = (r.value === selectedMode); });
     this.onModeChange(selectedMode, false);
 
-    // Set Weight Unit
-    const unitRadios = document.getElementsByName('failsafe-weight-unit');
-    unitRadios.forEach(r => {
-      r.checked = (r.value === job.weight_unit);
+    // Populate Selectors, Grid, Preview
+    this.populateColumnSelectors();
+    this.renderPreviewTable();
+    this.applySuggestions();
+    this.detectPreambleSuggestions();
+
+    // Validate and trigger initial dry-run
+    this.validate();
+    this.triggerDryRun();
+  },
+
+  /** View Mode: Guided Wizard vs Standard View */
+  switchViewMode(mode, save = true) {
+    this.viewMode = mode;
+    if (save) localStorage.setItem('quotelytics_mapping_mode', mode);
+
+    const wizBtn = document.getElementById('failsafe-view-wizard-btn');
+    const stdBtn = document.getElementById('failsafe-view-standard-btn');
+    const wizStepsHeader = document.getElementById('failsafe-wizard-steps-header');
+    const wizNavBtns = document.getElementById('failsafe-wizard-nav-btns');
+
+    if (mode === 'wizard') {
+      wizBtn.className = "px-2.5 py-1 rounded-md bg-white text-slate-900 font-bold shadow-2xs cursor-pointer";
+      stdBtn.className = "px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-colors cursor-pointer";
+      wizStepsHeader.classList.remove('hidden');
+      wizNavBtns.classList.remove('hidden');
+      this.jumpToStep(this.currentStep || 1);
+    } else {
+      stdBtn.className = "px-2.5 py-1 rounded-md bg-white text-slate-900 font-bold shadow-2xs cursor-pointer";
+      wizBtn.className = "px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-colors cursor-pointer";
+      wizStepsHeader.classList.add('hidden');
+      wizNavBtns.classList.add('hidden');
+      // Show all sections in standard view
+      ['step1', 'step2', 'step3', 'step4'].forEach(s => {
+        const el = document.getElementById(`failsafe-section-${s}`);
+        if (el) el.classList.remove('hidden');
+      });
+    }
+  },
+
+  /** Wizard Step Navigation */
+  jumpToStep(stepNum) {
+    this.currentStep = stepNum;
+    document.getElementById('wiz-current-step-num').innerText = stepNum;
+
+    ['step1', 'step2', 'step3', 'step4'].forEach((s, idx) => {
+      const el = document.getElementById(`failsafe-section-${s}`);
+      const pill = document.getElementById(`wiz-step-pill-${idx + 1}`);
+      if (idx + 1 === stepNum) {
+        if (el) el.classList.remove('hidden');
+        if (pill) pill.className = "flex items-center gap-1.5 font-bold text-red-600 cursor-pointer";
+      } else {
+        if (el) el.classList.add('hidden');
+        if (pill) pill.className = "flex items-center gap-1.5 text-slate-400 cursor-pointer";
+      }
     });
 
-    // Populate Column Selectors and Grid
-    this.populateColumnSelectors();
+    document.getElementById('wiz-prev-btn').disabled = (stepNum === 1);
+    const nextBtn = document.getElementById('wiz-next-btn');
+    if (stepNum === 4) {
+      nextBtn.innerText = "Review & Confirm →";
+    } else {
+      nextBtn.innerText = "Next Step →";
+    }
+  },
 
-    // Render Preview Table
-    this.renderPreviewTable();
+  wizardNext() {
+    if (this.currentStep < 4) {
+      this.jumpToStep(this.currentStep + 1);
+    } else {
+      this.confirm();
+    }
+  },
 
-    // Auto-select suggestions if provided
-    this.applySuggestions();
+  wizardPrev() {
+    if (this.currentStep > 1) {
+      this.jumpToStep(this.currentStep - 1);
+    }
+  },
 
-    // Validate state
+  /** Step 0: Tab Selector & Classification */
+  setupTabSelector() {
+    const tabsBar = document.getElementById('failsafe-tab-selector-bar');
+    const chipsCont = document.getElementById('failsafe-tab-chips-container');
+    const sheets = (this.jobData && this.jobData.sheets) || [];
+
+    if (!sheets || sheets.length <= 1) {
+      tabsBar.classList.add('hidden');
+      return;
+    }
+
+    tabsBar.classList.remove('hidden');
+    chipsCont.innerHTML = '';
+    const activeTab = this.currentTabName || sheets[0];
+
+    sheets.forEach((sheetName, idx) => {
+      // Classify tab heuristics: rate grid vs notes vs hidden
+      const sName = sheetName.toLowerCase();
+      let badgeType = "Rate Grid";
+      let badgeColor = "bg-emerald-100 text-emerald-800 border-emerald-300";
+      if (sName.includes("note") || sName.includes("terms") || sName.includes("rule") || sName.includes("legend")) {
+        badgeType = "Notes Only";
+        badgeColor = "bg-amber-100 text-amber-800 border-amber-300";
+      } else if (sName.startsWith("_") || sName.includes("hidden") || sName.includes("temp")) {
+        badgeType = "Hidden";
+        badgeColor = "bg-slate-200 text-slate-700 border-slate-300";
+      }
+
+      const isActive = (sheetName === activeTab);
+      const activeClass = isActive
+        ? "bg-white text-slate-900 border-red-500 shadow-2xs font-bold ring-1 ring-red-400"
+        : "bg-slate-200/70 text-slate-700 border-slate-300 hover:bg-white";
+
+      const btn = document.createElement('button');
+      btn.type = "button";
+      btn.className = `flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs cursor-pointer transition-all ${activeClass}`;
+      btn.innerHTML = `
+        <span>${sheetName}</span>
+        <span class="px-1 py-0.2 rounded text-[9px] font-bold border uppercase ${badgeColor}">${badgeType}</span>
+      `;
+      btn.onclick = () => this.switchTab(sheetName);
+      chipsCont.appendChild(btn);
+    });
+
+    document.getElementById('failsafe-tab-progress-label').innerText =
+      `Tab ${sheets.indexOf(activeTab) + 1} of ${sheets.length}`;
+  },
+
+  async switchTab(tabName) {
+    if (tabName === this.currentTabName) return;
+    this.currentTabName = tabName;
+    // Request job reload for target sheet tab
+    try {
+      const res = await fetch(`/jobs/${this.currentJobId}?sheet_name=${encodeURIComponent(tabName)}`);
+      if (res.ok) {
+        const newJob = await res.json();
+        this.open(newJob);
+      }
+    } catch (e) {
+      console.error("Failed to switch sheet tab:", e);
+    }
+  },
+
+  mapNextTab() {
+    const sheets = (this.jobData && this.jobData.sheets) || [];
+    const currIdx = sheets.indexOf(this.currentTabName);
+    if (currIdx >= 0 && currIdx + 1 < sheets.length) {
+      document.getElementById('failsafe-tab-transition-banner').classList.add('hidden');
+      this.switchTab(sheets[currIdx + 1]);
+    } else {
+      this.finishAndClose();
+    }
+  },
+
+  finishAndClose() {
+    this.close();
+    window.location.reload();
+  },
+
+  /** Fixed Origin Preamble Detection */
+  detectPreambleSuggestions() {
+    const preview = this.jobData.preview || [];
+    const suggestionEl = document.getElementById('failsafe-origin-preamble-suggestion');
+    const btn = document.getElementById('failsafe-origin-preamble-btn');
+    suggestionEl.classList.add('hidden');
+
+    for (let r = 0; r < Math.min(5, preview.length); r++) {
+      const rowText = (preview[r] || []).join(" ");
+      const m = rowText.match(/(?:outbound\s+from|origin(?:ating)?\s+at|from)\s+([A-Za-z\s]+(?:,\s*[A-Z]{2})?)/i);
+      if (m && m[1]) {
+        const loc = m[1].trim();
+        btn.innerText = `Use "${loc}" as fixed origin`;
+        btn.dataset.location = loc;
+        suggestionEl.classList.remove('hidden');
+        break;
+      }
+    }
+  },
+
+  applyFixedOriginPreamble() {
+    const btn = document.getElementById('failsafe-origin-preamble-btn');
+    const loc = btn.dataset.location;
+    if (loc) {
+      document.querySelector('input[name="failsafe-origin-type"][value="fixed"]').checked = true;
+      this.onOriginTypeChange('fixed');
+      document.getElementById('failsafe-fixed-origin-input').value = loc;
+      this.validate();
+      this.triggerDryRun();
+    }
+  },
+
+  onOriginTypeChange(type) {
+    const colFields = document.getElementById('failsafe-origin-col-fields');
+    const fixedFields = document.getElementById('failsafe-origin-fixed-fields');
+    if (type === 'fixed') {
+      colFields.classList.add('hidden');
+      fixedFields.classList.remove('hidden');
+    } else {
+      colFields.classList.remove('hidden');
+      fixedFields.classList.add('hidden');
+    }
     this.validate();
+    this.triggerDryRun();
   },
 
   onHeaderRowChange(rowNum1Indexed) {
@@ -386,27 +800,45 @@ const FailsafeModal = {
     this.populateColumnSelectors();
     this.renderPreviewTable();
     this.validate();
+    this.triggerDryRun();
+  },
+
+  onRateBasisChange() {
+    this.validate();
+    this.triggerDryRun();
   },
 
   onModeChange(mode, triggerValidation = true) {
     this.jobData.mode = mode;
     const unitContainer = document.getElementById('failsafe-unit-container');
-    const skidConfigPanel = document.getElementById('failsafe-skid-config-panel');
+    const rateBasisContainer = document.getElementById('failsafe-rate-basis-container');
     const weightRateContainer = document.getElementById('failsafe-weight-rate-container');
     const skidTiersContainer = document.getElementById('failsafe-skid-tiers-container');
+    const maxCapLabel = document.getElementById('failsafe-carrier-max-cap-label');
+    const maxCapUnit = document.getElementById('failsafe-carrier-max-cap-unit');
+    const maxCapInput = document.getElementById('failsafe-carrier-max-weight');
 
     if (mode === 'weight') {
       if (unitContainer) unitContainer.classList.remove('hidden');
-      if (skidConfigPanel) skidConfigPanel.classList.add('hidden');
+      if (rateBasisContainer) rateBasisContainer.classList.remove('hidden');
       if (weightRateContainer) weightRateContainer.classList.remove('hidden');
       if (skidTiersContainer) skidTiersContainer.classList.add('hidden');
+      if (maxCapLabel) maxCapLabel.innerText = "Carrier Legal Maximum Weight (Optional)";
+      if (maxCapUnit) maxCapUnit.innerText = "lbs (flags breaks exceeding capacity)";
+      if (maxCapInput && (maxCapInput.placeholder === "e.g. 10" || !maxCapInput.placeholder)) maxCapInput.placeholder = "e.g. 45000";
     } else {
       if (unitContainer) unitContainer.classList.add('hidden');
-      if (skidConfigPanel) skidConfigPanel.classList.remove('hidden');
+      if (rateBasisContainer) rateBasisContainer.classList.add('hidden');
       if (weightRateContainer) weightRateContainer.classList.add('hidden');
       if (skidTiersContainer) skidTiersContainer.classList.remove('hidden');
+      if (maxCapLabel) maxCapLabel.innerText = "Carrier Maximum Skid Capacity (Optional)";
+      if (maxCapUnit) maxCapUnit.innerText = "skids (flags shipments exceeding max pallet capacity)";
+      if (maxCapInput && (maxCapInput.placeholder === "e.g. 45000" || !maxCapInput.placeholder)) maxCapInput.placeholder = "e.g. 10";
     }
-    if (triggerValidation) this.validate();
+    if (triggerValidation) {
+      this.validate();
+      this.triggerDryRun();
+    }
   },
 
   getColumnNames() {
@@ -417,7 +849,7 @@ const FailsafeModal = {
 
     const cols = [];
     for (let i = 0; i < colCount; i++) {
-      const colLetter = String.fromCharCode(65 + (i % 26)); // e.g., A, B, C
+      const colLetter = String.fromCharCode(65 + (i % 26));
       const prefix = i >= 26 ? String.fromCharCode(64 + Math.floor(i / 26)) : '';
       const letterCode = prefix + colLetter;
       const text = (headerRow[i] !== undefined && headerRow[i] !== null && String(headerRow[i]).trim() !== '')
@@ -431,12 +863,14 @@ const FailsafeModal = {
   populateColumnSelectors() {
     const cols = this.getColumnNames();
     const originSelect = document.getElementById('failsafe-col-origin');
+    const originRegSelect = document.getElementById('failsafe-col-origin-region');
     const destSelect = document.getElementById('failsafe-col-destination');
+    const destRegSelect = document.getElementById('failsafe-col-destination-region');
     const baseCostSelect = document.getElementById('failsafe-col-base-cost');
     const rateGrid = document.getElementById('failsafe-rate-cols-grid');
     const skidTbody = document.getElementById('failsafe-skid-tiers-tbody');
 
-    const buildOptions = (placeholder) => {
+    const buildOptions = (placeholder, includeNone = false) => {
       let html = `<option value="">-- ${placeholder} --</option>`;
       cols.forEach(c => {
         html += `<option value="${c.index}">Col ${c.letter}: ${c.name}</option>`;
@@ -444,19 +878,21 @@ const FailsafeModal = {
       return html;
     };
 
-    originSelect.innerHTML = buildOptions("Select Origin Column");
-    destSelect.innerHTML = buildOptions("Select Destination Column");
+    originSelect.innerHTML = buildOptions("Select Origin City/Postal Column");
+    originRegSelect.innerHTML = `<option value="">-- None (Single Column Location) --</option>` + buildOptions("Select Province/State Column").replace('<option value="">-- Select Province/State Column --</option>', '');
+    destSelect.innerHTML = buildOptions("Select Destination City/Postal Column");
+    destRegSelect.innerHTML = `<option value="">-- None (Single Column Location) --</option>` + buildOptions("Select Province/State Column").replace('<option value="">-- Select Province/State Column --</option>', '');
     if (baseCostSelect) {
       baseCostSelect.innerHTML = `<option value="">-- Optional (No Base Charge / MC) --</option>` + buildOptions("Select Base Cost Column").replace('<option value="">-- Select Base Cost Column --</option>', '');
     }
 
-    // Populate weight rate checkboxes
+    // Populate weight rate checkboxes with accessible color badges
     rateGrid.innerHTML = '';
     cols.forEach(c => {
       const div = document.createElement('div');
-      div.className = "flex items-center gap-1.5 p-1 bg-white rounded border border-slate-200 text-xs";
+      div.className = "flex items-center gap-1.5 p-1.5 bg-white rounded-lg border border-slate-200 text-xs hover:border-slate-300";
       div.innerHTML = `
-        <input type="checkbox" id="failsafe-rate-cb-${c.index}" value="${c.index}" class="failsafe-rate-cb rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5" onchange="FailsafeModal.validate()">
+        <input type="checkbox" id="failsafe-rate-cb-${c.index}" value="${c.index}" class="failsafe-rate-cb rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5" onchange="FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
         <label for="failsafe-rate-cb-${c.index}" class="truncate font-mono text-[11px] text-slate-700 cursor-pointer" title="Col ${c.letter}: ${c.name}">
           <strong class="text-slate-900">${c.letter}:</strong> ${c.name}
         </label>
@@ -464,11 +900,10 @@ const FailsafeModal = {
       rateGrid.appendChild(div);
     });
 
-    // Populate skid tier table rows
+    // Populate skid tier table
     if (skidTbody) {
       skidTbody.innerHTML = '';
       cols.forEach(c => {
-        // Derive initial skid range guess from column header name if it has numbers
         let initialRange = "";
         const m = c.name.match(/(\d+)\s*(?:-|to)\s*(\d+)/i);
         if (m) {
@@ -484,7 +919,7 @@ const FailsafeModal = {
         tr.className = "hover:bg-slate-50 transition-colors";
         tr.innerHTML = `
           <td class="py-2 px-3 text-center">
-            <input type="checkbox" id="failsafe-skid-cb-${c.index}" value="${c.index}" class="failsafe-skid-tier-cb rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer" onchange="FailsafeModal.onSkidCbChange(${c.index}); FailsafeModal.validate();">
+            <input type="checkbox" id="failsafe-skid-cb-${c.index}" value="${c.index}" class="failsafe-skid-tier-cb rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer" onchange="FailsafeModal.onSkidCbChange(${c.index}); FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
           </td>
           <td class="py-2 px-3">
             <label for="failsafe-skid-cb-${c.index}" class="font-mono font-bold text-slate-900 cursor-pointer text-xs" title="${c.name}">
@@ -492,10 +927,10 @@ const FailsafeModal = {
             </label>
           </td>
           <td class="py-2 px-3">
-            <input type="text" id="failsafe-skid-range-${c.index}" value="${initialRange}" placeholder="e.g. 1 or 1-2" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500" oninput="FailsafeModal.validate()">
+            <input type="text" id="failsafe-skid-range-${c.index}" value="${initialRange}" placeholder="e.g. 1 or 1-2" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-800 focus:ring-1 focus:ring-amber-500" oninput="FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
           </td>
           <td class="py-2 px-3">
-            <select id="failsafe-skid-basis-${c.index}" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500" onchange="FailsafeModal.validate()">
+            <select id="failsafe-skid-basis-${c.index}" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 focus:ring-1 focus:ring-amber-500" onchange="FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
               <option value="PER_SKID">Per Skid ($/skid)</option>
               <option value="FLAT">Flat Total ($)</option>
             </select>
@@ -510,14 +945,12 @@ const FailsafeModal = {
     const cb = document.getElementById(`failsafe-skid-cb-${colIndex}`);
     const rangeInput = document.getElementById(`failsafe-skid-range-${colIndex}`);
     if (cb && cb.checked && rangeInput && !rangeInput.value.trim()) {
-      // Default to 1 if blank
       rangeInput.value = "1";
     }
   },
 
   selectAllSkidTiers(select) {
-    const cbs = document.querySelectorAll('.failsafe-skid-tier-cb');
-    cbs.forEach(cb => {
+    document.querySelectorAll('.failsafe-skid-tier-cb').forEach(cb => {
       cb.checked = select;
       if (select) {
         const colIdx = cb.value;
@@ -526,12 +959,18 @@ const FailsafeModal = {
       }
     });
     this.validate();
+    this.triggerDryRun();
+  },
+
+  selectAllRateCols(select) {
+    document.querySelectorAll('.failsafe-rate-cb').forEach(cb => { cb.checked = select; });
+    this.validate();
+    this.triggerDryRun();
   },
 
   parseSkidRange(strVal, maxCap = 10) {
     const s = String(strVal || "").trim().toLowerCase();
     if (!s) return null;
-    // e.g. "1-2", "1 - 2", "1 to 2"
     const mRange = s.match(/^(\d+)\s*(?:-|to)\s*(\d+)$/);
     if (mRange) {
       const minU = parseFloat(mRange[1]);
@@ -540,19 +979,15 @@ const FailsafeModal = {
         return { min_units: minU, max_units: maxU, skid_range: `${minU}-${maxU}` };
       }
     }
-    // e.g. "5+"
     const mPlus = s.match(/^(\d+)\s*\+$/);
     if (mPlus) {
       const minU = parseFloat(mPlus[1]);
       return { min_units: minU, max_units: Math.max(minU, parseFloat(maxCap)), skid_range: `${minU}+` };
     }
-    // Single number e.g. "1" or "2"
     const mSingle = s.match(/^(\d+)$/);
     if (mSingle) {
       const val = parseFloat(mSingle[1]);
-      if (val > 0) {
-        return { min_units: val, max_units: val, skid_range: String(val) };
-      }
+      if (val > 0) return { min_units: val, max_units: val, skid_range: String(val) };
     }
     return null;
   },
@@ -563,7 +998,6 @@ const FailsafeModal = {
     const allCols = this.getColumnNames();
     const totalCols = allCols.length;
 
-    // Column cap (~60)
     const visibleCols = (!this.showAllColsFlag && totalCols > this.maxDisplayCols)
       ? allCols.slice(0, this.maxDisplayCols)
       : allCols;
@@ -579,31 +1013,13 @@ const FailsafeModal = {
       overflowMsg.classList.add('hidden');
     }
 
-    // Build thead
     const thead = document.getElementById('failsafe-table-thead');
     let theadHtml = `<tr><th class="py-2 px-2.5 text-center text-slate-400 border-r border-slate-200 w-12">#</th>`;
     
-    // Conflict column set
-    const conflictCols = new Set();
-    if (this.jobData.conflicts) {
-      this.jobData.conflicts.forEach(c => (c.columns || []).forEach(idx => conflictCols.add(idx)));
-    }
-
     visibleCols.forEach(c => {
-      const isConflict = conflictCols.has(c.index);
-      const thClass = isConflict
-        ? "bg-red-50 text-red-700 border-b-2 border-red-500"
-        : "text-slate-700";
-      const conflictPill = isConflict
-        ? `<span class="ml-1 px-1 rounded bg-red-200 text-red-900 text-[9px] font-bold">Conflict</span>`
-        : '';
-
       theadHtml += `
-        <th class="py-2 px-3 border-r border-slate-200 text-left ${thClass}">
-          <div class="flex items-center justify-between">
-            <span>Col ${c.letter}</span>
-            ${conflictPill}
-          </div>
+        <th class="py-2 px-3 border-r border-slate-200 text-left text-slate-700">
+          <div>Col ${c.letter}</div>
           <div class="font-normal text-[10px] text-slate-500 truncate max-w-[120px]" title="${c.name}">${c.name}</div>
         </th>
       `;
@@ -611,7 +1027,6 @@ const FailsafeModal = {
     theadHtml += `</tr>`;
     thead.innerHTML = theadHtml;
 
-    // Build tbody (first 12 rows)
     const tbody = document.getElementById('failsafe-table-tbody');
     let tbodyHtml = '';
     const maxRows = Math.min(12, preview.length);
@@ -640,25 +1055,15 @@ const FailsafeModal = {
     this.renderPreviewTable();
   },
 
-  selectAllRateCols(select) {
-    const cbs = document.querySelectorAll('.failsafe-rate-cb');
-    cbs.forEach(cb => { cb.checked = select; });
-    this.validate();
-  },
-
   applySuggestions() {
     const s = this.jobData.suggestions || {};
-    const originSelect = document.getElementById('failsafe-col-origin');
-    const destSelect = document.getElementById('failsafe-col-destination');
-
     if (s.origin !== undefined && s.origin !== null) {
-      originSelect.value = s.origin;
+      document.getElementById('failsafe-col-origin').value = s.origin;
     }
     if (s.destination !== undefined && s.destination !== null) {
-      destSelect.value = s.destination;
+      document.getElementById('failsafe-col-destination').value = s.destination;
     }
 
-    // Rate breaks from guesses
     const guesses = this.jobData.guesses || [];
     const rateGuess = guesses.find(g => g.field === 'rates' || g.field === 'weight_breaks' || g.field === 'skid_rates');
     if (rateGuess && rateGuess.columns && rateGuess.columns.length > 0) {
@@ -682,26 +1087,47 @@ const FailsafeModal = {
       this.populateColumnSelectors();
       this.renderPreviewTable();
     }
+    if (m.currency) {
+      document.getElementsByName('failsafe-currency').forEach(r => { r.checked = (r.value === m.currency); });
+    }
+    if (m.rate_basis) {
+      const sel = document.getElementById('failsafe-rate-basis-select');
+      if (sel) sel.value = m.rate_basis;
+    }
     if (m.mode) {
-      const modeRadios = document.getElementsByName('failsafe-mode');
-      modeRadios.forEach(r => { r.checked = (r.value === m.mode); });
+      document.getElementsByName('failsafe-mode').forEach(r => { r.checked = (r.value === m.mode); });
       this.onModeChange(m.mode, false);
     }
     if (m.weight_unit) {
-      const unitRadios = document.getElementsByName('failsafe-weight-unit');
-      unitRadios.forEach(r => { r.checked = (r.value === m.weight_unit); });
+      document.getElementsByName('failsafe-weight-unit').forEach(r => { r.checked = (r.value === m.weight_unit); });
     }
-    if (m.origin !== undefined) {
-      document.getElementById('failsafe-col-origin').value = m.origin;
+    if (m.origin_type === 'fixed') {
+      document.querySelector('input[name="failsafe-origin-type"][value="fixed"]').checked = true;
+      this.onOriginTypeChange('fixed');
+      document.getElementById('failsafe-fixed-origin-input').value = m.fixed_origin_value || "";
+    } else if (m.origin !== undefined) {
+      document.querySelector('input[name="failsafe-origin-type"][value="column"]').checked = true;
+      this.onOriginTypeChange('column');
+      if (typeof m.origin === 'object') {
+        document.getElementById('failsafe-col-origin').value = m.origin.city_column;
+        if (m.origin.region_column !== undefined) document.getElementById('failsafe-col-origin-region').value = m.origin.region_column;
+      } else {
+        document.getElementById('failsafe-col-origin').value = m.origin;
+      }
     }
     if (m.destination !== undefined) {
-      document.getElementById('failsafe-col-destination').value = m.destination;
+      if (typeof m.destination === 'object') {
+        document.getElementById('failsafe-col-destination').value = m.destination.city_column;
+        if (m.destination.region_column !== undefined) document.getElementById('failsafe-col-destination-region').value = m.destination.region_column;
+      } else {
+        document.getElementById('failsafe-col-destination').value = m.destination;
+      }
     }
     if (m.base_cost_column !== undefined && document.getElementById('failsafe-col-base-cost')) {
       document.getElementById('failsafe-col-base-cost').value = m.base_cost_column;
     }
-    if (m.max_skid_capacity !== undefined && document.getElementById('failsafe-max-skid-cap')) {
-      document.getElementById('failsafe-max-skid-cap').value = m.max_skid_capacity;
+    if (m.allow_deficit_rating !== undefined) {
+      document.getElementById('failsafe-allow-deficit-cb').checked = !!m.allow_deficit_rating;
     }
     if (m.rate_columns && Array.isArray(m.rate_columns)) {
       this.selectAllRateCols(false);
@@ -710,79 +1136,132 @@ const FailsafeModal = {
         if (cb) cb.checked = true;
       });
     }
-    if (m.skid_tiers && Array.isArray(m.skid_tiers)) {
-      this.selectAllSkidTiers(false);
-      m.skid_tiers.forEach(t => {
-        const cb = document.getElementById(`failsafe-skid-cb-${t.column}`);
-        if (cb) cb.checked = true;
-        const rangeInp = document.getElementById(`failsafe-skid-range-${t.column}`);
-        if (rangeInp) rangeInp.value = t.skid_range || "1";
-        const basisSel = document.getElementById(`failsafe-skid-basis-${t.column}`);
-        if (basisSel && t.rate_type) basisSel.value = t.rate_type;
+    this.validate();
+    this.triggerDryRun();
+  },
+
+  buildMappingPayload() {
+    const headerRow = Math.max(0, parseInt(document.getElementById('failsafe-header-row-input').value, 10) - 1);
+    const headerRowConfirmed = document.getElementById('failsafe-header-confirmed-cb').checked;
+    
+    let currency = 'CAD';
+    document.getElementsByName('failsafe-currency').forEach(r => { if (r.checked) currency = r.value; });
+
+    let originType = 'column';
+    document.getElementsByName('failsafe-origin-type').forEach(r => { if (r.checked) originType = r.value; });
+
+    let origin = null;
+    let fixedOriginValue = null;
+    if (originType === 'fixed') {
+      fixedOriginValue = document.getElementById('failsafe-fixed-origin-input').value.trim();
+    } else {
+      const origCity = document.getElementById('failsafe-col-origin').value;
+      const origReg = document.getElementById('failsafe-col-origin-region').value;
+      if (origCity !== "") {
+        origin = origReg !== "" ? { city_column: parseInt(origCity, 10), region_column: parseInt(origReg, 10) } : parseInt(origCity, 10);
+      }
+    }
+
+    let destination = null;
+    const destCity = document.getElementById('failsafe-col-destination').value;
+    const destReg = document.getElementById('failsafe-col-destination-region').value;
+    if (destCity !== "") {
+      destination = destReg !== "" ? { city_column: parseInt(destCity, 10), region_column: parseInt(destReg, 10) } : parseInt(destCity, 10);
+    }
+
+    const baseCostVal = document.getElementById('failsafe-col-base-cost') ? document.getElementById('failsafe-col-base-cost').value : "";
+    const base_cost_column = baseCostVal !== "" ? parseInt(baseCostVal, 10) : null;
+    
+    let mode = 'weight';
+    document.getElementsByName('failsafe-mode').forEach(r => { if (r.checked) mode = r.value; });
+
+    const rateBasisSel = document.getElementById('failsafe-rate-basis-select');
+    const rate_basis = rateBasisSel ? rateBasisSel.value : 'PER_CWT';
+    const allow_deficit_rating = document.getElementById('failsafe-allow-deficit-cb').checked;
+
+    let weight_unit = null;
+    let rate_columns = [];
+    let skid_tiers = null;
+
+    if (mode === 'weight') {
+      document.getElementsByName('failsafe-weight-unit').forEach(r => { if (r.checked) weight_unit = r.value; });
+      rate_columns = Array.from(document.querySelectorAll('.failsafe-rate-cb:checked')).map(cb => parseInt(cb.value, 10));
+    } else {
+      const checkedSkidCbs = Array.from(document.querySelectorAll('.failsafe-skid-tier-cb:checked'));
+      skid_tiers = [];
+      rate_columns = [];
+      checkedSkidCbs.forEach(cb => {
+        const colIdx = parseInt(cb.value, 10);
+        rate_columns.push(colIdx);
+        const rangeInp = document.getElementById(`failsafe-skid-range-${colIdx}`);
+        const basisSel = document.getElementById(`failsafe-skid-basis-${colIdx}`);
+        const parsed = this.parseSkidRange(rangeInp ? rangeInp.value : "", 10);
+        skid_tiers.push({
+          column: colIdx,
+          skid_range: parsed ? parsed.skid_range : (rangeInp ? rangeInp.value.trim() : "1"),
+          min_units: parsed ? parsed.min_units : 1.0,
+          max_units: parsed ? parsed.max_units : 1.0,
+          rate_type: basisSel ? basisSel.value : "PER_SKID"
+        });
       });
     }
-    this.validate();
+
+    const carrierMaxCapVal = document.getElementById('failsafe-carrier-max-weight').value;
+    const maxCapacity = carrierMaxCapVal ? parseFloat(carrierMaxCapVal) : null;
+    const carrier_max_weight = (mode === 'weight') ? maxCapacity : null;
+    const max_skid_capacity = (mode === 'skid') ? (maxCapacity ? parseInt(maxCapacity, 10) : 10) : null;
+    const remember_mapping = document.getElementById('failsafe-remember-mapping').checked;
+    const tariff_ref = document.getElementById('failsafe-tariff-ref-input').value.trim() || null;
+
+    return {
+      header_row: headerRow,
+      header_row_confirmed: headerRowConfirmed,
+      sheet_name: this.currentTabName || this.jobData.sheet_name || null,
+      mode: mode,
+      rate_basis: rate_basis,
+      currency: currency,
+      origin_type: originType,
+      fixed_origin_value: fixedOriginValue,
+      origin: origin,
+      destination: destination,
+      rate_columns: rate_columns,
+      base_cost_column: base_cost_column,
+      allow_deficit_rating: allow_deficit_rating,
+      carrier_max_weight: carrier_max_weight,
+      max_skid_capacity: max_skid_capacity,
+      skid_tiers: skid_tiers,
+      weight_unit: weight_unit,
+      remember_mapping: remember_mapping,
+      tariff_ref: tariff_ref,
+      acknowledged_finding_ids: Array.from(this.acknowledgedFindings),
+      override_note: document.getElementById('failsafe-override-note-input').value.trim() || null,
+    };
   },
 
   validate() {
     const confirmBtn = document.getElementById('failsafe-confirm-btn');
     const hint = document.getElementById('failsafe-confirm-hint');
-    const errBox = document.getElementById('failsafe-validation-errors');
-    errBox.classList.add('hidden');
-
-    const originVal = document.getElementById('failsafe-col-origin').value;
-    const destVal = document.getElementById('failsafe-col-destination').value;
-    const baseCostVal = document.getElementById('failsafe-col-base-cost') ? document.getElementById('failsafe-col-base-cost').value : "";
-    
-    let modeVal = 'weight';
-    const modeRadios = document.getElementsByName('failsafe-mode');
-    modeRadios.forEach(r => { if (r.checked) modeVal = r.value; });
-
-    let unitVal = null;
-    const unitRadios = document.getElementsByName('failsafe-weight-unit');
-    unitRadios.forEach(r => { if (r.checked) unitVal = r.value; });
-
-    // Validation Rules
+    const payload = this.buildMappingPayload();
     const missing = [];
-    if (originVal === "") missing.push("Origin column");
-    if (destVal === "") missing.push("Destination column");
-    if (originVal !== "" && destVal !== "" && originVal === destVal) {
-      missing.push("Origin and Destination cannot be the same column");
-    }
 
-    if (baseCostVal !== "" && (baseCostVal === originVal || baseCostVal === destVal)) {
-      missing.push("Base Cost column cannot overlap with Origin/Destination");
-    }
-
-    if (modeVal === 'weight') {
-      const checkedRates = Array.from(document.querySelectorAll('.failsafe-rate-cb:checked')).map(cb => parseInt(cb.value, 10));
-      if (checkedRates.length === 0) missing.push("At least one rate column");
-      if (!unitVal) missing.push("Weight unit (lb or kg)");
-      if (baseCostVal !== "" && checkedRates.includes(parseInt(baseCostVal, 10))) {
-        missing.push("Base Cost column cannot overlap with a rate column");
-      }
+    if (payload.origin_type === 'fixed') {
+      if (!payload.fixed_origin_value) missing.push("Fixed Origin location");
     } else {
-      // Skid mode: validate skid tier selections and ranges
-      const maxCapInp = document.getElementById('failsafe-max-skid-cap');
-      const maxCap = maxCapInp ? Math.max(1, parseInt(maxCapInp.value, 10) || 10) : 10;
-      const checkedSkidCbs = Array.from(document.querySelectorAll('.failsafe-skid-tier-cb:checked'));
-      if (checkedSkidCbs.length === 0) {
-        missing.push("At least one skid rate column");
-      } else {
-        let hasInvalidRange = false;
-        checkedSkidCbs.forEach(cb => {
-          const colIdx = cb.value;
-          const rangeInp = document.getElementById(`failsafe-skid-range-${colIdx}`);
-          const parsed = this.parseSkidRange(rangeInp ? rangeInp.value : "", maxCap);
-          if (!parsed) hasInvalidRange = true;
-          if (baseCostVal !== "" && parseInt(baseCostVal, 10) === parseInt(colIdx, 10)) {
-            missing.push(`Column Col ${String.fromCharCode(65 + parseInt(colIdx, 10))} cannot be both Base Cost and a Skid Rate column`);
-          }
-        });
-        if (hasInvalidRange) {
-          missing.push("Valid skid range for each selected column (e.g. 1 or 1-2)");
-        }
-      }
+      if (payload.origin === null) missing.push("Origin column");
+    }
+    if (payload.destination === null) missing.push("Destination column");
+
+    if (payload.origin_type === 'column' && payload.origin !== null && payload.destination !== null) {
+      const origIdx = typeof payload.origin === 'object' ? payload.origin.city_column : payload.origin;
+      const destIdx = typeof payload.destination === 'object' ? payload.destination.city_column : payload.destination;
+      if (origIdx === destIdx) missing.push("Origin and Destination cannot share the same column");
+    }
+
+    if (payload.mode === 'weight') {
+      if (payload.rate_columns.length === 0) missing.push("At least one rate column");
+      if (!payload.weight_unit) missing.push("Weight unit");
+    } else {
+      if (!payload.skid_tiers || payload.skid_tiers.length === 0) missing.push("At least one skid rate column");
     }
 
     if (missing.length > 0) {
@@ -792,9 +1271,197 @@ const FailsafeModal = {
       return false;
     } else {
       confirmBtn.disabled = false;
-      hint.innerText = "✓ Ready to confirm";
+      hint.innerText = "Ready to confirm";
       hint.className = "text-xs text-emerald-700 font-semibold";
+      const errBox = document.getElementById('failsafe-validation-errors');
+      if (errBox && errBox.innerText.startsWith("Required:")) {
+        errBox.classList.add('hidden');
+      }
       return true;
+    }
+  },
+
+  /** Debounced Live Dry-Run with seq_id Monotonic Race Protection */
+  triggerDryRun() {
+    if (this.dryRunDebounceTimer) clearTimeout(this.dryRunDebounceTimer);
+    this.dryRunDebounceTimer = setTimeout(() => {
+      this.executeDryRun();
+    }, 300);
+  },
+
+  async executeDryRun() {
+    if (!this.currentJobId) return;
+    const payload = this.buildMappingPayload();
+    this.dryRunSeqId += 1;
+    const requestSeq = this.dryRunSeqId;
+
+    const statusPill = document.getElementById('failsafe-dry-run-status-pill');
+    statusPill.innerText = "Evaluating...";
+    statusPill.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-blue-100 text-blue-800 animate-pulse";
+
+    try {
+      const res = await fetch(`/jobs/${this.currentJobId}/dry-run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seq_id: requestSeq, mapping: payload })
+      });
+
+      if (!res.ok) {
+        statusPill.innerText = "Configuring";
+        statusPill.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-slate-200 text-slate-700";
+        return;
+      }
+
+      const data = await res.json();
+      // Enforce monotonic seq_id race guard
+      if (data.seq_id < this.dryRunSeqId) {
+        console.warn(`Disregarding stale dry-run seq ${data.seq_id} (latest: ${this.dryRunSeqId})`);
+        return;
+      }
+
+      this.latestDryRunData = data;
+      this.renderDryRunResults(data);
+
+    } catch (err) {
+      console.error("Dry-run execution error:", err);
+      statusPill.innerText = "Error";
+      statusPill.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-red-100 text-red-800";
+    }
+  },
+
+  renderDryRunResults(data) {
+    const statusPill = document.getElementById('failsafe-dry-run-status-pill');
+    const cardsStrip = document.getElementById('failsafe-dry-run-cards-strip');
+    const checksBadge = document.getElementById('failsafe-checks-count-badge');
+    const warningsBanner = document.getElementById('failsafe-warnings-banner');
+    const warningsList = document.getElementById('failsafe-warnings-checklist');
+
+    // Update status & checks count
+    statusPill.innerText = data.status === 'PARTIAL_CHECK' ? 'Partial Check' : 'Live Verified';
+    statusPill.className = data.status === 'PARTIAL_CHECK'
+      ? "px-2 py-0.5 rounded text-[10px] font-mono bg-amber-100 text-amber-800"
+      : "px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-100 text-emerald-800";
+
+    checksBadge.innerText = data.checks_summary || `checked ${data.checks_performed || 0} checks`;
+
+    // Render 5 Lane Representative Cards
+    cardsStrip.innerHTML = '';
+    const sampleRuns = data.sample_runs || [];
+    if (sampleRuns.length === 0) {
+      cardsStrip.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-400">Select rate columns above to preview live quote calculations.</div>`;
+    } else {
+      sampleRuns.forEach((run, idx) => {
+        const card = document.createElement('div');
+        card.className = "p-3 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all flex flex-col justify-between";
+        const pt = (run.cards && run.cards.length > 0) ? run.cards[0] : run;
+        const laneIdx = (run.lane_idx !== undefined && !isNaN(run.lane_idx)) ? run.lane_idx : idx;
+        const hasRate = (pt.status !== "ERROR" && pt.total_charge !== undefined && pt.total_charge !== null) || (run.result !== "no rate for this lane" && run.client_total !== undefined && run.client_total !== null);
+        const rawTotal = (pt.total_charge !== undefined && pt.total_charge !== null) ? pt.total_charge : run.client_total;
+        const totalDisplay = hasRate ? `$${parseFloat(rawTotal).toFixed(2)}` : "No Rate";
+        const totalColor = hasRate ? "text-emerald-700" : "text-slate-400";
+        const isDeficit = pt.is_deficit_rated || run.is_deficit_rated;
+        const isMin = pt.min_applied || run.min_applied;
+        const deficitTag = isDeficit ? `<span class="px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-800 text-[9px] font-bold">Deficit</span>` : '';
+        const minTag = isMin ? `<span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[9px] font-bold">Min</span>` : '';
+        const labelDisplay = pt.label || run.test_point_label || (pt.skid_count ? `${pt.skid_count} skids` : (run.skids ? `${run.skids} skids` : `${pt.weight_lbs || run.weight || 0} lbs`));
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between text-[10px] text-slate-500 font-medium mb-1">
+              <span>Lane #${laneIdx + 1}</span>
+              <div class="flex gap-1">${deficitTag}${minTag}</div>
+            </div>
+            <div class="font-bold text-xs text-slate-900 truncate" title="${run.origin} → ${run.destination}">
+              ${run.origin} → ${run.destination}
+            </div>
+            <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+              ${labelDisplay}
+            </div>
+          </div>
+          <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Quote</span>
+            <span class="font-bold font-mono text-sm ${totalColor}">${totalDisplay}</span>
+          </div>
+        `;
+        cardsStrip.appendChild(card);
+      });
+    }
+
+    // Render Calculation Drawer Content
+    const drawerContent = document.getElementById('failsafe-trace-drawer-content');
+    drawerContent.innerHTML = '';
+    const drawerRows = data.drawer_rows || [];
+    if (drawerRows.length === 0) {
+      drawerContent.innerHTML = `<div class="text-slate-400">No active calculations to display.</div>`;
+    } else {
+      drawerRows.forEach(row => {
+        const div = document.createElement('div');
+        div.className = "p-2 rounded bg-slate-50 border border-slate-200 text-slate-800 flex items-center justify-between";
+        div.innerHTML = `
+          <div>
+            <span class="font-bold text-slate-900">[Lane #${row.lane_idx + 1}] ${row.origin} → ${row.destination}:</span>
+            <span class="text-slate-600 ml-1 font-mono">${row.weight ? `${row.weight} lbs` : `${row.skids} skids`} @ ${row.rate_break || 'LTL'}</span>
+            <div class="text-[10px] text-slate-500 font-sans mt-0.5">${row.formula || 'Base freight calculation'}</div>
+          </div>
+          <div class="text-right">
+            <span class="font-bold font-mono text-slate-900">$${parseFloat(row.client_total || 0).toFixed(2)}</span>
+            <div class="text-[9px] text-slate-400">${row.currency || 'CAD'}</div>
+          </div>
+        `;
+        drawerContent.appendChild(div);
+      });
+    }
+
+    // Render Warning Findings Checklist
+    const findings = data.findings || [];
+    const warningFindings = findings.filter(f => f.severity === 'WARNING');
+    if (warningFindings.length > 0) {
+      warningsBanner.classList.remove('hidden');
+      warningsList.innerHTML = '';
+      warningFindings.forEach(f => {
+        const item = document.createElement('label');
+        item.className = "flex items-start gap-2 p-1.5 rounded bg-amber-100/60 border border-amber-200 text-xs text-amber-950 cursor-pointer";
+        const isChecked = this.acknowledgedFindings.has(f.finding_id);
+        item.innerHTML = `
+          <input type="checkbox" value="${f.finding_id}" ${isChecked ? 'checked' : ''} class="failsafe-ack-cb rounded text-amber-600 focus:ring-amber-500 mt-0.5" onchange="FailsafeModal.onFindingAckChange(this)">
+          <div>
+            <strong class="text-amber-900">${f.code}:</strong> <span>${f.message}</span>
+          </div>
+        `;
+        warningsList.appendChild(item);
+      });
+
+      // Require note if outlier or parcel override is in warnings
+      const needsNote = warningFindings.some(f => f.code.includes("OUTLIER") || f.code.includes("PARCEL"));
+      const noteCont = document.getElementById('failsafe-override-note-container');
+      if (needsNote) {
+        noteCont.classList.remove('hidden');
+      } else {
+        noteCont.classList.add('hidden');
+      }
+    } else {
+      warningsBanner.classList.add('hidden');
+    }
+  },
+
+  onFindingAckChange(cb) {
+    if (cb.checked) {
+      this.acknowledgedFindings.add(cb.value);
+    } else {
+      this.acknowledgedFindings.delete(cb.value);
+    }
+    this.validate();
+  },
+
+  toggleTraceDrawer() {
+    const drawer = document.getElementById('failsafe-trace-drawer');
+    const btn = document.getElementById('failsafe-toggle-drawer-btn');
+    if (drawer.classList.contains('hidden')) {
+      drawer.classList.remove('hidden');
+      btn.innerText = "Hide Calculation Trace ▲";
+    } else {
+      drawer.classList.add('hidden');
+      btn.innerText = "View Calculation Trace & Invariants ▼";
     }
   },
 
@@ -805,64 +1472,7 @@ const FailsafeModal = {
     confirmBtn.disabled = true;
     confirmBtn.innerText = "Saving & Processing...";
 
-    const headerRow = Math.max(0, parseInt(document.getElementById('failsafe-header-row-input').value, 10) - 1);
-    const origin = parseInt(document.getElementById('failsafe-col-origin').value, 10);
-    const destination = parseInt(document.getElementById('failsafe-col-destination').value, 10);
-    const baseCostVal = document.getElementById('failsafe-col-base-cost') ? document.getElementById('failsafe-col-base-cost').value : "";
-    const base_cost_column = baseCostVal !== "" ? parseInt(baseCostVal, 10) : null;
-    
-    let mode = 'weight';
-    document.getElementsByName('failsafe-mode').forEach(r => { if (r.checked) mode = r.value; });
-
-    let weight_unit = null;
-    let rate_columns = [];
-    let skid_tiers = null;
-    let max_skid_capacity = 10;
-
-    if (mode === 'weight') {
-      document.getElementsByName('failsafe-weight-unit').forEach(r => { if (r.checked) weight_unit = r.value; });
-      rate_columns = Array.from(document.querySelectorAll('.failsafe-rate-cb:checked')).map(cb => parseInt(cb.value, 10));
-    } else {
-      const maxCapInp = document.getElementById('failsafe-max-skid-cap');
-      max_skid_capacity = maxCapInp ? Math.max(1, parseInt(maxCapInp.value, 10) || 10) : 10;
-
-      const checkedSkidCbs = Array.from(document.querySelectorAll('.failsafe-skid-tier-cb:checked'));
-      skid_tiers = [];
-      rate_columns = [];
-
-      checkedSkidCbs.forEach(cb => {
-        const colIdx = parseInt(cb.value, 10);
-        rate_columns.push(colIdx);
-        const rangeInp = document.getElementById(`failsafe-skid-range-${colIdx}`);
-        const basisSel = document.getElementById(`failsafe-skid-basis-${colIdx}`);
-        const parsed = this.parseSkidRange(rangeInp ? rangeInp.value : "", max_skid_capacity);
-        const rateType = basisSel ? basisSel.value : "PER_SKID";
-
-        skid_tiers.push({
-          column: colIdx,
-          skid_range: parsed ? parsed.skid_range : (rangeInp ? rangeInp.value.trim() : "1"),
-          min_units: parsed ? parsed.min_units : 1.0,
-          max_units: parsed ? parsed.max_units : 1.0,
-          rate_type: rateType
-        });
-      });
-    }
-
-    const remember_mapping = document.getElementById('failsafe-remember-mapping').checked;
-
-    const payload = {
-      header_row: headerRow,
-      sheet_name: this.jobData.sheet_name || null,
-      mode: mode,
-      origin: origin,
-      destination: destination,
-      rate_columns: rate_columns,
-      base_cost_column: base_cost_column,
-      max_skid_capacity: max_skid_capacity,
-      skid_tiers: skid_tiers,
-      weight_unit: weight_unit,
-      remember_mapping: remember_mapping
-    };
+    const payload = this.buildMappingPayload();
 
     try {
       // 1. Post Mapping Confirmation
@@ -873,21 +1483,43 @@ const FailsafeModal = {
       });
       const mapData = await mapRes.json();
 
+      if (mapRes.status === 409) {
+        // Warning finding unacknowledged
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = "Confirm Mapping & Process";
+        this.triggerDryRun();
+        const errBox = document.getElementById('failsafe-validation-errors');
+        errBox.innerText = `Warning Confirmation Required: ${mapData.message || "Please check the warning acknowledgment checkboxes above to proceed."}`;
+        errBox.classList.remove('hidden');
+        return;
+      }
+
       if (!mapRes.ok) {
-        throw new Error(mapData.errors ? mapData.errors.join("; ") : (mapData.detail || "Validation failed"));
+        throw new Error(mapData.errors ? mapData.errors.join("; ") : (mapData.detail || mapData.message || "Validation failed"));
+      }
+
+      // Check if multi-tab workbook has additional unmapped tabs
+      const sheets = (this.jobData && this.jobData.sheets) || [];
+      const currIdx = sheets.indexOf(this.currentTabName);
+      if (sheets.length > 1 && currIdx >= 0 && currIdx + 1 < sheets.length) {
+        // Show multi-tab completion transition banner
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = "Confirm Mapping & Process";
+        const transBanner = document.getElementById('failsafe-tab-transition-banner');
+        const transMsg = document.getElementById('failsafe-tab-transition-msg');
+        transMsg.innerText = `Tab "${this.currentTabName}" confirmed! ${sheets.length - (currIdx + 1)} tabs remaining in workbook.`;
+        transBanner.classList.remove('hidden');
+        transBanner.scrollIntoView({ behavior: 'smooth' });
+        return;
       }
 
       // 2. Trigger Gated Process
-      const procRes = await fetch(`/jobs/${this.currentJobId}/process`, {
-        method: 'POST'
-      });
+      const procRes = await fetch(`/jobs/${this.currentJobId}/process`, { method: 'POST' });
       const procData = await procRes.json();
-
       if (!procRes.ok) {
         throw new Error(procData.detail || "Processing failed after mapping confirmation");
       }
 
-      // Success: Close modal and trigger callback / reload
       this.close();
       if (window.onFailsafeMappingComplete) {
         window.onFailsafeMappingComplete(procData);
@@ -926,6 +1558,5 @@ const FailsafeModal = {
   }
 };
 
-// Explicitly bind FailsafeModal to window for global access across templates
 window.FailsafeModal = FailsafeModal;
 </script>

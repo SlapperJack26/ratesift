@@ -138,15 +138,15 @@ def find_near_match(
 
 def list_saved_mappings(tenant_id: Optional[str] = None, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     """Lists saved mappings scoped to tenant/user."""
+    if not tenant_id and not user_id:
+        return []
     conn = job_store._get_connection()
     try:
         cur = conn.cursor()
         if tenant_id:
             cur.execute("SELECT * FROM failsafe_saved_mappings WHERE tenant_id = ? ORDER BY updated_at DESC;", (tenant_id,))
-        elif user_id:
-            cur.execute("SELECT * FROM failsafe_saved_mappings WHERE user_id = ? ORDER BY updated_at DESC;", (user_id,))
         else:
-            cur.execute("SELECT * FROM failsafe_saved_mappings ORDER BY updated_at DESC;")
+            cur.execute("SELECT * FROM failsafe_saved_mappings WHERE user_id = ? ORDER BY updated_at DESC;", (user_id,))
         rows = cur.fetchall()
         result = []
         for r in rows:
@@ -160,14 +160,13 @@ def list_saved_mappings(tenant_id: Optional[str] = None, user_id: Optional[str] 
 
 
 def delete_saved_mapping(mapping_id: str, tenant_id: Optional[str] = None) -> bool:
-    """Deletes saved mapping with tenant scoping check."""
+    """Deletes saved mapping with strict tenant scoping check."""
+    if not tenant_id:
+        return False
     conn = job_store._get_connection()
     try:
         cur = conn.cursor()
-        if tenant_id:
-            cur.execute("DELETE FROM failsafe_saved_mappings WHERE id = ? AND tenant_id = ?;", (mapping_id, tenant_id))
-        else:
-            cur.execute("DELETE FROM failsafe_saved_mappings WHERE id = ?;", (mapping_id,))
+        cur.execute("DELETE FROM failsafe_saved_mappings WHERE id = ? AND tenant_id = ?;", (mapping_id, tenant_id))
         deleted = cur.rowcount > 0
         conn.commit()
         return deleted

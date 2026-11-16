@@ -21,23 +21,23 @@ def run_tests():
     print("==================================================")
 
     # Register a fresh dedicated user for testing
-    user_email = f"settings_user_{uuid.uuid4().hex[:6]}@techcorp.io"
+    user_email = f"settings_user_{uuid.uuid4().hex[:6]}@acme-logistics.ca"
     user_pwd = "InitialPassword2026!"
     reg = client.post("/api/auth/register", data={
-        "name": "Alex Rivers",
+        "name": "Jordan Freight",
         "email": user_email,
-        "company": "TechCorp Logistics",
+        "company": "Acme Logistics",
         "origin_zip": "M5V 2T6",
         "password": user_pwd
     })
     assert reg.status_code == 200, f"Registration failed: {reg.text}"
-    session = reg.cookies.get("shipflow_session")
-    auth_client = TestClient(app, cookies={"shipflow_session": session})
+    session = reg.cookies.get("quotelytics_session")
+    auth_client = TestClient(app, cookies={"quotelytics_session": session})
 
     print("\n--- 1. Testing Profile & Origin Defaults Update via Form Data ---")
     form_data = {
-        "name": "Alexander Rivers",
-        "company": "TechCorp Logistics Canada Inc.",
+        "name": "Jordan A. Freight",
+        "company": "Acme Logistics Canada Inc.",
         "origin_zip": "M5V 2T6",
         "origin_address": "100 King St W, Suite 400",
         "phone": "+1 (416) 555-9876"
@@ -48,8 +48,8 @@ def run_tests():
 
     # Verify profile reflects changes
     prof = auth_client.get("/api/user/profile").json()
-    assert prof["name"] == "Alexander Rivers"
-    assert prof["company"] == "TechCorp Logistics Canada Inc."
+    assert prof["name"] == "Jordan A. Freight"
+    assert prof["company"] == "Acme Logistics Canada Inc."
     assert prof["origin_zip"] == "M5V 2T6"
     assert prof["origin_address"] == "100 King St W, Suite 400"
     assert prof["phone"] == "+1 (416) 555-9876"
@@ -57,8 +57,8 @@ def run_tests():
 
     print("\n--- 2. Testing Profile & Origin Defaults Update via JSON Payload ---")
     json_data = {
-        "name": "Alex Rivers",
-        "company": "TechCorp Logistics",
+        "name": "Jordan Freight",
+        "company": "Acme Logistics",
         "origin_zip": "TORONTO, ON",
         "origin_address": "5500 Logistics Way, Bay 12",
         "phone": "+1 (416) 555-0199"
@@ -68,8 +68,8 @@ def run_tests():
     assert res.json()["status"] == "success"
 
     prof = auth_client.get("/api/user/profile").json()
-    assert prof["name"] == "Alex Rivers"
-    assert prof["company"] == "TechCorp Logistics"
+    assert prof["name"] == "Jordan Freight"
+    assert prof["company"] == "Acme Logistics"
     assert prof["origin_zip"] == "TORONTO, ON"
     assert prof["origin_address"] == "5500 Logistics Way, Bay 12"
     assert prof["phone"] == "+1 (416) 555-0199"
@@ -135,7 +135,7 @@ def run_tests():
         "new_password": "abc"
     })
     assert short_res.status_code == 400
-    assert "at least 6 characters" in short_res.json().get("detail", "")
+    assert "at least 10 characters" in short_res.json().get("detail", "")
     print("   [OK] Rejection of short password verified (HTTP 400)")
 
     # 5c. Valid password update

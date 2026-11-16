@@ -5,8 +5,8 @@ import json
 from fastapi.testclient import TestClient
 
 from main import app
-from services.ratesift_extractor import RateSiftExtractor
-from services.ratesift_db_service import (
+from services.quotelytics_extractor import QuotelyticsExtractor
+from services.quotelytics_db_service import (
     get_rate_sheet,
     get_sheet_full_rules,
     get_rate_sheet_cells,
@@ -17,13 +17,21 @@ from services.ratesift_db_service import (
 class TestMilestone2ExtractorAndConfirmationGate(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        from services.auth_service import create_session
+        import uuid
+        from services.auth_service import register_and_create_session
         from services.db_service import update_user_tier
         cls.client = TestClient(app)
-        cls.user_id = "usr_alex_rivers"
+        user, token = register_and_create_session(
+            name="Jordan Freight",
+            email=f"m2.extractor.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+            company="Acme Logistics",
+            origin_zip="TORONTO, ON",
+            password="M2ExtractorPassword2026!"
+        )
+        cls.user_id = user["id"]
         update_user_tier(cls.user_id, "TEAM")
-        cls.token = create_session(cls.user_id)
-        cls.client.cookies.set("shipflow_session", cls.token)
+        cls.token = token
+        cls.client.cookies.set("quotelytics_session", cls.token)
         cls.guide_csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sample_sheets", "day_and_ross_guide_tariff.csv")
 
     def test_01_extractor_rules_on_day_and_ross_sheet(self):
@@ -32,7 +40,7 @@ class TestMilestone2ExtractorAndConfirmationGate(unittest.TestCase):
         with open(self.guide_csv_path, "rb") as f:
             file_bytes = f.read()
 
-        extractor = RateSiftExtractor(
+        extractor = QuotelyticsExtractor(
             file_bytes=file_bytes,
             filename="day_and_ross_guide_tariff.csv",
             user_id=self.user_id
@@ -40,7 +48,7 @@ class TestMilestone2ExtractorAndConfirmationGate(unittest.TestCase):
         result = extractor.process()
 
         sheet_id = result["sheet_id"]
-        self.assertTrue(sheet_id.startswith("rs_sheet_"))
+        self.assertTrue(sheet_id.startswith("ql_sheet_"))
         
         # Rule 7 & 19: Starts in PENDING_REVIEW status
         self.assertEqual(result["confirmation_status"], "PENDING_REVIEW")
@@ -75,7 +83,7 @@ class TestMilestone2ExtractorAndConfirmationGate(unittest.TestCase):
         # 1. Upload new sheet via API
         with open(self.guide_csv_path, "rb") as f:
             response = self.client.post(
-                "/api/ratesift/sheets/upload",
+                "/api/quotelytics/sheets/upload",
                 files={"file": ("day_and_ross_guide_tariff.csv", f, "text/csv")}
             )
         self.assertEqual(response.status_code, 200)
@@ -84,7 +92,7 @@ class TestMilestone2ExtractorAndConfirmationGate(unittest.TestCase):
         self.assertEqual(data["confirmation_status"], "PENDING_REVIEW")
 
         # 2. Get Sheet Details via API
-        detail_res = self.client.get(f"/api/ratesift/sheets/{sheet_id}")
+        detail_res = self.client.get(f"/api/quotelytics/sheets/{sheet_id}")
         self.assertEqual(detail_res.status_code, 200)
         detail_data = detail_res.json()
         self.assertEqual(detail_data["sheet"]["id"], sheet_id)
@@ -93,12 +101,12 @@ class TestMilestone2ExtractorAndConfirmationGate(unittest.TestCase):
         self.assertGreater(len(detail_data["breaks"]), 50)
 
         # 3. Confirm Sheet via API (Rule 7)
-        confirm_res = self.client.post(f"/api/ratesift/sheets/{sheet_id}/confirm")
+        confirm_res = self.client.post(f"/api/quotelytics/sheets/{sheet_id}/confirm")
         self.assertEqual(confirm_res.status_code, 200)
         self.assertEqual(confirm_res.json()["status"], "success")
 
         # 4. Verify status updated to CONFIRMED
-        after_res = self.client.get(f"/api/ratesift/sheets/{sheet_id}")
+        after_res = self.client.get(f"/api/quotelytics/sheets/{sheet_id}")
         self.assertEqual(after_res.json()["sheet"]["confirmation_status"], "CONFIRMED")
         self.assertIsNotNone(after_res.json()["sheet"]["confirmed_at"])
 
@@ -108,7 +116,7 @@ class TestMilestone2ExtractorAndConfirmationGate(unittest.TestCase):
         self.assertGreater(len(sheets), 0)
         sheet_id = sheets[0]["id"]
 
-        cell_res = self.client.get(f"/api/ratesift/sheets/{sheet_id}/cells")
+        cell_res = self.client.get(f"/api/quotelytics/sheets/{sheet_id}/cells")
         self.assertEqual(cell_res.status_code, 200)
         cell_data = cell_res.json()
         self.assertIn("cells", cell_data)
@@ -127,7 +135,7 @@ class TestMilestone2ExtractorAndConfirmationGate(unittest.TestCase):
             "CALGARY, AB,TORONTO, ON,96.89,34.51,27.73\n"
             "EDMONTON, AB,MONTREAL, QC,96.89,,25.26\n"  # missing LTL rate!
         )
-        extractor = RateSiftExtractor(
+        extractor = QuotelyticsExtractor(
             file_bytes=mock_csv.encode("utf-8"),
             filename="mock_missing_rate.csv",
             user_id=self.user_id

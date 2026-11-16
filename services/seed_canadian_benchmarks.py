@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Dict, Any, List, Optional
-from services.ratesift_db_service import (
+from services.quotelytics_db_service import (
     get_connection,
     create_rate_sheet,
     confirm_rate_sheet,
@@ -357,14 +357,14 @@ CANADIAN_BENCHMARK_CARRIERS = [
 ]
 
 def ensure_is_benchmark_column():
-    """Ensures `is_benchmark` column exists on `rs_rate_sheets`."""
+    """Ensures `is_benchmark` column exists on `ql_rate_sheets`."""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("PRAGMA table_info(rs_rate_sheets)")
+    cursor.execute("PRAGMA table_info(ql_rate_sheets)")
     cols = [r["name"] for r in cursor.fetchall()]
     if "is_benchmark" not in cols:
         try:
-            cursor.execute("ALTER TABLE rs_rate_sheets ADD COLUMN is_benchmark INTEGER DEFAULT 0")
+            cursor.execute("ALTER TABLE ql_rate_sheets ADD COLUMN is_benchmark INTEGER DEFAULT 0")
             conn.commit()
         except Exception:
             pass
@@ -383,7 +383,7 @@ def seed_canadian_benchmarks_for_user(user_id: str, force: bool = False) -> List
 
     # Check if user already has benchmark tariffs
     cursor.execute("""
-    SELECT id, carrier_name FROM rs_rate_sheets 
+    SELECT id, carrier_name FROM ql_rate_sheets 
     WHERE user_id = ? AND is_benchmark = 1
     """, (user_id,))
     existing = cursor.fetchall()
@@ -396,12 +396,12 @@ def seed_canadian_benchmarks_for_user(user_id: str, force: bool = False) -> List
     if existing:
         sheet_ids = [r["id"] for r in existing]
         placeholders = ",".join("?" * len(sheet_ids))
-        cursor.execute(f"DELETE FROM rs_rate_sheet_cells WHERE sheet_id IN ({placeholders})", sheet_ids)
-        cursor.execute(f"DELETE FROM rs_carrier_zones WHERE sheet_id IN ({placeholders})", sheet_ids)
-        cursor.execute(f"DELETE FROM rs_weight_breaks WHERE sheet_id IN ({placeholders})", sheet_ids)
-        cursor.execute(f"DELETE FROM rs_carrier_minimums WHERE sheet_id IN ({placeholders})", sheet_ids)
-        cursor.execute(f"DELETE FROM rs_carrier_surcharges WHERE sheet_id IN ({placeholders})", sheet_ids)
-        cursor.execute(f"DELETE FROM rs_rate_sheets WHERE id IN ({placeholders})", sheet_ids)
+        cursor.execute(f"DELETE FROM ql_rate_sheet_cells WHERE sheet_id IN ({placeholders})", sheet_ids)
+        cursor.execute(f"DELETE FROM ql_carrier_zones WHERE sheet_id IN ({placeholders})", sheet_ids)
+        cursor.execute(f"DELETE FROM ql_weight_breaks WHERE sheet_id IN ({placeholders})", sheet_ids)
+        cursor.execute(f"DELETE FROM ql_carrier_minimums WHERE sheet_id IN ({placeholders})", sheet_ids)
+        cursor.execute(f"DELETE FROM ql_carrier_surcharges WHERE sheet_id IN ({placeholders})", sheet_ids)
+        cursor.execute(f"DELETE FROM ql_rate_sheets WHERE id IN ({placeholders})", sheet_ids)
         conn.commit()
 
     conn.close()
@@ -436,12 +436,12 @@ def seed_canadian_benchmarks_for_user(user_id: str, force: bool = False) -> List
         # Mark as benchmark tariff
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE rs_rate_sheets SET is_benchmark = 1 WHERE id = ?", (sheet_id,))
+        cursor.execute("UPDATE ql_rate_sheets SET is_benchmark = 1 WHERE id = ?", (sheet_id,))
         conn.commit()
         conn.close()
 
         # Confirm sheet for live quoting
-        confirm_rate_sheet(sheet_id, user_id=user_id, confirmed_by="RateSift Benchmark Registry")
+        confirm_rate_sheet(sheet_id, user_id=user_id, confirmed_by="Quotelytics Benchmark Registry")
 
         # Insert Surcharges
         insert_carrier_surcharges(sheet_id, user_id=user_id, surcharges=carrier_def["surcharges"])
@@ -529,6 +529,10 @@ def seed_canadian_benchmarks_for_user(user_id: str, force: bool = False) -> List
     return created_ids
 
 if __name__ == "__main__":
-    print("Seeding Canadian benchmark carrier tariffs for Alex Rivers...")
-    ids = seed_canadian_benchmarks_for_user("usr_alex_rivers", force=True)
+    import sys
+    if len(sys.argv) < 2:
+        raise SystemExit("Usage: python -m services.seed_canadian_benchmarks <user_id>")
+    target_uid = sys.argv[1]
+    print(f"Seeding Canadian benchmark carrier tariffs for {target_uid}...")
+    ids = seed_canadian_benchmarks_for_user(target_uid, force=True)
     print(f"Successfully seeded {len(ids)} Canadian benchmark tariffs: {ids}")

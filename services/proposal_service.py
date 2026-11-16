@@ -18,9 +18,9 @@ def build_client_proposal_data(
     Hides internal carrier wholesale net rates and presents professional all-in pricing.
     """
     broker = broker_info or {}
-    company_name = broker.get("company") or "TechCorp Logistics"
-    agent_name = broker.get("name") or "Alex Rivers"
-    agent_email = broker.get("email") or "alex.rivers@techcorp.io"
+    company_name = broker.get("company") or ""
+    agent_name = broker.get("name") or ""
+    agent_email = broker.get("email") or ""
     origin_hub = broker.get("origin_zip") or quote_data.get("origin") or "TORONTO, ON"
 
     now = datetime.utcnow()
@@ -136,9 +136,9 @@ def generate_proposal_email(proposal_data: Dict[str, Any]) -> Dict[str, str]:
     issue_date = proposal_data.get("issue_date", "")
     expiry_date = proposal_data.get("expiry_date", "")
     client_name = client.get("name", "Client Partner")
-    agent_name = broker.get("agent_name", "Alex Rivers")
-    company_name = broker.get("company", "TechCorp Logistics")
-    agent_email = broker.get("email", "alex.rivers@techcorp.io")
+    agent_name = broker.get("agent_name") or ""
+    company_name = broker.get("company") or ""
+    agent_email = broker.get("email") or ""
     origin_hub = broker.get("origin_hub", "Toronto, ON")
 
     subject = f"Freight Rate Quote Proposal: {origin} → {destination} ({weight:,.0f} lbs) - Ref #{proposal_id}"
@@ -200,7 +200,7 @@ Best regards,
 {company_name}
 Email: {agent_email}
 Dispatch Hub: {origin_hub}
-RateSift Canadian Freight Engine • WHC Canadian Data Residency Verified"""
+Quotelytics Canadian Freight Engine • WHC Canadian Data Residency Verified"""
 
     body_html = f"""<div style="font-family: Arial, -apple-system, sans-serif; color: #1e293b; max-width: 650px; line-height: 1.6;">
   <p style="font-size: 14px; margin-bottom: 16px;">Hi <strong>{client_name}</strong>,</p>
@@ -500,7 +500,7 @@ def generate_proposal_excel_workbook(proposal_data: Dict[str, Any]) -> bytes:
     # Footer note
     current_r += 1
     ws.merge_cells(f"A{current_r}:E{current_r}")
-    ws[f"A{current_r}"] = "RateSift Canada • PIPEDA Compliant • All rates calculated deterministically from verified tariffs."
+    ws[f"A{current_r}"] = "Quotelytics Canada • PIPEDA Compliant • All rates calculated deterministically from verified tariffs."
     ws[f"A{current_r}"].font = Font(name="Arial", size=8, color="94A3B8")
     ws[f"A{current_r}"].alignment = Alignment(horizontal="center", vertical="center")
 

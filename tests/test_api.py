@@ -11,6 +11,7 @@ Comprehensive API and concurrency tests for Phase 2:
 import concurrent.futures
 import io
 import time
+import uuid
 from fastapi.testclient import TestClient
 import openpyxl
 from openpyxl import Workbook
@@ -20,8 +21,28 @@ import pytest
 from app.jobs import job_store
 from app.main import app
 from app.mappings import compute_fingerprint
+from services.auth_service import register_and_create_session
+from services.db_service import update_user_tier
 
 client = TestClient(app)
+
+def _make_auth_headers(prefix: str = "api_user", company: str = "Acme Logistics") -> dict:
+    user, token = register_and_create_session(
+        name=f"User {prefix}",
+        email=f"{prefix}.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+        company=company,
+        origin_zip="TORONTO, ON",
+        password="ApiTestPassword2026!"
+    )
+    update_user_tier(user["id"], "BUSINESS")
+    return {"Authorization": f"Bearer {token}"}
+
+_SHARED_CORP_HEADERS = None
+def _get_corp_headers() -> dict:
+    global _SHARED_CORP_HEADERS
+    if _SHARED_CORP_HEADERS is None:
+        _SHARED_CORP_HEADERS = _make_auth_headers("u1", "Tenant Corp")
+    return _SHARED_CORP_HEADERS
 
 
 def create_test_excel_bytes(rows):
@@ -36,6 +57,7 @@ def create_test_excel_bytes(rows):
 
 
 def test_upload_excel_job():
+    u1_headers = _make_auth_headers("u1_upload")
     rows = [
         ["ACME Freight Rates 2026 (lbs)"],
         [],
@@ -46,7 +68,7 @@ def test_upload_excel_job():
     response = client.post(
         "/jobs",
         files={"file": ("test_rates.xlsx", file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": "u1", "X-Tenant-Id": "t1"}
+        headers=u1_headers
     )
     assert response.status_code == 200
     data = response.json()
@@ -55,7 +77,7 @@ def test_upload_excel_job():
     assert data["column_count"] == 7
 
     job_id = data["job_id"]
-    get_res = client.get(f"/jobs/{job_id}", headers={"X-User-Id": "u1", "X-Tenant-Id": "t1"})
+    get_res = client.get(f"/jobs/{job_id}", headers=u1_headers)
     assert get_res.status_code == 200
     assert get_res.json()["job_id"] == job_id
 
@@ -111,6 +133,8 @@ def test_atomic_transition_concurrent_double_process():
 
 def test_tenant_isolation_returns_404():
     # Rule 14: Another user cannot access job and gets 404 (not 403)
+    headers_a = _make_auth_headers("user_a", "Tenant A")
+    headers_b = _make_auth_headers("user_b", "Tenant B")
     rows = [
         ["ACME Freight Rates 2026 (lbs)"],
         [],
@@ -121,24 +145,25 @@ def test_tenant_isolation_returns_404():
     res = client.post(
         "/jobs",
         files={"file": ("tenant_a.xlsx", file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": "user_a", "X-Tenant-Id": "tenant_a"}
+        headers=headers_a
     )
     job_id = res.json()["job_id"]
 
     # Tenant A access succeeds
-    res_a = client.get(f"/jobs/{job_id}", headers={"X-User-Id": "user_a", "X-Tenant-Id": "tenant_a"})
+    res_a = client.get(f"/jobs/{job_id}", headers=headers_a)
     assert res_a.status_code == 200
 
     # Tenant B access returns 404
-    res_b = client.get(f"/jobs/{job_id}", headers={"X-User-Id": "user_b", "X-Tenant-Id": "tenant_b"})
+    res_b = client.get(f"/jobs/{job_id}", headers=headers_b)
     assert res_b.status_code == 404
 
     # Processing from Tenant B returns 404
-    proc_b = client.post(f"/jobs/{job_id}/process", headers={"X-User-Id": "user_b", "X-Tenant-Id": "tenant_b"})
+    proc_b = client.post(f"/jobs/{job_id}/process", headers=headers_b)
     assert proc_b.status_code == 404
 
 
 def test_saved_mapping_reuse_and_swapped_columns():
+    corp_headers = _get_corp_headers()
     # Upload custom sheet requiring mapping
     rows = [
         ["City A", "City B", "Rate 100", "Rate 500"],
@@ -148,7 +173,7 @@ def test_saved_mapping_reuse_and_swapped_columns():
     res = client.post(
         "/jobs",
         files={"file": ("custom_layout.xlsx", file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": "u1", "X-Tenant-Id": "tenant_corp"}
+        headers=corp_headers
     )
     job_id = res.json()["job_id"]
     assert res.json()["status"] == "needs_mapping"
@@ -165,7 +190,7 @@ def test_saved_mapping_reuse_and_swapped_columns():
             "weight_unit": "lb",
             "remember_mapping": True
         },
-        headers={"X-User-Id": "u1", "X-Tenant-Id": "tenant_corp"}
+        headers=corp_headers
     )
     assert map_res.status_code == 200
     assert map_res.json()["status"] == "ready"
@@ -174,7 +199,7 @@ def test_saved_mapping_reuse_and_swapped_columns():
     re_upload = client.post(
         "/jobs",
         files={"file": ("custom_layout2.xlsx", file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": "u1", "X-Tenant-Id": "tenant_corp"}
+        headers=corp_headers
     )
     assert re_upload.status_code == 200
     assert re_upload.json()["status"] == "ready"
@@ -189,7 +214,7 @@ def test_saved_mapping_reuse_and_swapped_columns():
     swapped_upload = client.post(
         "/jobs",
         files={"file": ("swapped.xlsx", swapped_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": "u1", "X-Tenant-Id": "tenant_corp"}
+        headers=corp_headers
     )
     assert swapped_upload.status_code == 200
     # Must NOT auto-apply previous mapping because fingerprint is position-aware!
@@ -199,6 +224,7 @@ def test_saved_mapping_reuse_and_swapped_columns():
 
 def test_cross_tenant_mapping_isolation():
     # Tenant X upload should NOT match Tenant Corp's saved mapping
+    headers_x = _make_auth_headers("ux", "Tenant X")
     rows = [
         ["City A", "City B", "Rate 100", "Rate 500"],
         ["Toronto", "Montreal", 0.50, 0.40],
@@ -207,7 +233,7 @@ def test_cross_tenant_mapping_isolation():
     res = client.post(
         "/jobs",
         files={"file": ("tenant_x.xlsx", file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": "ux", "X-Tenant-Id": "tenant_x"}
+        headers=headers_x
     )
     assert res.status_code == 200
     # Tenant X does not have this mapping saved, so it must not auto-map
@@ -215,15 +241,16 @@ def test_cross_tenant_mapping_isolation():
 
 
 def test_list_and_delete_saved_mappings():
+    corp_headers = _get_corp_headers()
     # List mappings for tenant_corp
-    res = client.get("/mappings", headers={"X-User-Id": "u1", "X-Tenant-Id": "tenant_corp"})
+    res = client.get("/mappings", headers=corp_headers)
     assert res.status_code == 200
     mappings = res.json()
     assert len(mappings) >= 1
     mapping_id = mappings[0]["id"]
 
     # Delete mapping
-    del_res = client.delete(f"/mappings/{mapping_id}", headers={"X-User-Id": "u1", "X-Tenant-Id": "tenant_corp"})
+    del_res = client.delete(f"/mappings/{mapping_id}", headers=corp_headers)
     assert del_res.status_code == 200
     assert del_res.json()["deleted"] is True
 
@@ -288,6 +315,7 @@ def test_upload_uncached_formula_rejected():
 
 
 def test_process_and_download_flow():
+    proc_headers = _make_auth_headers("u_proc", "Tenant Proc")
     rows = [
         ["ACME Freight Rates 2026 (lbs)"],
         [],
@@ -298,19 +326,19 @@ def test_process_and_download_flow():
     res = client.post(
         "/jobs",
         files={"file": ("process_rates.xlsx", file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
-        headers={"X-User-Id": "u_proc", "X-Tenant-Id": "t_proc"}
+        headers=proc_headers
     )
     assert res.status_code == 200
     job_id = res.json()["job_id"]
     assert res.json()["status"] == "ready"
 
     # Process job
-    proc_res = client.post(f"/jobs/{job_id}/process", headers={"X-User-Id": "u_proc", "X-Tenant-Id": "t_proc"})
+    proc_res = client.post(f"/jobs/{job_id}/process", headers=proc_headers)
     assert proc_res.status_code == 200
     assert proc_res.json()["status"] == "done"
 
     # Download output workbook
-    dl_res = client.get(f"/jobs/{job_id}/download", headers={"X-User-Id": "u_proc", "X-Tenant-Id": "t_proc"})
+    dl_res = client.get(f"/jobs/{job_id}/download", headers=proc_headers)
     assert dl_res.status_code == 200
     assert len(dl_res.content) > 0
     # Must be valid xlsx

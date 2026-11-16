@@ -1,7 +1,7 @@
 """
 services/fsa_resolver_service.py
 ================================
-RateSift Canadian Postal Forward Sortation Area (FSA) Resolver Service.
+Quotelytics Canadian Postal Forward Sortation Area (FSA) Resolver Service.
 
 Provides comprehensive mapping and deterministic resolution for Canadian postal codes
 and FSAs across all 10 provinces and 3 territories, mapping them to canonical freight cities,

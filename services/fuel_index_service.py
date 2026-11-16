@@ -1,7 +1,7 @@
 """
 services/fuel_index_service.py
 ==============================
-RateSift Canadian Weekly Fuel Surcharge (FSC) Index Manager.
+Quotelytics Canadian Weekly Fuel Surcharge (FSC) Index Manager.
 
 Manages Canadian diesel fuel benchmarks (Ontario Trucking Association / OTA,
 Freight Carriers Association of Canada / FCA, and Regional Canadian Indices),
@@ -12,7 +12,7 @@ import sqlite3
 import os
 from datetime import datetime
 from typing import Dict, Any, List, Optional
-from services.ratesift_db_service import get_connection
+from services.quotelytics_db_service import get_connection
 
 # Standard published Canadian Freight Benchmark Indices (October 2026 Baseline)
 CANADIAN_BENCHMARK_INDICES = [
@@ -59,12 +59,12 @@ CANADIAN_BENCHMARK_INDICES = [
 ]
 
 def init_fuel_indices_table():
-    """Initializes the rs_fuel_settings and rs_fuel_history tables."""
+    """Initializes the ql_fuel_settings and ql_fuel_history tables."""
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS rs_fuel_settings (
+    CREATE TABLE IF NOT EXISTS ql_fuel_settings (
         user_id TEXT PRIMARY KEY,
         active_index_code TEXT NOT NULL DEFAULT 'OTA_LTL_STANDARD',
         custom_ltl_percent REAL,
@@ -76,7 +76,7 @@ def init_fuel_indices_table():
     """)
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS rs_fuel_history (
+    CREATE TABLE IF NOT EXISTS ql_fuel_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         index_code TEXT NOT NULL,
         diesel_price_cad_litre REAL NOT NULL,
@@ -102,17 +102,17 @@ def get_tenant_fuel_settings(user_id: str) -> Dict[str, Any]:
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM rs_fuel_settings WHERE user_id = ?", (user_id,))
+    cursor.execute("SELECT * FROM ql_fuel_settings WHERE user_id = ?", (user_id,))
     row = cursor.fetchone()
 
     if not row:
         now_str = datetime.utcnow().isoformat()
         cursor.execute("""
-        INSERT INTO rs_fuel_settings (user_id, active_index_code, custom_ltl_percent, use_carrier_sheet_fsc, auto_update_weekly, updated_at)
+        INSERT INTO ql_fuel_settings (user_id, active_index_code, custom_ltl_percent, use_carrier_sheet_fsc, auto_update_weekly, updated_at)
         VALUES (?, 'OTA_LTL_STANDARD', NULL, 1, 1, ?)
         """, (user_id, now_str))
         conn.commit()
-        cursor.execute("SELECT * FROM rs_fuel_settings WHERE user_id = ?", (user_id,))
+        cursor.execute("SELECT * FROM ql_fuel_settings WHERE user_id = ?", (user_id,))
         row = cursor.fetchone()
 
     conn.close()
@@ -141,7 +141,7 @@ def update_tenant_fuel_settings(
     now_str = datetime.utcnow().isoformat()
 
     cursor.execute("""
-    INSERT INTO rs_fuel_settings (user_id, active_index_code, custom_ltl_percent, use_carrier_sheet_fsc, auto_update_weekly, updated_at)
+    INSERT INTO ql_fuel_settings (user_id, active_index_code, custom_ltl_percent, use_carrier_sheet_fsc, auto_update_weekly, updated_at)
     VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(user_id) DO UPDATE SET
         active_index_code = excluded.active_index_code,
@@ -164,7 +164,7 @@ def record_fuel_index_history(
     source: Optional[str] = None,
     index_code: Optional[str] = None,
 ) -> None:
-    """Inserts a dated benchmark fuel index record into rs_fuel_history."""
+    """Inserts a dated benchmark fuel index record into ql_fuel_history."""
     # Support calling with (effective_date, diesel, ltl_pct, tl_pct, source=...) or (index_code, diesel, ltl_pct, tl_pct, effective_date)
     if effective_date is None and len(index_code_or_date.strip()) == 10 and index_code_or_date.strip()[4] == "-":
         eff_date_str = index_code_or_date.strip()
@@ -177,7 +177,7 @@ def record_fuel_index_history(
     cursor = conn.cursor()
     cursor.execute(
         """
-        INSERT INTO rs_fuel_history (
+        INSERT INTO ql_fuel_history (
             index_code, diesel_price_cad_litre, ltl_surcharge_percent,
             tl_surcharge_percent, effective_date, recorded_at
         ) VALUES (?, ?, ?, ?, ?, ?)
@@ -210,7 +210,7 @@ def resolve_effective_fuel_surcharge(
     - If is_fuel_included is True (e.g. tariff states 'Fuel Included'), returns 0.0% ($0.00).
     - If fuel_precedence == 'SHEET_FIRST' and carrier_sheet_fsc is present (>0), uses sheet's FSC.
     - Otherwise (or when fuel_precedence == 'BENCHMARK_FIRST'), looks up the benchmark index
-      at shipment_date in rs_fuel_history (falling back to tenant active index).
+      at shipment_date in ql_fuel_history (falling back to tenant active index).
     - Uses Decimal ROUND_HALF_UP for monetary quantization.
     """
     from decimal import Decimal, ROUND_HALF_UP
@@ -251,7 +251,7 @@ def resolve_effective_fuel_surcharge(
             cursor.execute(
                 """
                 SELECT ltl_surcharge_percent, effective_date
-                FROM rs_fuel_history
+                FROM ql_fuel_history
                 WHERE index_code = ? AND effective_date <= ?
                 ORDER BY effective_date DESC, id DESC
                 LIMIT 1

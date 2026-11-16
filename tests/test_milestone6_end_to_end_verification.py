@@ -5,12 +5,12 @@ from fastapi.testclient import TestClient
 
 from main import app
 from services.auth_service import create_session
-from services.ratesift_engine import (
+from services.quotelytics_engine import (
     calculate_billable_weight,
     calculate_quote_for_sheet,
     quote_all_confirmed_carriers
 )
-from services.ratesift_db_service import (
+from services.quotelytics_db_service import (
     create_rate_sheet,
     get_rate_sheet,
     insert_weight_breaks,
@@ -28,19 +28,42 @@ from services.import_day_and_ross_guide import import_day_and_ross_tariff
 class TestMilestone6EndToEndVerification(unittest.TestCase):
     """
     Comprehensive End-to-End Automated Verification Suite
-    Strictly verifies all 32 RateSift Agent Rules in an integrated system workflow.
+    Strictly verifies all 32 Quotelytics Agent Rules in an integrated system workflow.
     """
     @classmethod
     def setUpClass(cls):
+        import uuid
+        from services.auth_service import register_and_create_session
+        from services.quotelytics_db_service import get_connection
         cls.client = TestClient(app)
-        cls.user_alex = "usr_alex_rivers"
-        cls.user_competitor = "usr_tenant_b"
-        cls.token_alex = create_session(cls.user_alex)
-        cls.token_competitor = create_session(cls.user_competitor)
+        u_main, tok_main = register_and_create_session(
+            name="Jordan Primary",
+            email=f"m6.primary.{uuid.uuid4().hex[:6]}@acme-logistics.ca",
+            company="Acme Primary Logistics",
+            origin_zip="TORONTO, ON",
+            password="M6PrimaryPassword2026!"
+        )
+        u_comp, tok_comp = register_and_create_session(
+            name="Competitor Beta",
+            email=f"m6.competitor.{uuid.uuid4().hex[:6]}@beta-cargo.ca",
+            company="Beta Cargo QC",
+            origin_zip="MONTREAL, QC",
+            password="M6CompetitorPassword2026!"
+        )
+        cls.user_alex = u_main["id"]
+        cls.user_competitor = u_comp["id"]
+        cls.token_alex = tok_main
+        cls.token_competitor = tok_comp
 
-        cls.client.cookies.set("shipflow_session", cls.token_alex)
+        # Clear auto-seeded benchmark sheets for competitor so isolation list test starts at 0
+        conn = get_connection()
+        conn.execute("DELETE FROM ql_rate_sheets WHERE user_id = ?", (cls.user_competitor,))
+        conn.commit()
+        conn.close()
 
-        # Import confirmed Day & Ross Guide Tariff for Alex
+        cls.client.cookies.set("quotelytics_session", cls.token_alex)
+
+        # Import confirmed Day & Ross Guide Tariff for primary user
         cls.guide_sheet_id = import_day_and_ross_tariff(user_id=cls.user_alex, auto_confirm=True)
 
     def test_01_rules_1_to_7_and_19_extraction_schema_traceability_confirmation_gate(self):
@@ -275,7 +298,7 @@ class TestMilestone6EndToEndVerification(unittest.TestCase):
         - Rate shift anomaly warning (Rule 27).
         """
         # Rule 25: Missing Origin or Destination triggers 400
-        resp_missing = self.client.post("/api/ratesift/quotes/calculate", json={
+        resp_missing = self.client.post("/api/quotelytics/quotes/calculate", json={
             "origin": "",
             "destination": "TORONTO, ON",
             "actual_weight": 500.0
@@ -284,7 +307,7 @@ class TestMilestone6EndToEndVerification(unittest.TestCase):
         self.assertIn("Origin and Destination locations are required (Rule 25)", resp_missing.json()["detail"])
 
         # Rule 25: Weight <= 0 triggers 400
-        resp_zero_wt = self.client.post("/api/ratesift/quotes/calculate", json={
+        resp_zero_wt = self.client.post("/api/quotelytics/quotes/calculate", json={
             "origin": "CALGARY, AB",
             "destination": "TORONTO, ON",
             "actual_weight": 0.0
@@ -293,7 +316,7 @@ class TestMilestone6EndToEndVerification(unittest.TestCase):
         self.assertIn("weight must be greater than 0", resp_zero_wt.json()["detail"])
 
         # Rule 26: Non-binding calculation disclaimer
-        resp_valid = self.client.post("/api/ratesift/quotes/calculate", json={
+        resp_valid = self.client.post("/api/quotelytics/quotes/calculate", json={
             "origin": "CALGARY, AB",
             "destination": "LINDSAY, ON",
             "actual_weight": 1450.0,
@@ -324,14 +347,14 @@ class TestMilestone6EndToEndVerification(unittest.TestCase):
         self.assertEqual(len(comp_sheets_list), 0)
 
         # Quoting for Alex generates an immutable audit log (Rule 30)
-        resp = self.client.post("/api/ratesift/quotes/calculate", json={
+        resp = self.client.post("/api/quotelytics/quotes/calculate", json={
             "origin": "CALGARY, AB",
             "destination": "LINDSAY, ON",
             "actual_weight": 1450.0,
             "shipment_date": "2024-01-15"
         })
         quote_id = resp.json()["quote_id"]
-        self.assertTrue(quote_id.startswith("RS-"))
+        self.assertTrue(quote_id.startswith("QL-"))
 
         # Retrieve audit log
         audit = get_quote_audit_log(quote_id, user_id=self.user_alex)
@@ -344,12 +367,12 @@ class TestMilestone6EndToEndVerification(unittest.TestCase):
         comp_audit = get_quote_audit_log(quote_id, user_id=self.user_competitor)
         self.assertIsNone(comp_audit)
 
-        self.client.cookies.set("shipflow_session", self.token_competitor)
-        resp_comp = self.client.get(f"/api/ratesift/quotes/audit/{quote_id}")
+        self.client.cookies.set("quotelytics_session", self.token_competitor)
+        resp_comp = self.client.get(f"/api/quotelytics/quotes/audit/{quote_id}")
         self.assertEqual(resp_comp.status_code, 404)
 
         # Restore Alex's session
-        self.client.cookies.set("shipflow_session", self.token_alex)
+        self.client.cookies.set("quotelytics_session", self.token_alex)
 
     def test_07_rules_31_and_32_broker_terminology_and_concise_ui(self):
         """

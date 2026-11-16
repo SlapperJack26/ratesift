@@ -1,17 +1,35 @@
 import unittest
+import uuid
 from fastapi.testclient import TestClient
 from main import app, _active_proposal_memory
+from services.auth_service import register_and_create_session
 
 class TestProposalEmailLifecycle(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
+        self.test_email = f"proposal.broker.{uuid.uuid4().hex[:6]}@acme-logistics.ca"
+        self.test_pwd = "ProposalLifecycle2026!"
+        user, _ = register_and_create_session(
+            name="Jordan Freight",
+            email=self.test_email,
+            company="Acme Logistics",
+            origin_zip="TORONTO, ON",
+            password=self.test_pwd
+        )
+        from services.seed_canadian_benchmarks import seed_canadian_benchmarks_for_user
+        from services.quotelytics_db_service import get_connection
+        seed_canadian_benchmarks_for_user(user["id"], force=True)
+        conn = get_connection()
+        conn.execute("UPDATE ql_rate_sheets SET is_benchmark = 0 WHERE user_id = ?", (user["id"],))
+        conn.commit()
+        conn.close()
         # Login
-        res = self.client.post("/api/auth/login", data={"email": "alex.rivers@techcorp.io", "password": "RateSiftDemo2026!"})
+        res = self.client.post("/api/auth/login", data={"email": self.test_email, "password": self.test_pwd})
         self.assertEqual(res.status_code, 200)
 
     def test_full_proposal_email_lifecycle(self):
         # 1. Calculate Quote 1
-        calc1 = self.client.post("/api/ratesift/quotes/calculate", json={
+        calc1 = self.client.post("/api/quotelytics/quotes/calculate", json={
             "origin": "TORONTO, ON",
             "destination": "MONTREAL, QC",
             "actual_weight": 1250,
@@ -64,7 +82,7 @@ class TestProposalEmailLifecycle(unittest.TestCase):
         self.assertEqual(mem2["proposal"]["proposal_id"], prop["proposal_id"])
 
         # 5. User generates their next quote
-        calc2 = self.client.post("/api/ratesift/quotes/calculate", json={
+        calc2 = self.client.post("/api/quotelytics/quotes/calculate", json={
             "origin": "CALGARY, AB",
             "destination": "VANCOUVER, BC",
             "actual_weight": 850,
@@ -92,7 +110,7 @@ class TestProposalEmailLifecycle(unittest.TestCase):
 
         # 8. Verify persistent across login: logout and log back in
         self.client.get("/api/auth/logout")
-        login_res = self.client.post("/api/auth/login", data={"email": "alex.rivers@techcorp.io", "password": "RateSiftDemo2026!"})
+        login_res = self.client.post("/api/auth/login", data={"email": self.test_email, "password": self.test_pwd})
         self.assertEqual(login_res.status_code, 200)
 
         # Quotes history still contains the saved proposal quote after login

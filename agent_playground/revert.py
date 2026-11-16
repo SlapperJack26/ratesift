@@ -1,5 +1,5 @@
 """
-1-Click Rollback Script for RateSift Agent Playground
+1-Click Rollback Script for Quotelytics Agent Playground
 Immediately reverts agent_playground to the latest 'baseline' snapshot.
 
 Usage:

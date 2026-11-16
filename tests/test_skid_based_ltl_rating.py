@@ -4,21 +4,21 @@ import io
 import openpyxl
 from datetime import datetime
 
-from services.ratesift_extractor import RateSiftExtractor
-from services.ratesift_engine import calculate_quote_for_sheet, quote_all_confirmed_carriers
-from services.ratesift_db_service import (
-    init_ratesift_db,
+from services.quotelytics_extractor import QuotelyticsExtractor
+from services.quotelytics_engine import calculate_quote_for_sheet, quote_all_confirmed_carriers
+from services.quotelytics_db_service import (
+    init_quotelytics_db,
     confirm_rate_sheet,
     delete_rate_sheet,
     get_sheet_full_rules,
     get_rate_sheet
 )
-from services.ratesift_excel_reformatter import analyze_excel_sheet
+from services.quotelytics_excel_reformatter import analyze_excel_sheet
 
 class TestSkidBasedLTLRating(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        init_ratesift_db()
+        init_quotelytics_db()
         cls.user_id = f"usr_test_skid_{int(datetime.utcnow().timestamp())}"
         cls.created_sheet_ids = []
 
@@ -60,7 +60,7 @@ class TestSkidBasedLTLRating(unittest.TestCase):
     def test_skid_sheet_extraction_and_classification(self):
         """Phase 2: Verifies extractor identifies PER_SKID basis, 10M max capacity, and bidirectional rates."""
         file_bytes = self.create_mock_skid_excel()
-        extractor = RateSiftExtractor(file_bytes, "test_tariff.xlsx", self.user_id)
+        extractor = QuotelyticsExtractor(file_bytes, "test_tariff.xlsx", self.user_id)
         result = extractor.process()
         sheet_id = result["sheet_id"]
         self.created_sheet_ids.append(sheet_id)
@@ -95,7 +95,7 @@ class TestSkidBasedLTLRating(unittest.TestCase):
         """Phase 2: Verifies extractor recognizes MIN/BASE and '1-4 Skids' / '5 Skids' synonyms."""
         synonym_skid_headers = ["1-4 Skids", "5 Skids", "6 Skids", "7 Skids", "8-9 Skids", "10 Skids"]
         file_bytes = self.create_mock_skid_excel(base_cost_header="MIN", skid_headers=synonym_skid_headers)
-        extractor = RateSiftExtractor(file_bytes, "synonym_tariff.xlsx", self.user_id)
+        extractor = QuotelyticsExtractor(file_bytes, "synonym_tariff.xlsx", self.user_id)
         result = extractor.process()
         sheet_id = result["sheet_id"]
         self.created_sheet_ids.append(sheet_id)
@@ -110,7 +110,7 @@ class TestSkidBasedLTLRating(unittest.TestCase):
     def test_skid_quote_additive_mc_formula(self):
         """Phase 3: Verifies exact formula Base Freight = MC + (S x RateBreak)."""
         file_bytes = self.create_mock_skid_excel()
-        extractor = RateSiftExtractor(file_bytes, "test_tariff.xlsx", self.user_id)
+        extractor = QuotelyticsExtractor(file_bytes, "test_tariff.xlsx", self.user_id)
         result = extractor.process()
         sheet_id = result["sheet_id"]
         self.created_sheet_ids.append(sheet_id)
@@ -156,7 +156,7 @@ class TestSkidBasedLTLRating(unittest.TestCase):
     def test_multi_tier_skid_break_calculations(self):
         """Phase 3: Verifies each break tier calculates accurately."""
         file_bytes = self.create_mock_skid_excel()
-        extractor = RateSiftExtractor(file_bytes, "test_tariff.xlsx", self.user_id)
+        extractor = QuotelyticsExtractor(file_bytes, "test_tariff.xlsx", self.user_id)
         result = extractor.process()
         sheet_id = result["sheet_id"]
         self.created_sheet_ids.append(sheet_id)
@@ -197,7 +197,7 @@ class TestSkidBasedLTLRating(unittest.TestCase):
     def test_rule_18_skid_capacity_limit_enforcement(self):
         """Phase 3: Verifies Rule 18 rejects shipments exceeding max_skid_capacity."""
         file_bytes = self.create_mock_skid_excel()
-        extractor = RateSiftExtractor(file_bytes, "test_tariff.xlsx", self.user_id)
+        extractor = QuotelyticsExtractor(file_bytes, "test_tariff.xlsx", self.user_id)
         result = extractor.process()
         sheet_id = result["sheet_id"]
         self.created_sheet_ids.append(sheet_id)
@@ -246,7 +246,7 @@ class TestSkidBasedLTLRating(unittest.TestCase):
         with open(uploaded_path, "rb") as f:
             file_bytes = f.read()
 
-        extractor = RateSiftExtractor(file_bytes, "media_1791401358135.xlsx", self.user_id)
+        extractor = QuotelyticsExtractor(file_bytes, "media_1791401358135.xlsx", self.user_id)
         result = extractor.process()
         sheet_id = result["sheet_id"]
         self.created_sheet_ids.append(sheet_id)

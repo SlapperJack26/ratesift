@@ -1,14 +1,14 @@
 """
 Unified break-header and column-header parser shared by:
 - app/detect.py (failsafe detector & mapping validator)
-- services/ratesift_extractor.py (deep tariff extractor)
-- services/ratesift_excel_reformatter.py (excel reformatter)
+- services/quotelytics_extractor.py (deep tariff extractor)
+- services/quotelytics_excel_reformatter.py (excel reformatter)
 
 Guarantees 100% parity between failsafe header detection and tariff extraction.
 """
 from dataclasses import dataclass
 import re
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 WEIGHT_UNIT_REGEX = re.compile(r"\b(lbs?|kgs?|cwt)\b|#", re.I)
 
@@ -112,15 +112,52 @@ def is_numeric_range_header(raw: Any) -> bool:
     return bool(re.search(r"\d+(?:\.\d+)?\s*(?:[-–]|to)\s*\d+(?:\.\d+)?", decomma, re.I))
 
 
+def parse_skid_break_from_keywords(
+    h: Any,
+    custom_keywords: Optional[Dict[str, Any]] = None,
+) -> Optional[ParsedBreak]:
+    """
+    Checks if header `h` matches a user-defined SKID_BREAK in `custom_keywords`.
+    Returns a ParsedBreak with kind='skid' and min_weight/max_weight representing skid units.
+    """
+    if not custom_keywords:
+        return None
+    raw = _s(h)
+    if not raw:
+        return None
+    norm_kw = " ".join(raw.upper().split())
+    kw_entry = custom_keywords.get(norm_kw)
+    if not kw_entry or kw_entry.get("parsed_category") != "SKID_BREAK":
+        return None
+    rule = kw_entry.get("parsed_rule") or {}
+    min_u = float(rule.get("min_units", 1))
+    max_u = float(rule["max_units"]) if rule.get("max_units") is not None else None
+    is_open = bool(rule.get("is_open_ended", False))
+    is_under = bool(rule.get("is_under", False))
+    return ParsedBreak(
+        raw_header=raw,
+        break_name=raw.strip().upper(),
+        min_weight=min_u,
+        max_weight=max_u,
+        is_open_ended=is_open,
+        break_value=max_u if (is_under and max_u is not None) else min_u,
+        unit="SKID",
+        is_under=is_under,
+        kind="skid",
+    )
+
+
 def parse_break_header(
     h: Any,
     mode_hint: Optional[str] = None,
     rating_basis: Optional[str] = None,
+    custom_keywords: Optional[Dict[str, Any]] = None,
 ) -> Optional[ParsedBreak]:
     """
     Parses a spreadsheet column header into a structured ParsedBreak.
 
     Supported formats:
+    - User-defined Keyword Definitions in Settings (highest precedence)
     - Canadian/US LTL codes: L5C (0..499), M5C (500+), M1M (1000+), M2M (2000+), M5M (5000+), M10M (10000+)
     - Range headers with commas/hyphens/'to': '1,000 to 1,999 lbs', '500-999', '100 - 499 kg'
     - Leading hyphen / less-than ('under' syntax): '-45', '<45', 'Under 45 lbs' -> (0..45, break_value=45)
@@ -138,6 +175,38 @@ def parse_break_header(
     raw = _s(h)
     if not raw:
         return None
+
+    # 0. Highest-priority user keyword definitions override
+    if custom_keywords:
+        norm_kw = " ".join(raw.upper().split())
+        kw_entry = custom_keywords.get(norm_kw)
+        if kw_entry:
+            cat = kw_entry.get("parsed_category")
+            rule = kw_entry.get("parsed_rule") or {}
+            if cat in ("COLUMN_ROLE", "SURCHARGE_SYNONYM"):
+                return None
+            if cat == "SKID_BREAK":
+                if mode_hint == "skid":
+                    return parse_skid_break_from_keywords(raw, custom_keywords)
+                # Do not misclassify a user-defined skid break (e.g. L5C -> "less than 5 skids") as a weight break
+                return None
+            if cat == "WEIGHT_BREAK":
+                min_w = float(rule.get("min_weight", 0.0))
+                max_w = float(rule["max_weight"]) if rule.get("max_weight") is not None else None
+                is_open = bool(rule.get("is_open_ended", max_w is None))
+                is_under = bool(rule.get("is_under", False))
+                b_val = float(rule.get("break_value", max_w if (is_under and max_w is not None) else min_w))
+                return ParsedBreak(
+                    raw_header=raw,
+                    break_name=raw.strip(),
+                    min_weight=min_w,
+                    max_weight=max_w,
+                    is_open_ended=is_open,
+                    break_value=b_val,
+                    unit=rule.get("unit") or detect_unit_in_header(raw),
+                    is_under=is_under,
+                    kind="weight",
+                )
 
     norm_lower = " ".join(raw.lower().split())
     if norm_lower in NON_BREAK_HEADERS:
@@ -326,11 +395,15 @@ def parse_break_header(
     return None
 
 
-def parse_break_value(h: Any, mode_hint: Optional[str] = None) -> Tuple[Optional[float], Optional[str]]:
+def parse_break_value(
+    h: Any,
+    mode_hint: Optional[str] = None,
+    custom_keywords: Optional[Dict[str, Any]] = None,
+) -> Tuple[Optional[float], Optional[str]]:
     """
     Backward-compatible helper returning (break_value, unit) for app/detect.py.
     """
-    parsed = parse_break_header(h, mode_hint=mode_hint)
+    parsed = parse_break_header(h, mode_hint=mode_hint, custom_keywords=custom_keywords)
     if parsed is None:
         return None, None
     return parsed.break_value, parsed.unit

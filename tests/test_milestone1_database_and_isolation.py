@@ -4,8 +4,8 @@ import json
 import sqlite3
 from datetime import datetime
 
-from services.ratesift_db_service import (
-    init_ratesift_db,
+from services.quotelytics_db_service import (
+    init_quotelytics_db,
     get_connection,
     create_rate_sheet,
     get_rate_sheet,
@@ -27,12 +27,12 @@ from services.ratesift_db_service import (
 )
 from services.db_service import init_db
 
-class TestRateSiftMilestone1(unittest.TestCase):
+class TestQuotelyticsMilestone1(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Initialize primary and RateSift DB
+        # Initialize primary and Quotelytics DB
         init_db()
-        init_ratesift_db()
+        init_quotelytics_db()
         
         # Ensure test tenants exist in users table
         conn = get_connection()
@@ -50,21 +50,21 @@ class TestRateSiftMilestone1(unittest.TestCase):
         conn.close()
 
     def test_01_schema_tables_exist(self):
-        """Verifies that all 7 normalized RateSift tables exist with proper structure."""
+        """Verifies that all 7 normalized Quotelytics tables exist with proper structure."""
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'rs_%'")
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'ql_%'")
         tables = {row["name"] for row in cursor.fetchall()}
         conn.close()
 
         expected = {
-            "rs_rate_sheets",
-            "rs_rate_sheet_cells",
-            "rs_carrier_zones",
-            "rs_weight_breaks",
-            "rs_carrier_minimums",
-            "rs_carrier_surcharges",
-            "rs_quote_audit_logs"
+            "ql_rate_sheets",
+            "ql_rate_sheet_cells",
+            "ql_carrier_zones",
+            "ql_weight_breaks",
+            "ql_carrier_minimums",
+            "ql_carrier_surcharges",
+            "ql_quote_audit_logs"
         }
         self.assertTrue(expected.issubset(tables), f"Missing tables: {expected - tables}")
 
@@ -87,7 +87,7 @@ class TestRateSiftMilestone1(unittest.TestCase):
             expiry_date="2024-04-30",
             source_filename="day_and_ross_guide_tariff.csv"
         )
-        self.assertTrue(sheet_a_id.startswith("rs_sheet_"))
+        self.assertTrue(sheet_a_id.startswith("ql_sheet_"))
 
         # Tenant A can view their sheet
         sheet_a = get_rate_sheet(sheet_a_id, user_id=tenant_a)
@@ -240,7 +240,7 @@ class TestRateSiftMilestone1(unittest.TestCase):
     def test_06_immutable_audit_logging_rule30(self):
         """Rule 30: Complete audit log of every quote with Canadian data residency (Rule 29)."""
         tenant_a = "usr_tenant_a"
-        quote_id = f"RS-TEST-{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}"
+        quote_id = f"QL-TEST-{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}"
 
         shipment_inputs = {
             "origin": "CALGARY, AB",
@@ -249,9 +249,9 @@ class TestRateSiftMilestone1(unittest.TestCase):
             "dimensions_in": {"length": 48, "width": 40, "height": 60},
             "accessorials": ["appointment", "residential_delivery"]
         }
-        sheets_considered = ["rs_sheet_day_ross_01", "rs_sheet_manitoulin_01"]
+        sheets_considered = ["ql_sheet_day_ross_01", "ql_sheet_manitoulin_01"]
         sheets_excluded = [
-            {"sheet_id": "rs_sheet_expired_01", "carrier": "Old Carrier", "reason": "Rule 16: Sheet expired on 2024-01-01"}
+            {"sheet_id": "ql_sheet_expired_01", "carrier": "Old Carrier", "reason": "Rule 16: Sheet expired on 2024-01-01"}
         ]
         calculation_trace = [
             {"step": "DIM Weight Check", "actual_wt": 1450.0, "dim_wt": 828.77, "billable_wt": 1450.0},
@@ -296,10 +296,10 @@ class TestRateSiftMilestone1(unittest.TestCase):
     def test_07_day_and_ross_guide_sheet_imported_and_queried(self):
         """Verifies Guide Template #1 (Day & Ross) normalized data, accessorials, breaks and minimums."""
         from services.import_day_and_ross_guide import import_day_and_ross_tariff
-        tenant_alex = "usr_alex_rivers"
+        tenant_alpha = "usr_tenant_a"
         
-        sheet_id = import_day_and_ross_tariff(user_id=tenant_alex, auto_confirm=True)
-        dnr_sheet = get_rate_sheet(sheet_id, user_id=tenant_alex)
+        sheet_id = import_day_and_ross_tariff(user_id=tenant_alpha, auto_confirm=True)
+        dnr_sheet = get_rate_sheet(sheet_id, user_id=tenant_alpha)
         self.assertIsNotNone(dnr_sheet)
         self.assertEqual(dnr_sheet["carrier_name"], "Day & Ross")
         self.assertEqual(dnr_sheet["currency"], "CAD")
@@ -309,7 +309,7 @@ class TestRateSiftMilestone1(unittest.TestCase):
         self.assertEqual(dnr_sheet["expiry_date"], "2024-04-30")
 
         # Fetch full rules
-        full_rules = get_sheet_full_rules(dnr_sheet["id"], user_id=tenant_alex)
+        full_rules = get_sheet_full_rules(dnr_sheet["id"], user_id=tenant_alpha)
         self.assertGreater(len(full_rules["surcharges"]), 10)
         self.assertGreater(len(full_rules["breaks"]), 100)
         self.assertGreater(len(full_rules["minimums"]), 20)

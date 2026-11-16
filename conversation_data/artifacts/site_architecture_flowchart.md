@@ -1,6 +1,6 @@
-# Ratesift Page Architecture & Relation Flowchart
+# Quotelytics Page Architecture & Relation Flowchart
 
-This document provides a comprehensive structural map of the **Ratesift** platform, organizing all 9 views into **Public Pages** and **Private (Authenticated) Pages**, with full transition logic and relationship mappings.
+This document provides a comprehensive structural map of the **Quotelytics** platform, organizing all 9 views into **Public Pages** and **Private (Authenticated) Pages**, with full transition logic and relationship mappings.
 
 ---
 
