@@ -1,0 +1,18 @@
+[Unit]
+Description=Quotelytics Read-Only Discord Sales Rep Support Bot
+After=network-online.target quotelytics.service
+Wants=network-online.target
+
+[Service]
+User=deploy
+Group=deploy
+WorkingDirectory=/srv/quotelytics/app
+EnvironmentFile=-/srv/quotelytics/app/.env
+ExecStart=/srv/quotelytics/app/.venv/bin/python /srv/quotelytics/app/scripts/discord_sales_support_bot.py --interval 4.0
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

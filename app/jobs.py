@@ -13,7 +13,19 @@ import time
 from typing import Any, Dict, List, Optional, Tuple
 
 DB_PATH_DEFAULT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "quotelytics.db")
-DB_PATH = os.environ.get("FAILSAFE_DB_PATH", DB_PATH_DEFAULT)
+DB_PATH = os.environ.get("QUOTELYTICS_DB_PATH") or os.environ.get("FAILSAFE_DB_PATH") or DB_PATH_DEFAULT
+
+
+def resolve_db_path(configured_path: Optional[str] = None) -> str:
+    """Resolve active SQLite JobStore path, honoring env overrides when using the default path."""
+    path = configured_path if configured_path is not None else DB_PATH
+    if path == DB_PATH_DEFAULT:
+        return (
+            os.environ.get("QUOTELYTICS_DB_PATH")
+            or os.environ.get("FAILSAFE_DB_PATH")
+            or (DB_PATH if DB_PATH != DB_PATH_DEFAULT else path)
+        )
+    return path
 
 
 class JobStore(ABC):
@@ -54,7 +66,7 @@ class RelationalJobStore(JobStore):
         self._init_db()
 
     def _get_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path, timeout=30.0, check_same_thread=False)
+        conn = sqlite3.connect(resolve_db_path(self.db_path), timeout=30.0, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         # Enable WAL mode for high concurrency
         conn.execute("PRAGMA journal_mode=WAL;")

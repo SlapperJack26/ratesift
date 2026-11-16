@@ -9,12 +9,20 @@ from typing import Optional, Dict, Any, List, Tuple
 
 logger = logging.getLogger("quotelytics.db")
 
-DB_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "quotelytics.db")
+_DEFAULT_DB_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "quotelytics.db")
+DB_FILE = os.environ.get("QUOTELYTICS_DB_PATH") or os.environ.get("FAILSAFE_DB_PATH") or _DEFAULT_DB_FILE
+
+
+def resolve_db_file() -> str:
+    """Resolve active SQLite database path, respecting monkeypatched DB_FILE or env vars."""
+    if DB_FILE != _DEFAULT_DB_FILE:
+        return DB_FILE
+    return os.environ.get("QUOTELYTICS_DB_PATH") or os.environ.get("FAILSAFE_DB_PATH") or DB_FILE
 
 
 def get_connection():
     """Open a SQLite connection configured with WAL mode, foreign keys, and row factory."""
-    conn = sqlite3.connect(DB_FILE, timeout=30.0)
+    conn = sqlite3.connect(resolve_db_file(), timeout=30.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=NORMAL")

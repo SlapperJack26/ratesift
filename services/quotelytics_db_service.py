@@ -6,14 +6,22 @@ import time
 from datetime import datetime
 from typing import Dict, Any, List, Optional, Tuple
 
-DB_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "quotelytics.db")
+_DEFAULT_DB_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "quotelytics.db")
+DB_FILE = os.environ.get("QUOTELYTICS_DB_PATH") or os.environ.get("FAILSAFE_DB_PATH") or _DEFAULT_DB_FILE
 DATA_RESIDENCY_REGION = "CA_CENTRAL_WHC"  # Rule 29: Canadian Hosting (WHC)
 
 _SCHEMA_MIGRATED_DBS = set()
 
 
+def resolve_db_file() -> str:
+    """Resolve active SQLite database path, respecting monkeypatched DB_FILE or env vars."""
+    if DB_FILE != _DEFAULT_DB_FILE:
+        return DB_FILE
+    return os.environ.get("QUOTELYTICS_DB_PATH") or os.environ.get("FAILSAFE_DB_PATH") or DB_FILE
+
+
 def _ensure_schema_migrated(conn: sqlite3.Connection):
-    db_key = os.path.abspath(DB_FILE)
+    db_key = os.path.abspath(resolve_db_file())
     if db_key in _SCHEMA_MIGRATED_DBS:
         return
     cursor = conn.cursor()
@@ -171,7 +179,7 @@ def _ensure_schema_migrated(conn: sqlite3.Connection):
 
 
 def get_connection():
-    conn = sqlite3.connect(DB_FILE, timeout=30.0)
+    conn = sqlite3.connect(resolve_db_file(), timeout=30.0)
     conn.row_factory = sqlite3.Row
     try:
         _ensure_schema_migrated(conn)
@@ -185,7 +193,7 @@ def init_quotelytics_db():
     Initializes the Quotelytics normalized multi-tenant schema.
     Strictly enforces Rules 2, 3, 28, 29, 30.
     """
-    conn = sqlite3.connect(DB_FILE, timeout=30.0)
+    conn = sqlite3.connect(resolve_db_file(), timeout=30.0)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -352,7 +360,7 @@ def init_quotelytics_db():
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_ql_audit_user ON ql_quote_audit_logs (user_id, timestamp)")
 
-    _SCHEMA_MIGRATED_DBS.discard(os.path.abspath(DB_FILE))
+    _SCHEMA_MIGRATED_DBS.discard(os.path.abspath(resolve_db_file()))
     _ensure_schema_migrated(conn)
     conn.commit()
     conn.close()
