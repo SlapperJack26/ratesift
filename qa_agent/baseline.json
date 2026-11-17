@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T22:52:18",
+  "updated_at": "2026-11-16T14:34:36",
   "findings": [
     {
       "phase": "crawl-public",
@@ -15,17 +15,93 @@
       "fingerprint": "01345b7f2909"
     },
     {
-      "phase": "hardening",
-      "severity": "high",
-      "category": "Quota Race Condition",
-      "title": "Quota ceiling was not atomically enforced under race condition",
-      "page_url": "http://127.0.0.1:8000/api/quotelytics/quotes/calculate",
-      "description": "Status codes: [200, 200, 200, 403, 403, 200, 200, 200], Final quotes used: 55/50. Expected 1x 200, 7x 403.",
-      "element": "",
+      "phase": "crawl-console",
+      "severity": "low",
+      "category": "Accessibility (Advisory)",
+      "title": "A11y: Input lacks visible label, aria-label, or placeholder on /console/rate-sheets",
+      "page_url": "http://127.0.0.1:8000/console/rate-sheets",
+      "description": "Input lacks visible label, aria-label, or placeholder (Element: concierge-files-input)",
+      "element": "concierge-files-input",
       "steps_to_reproduce": [],
       "screenshot_rel": null,
-      "status_delta": "still_open",
-      "fingerprint": "a8ffcac9253e"
+      "status_delta": "new",
+      "fingerprint": "a84ab1eb057c"
+    },
+    {
+      "phase": "crawl-console",
+      "severity": "high",
+      "category": "Broken Page Route",
+      "title": "/console/admin returned HTTP 403",
+      "page_url": "http://127.0.0.1:8000/console/admin",
+      "description": "Expected HTTP 200 on http://127.0.0.1:8000/console/admin, got HTTP 403.",
+      "element": "",
+      "steps_to_reproduce": [
+        "Open http://127.0.0.1:8000/console/admin in browser"
+      ],
+      "screenshot_rel": "screenshots/034_crawl-console_console_admin.png",
+      "status_delta": "new",
+      "fingerprint": "accfbad97bf6"
+    },
+    {
+      "phase": "crawl-console",
+      "severity": "low",
+      "category": "Accessibility (Advisory)",
+      "title": "A11y: Page lacks an <h1> heading on /console/admin",
+      "page_url": "http://127.0.0.1:8000/console/admin",
+      "description": "Page lacks an <h1> heading (Element: body)",
+      "element": "body",
+      "steps_to_reproduce": [],
+      "screenshot_rel": null,
+      "status_delta": "new",
+      "fingerprint": "e18b39866939"
+    },
+    {
+      "phase": "crawl-console",
+      "severity": "medium",
+      "category": "Console Error",
+      "title": "Console error on /console/admin",
+      "page_url": "http://127.0.0.1:8000/console/admin",
+      "description": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "element": "",
+      "steps_to_reproduce": [
+        "Open http://127.0.0.1:8000/console/admin",
+        "Inspect console output"
+      ],
+      "screenshot_rel": "screenshots/034_crawl-console_console_admin.png",
+      "status_delta": "new",
+      "fingerprint": "062f17ec51fc"
+    },
+    {
+      "phase": "crawl-console",
+      "severity": "medium",
+      "category": "Failed Network Request",
+      "title": "Network request failed on /console/admin: HTTP 403 GET http://127.0.0.1:8000/console/admin",
+      "page_url": "http://127.0.0.1:8000/console/admin",
+      "description": "Page asset or XHR returned >=400: HTTP 403 GET http://127.0.0.1:8000/console/admin",
+      "element": "",
+      "steps_to_reproduce": [
+        "Open http://127.0.0.1:8000/console/admin",
+        "Observe Network panel"
+      ],
+      "screenshot_rel": "screenshots/034_crawl-console_console_admin.png",
+      "status_delta": "new",
+      "fingerprint": "ccf04ae3184a"
+    },
+    {
+      "phase": "crawl-console",
+      "severity": "critical",
+      "category": "Broken Internal Link",
+      "title": "Broken link to '/console/admin' (HTTP 403)",
+      "page_url": "http://127.0.0.1:8000/console/account",
+      "description": "Page http://127.0.0.1:8000/console/account links to '/console/admin', which returned HTTP 403.",
+      "element": "<a href='/console/admin'>",
+      "steps_to_reproduce": [
+        "Navigate to http://127.0.0.1:8000/console/account",
+        "Click the link pointing to /console/admin"
+      ],
+      "screenshot_rel": null,
+      "status_delta": "new",
+      "fingerprint": "0471b35cedf4"
     }
   ]
 }

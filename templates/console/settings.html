@@ -261,6 +261,46 @@
           </div>
         </section>
 
+        <!-- Section 5: Brokerage Owner Minimum Margin Guardrails & Master Tariff Lock -->
+        <section id="owner-guardrails-section" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-2xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[var(--border)]">
+            <div>
+              <h2 class="text-sm font-bold text-[var(--foreground)]">Brokerage Owner Margin Guardrails &amp; Master Tariff Lock</h2>
+              <p class="text-[11px] text-[var(--muted-foreground)] mt-0.5">Prevent junior dispatchers from quoting below your hard margin floor or deleting/altering confirmed carrier tariffs.</p>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200">Broker Team Governance</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="guardrail-min-markup" class="block text-xs font-medium text-[var(--foreground)] mb-1">Min Allowed Markup (%)</label>
+              <input id="guardrail-min-markup" type="number" step="0.5" min="0" value="12.0" class="w-full bg-[var(--muted)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs font-mono" />
+            </div>
+            <div>
+              <label for="guardrail-min-dollars" class="block text-xs font-medium text-[var(--foreground)] mb-1">Min Dollar Profit Floor ($ CAD)</label>
+              <input id="guardrail-min-dollars" type="number" step="1" min="0" value="45.0" class="w-full bg-[var(--muted)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs font-mono" />
+            </div>
+            <div>
+              <label for="guardrail-override-pin" class="block text-xs font-medium text-[var(--foreground)] mb-1">Owner Override PIN</label>
+              <input id="guardrail-override-pin" type="password" placeholder="e.g. 2026" class="w-full bg-[var(--muted)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs font-mono" />
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-4 pt-1">
+            <div class="flex flex-wrap items-center gap-5">
+              <label class="inline-flex items-center gap-2 text-xs font-medium text-[var(--foreground)] cursor-pointer">
+                <input id="guardrail-enforce" type="checkbox" class="rounded text-red-600 focus:ring-red-500" />
+                <span>Enforce Minimum Margin Floor on Dispatcher Quotes</span>
+              </label>
+              <label class="inline-flex items-center gap-2 text-xs font-medium text-[var(--foreground)] cursor-pointer">
+                <input id="guardrail-lock-tariffs" type="checkbox" class="rounded text-red-600 focus:ring-red-500" />
+                <span>Lock Master Carrier Tariffs (Block Delete / GRI Edits)</span>
+              </label>
+            </div>
+            <button type="button" onclick="saveOwnerGuardrails()" class="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold cursor-pointer transition-colors">
+              Save Owner Guardrails
+            </button>
+          </div>
+        </section>
+
         <!-- Action Buttons -->
         <div class="pt-2 flex items-center justify-end gap-2.5">
           <button type="button" onclick="showToast('Settings reset to default.', 'info');" class="px-3 py-1.5 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
@@ -512,9 +552,50 @@
       });
     }
 
+    async function loadOwnerGuardrails() {
+      try {
+        const res = await fetch('/api/user/guardrails');
+        const data = await res.json();
+        const g = data && data.guardrails;
+        if (!g) return;
+        if (document.getElementById('guardrail-min-markup')) document.getElementById('guardrail-min-markup').value = g.min_allowed_markup_pct ?? 12.0;
+        if (document.getElementById('guardrail-min-dollars')) document.getElementById('guardrail-min-dollars').value = g.min_allowed_margin_dollars ?? 45.0;
+        if (document.getElementById('guardrail-enforce')) document.getElementById('guardrail-enforce').checked = Boolean(g.enforce_guardrails);
+        if (document.getElementById('guardrail-lock-tariffs')) document.getElementById('guardrail-lock-tariffs').checked = Boolean(g.lock_master_tariffs);
+      } catch (err) {
+        console.debug('Guardrails load error:', err);
+      }
+    }
+
+    async function saveOwnerGuardrails() {
+      const payload = {
+        min_allowed_markup_pct: parseFloat(document.getElementById('guardrail-min-markup')?.value || '12.0'),
+        min_allowed_margin_dollars: parseFloat(document.getElementById('guardrail-min-dollars')?.value || '45.0'),
+        enforce_guardrails: Boolean(document.getElementById('guardrail-enforce')?.checked),
+        lock_master_tariffs: Boolean(document.getElementById('guardrail-lock-tariffs')?.checked),
+        owner_override_pin: (document.getElementById('guardrail-override-pin')?.value || '').trim() || null
+      };
+      try {
+        const res = await fetch('/api/user/guardrails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Could not save owner guardrails.');
+        if (typeof showToast === 'function') {
+          showToast('Brokerage Owner Margin Guardrails & Master Tariff Lock updated.', 'success');
+        }
+      } catch (err) {
+        if (typeof showToast === 'function') {
+          showToast(err.message || 'Error saving guardrails.', 'error');
+        }
+      }
+    }
+
     updateHeaderQuota();
     loadSettings();
     loadKeywordDefinitions();
+    loadOwnerGuardrails();
   </script>
   <script src="/static/js/global-chrome.js?v=20261113b"></script>
 </body>

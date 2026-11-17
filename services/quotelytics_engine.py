@@ -686,11 +686,17 @@ def evaluate_surcharges(
                 triggered = True
         elif cond_type in ["liftgate", "tailgate", "power_tailgate"] and ("liftgate" in req_set or "tailgate" in req_set or "power_tailgate" in req_set):
             triggered = True
-        elif cond_type == "residential_delivery" and ("residential" in req_set or "residential_delivery" in req_set):
+        elif cond_type in ["residential", "residential_delivery"] and ("residential" in req_set or "residential_delivery" in req_set):
             triggered = True
         elif cond_type == "residential_pickup" and "residential_pickup" in req_set:
             triggered = True
-        elif cond_type in ["heated", "protective_service", "protect_from_freeze"] and ("heated" in req_set or "protective_service" in req_set):
+        elif cond_type in ["heated", "protective_service", "protect_from_freeze", "freeze_protect"] and (
+            "heated" in req_set or "protective_service" in req_set or "protect_from_freeze" in req_set or "freeze_protect" in req_set
+        ):
+            triggered = True
+        elif cond_type in ["limited_access", "construction", "mall"] and (
+            "limited_access" in req_set or "construction" in req_set or "mall" in req_set
+        ):
             triggered = True
         elif cond_type == "reconsignment" and "reconsignment" in req_set:
             triggered = True
@@ -698,7 +704,7 @@ def evaluate_surcharges(
             triggered = True
         elif cond_type == "tradeshow" and "tradeshow" in req_set:
             triggered = True
-        elif cond_type == "inside_delivery" and "inside_delivery" in req_set:
+        elif cond_type in ["inside_delivery", "inside"] and ("inside_delivery" in req_set or "inside" in req_set):
             triggered = True
         elif cond_type == "expedited_monday" and "expedited_monday" in req_set:
             triggered = True
@@ -735,7 +741,7 @@ def evaluate_surcharges(
             calc_dec = Decimal("0.00")
         elif fee_type == "FLAT":
             calc_dec = rate_amt_dec
-        elif fee_type == "PERCENTAGE":
+        elif fee_type in ("PERCENTAGE", "PCT", "PERCENT"):
             calc_dec = (rate_amt_dec / Decimal("100")) * selected_pct_base_dec
             if min_fee_dec > Decimal("0"):
                 calc_dec = max(calc_dec, min_fee_dec)
@@ -1722,4 +1728,162 @@ def quote_all_confirmed_carriers(
         "excluded_sheets": excluded_sheets,
         "message": message,
         "disclaimer": "Calculation from customer uploaded rate sheets. Non-binding quote (Rule 26)."
+    }
+
+
+def calculate_canadian_ltl_cube_density(
+    actual_weight_lbs: float = 0.0,
+    length_in: float = 48.0,
+    width_in: float = 40.0,
+    height_in: float = 48.0,
+    skid_count: int = 1,
+    density_rule_lbs_per_cuft: float = 10.0,
+    non_stackable: bool = False,
+    skid_lines: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    """
+    Canadian LTL Minimum Cubic Density ('Cube-Out'), Non-Stackable (84" Vertical Cube Rule),
+    Over-Length (>=96" / >=144") Surcharge Detector & Heterogeneous Mixed-Skid Line Calculator.
+    Standard Canadian LTL carriers enforce a 10 lbs/cu.ft (or 12 lbs/cu.ft) minimum density floor,
+    bill non-stackable pallets at full 84" trailer height, and assess Over-Length penalties at 96"+ / 144"+.
+    """
+    rule_dec = to_decimal(max(1.0, float(density_rule_lbs_per_cuft or 10.0)))
+    total_wt_dec = Decimal("0")
+    total_cu_in = Decimal("0")
+    total_skids = 0
+    linear_feet_total = 0.0
+    max_dimension_in = 0.0
+    effective_height_max = 0.0
+    any_non_stackable = bool(non_stackable)
+    evaluated_lines: List[Dict[str, Any]] = []
+
+    if skid_lines and isinstance(skid_lines, list):
+        line_sum_wt = Decimal("0")
+        for line in skid_lines:
+            l_qty = max(1, int(line.get("qty") or line.get("skid_count") or 1))
+            l_len = max(1.0, float(line.get("length_in") or line.get("length") or length_in or 48.0))
+            l_wid = max(1.0, float(line.get("width_in") or line.get("width") or width_in or 40.0))
+            l_hgt_raw = max(1.0, float(line.get("height_in") or line.get("height") or height_in or 48.0))
+            l_ns = bool(line.get("non_stackable", non_stackable))
+            if l_ns:
+                any_non_stackable = True
+            l_hgt_eff = max(l_hgt_raw, 84.0) if l_ns else l_hgt_raw
+            l_wt = to_decimal(max(0.0, float(line.get("weight_lbs") or line.get("weight") or 0.0)))
+
+            line_cu_in = to_decimal(l_len) * to_decimal(l_wid) * to_decimal(l_hgt_eff) * Decimal(str(l_qty))
+            total_cu_in += line_cu_in
+            line_sum_wt += l_wt
+            total_skids += l_qty
+            max_dimension_in = max(max_dimension_in, l_len, l_wid)
+            effective_height_max = max(effective_height_max, l_hgt_eff)
+            # Side-by-side pairs if width <= 48", otherwise single row along trailer length
+            if l_wid > 48.0:
+                linear_feet_total += l_qty * (l_len / 12.0)
+            else:
+                linear_feet_total += ((l_qty + 1) // 2) * (l_len / 12.0)
+
+            evaluated_lines.append({
+                "qty": l_qty,
+                "length_in": l_len,
+                "width_in": l_wid,
+                "raw_height_in": l_hgt_raw,
+                "effective_height_in": l_hgt_eff,
+                "non_stackable": l_ns,
+                "weight_lbs": float(l_wt),
+            })
+
+        total_wt_dec = line_sum_wt if line_sum_wt > Decimal("0") else to_decimal(max(0.0, float(actual_weight_lbs or 0.0)))
+    else:
+        total_wt_dec = to_decimal(max(0.0, float(actual_weight_lbs or 0.0)))
+        l_val = max(1.0, float(length_in or 48.0))
+        w_val = max(1.0, float(width_in or 40.0))
+        h_val_raw = max(1.0, float(height_in or 48.0))
+        h_val_eff = max(h_val_raw, 84.0) if non_stackable else h_val_raw
+        total_skids = max(1, int(skid_count or 1))
+        total_cu_in = to_decimal(l_val) * to_decimal(w_val) * to_decimal(h_val_eff) * Decimal(str(total_skids))
+        max_dimension_in = max(l_val, w_val)
+        effective_height_max = h_val_eff
+        if w_val > 48.0:
+            linear_feet_total = round(total_skids * (l_val / 12.0), 1)
+        else:
+            linear_feet_total = round(((total_skids + 1) // 2) * (l_val / 12.0), 1)
+        evaluated_lines.append({
+            "qty": total_skids,
+            "length_in": l_val,
+            "width_in": w_val,
+            "raw_height_in": h_val_raw,
+            "effective_height_in": h_val_eff,
+            "non_stackable": bool(non_stackable),
+            "weight_lbs": float(total_wt_dec),
+        })
+
+    cubic_feet_dec = (total_cu_in / Decimal("1728")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    density_weight_dec = (cubic_feet_dec * rule_dec).to_integral_value(rounding=ROUND_CEILING)
+    effective_billable_dec = max(total_wt_dec, density_weight_dec)
+    is_cubed_out = density_weight_dec > total_wt_dec
+    weight_delta_dec = max(Decimal("0"), density_weight_dec - total_wt_dec)
+
+    actual_density_pcf = (
+        float((total_wt_dec / cubic_feet_dec).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+        if cubic_feet_dec > Decimal("0")
+        else 0.0
+    )
+
+    linear_feet_est = round(linear_feet_total, 1)
+    linear_foot_warning = linear_feet_est >= 12.0 or total_skids >= 6
+
+    # Over-Length / Extreme-Length Carrier Penalty Rules (>=96" = 8 ft, >=144" = 12 ft)
+    over_length_code = None
+    over_length_surcharge_cad = 0.0
+    is_over_length = False
+    if max_dimension_in >= 144.0:
+        over_length_code = "EXTREME_LENGTH_12FT"
+        over_length_surcharge_cad = 250.0
+        is_over_length = True
+    elif max_dimension_in >= 96.0:
+        over_length_code = "OVER_LENGTH_8FT"
+        over_length_surcharge_cad = 125.0
+        is_over_length = True
+
+    alerts: List[str] = []
+    if any_non_stackable:
+        alerts.append(
+            f"Non-Stackable 84\" Rule Applied (effective height billed at {effective_height_max:.0f} in)"
+        )
+    if is_over_length:
+        alerts.append(
+            f"Over-Length Freight Alert ({max_dimension_in:.0f} in -> {over_length_code}: est. +${over_length_surcharge_cad:.2f} CAD)"
+        )
+    if is_cubed_out:
+        alerts.append(
+            f"Cube-Out Alert: {float(total_wt_dec):,.0f} lbs cubes out to "
+            f"{float(density_weight_dec):,.0f} lbs at {float(rule_dec):g} lbs/cu.ft ({float(cubic_feet_dec)} cu.ft, "
+            f"+{float(weight_delta_dec):,.0f} lbs)."
+        )
+    elif linear_foot_warning:
+        alerts.append(
+            f"Linear-Foot Notice: {total_skids} skids (~{linear_feet_est} linear ft) may trigger carrier LTL linear-foot / volume rules (>12 ft)."
+        )
+
+    return {
+        "actual_weight_lbs": float(total_wt_dec),
+        "cubic_feet": float(cubic_feet_dec),
+        "actual_density_pcf": actual_density_pcf,
+        "density_rule_lbs_per_cuft": float(rule_dec),
+        "density_weight_lbs": float(density_weight_dec),
+        "effective_billable_weight_lbs": float(effective_billable_dec),
+        "weight_delta_lbs": float(weight_delta_dec),
+        "is_cubed_out": bool(is_cubed_out),
+        "skid_count": total_skids,
+        "estimated_linear_feet": linear_feet_est,
+        "linear_foot_warning": bool(linear_foot_warning),
+        "non_stackable_applied": bool(any_non_stackable),
+        "effective_height_in": float(effective_height_max),
+        "max_dimension_in": float(max_dimension_in),
+        "is_over_length": bool(is_over_length),
+        "over_length_code": over_length_code,
+        "over_length_surcharge_cad": over_length_surcharge_cad,
+        "skid_lines_evaluated": len(evaluated_lines),
+        "skid_lines_breakdown": evaluated_lines,
+        "warning_message": " | ".join(alerts) if alerts else None,
     }

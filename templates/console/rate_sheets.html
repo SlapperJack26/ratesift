@@ -107,7 +107,22 @@
           </p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <select id="carrier-preset-select" aria-label="Canadian Carrier Format Preset" class="px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-800 text-xs font-semibold shadow-2xs focus:outline-none focus:border-red-500">
+            <option value="AUTO_DETECT">Format: Auto-Detect (Default)</option>
+            <option value="MANITOULIN_CWT">Manitoulin Transport — Standard CWT</option>
+            <option value="DAY_AND_ROSS_CWT">Day &amp; Ross Freight — Canadian LTL CWT</option>
+            <option value="MIDLAND_ATLANTIC">Midland Transport — Atlantic &amp; Central LTL</option>
+            <option value="OVERLAND_WEST">Overland West / Western Canada LTL</option>
+            <option value="KINDERSLEY_PRAIRIE">Kindersley Transport — Prairie LTL</option>
+            <option value="GENERIC_SKID_SPOT">Canadian Skid / Pallet Spot Matrix (1–10 Skids)</option>
+          </select>
+          <button type="button" onclick="seedSampleTariffsFromSheetsPage()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Load 3 sample confirmed Canadian LTL tariffs for instant testing">
+            <span>⚡ Load 3 Sample Tariffs</span>
+          </button>
+          <button type="button" onclick="purgeSampleTariffsFromSheetsPage()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Remove [SAMPLE] sandbox tariffs">
+            <span>Clear Samples</span>
+          </button>
           <button onclick="openRedactionModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Scrub proprietary accounts and customer names before upload">
             <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             <span>Scrub & Redact Tariff</span>
@@ -116,7 +131,26 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             <span>Upload New Rate Sheet</span>
           </button>
-          <input id="sheet-upload-input" type="file" accept=".xlsx,.xls,.csv" aria-label="Upload Carrier Rate Sheet (XLSX, CSV, PDF)" class="hidden" onchange="uploadNewSheet(event)">
+          <input id="sheet-upload-input" type="file" accept=".xlsx,.xls,.csv,.pdf" aria-label="Upload Carrier Rate Sheet (XLSX, CSV, PDF)" class="hidden" onchange="uploadNewSheet(event)">
+        </div>
+      </div>
+
+      <!-- 24-Hour Concierge "Done-For-You" Tariff Calibration Drop-Box -->
+      <div id="concierge-dropbox-card" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="space-y-1 max-w-2xl">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500 text-slate-950">24-Hr White-Glove Concierge</span>
+            <span class="text-xs font-bold">Too Busy to Map Complex Multi-Tab Spreadsheets? Let Us Do It For You.</span>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Drop up to 10 messy Canadian carrier Excel/CSV files here. Our engineering team will calibrate all CWT breaks, deficit rules, fuel tables, and winter heated/tailgate accessorials inside your private tenant within 24 hours.
+          </p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <input id="concierge-files-input" type="file" multiple accept=".xlsx,.xls,.csv" class="hidden" aria-label="Upload carrier rate sheets for concierge setup" onchange="submitConciergeUpload(event)" />
+          <button type="button" onclick="document.getElementById('concierge-files-input').click()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-xs cursor-pointer transition-colors whitespace-nowrap">
+            Drop Sheets for 24-Hr Concierge Setup →
+          </button>
         </div>
       </div>
 
@@ -1785,6 +1819,42 @@
       loadRateSheets();
     };
 
+    async function submitConciergeUpload(event) {
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
+      const presetEl = document.getElementById('carrier-preset-select');
+      const preset = presetEl ? presetEl.value : 'AUTO_DETECT';
+      const fd = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        fd.append('files', files[i]);
+      }
+      fd.append('carrier_preset', preset);
+      fd.append('notes', 'Submitted via 24-Hour Concierge Drop-Box');
+
+      const statusBox = document.getElementById('upload-status');
+      if (statusBox) {
+        statusBox.className = "p-3 rounded-xl text-xs font-mono bg-blue-50 text-blue-800 border border-blue-200 block";
+        statusBox.textContent = `Uploading ${files.length} sheet(s) to 24-Hour Concierge Queue...`;
+      }
+      try {
+        const res = await fetch('/api/quotelytics/concierge-upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Concierge upload failed.');
+        if (statusBox) {
+          statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+          statusBox.textContent = `✓ ${data.message} Request ID: ${data.concierge_request.id}`;
+        }
+        await loadRateSheets();
+      } catch (err) {
+        if (statusBox) {
+          statusBox.className = "p-3 rounded-xl text-xs font-mono bg-red-50 text-red-800 border border-red-200 block";
+          statusBox.textContent = `Error: ${err.message}`;
+        }
+      } finally {
+        event.target.value = '';
+      }
+    }
+
     // Initial load
     document.addEventListener("DOMContentLoaded", async () => {
       await loadRateSheets();
@@ -1818,6 +1888,44 @@
         }
       }
     });
+
+    async function seedSampleTariffsFromSheetsPage() {
+      const statusBox = document.getElementById('upload-status');
+      try {
+        const res = await fetch('/api/quotelytics/sheets/seed-sample-tariffs', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Could not load sample tariffs.');
+        if (statusBox) {
+          statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+          statusBox.textContent = `✓ Loaded ${data.seeded_count} confirmed [SAMPLE] Canadian LTL tariffs (${(data.carriers || []).join(', ')}).`;
+        }
+        await loadRateSheets();
+      } catch (err) {
+        if (statusBox) {
+          statusBox.className = "p-3 rounded-xl text-xs font-mono bg-red-50 text-red-800 border border-red-200 block";
+          statusBox.textContent = `Error: ${err.message}`;
+        }
+      }
+    }
+
+    async function purgeSampleTariffsFromSheetsPage() {
+      const statusBox = document.getElementById('upload-status');
+      try {
+        const res = await fetch('/api/quotelytics/sheets/purge-sample-tariffs', { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Could not clear sample tariffs.');
+        if (statusBox) {
+          statusBox.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 text-slate-700 border border-slate-300 block";
+          statusBox.textContent = `✓ Purged ${data.purged_count} [SAMPLE] sandbox tariff(s).`;
+        }
+        await loadRateSheets();
+      } catch (err) {
+        if (statusBox) {
+          statusBox.className = "p-3 rounded-xl text-xs font-mono bg-red-50 text-red-800 border border-red-200 block";
+          statusBox.textContent = `Error: ${err.message}`;
+        }
+      }
+    }
 
   </script>
   {% include "console/components/mapping_modal.html" %}

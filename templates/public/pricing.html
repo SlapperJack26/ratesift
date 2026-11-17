@@ -185,7 +185,7 @@
       <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
       <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
         <a href="/" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Home</a>
-        <a href="/demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Demo</a>
+        <a href="/demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Live Demo</a>
         <a href="/pricing" aria-current="page" class="pub-tab text-red-600 font-semibold border-b-2 border-red-600 py-1 transition-all">Pricing</a>
       </nav>
 
@@ -194,8 +194,8 @@
         <a href="/login" class="text-xs font-semibold text-[var(--foreground)] hover:text-red-600 transition-colors px-2 py-1" title="Log in to your Quotelytics account">
           Log in
         </a>
-        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Create a free Quotelytics account">
-          Get Started
+        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Request Private Beta Access">
+          Request Beta Access
         </a>
         <!-- Mobile Menu Toggle Button (Phone Only) -->
         <button type="button" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" class="md:hidden p-1.5 rounded-lg border border-[var(--border)] text-slate-600 hover:bg-black/5 focus:outline-hidden transition-colors">
@@ -207,16 +207,26 @@
     <!-- Collapsible Mobile Navigation Drawer for Phones (< 768px) -->
     <nav id="mobile-nav-drawer" aria-label="Mobile Navigation" class="hidden md:hidden border-b border-[var(--border)] bg-slate-50/95 px-4 py-3 space-y-1.5 text-xs font-medium transition-all">
       <a href="/" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Home</a>
-      <a href="/demo" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Demo</a>
+      <a href="/demo" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Live Demo</a>
       <a href="/pricing" class="block px-3 py-2 rounded-lg text-red-600 font-bold bg-red-50/80">Pricing</a>
       <div class="pt-2 mt-2 border-t border-[var(--border)] flex items-center justify-between">
         <a href="/login" class="text-xs font-semibold px-2 py-1 rounded text-slate-700 hover:text-red-600">Log in</a>
-        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs ">Get Started</a>
+        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs ">Request Beta Access</a>
       </div>
     </nav>
 
     <!-- Main Content Area: Accessible Landmark -->
     <main id="main-content" role="main" class="flex-1 p-6 md:p-8 space-y-10">
+
+      <!-- Private Beta Notice Banner -->
+      <div class="max-w-4xl mx-auto p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="font-bold">Private Beta Notice:</span> Online payments and self-serve signups are paused during Private Beta. All beta accounts are provisioned by a Quotelytics administrator with zero payment required.
+        </div>
+        <a href="/get-started" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs whitespace-nowrap transition-colors">
+          Request Beta Access →
+        </a>
+      </div>
       
       <!-- 1. Hero Title & Billing Cycle Switcher -->
       <section aria-labelledby="pricing-heading" class="max-w-3xl mx-auto text-center space-y-3">
@@ -291,12 +301,20 @@
                 <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                 <span>Canadian data residency (WHC / PIPEDA)</span>
               </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>1-Click Sample Tariffs &amp; Smart Email Parser</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>10 lb/cu.ft Cube-Out &amp; Rural/Ferry Guard</span>
+              </li>
             </ul>
           </div>
 
           <div class="pt-6">
-            <a href="/console/new-quote" class="block w-full text-center py-2.5 px-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs transition-colors shadow-2xs">
-              Start Free (No Card) →
+            <a href="/get-started?tier=FREE" class="block w-full text-center py-2.5 px-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs transition-colors shadow-2xs">
+              Request Beta Access →
             </a>
           </div>
         </div>
@@ -343,7 +361,19 @@
               </li>
               <li class="flex items-start gap-2">
                 <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                <span><strong>1-Click Client Proposals</strong> (PDF & Excel)</span>
+                <span><strong>PDF, Excel &amp; CSV Tariff Extraction</strong> + 24-Hr Concierge Setup</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span><strong>1-Click Client Proposals</strong> (PDF, Excel &amp; Live <code>/q/{token}</code> Links)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span><strong>Rate Con, Straight BOL &amp; Invoice Overcharge Audit</strong></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span><strong>Non-Stackable (84&quot;), Over-Length, $2/lb &amp; TDG Guardrails</strong></span>
               </li>
               <li class="flex items-start gap-2">
                 <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
@@ -355,14 +385,14 @@
               </li>
               <li class="flex items-start gap-2">
                 <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                <span>Priority broker support (< 2hr turnaround)</span>
+                <span>Priority broker support (&lt; 2hr turnaround)</span>
               </li>
             </ul>
           </div>
 
           <div class="pt-6">
-            <a href="/console/new-quote" class="block w-full text-center py-2.5 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition-colors shadow-xs">
-              Start 14-Day Free Trial →
+            <a href="/get-started?tier=PRO" class="block w-full text-center py-2.5 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition-colors shadow-xs">
+              Request Beta Access →
             </a>
           </div>
         </div>
@@ -406,6 +436,18 @@
               </li>
               <li class="flex items-start gap-2">
                 <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span><strong>Owner Margin Guardrails &amp; Master Tariff Lock</strong></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span><strong>Multi-Lane RFP Bid Matrix &amp; Spot RFQ Logger</strong></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span><strong>TMS/QuickBooks Export &amp; Lane Win/Loss Memory</strong></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                 <span>Pre-Authorized Debit (PAD) / EFT bank billing</span>
               </li>
               <li class="flex items-start gap-2">
@@ -416,8 +458,8 @@
           </div>
 
           <div class="pt-6">
-            <a href="/console/new-quote" class="block w-full text-center py-2.5 px-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs transition-colors shadow-2xs">
-              Start Free Team Trial →
+            <a href="/get-started?tier=TEAM" class="block w-full text-center py-2.5 px-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs transition-colors shadow-2xs">
+              Request Beta Access →
             </a>
           </div>
         </div>
@@ -431,9 +473,10 @@
             </div>
             <div class="pt-2">
               <div class="flex items-baseline gap-1">
-                <span id="price-api" class="text-3xl font-extrabold text-[var(--foreground)] font-mono">Get Quote</span>
+                <span id="price-api" class="text-3xl font-extrabold text-[var(--foreground)] font-mono">From $399</span>
+                <span class="text-xs text-[var(--muted-foreground)]">CAD / mo</span>
               </div>
-              <div id="sub-api" class="text-[11px] text-slate-500 mt-1">High-volume usage & embedded API billing</div>
+              <div id="sub-api" class="text-[11px] text-slate-500 mt-1">Includes 10 seats (+$20/extra) • 50k API quotes</div>
             </div>
 
             <!-- Features -->
@@ -460,7 +503,7 @@
               </li>
               <li class="flex items-start gap-2">
                 <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                <span>Dedicated Canadian cloud tenant (WHC)</span>
+                <span>Dedicated Canadian cloud tenant (WHC) &amp; White-Label options</span>
               </li>
               <li class="flex items-start gap-2">
                 <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
@@ -470,8 +513,8 @@
           </div>
 
           <div class="pt-6">
-            <a href="/console/new-quote" class="block w-full text-center py-2.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-xs">
-              Get a Custom Quote →
+            <a href="/get-started?tier=BUSINESS" class="block w-full text-center py-2.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-xs">
+              Request Beta Access →
             </a>
           </div>
         </div>
@@ -507,6 +550,54 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- Interactive Canadian Brokerage ROI Calculator -->
+      <section id="brokerage-roi-calculator" aria-label="Interactive Canadian Brokerage ROI Calculator" class="border border-slate-200 rounded-2xl bg-white p-6 shadow-2xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200">Interactive ROI Calculator</span>
+            <h2 class="text-lg font-extrabold text-slate-900 mt-1">Calculate Your Dispatch Desk's Monthly Savings &amp; ROI</h2>
+            <p class="text-xs text-slate-500">See how fast Quotelytics pays for itself from dispatcher time saved (12 mins/quote) and caught 10 lb/cu.ft cube-out &amp; deficit-rating discrepancies.</p>
+          </div>
+          <div class="text-right bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5">
+            <div class="text-[10px] font-bold uppercase text-emerald-800">Estimated Monthly Value Captured</div>
+            <div id="calc-monthly-roi-val" class="text-2xl font-extrabold text-emerald-700 font-mono">$1,650 CAD / mo</div>
+            <div id="calc-roi-multiple" class="text-[11px] font-bold text-emerald-800">20.8x Return on Broker Pro ($79/mo)</div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 text-xs">
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <label for="roi-dispatchers" class="font-bold text-slate-800 block mb-1">1. Dispatchers on Desk: <span id="lbl-roi-disp">2</span></label>
+            <input id="roi-dispatchers" type="range" min="1" max="20" value="2" oninput="recalcPublicRoi()" class="w-full accent-red-600 cursor-pointer" />
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <label for="roi-quotes-day" class="font-bold text-slate-800 block mb-1">2. LTL Quotes / Day: <span id="lbl-roi-q">10</span></label>
+            <input id="roi-quotes-day" type="range" min="2" max="100" value="10" oninput="recalcPublicRoi()" class="w-full accent-red-600 cursor-pointer" />
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <label for="roi-catches-mo" class="font-bold text-slate-800 block mb-1">3. Cube-Out / Deficit Catches / Mo: <span id="lbl-roi-c">6</span></label>
+            <input id="roi-catches-mo" type="range" min="1" max="40" value="6" oninput="recalcPublicRoi()" class="w-full accent-red-600 cursor-pointer" />
+          </div>
+        </div>
+        <script>
+          function recalcPublicRoi() {
+            const d = parseInt(document.getElementById('roi-dispatchers')?.value || '2', 10);
+            const q = parseInt(document.getElementById('roi-quotes-day')?.value || '10', 10);
+            const c = parseInt(document.getElementById('roi-catches-mo')?.value || '6', 10);
+            document.getElementById('lbl-roi-disp').textContent = d;
+            document.getElementById('lbl-roi-q').textContent = q;
+            document.getElementById('lbl-roi-c').textContent = c;
+            const monthlyQuotes = q * 22;
+            const hoursSaved = (monthlyQuotes * 12) / 60;
+            const laborSaved = hoursSaved * 32;
+            const leakSaved = c * 45;
+            const totalVal = Math.round(laborSaved + leakSaved);
+            const mult = (totalVal / 79).toFixed(1);
+            document.getElementById('calc-monthly-roi-val').textContent = '$' + totalVal.toLocaleString() + ' CAD / mo';
+            document.getElementById('calc-roi-multiple').textContent = mult + 'x Return on Broker Pro ($79/mo) • ' + Math.round(hoursSaved) + ' hrs saved/mo';
+          }
+        </script>
       </section>
 
       <!-- 3. Longer-term Expansion Spotlight: Embedded Quoting API for Brokers & 3PLs -->
@@ -614,7 +705,7 @@
                   <td colspan="5" class="py-1.5 px-4 uppercase tracking-wider">Quoting Volume & Spreadsheets</td>
                 </tr>
                 <tr>
-                  <td class="py-2.5 px-4 font-normal text-slate-700">Active Rate Sheets (.xlsx/.xls)</td>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Active Rate Sheets (.xlsx, .xls, .csv, .pdf)</td>
                   <td class="py-2.5 px-3 font-normal text-slate-600 text-center">Up to 3 Sheets</td>
                   <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">Up to 10</td>
                   <td class="py-2.5 px-3 font-normal text-slate-600 text-center">Unlimited</td>
@@ -632,7 +723,7 @@
                   <td class="py-2.5 px-3 font-normal text-slate-600 text-center">1 Seat</td>
                   <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">1 Seat</td>
                   <td class="py-2.5 px-3 font-normal text-slate-600 text-center">5 Seats Included (+$25/extra)</td>
-                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">Unlimited API Keys</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">10 Seats (+$20/extra) + Unlimited API Keys</td>
                 </tr>
 
                 <!-- Group 2: Rating & Routing Features -->
@@ -701,6 +792,60 @@
                   <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">5 Major Fleets</td>
                   <td class="py-2.5 px-3 font-normal text-slate-600 text-center">All + Regional LTL</td>
                   <td class="py-2.5 px-3 font-normal text-slate-600 text-center">All + Custom Tariffs</td>
+                </tr>
+
+                <!-- Group 2b: Canadian Margin Guardrails, Dispatch & Governance (Phases 1-5) -->
+                <tr class="bg-slate-50/80 font-bold text-[11px] text-slate-600">
+                  <td colspan="5" class="py-1.5 px-4 uppercase tracking-wider">Canadian Margin Guardrails, Dispatch &amp; Governance</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">1-Click Sample Tariffs &amp; Smart Email Parser</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center bg-red-50/20">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">10 lb/cu.ft Cube-Out, Non-Stackable (84&quot;) &amp; Over-Length (&gt;=96&quot;)</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center bg-red-50/20">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Rural (X0X) / Ferry Detector &amp; $2/lb Liability / TDG BOL Guard</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center">Corridor Alerts</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center bg-red-50/20">Full Suite</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Full Suite</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Full Suite</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Live <code>/q/{token}</code> Shipper Links, Rate Con &amp; Straight BOL</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center bg-red-50/20">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">White-Label</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Carrier Invoice Audit, Spot RFQ Logger &amp; RFP Bid Matrix</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center bg-red-50/20">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">24-Hr Concierge Tariff Setup &amp; TMS/QuickBooks Export</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center bg-red-50/20">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Included</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-4 font-normal text-slate-700">Owner Margin Guardrails, Master Tariff Lock &amp; Lane Win/Loss Memory</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-400 text-center">—</td>
+                  <td class="py-2.5 px-3 font-normal text-slate-600 text-center bg-red-50/20">Lane Memory</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Full Governance</td>
+                  <td class="py-2.5 px-3 font-normal text-emerald-700 font-semibold text-center">Full Governance</td>
                 </tr>
 
                 <!-- Group 3: Integration & APIs -->
@@ -845,8 +990,8 @@
           Upload your live Excel rate sheets right now on the Free Starter tier. Validate calculation accuracy in seconds.
         </p>
         <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
-          <a href="/console/new-quote" class="px-5 py-2.5 bg-white text-red-600 font-bold text-xs rounded-lg shadow-sm hover:bg-red-50 transition-colors">
-            Start Free Starter Plan →
+          <a href="/get-started" class="px-5 py-2.5 bg-white text-red-600 font-bold text-xs rounded-lg shadow-sm hover:bg-red-50 transition-colors">
+            Request Beta Access →
           </a>
           <a href="/demo" class="px-4 py-2.5 bg-red-700/60 hover:bg-red-700 text-white font-semibold text-xs rounded-lg transition-colors border border-white/20">
             Open Interactive Demo Sandbox
@@ -913,8 +1058,8 @@
         subPro.textContent = "Billed annually ($756 CAD/yr) • Save 20%";
         priceTeam.textContent = "$159";
         subTeam.textContent = "Billed annually ($1,908 CAD/yr) • Save 20%";
-        priceApi.textContent = "Get Quote";
-        subApi.textContent = "Tailored annual volume & SLAs";
+        priceApi.textContent = "From $319";
+        subApi.textContent = "Billed annually ($3,830 CAD/yr) • Save 20%";
       } else {
         toggle.setAttribute('aria-checked', 'false');
         toggle.classList.remove('bg-red-600');
@@ -932,8 +1077,8 @@
         subPro.textContent = "Billed monthly • Cancel anytime";
         priceTeam.textContent = "$199";
         subTeam.textContent = "Includes 5 seats (+$25/seat add-on)";
-        priceApi.textContent = "Get Quote";
-        subApi.textContent = "High-volume usage & embedded API billing";
+        priceApi.textContent = "From $399";
+        subApi.textContent = "Includes 10 seats (+$20/extra) • 50k API quotes";
       }
     }
   

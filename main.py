@@ -259,12 +259,19 @@ def api_login(request: Request, response: Response, email: str = Form(...), pass
     _LOGIN_FAILED_BY_IP.pop(ip_key, None)
 
     _set_session_cookies(response, token, request)
+    must_change = bool(user.get("must_change_password", False))
     return {
         "status": "success",
         "user": user,
         "token": token,
-        "redirect": "/console/new-quote"
+        "must_change_password": must_change,
+        "redirect": "/console/change-password" if must_change else "/console/new-quote"
     }
+
+def is_beta_invite_only() -> bool:
+    """Returns True when Private Beta invite-only lockdown is active (blocks public self-signup & billing)."""
+    return os.environ.get("QUOTELYTICS_BETA_INVITE_ONLY", "true").strip().lower() not in ("0", "false", "no", "off")
+
 
 @app.post("/api/auth/register", tags=["Authentication"])
 def api_register(
@@ -280,6 +287,11 @@ def api_register(
     form_version: str = Form("v2026.10"),
 ):
     """Registers account on Free Starter tier with role='USER', records CASL consent, and establishes session."""
+    if is_beta_invite_only():
+        raise HTTPException(
+            status_code=403,
+            detail="Quotelytics is currently in Private Beta. Accounts are provisioned by an administrator. Please submit a Beta Access Request at /get-started.",
+        )
     if not terms_accepted:
         raise HTTPException(status_code=400, detail="You must accept the Terms of Service and Privacy Policy to register.")
     if not password or len(password) < 10:
@@ -298,11 +310,13 @@ def api_register(
         form_version=form_version,
     )
     _set_session_cookies(response, token, request)
+    must_change = bool(user.get("must_change_password", False))
     return {
         "status": "success",
         "user": user,
         "token": token,
-        "redirect": "/console/new-quote"
+        "must_change_password": must_change,
+        "redirect": "/console/change-password" if must_change else "/console/new-quote"
     }
 
 @app.get("/api/auth/logout", tags=["Authentication"])
@@ -616,8 +630,13 @@ def api_billing_info(request: Request):
 
 @app.post("/api/billing/checkout", tags=["Stripe Billing"])
 def api_billing_checkout(payload: CheckoutPayload, request: Request):
-    """Initializes a Stripe Checkout session for subscription purchase."""
+    """Initializes a Stripe Checkout session for subscription purchase (disabled during Private Beta)."""
     user = require_user(request)
+    if is_beta_invite_only():
+        raise HTTPException(
+            status_code=403,
+            detail="Online payments and self-serve subscriptions are disabled during Private Beta. Please request beta access or contact your Quotelytics administrator.",
+        )
     from services.stripe_service import create_checkout_session
     try:
         session_info = create_checkout_session(
@@ -639,8 +658,13 @@ def api_billing_checkout(payload: CheckoutPayload, request: Request):
 
 @app.post("/api/billing/portal", tags=["Stripe Billing"])
 def api_billing_portal(payload: PortalPayload, request: Request):
-    """Generates a Stripe Customer Portal redirect URL for managing cards and subscriptions."""
+    """Generates a Stripe Customer Portal redirect URL for managing cards and subscriptions (disabled during Private Beta)."""
     user = require_user(request)
+    if is_beta_invite_only():
+        raise HTTPException(
+            status_code=403,
+            detail="Online payments and self-serve billing portals are disabled during Private Beta. Please request beta access or contact your Quotelytics administrator.",
+        )
     from services.stripe_service import create_customer_portal_session
     try:
         portal_info = create_customer_portal_session(
@@ -925,7 +949,7 @@ async def api_analyze_excel(
     user = require_user(request)
     user_id = user["id"]
     
-    if not (file.filename.endswith(".xlsx") or file.filename.endswith(".xls") or file.filename.endswith(".csv")):
+    if not (file.filename.lower().endswith(".xlsx") or file.filename.lower().endswith(".xls") or file.filename.lower().endswith(".csv") or file.filename.lower().endswith(".pdf")):
         raise HTTPException(status_code=400, detail="Only spreadsheet files (.xlsx, .xls, .csv) are supported.")
         
     content = await file.read()
@@ -1229,8 +1253,8 @@ async def api_quotelytics_upload_sheet(
             detail=f"Tier limit exceeded: {quota['tier_name']} allows a maximum of {quota['max_sheets']} uploaded rate sheets ({quota['sheets_uploaded']} active). Please upgrade to Pro or Team for additional sheets."
         )
 
-    if not (file.filename.endswith(".xlsx") or file.filename.endswith(".xls") or file.filename.endswith(".csv")):
-        raise HTTPException(status_code=400, detail="Only Excel (.xlsx, .xls) and CSV (.csv) rate sheets are supported.")
+    if not (file.filename.lower().endswith(".xlsx") or file.filename.lower().endswith(".xls") or file.filename.lower().endswith(".csv") or file.filename.lower().endswith(".pdf")):
+        raise HTTPException(status_code=400, detail="Only Excel (.xlsx, .xls), CSV (.csv), and PDF (.pdf) rate sheets are supported.")
 
     content = await file.read()
     try:
@@ -1249,6 +1273,22 @@ def api_quotelytics_list_sheets(request: Request, status: Optional[str] = None):
     from services.quotelytics_db_service import list_rate_sheets
     sheets = list_rate_sheets(user_id=user_id, status=status)
     return {"sheets": sheets}
+
+@app.post("/api/quotelytics/sheets/seed-sample-tariffs", tags=["Quotelytics Rate Sheets"])
+def api_seed_sample_canadian_tariffs(request: Request):
+    """1-Click Sandbox Mode: Seeds 3 sample Canadian LTL tariffs for immediate console evaluation."""
+    user = require_user(request)
+    from services.quotelytics_db_service import seed_sample_canadian_ltl_tariffs
+    res = seed_sample_canadian_ltl_tariffs(user["id"])
+    return {"status": "success", **res}
+
+@app.delete("/api/quotelytics/sheets/purge-sample-tariffs", tags=["Quotelytics Rate Sheets"])
+def api_purge_sample_canadian_tariffs(request: Request):
+    """Deletes all '[SAMPLE]' Sandbox Canadian LTL tariffs owned by the current user."""
+    user = require_user(request)
+    from services.quotelytics_db_service import purge_sample_canadian_ltl_tariffs
+    res = purge_sample_canadian_ltl_tariffs(user["id"])
+    return {"status": "success", **res}
 
 @app.get("/api/quotelytics/sheets/{sheet_id}", tags=["Quotelytics Rate Sheets"])
 def api_quotelytics_get_sheet(sheet_id: str, request: Request, limit: Optional[int] = None, offset: int = 0):
@@ -1475,11 +1515,28 @@ def api_quotelytics_archive_sheet(sheet_id: str, request: Request):
     return {"status": "success", "message": "Rate sheet archived."}
 
 @app.delete("/api/quotelytics/sheets/{sheet_id}", tags=["Quotelytics Rate Sheets"])
-def api_quotelytics_delete_sheet(sheet_id: str, request: Request):
-    """Deletes a rate sheet."""
+def api_quotelytics_delete_sheet(sheet_id: str, request: Request, override_pin: Optional[str] = None):
+    """Deletes a rate sheet (enforces Brokerage Owner Master Tariff Lock if active)."""
     user = require_user(request)
     user_id = user["id"]
-    from services.quotelytics_db_service import delete_rate_sheet
+    from services.db_service import get_brokerage_guardrails
+    from services.quotelytics_db_service import delete_rate_sheet, get_rate_sheet, SAMPLE_SANDBOX_TARIFF_REF
+
+    sheet = get_rate_sheet(sheet_id, user_id)
+    if not sheet:
+        raise HTTPException(status_code=404, detail="Rate sheet not found.")
+
+    guardrails = get_brokerage_guardrails(user_id)
+    if (
+        guardrails.get("lock_master_tariffs")
+        and sheet.get("tariff_ref") != SAMPLE_SANDBOX_TARIFF_REF
+        and (override_pin or "").strip() != guardrails.get("owner_override_pin")
+    ):
+        raise HTTPException(
+            status_code=423,
+            detail="Master Tariff Lock is active. Unlock master tariffs in Owner Guardrails before deleting or modifying confirmed carrier sheets.",
+        )
+
     success = delete_rate_sheet(sheet_id, user_id)
     if not success:
         raise HTTPException(status_code=404, detail="Rate sheet not found.")
@@ -2713,3 +2770,1105 @@ def api_delete_keyword_definition(keyword_id: str, request: Request):
     if not deleted:
         raise HTTPException(status_code=404, detail="Keyword definition not found.")
     return {"status": "success", "deleted_id": keyword_id}
+
+
+# ==============================================================================
+# STARTUP SURVIVAL & BROKER ADOPTION UPGRADES:
+# 1. Canadian Carrier Format Presets & Big 6 Accessorial Matrix
+# 2. 24-Hour Concierge "Done-For-You" Tariff Calibration Drop-Box
+# 3. 1-Second "Paste Shipper Email / RFQ" Smart Parser
+# ==============================================================================
+
+class AccessorialMatrixPayload(BaseModel):
+    accessorials: List[Dict[str, Any]]
+
+
+class EmailQuoteParsePayload(BaseModel):
+    text: str
+
+
+@app.get("/api/quotelytics/carrier-presets", tags=["Quotelytics Rate Sheets"])
+def api_list_carrier_presets(request: Request):
+    """Returns Canadian LTL Carrier Format Presets and the Big 6 Canadian Accessorials catalog."""
+    require_user(request)
+    from services.carrier_presets_service import (
+        BIG_6_CANADIAN_ACCESSORIALS,
+        list_carrier_presets,
+    )
+    return {
+        "status": "success",
+        "presets": list_carrier_presets(),
+        "big_6_accessorials": BIG_6_CANADIAN_ACCESSORIALS,
+    }
+
+
+@app.post("/api/quotelytics/sheets/{sheet_id}/accessorials", tags=["Quotelytics Rate Sheets"])
+def api_upsert_sheet_accessorials(
+    sheet_id: str,
+    payload: AccessorialMatrixPayload,
+    request: Request,
+):
+    """Creates or updates the Big 6 Canadian LTL Accessorial Matrix on a specific carrier rate sheet."""
+    user = require_user(request)
+    from services.carrier_presets_service import upsert_sheet_accessorial_matrix
+    try:
+        updated = upsert_sheet_accessorial_matrix(
+            sheet_id=sheet_id,
+            user_id=user["id"],
+            accessorials=payload.accessorials,
+        )
+        return {
+            "status": "success",
+            "sheet_id": sheet_id,
+            "surcharges": updated,
+            "total": len(updated),
+        }
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@app.post("/api/quotelytics/concierge-upload", tags=["Quotelytics Rate Sheets"])
+async def api_concierge_tariff_upload(
+    request: Request,
+    files: List[UploadFile] = File(default=[]),
+    notes: str = Form(default=""),
+    carrier_preset: str = Form(default="AUTO_DETECT"),
+):
+    """
+    24-Hour Concierge 'Done-For-You' Tariff Drop-Box.
+    Allows a busy broker to drop 1–10 messy Excel/CSV sheets at once so engineering
+    can calibrate and confirm them within 24 hours.
+    """
+    user = require_user(request)
+    user_id = user["id"]
+
+    if not files:
+        raise HTTPException(status_code=400, detail="Please attach at least one carrier rate sheet.")
+
+    filenames: List[str] = []
+    sheet_ids: List[str] = []
+    from services.quotelytics_extractor import QuotelyticsExtractor
+
+    for f in files[:10]:
+        fname = f.filename or "carrier_tariff.xlsx"
+        filenames.append(fname)
+        if fname.lower().endswith((".xlsx", ".xls", ".csv", ".pdf")):
+            try:
+                content = await f.read()
+                extractor = QuotelyticsExtractor(
+                    file_bytes=content,
+                    filename=fname,
+                    user_id=user_id,
+                    carrier_preset=carrier_preset,
+                )
+                res = extractor.process()
+                if res.get("sheet_id"):
+                    sheet_ids.append(res["sheet_id"])
+            except Exception:
+                # Even if a messy sheet fails automatic parsing, Concierge Drop-Box still queues it for manual calibration!
+                pass
+
+    from services.db_service import create_concierge_tariff_request
+    req_record = create_concierge_tariff_request(
+        user_id=user_id,
+        email=user["email"],
+        company=user.get("company") or "",
+        filenames=filenames,
+        notes=notes,
+        carrier_preset=carrier_preset,
+        sheet_ids=sheet_ids,
+    )
+    return {
+        "status": "success",
+        "concierge_request": req_record,
+        "message": f"Queued {len(filenames)} sheet(s) for 24-hour Concierge Calibration.",
+    }
+
+
+@app.get("/api/quotelytics/concierge-requests", tags=["Quotelytics Rate Sheets"])
+def api_list_concierge_requests(request: Request):
+    """Lists Concierge Tariff Calibration requests for the active user (or all requests if ADMIN)."""
+    user = require_user(request)
+    from services.db_service import list_concierge_tariff_requests
+    is_admin = (user.get("role") or "").upper() == "ADMIN"
+    items = list_concierge_tariff_requests(user_id=None if is_admin else user["id"])
+    return {"status": "success", "requests": items, "total": len(items)}
+
+
+@app.post("/api/quotes/parse-email-text", tags=["Quoting Engine"])
+def api_parse_shipper_email_text(payload: EmailQuoteParsePayload):
+    """
+    1-Second 'Paste Shipper Email / RFQ' Smart Parser.
+    Extracts Origin, Destination, Weight (lbs/kg), Skids, Dimensions, and Accessorials
+    from raw pasted email text (works on both /console/new-quote and public /demo).
+    """
+    from services.email_quote_parser_service import parse_shipper_email_text
+    try:
+        return parse_shipper_email_text(payload.text)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+# ==============================================================================
+# PHASE 2: MARGIN PROTECTION, RETENTION & MULTI-PLAYER SHIPPER QUOTE LOOP
+# ==============================================================================
+
+class CubeDensityPayload(BaseModel):
+    actual_weight_lbs: float = 0.0
+    length_in: float = 48.0
+    width_in: float = 40.0
+    height_in: float = 48.0
+    skid_count: int = 1
+    density_rule_lbs_per_cuft: float = 10.0
+    non_stackable: bool = False
+    skid_lines: Optional[List[Dict[str, Any]]] = None
+
+
+class ProposalCurrencyConvertPayload(BaseModel):
+    proposal_data: Dict[str, Any]
+    target_currency: str = "CAD"
+    fx_rate: float = 1.3850
+    broker_fx_buffer_pct: float = 1.5
+
+
+class ShareProposalPayload(BaseModel):
+    client_name: str = "Valued Shipper"
+    origin: str
+    destination: str
+    carrier_name: str = "Canadian LTL Partner"
+    service_name: str = "Standard Road LTL"
+    transit_days: int = 3
+    weight_lbs: float = 1000.0
+    skid_count: int = 1
+    wholesale_cost: float
+    client_total: Optional[float] = None
+    currency: str = "CAD"
+    markup_pct: float = 15.0
+
+
+class ShipperDecisionPayload(BaseModel):
+    decision: str
+    shipper_contact_name: Optional[str] = ""
+    shipper_notes: Optional[str] = ""
+
+
+class DieselFscPayload(BaseModel):
+    diesel_price_cad_litre: float
+    mode: str = "LTL"
+
+
+class GriApplyPayload(BaseModel):
+    gri_percent: float
+    new_effective_date: Optional[str] = None
+    new_expiry_date: Optional[str] = None
+
+
+@app.post("/api/quotes/cube-density-check", tags=["Quoting Engine"])
+def api_cube_density_check(payload: CubeDensityPayload):
+    """Calculates Canadian LTL 10 lb/cu.ft minimum density ('cube-out'), non-stackable 84\" cube, over-length, and linear-foot warnings."""
+    from services.quotelytics_engine import calculate_canadian_ltl_cube_density
+    return calculate_canadian_ltl_cube_density(
+        actual_weight_lbs=payload.actual_weight_lbs,
+        length_in=payload.length_in,
+        width_in=payload.width_in,
+        height_in=payload.height_in,
+        skid_count=payload.skid_count,
+        density_rule_lbs_per_cuft=payload.density_rule_lbs_per_cuft,
+        non_stackable=payload.non_stackable,
+        skid_lines=payload.skid_lines,
+    )
+
+
+@app.post("/api/proposals/convert-currency", tags=["Client Proposals"])
+def api_convert_proposal_currency(payload: ProposalCurrencyConvertPayload, request: Request):
+    """Converts a Client Proposal between USD and CAD with a configurable Broker FX Buffer %."""
+    require_user(request)
+    from services.proposal_service import convert_proposal_currency
+    return {
+        "status": "success",
+        "proposal": convert_proposal_currency(
+            proposal_data=payload.proposal_data,
+            target_currency=payload.target_currency,
+            fx_rate=payload.fx_rate,
+            broker_fx_buffer_pct=payload.broker_fx_buffer_pct,
+        ),
+    }
+
+
+@app.post("/api/proposals/share", tags=["Client Proposals"])
+def api_create_shareable_proposal(payload: ShareProposalPayload, request: Request):
+    """Generates an interactive shareable shipper quote link (/q/{token}) and tracks margin."""
+    user = require_user(request)
+    from services.db_service import create_shared_shipper_proposal
+    shared = create_shared_shipper_proposal(
+        user_id=user["id"],
+        broker_company=user.get("company") or "Quotelytics Partner Brokerage",
+        broker_email=user.get("email") or "",
+        client_name=payload.client_name,
+        origin=payload.origin,
+        destination=payload.destination,
+        carrier_name=payload.carrier_name,
+        service_name=payload.service_name,
+        transit_days=payload.transit_days,
+        weight_lbs=payload.weight_lbs,
+        skid_count=payload.skid_count,
+        wholesale_cost=payload.wholesale_cost,
+        client_total=payload.client_total or 0.0,
+        currency=payload.currency,
+        markup_pct=payload.markup_pct,
+    )
+    return {"status": "success", "shared_proposal": shared}
+
+
+@app.get("/q/{token}", response_class=HTMLResponse, tags=["Client Proposals"])
+def public_shared_quote_page(token: str, request: Request):
+    """Public interactive shipper quote approval portal (/q/{token})."""
+    from fastapi.templating import Jinja2Templates
+    from services.db_service import get_shared_shipper_proposal
+    prop = get_shared_shipper_proposal(token, mark_viewed=True)
+    if not prop:
+        raise HTTPException(status_code=404, detail="Shared quote link not found or expired.")
+    jinja_templates = Jinja2Templates(directory=TEMPLATES_DIR)
+    return jinja_templates.TemplateResponse(request, "public/shared_quote.html", {"proposal": prop})
+
+
+@app.post("/q/{token}/respond", tags=["Client Proposals"])
+def api_respond_shared_quote(token: str, payload: ShipperDecisionPayload):
+    """Records a shipper's 1-click acceptance ('WON') or decline ('LOST') on a shared quote link."""
+    from services.db_service import respond_to_shared_shipper_proposal
+    try:
+        updated = respond_to_shared_shipper_proposal(
+            token=token,
+            decision=payload.decision,
+            shipper_contact_name=payload.shipper_contact_name or "",
+            shipper_notes=payload.shipper_notes or "",
+        )
+        return {"status": "success", "proposal": updated}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/quotes/win-loss-analytics", tags=["Client Proposals"])
+def api_get_win_loss_analytics(request: Request):
+    """Returns Won/Lost conversion analytics and total won broker margin ($ CAD)."""
+    user = require_user(request)
+    from services.db_service import get_user_win_loss_analytics
+    return {"status": "success", "analytics": get_user_win_loss_analytics(user["id"])}
+
+
+@app.post("/api/fuel-index/calculate-from-diesel", tags=["Fuel Index"])
+def api_calculate_fsc_from_diesel(payload: DieselFscPayload):
+    """Calculates Canadian FCA/OTA LTL & TL Fuel Surcharge % from a weekly retail diesel price ($/L)."""
+    from services.fuel_index_service import calculate_fsc_from_diesel_price
+    return calculate_fsc_from_diesel_price(
+        diesel_price_cad_litre=payload.diesel_price_cad_litre,
+        mode=payload.mode,
+    )
+
+
+@app.get("/api/quotelytics/sheets-expiry-alerts", tags=["Quotelytics Rate Sheets"])
+def api_get_sheets_expiry_alerts(request: Request, within_days: int = 14):
+    """Returns carrier rate sheets that are expired or expiring within `within_days` calendar days."""
+    user = require_user(request)
+    from services.quotelytics_db_service import get_expiring_or_expired_sheets
+    alerts = get_expiring_or_expired_sheets(user["id"], within_days=within_days)
+    return {"status": "success", "alerts": alerts, "total": len(alerts)}
+
+
+@app.post("/api/quotelytics/sheets/{sheet_id}/apply-gri", tags=["Quotelytics Rate Sheets"])
+def api_apply_gri_to_sheet(sheet_id: str, payload: GriApplyPayload, request: Request, override_pin: Optional[str] = None):
+    """1-Click General Rate Increase (GRI) Bumper across all weight breaks & minimums on a sheet."""
+    user = require_user(request)
+    from services.db_service import get_brokerage_guardrails
+    from services.quotelytics_db_service import apply_gri_percentage_to_sheet, get_rate_sheet, SAMPLE_SANDBOX_TARIFF_REF
+
+    sheet = get_rate_sheet(sheet_id, user["id"])
+    if not sheet:
+        raise HTTPException(status_code=404, detail="Rate sheet not found or unauthorized.")
+
+    guardrails = get_brokerage_guardrails(user["id"])
+    if (
+        guardrails.get("lock_master_tariffs")
+        and sheet.get("tariff_ref") != SAMPLE_SANDBOX_TARIFF_REF
+        and (override_pin or "").strip() != guardrails.get("owner_override_pin")
+    ):
+        raise HTTPException(
+            status_code=423,
+            detail="Master Tariff Lock is active. Unlock master tariffs in Owner Guardrails before deleting or modifying confirmed carrier sheets.",
+        )
+
+    try:
+        res = apply_gri_percentage_to_sheet(
+            sheet_id=sheet_id,
+            user_id=user["id"],
+            gri_percent=payload.gri_percent,
+            new_effective_date=payload.new_effective_date,
+            new_expiry_date=payload.new_expiry_date,
+        )
+        return {"status": "success", "gri_result": res}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+# ==============================================================================
+# PHASE 3: DISPATCH DOCUMENTS (RATE CON & STRAIGHT BOL), SHIPPER MARGIN PROFILES,
+# DAY-30 BETA RENEWAL ROI SCORECARD & SALES REP LEADERBOARD
+# ==============================================================================
+
+class DispatchDocsPayload(BaseModel):
+    quote_data: Dict[str, Any]
+    shipper_info: Optional[Dict[str, Any]] = None
+    consignee_info: Optional[Dict[str, Any]] = None
+    carrier_notes: Optional[str] = ""
+    bol_notes: Optional[str] = ""
+
+
+class ShipperMarginProfilePayload(BaseModel):
+    shipper_name: str
+    default_markup_pct: float = 15.0
+    min_margin_dollars: float = 45.0
+    preferred_currency: str = "CAD"
+    notes: Optional[str] = ""
+
+
+class SalesRepActivityPayload(BaseModel):
+    rep_name: str = "Rep 1"
+    prospect_company: str
+    activity_type: str = "CALL"
+    province: str = "ON"
+    sheet_uploaded: bool = False
+    arr_value_cad: float = 0.0
+    notes: Optional[str] = ""
+
+
+@app.post("/api/quotes/dispatch-documents", tags=["Dispatch Handoff"])
+def api_generate_dispatch_documents(payload: DispatchDocsPayload, request: Request):
+    """
+    1-Click Post-Quote Dispatch Handoff:
+    Generates both the Carrier Rate Confirmation ('Rate Con' with wholesale net pay & cell proof)
+    and the Canadian Straight Bill of Lading (BOL with zero pricing exposed).
+    """
+    user = require_user(request)
+    from services.dispatch_documents_service import (
+        build_canadian_straight_bol,
+        build_carrier_rate_confirmation,
+    )
+    broker_info = {
+        "company": user.get("company") or "Quotelytics Partner Brokerage",
+        "name": user.get("name") or "Dispatch Desk",
+        "email": user.get("email") or "",
+    }
+    rate_con = build_carrier_rate_confirmation(
+        quote_data=payload.quote_data,
+        broker_info=broker_info,
+        carrier_notes=payload.carrier_notes or "",
+    )
+    straight_bol = build_canadian_straight_bol(
+        quote_data=payload.quote_data,
+        broker_info=broker_info,
+        shipper_info=payload.shipper_info,
+        consignee_info=payload.consignee_info,
+        bol_notes=payload.bol_notes or "",
+    )
+    return {
+        "status": "success",
+        "rate_confirmation": rate_con,
+        "straight_bol": straight_bol,
+    }
+
+
+@app.get("/api/shippers/profiles", tags=["Shipper Margin Profiles"])
+def api_list_shipper_profiles(request: Request):
+    """Lists all saved Shipper Margin Profiles (% markup + minimum dollar profit floor)."""
+    user = require_user(request)
+    from services.db_service import list_shipper_margin_profiles
+    items = list_shipper_margin_profiles(user["id"])
+    return {"status": "success", "profiles": items, "total": len(items)}
+
+
+@app.post("/api/shippers/profiles", tags=["Shipper Margin Profiles"])
+def api_upsert_shipper_profile(payload: ShipperMarginProfilePayload, request: Request):
+    """Creates or updates a customer-specific Shipper Margin Profile (% markup + $ min profit floor)."""
+    user = require_user(request)
+    from services.db_service import upsert_shipper_margin_profile
+    try:
+        saved = upsert_shipper_margin_profile(
+            user_id=user["id"],
+            shipper_name=payload.shipper_name,
+            default_markup_pct=payload.default_markup_pct,
+            min_margin_dollars=payload.min_margin_dollars,
+            preferred_currency=payload.preferred_currency,
+            notes=payload.notes or "",
+        )
+        return {"status": "success", "profile": saved}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.delete("/api/shippers/profiles/{profile_id}", tags=["Shipper Margin Profiles"])
+def api_delete_shipper_profile(profile_id: str, request: Request):
+    """Deletes a Shipper Margin Profile owned by the authenticated user."""
+    user = require_user(request)
+    from services.db_service import delete_shipper_margin_profile
+    deleted = delete_shipper_margin_profile(user["id"], profile_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Shipper profile not found.")
+    return {"status": "success", "deleted_id": profile_id}
+
+
+@app.get("/api/user/roi-scorecard", tags=["Subscription & Quotas"])
+def api_get_user_roi_scorecard(request: Request, hourly_labor_rate_cad: float = 32.0):
+    """Returns the Day-30 Beta Renewal ROI & Value Captured Scorecard for the active brokerage."""
+    user = require_user(request)
+    from services.db_service import get_brokerage_roi_scorecard
+    return {
+        "status": "success",
+        "scorecard": get_brokerage_roi_scorecard(user["id"], hourly_labor_rate_cad=hourly_labor_rate_cad),
+    }
+
+
+@app.post("/api/admin/sales-activity", tags=["Sales Rep CRM & Leaderboard"])
+def api_log_sales_rep_activity(payload: SalesRepActivityPayload, request: Request):
+    """Logs a sales rep outbound touch, qualified demo ($25 spiff), or closed account."""
+    require_user(request)
+    from services.db_service import get_sales_rep_leaderboard, log_sales_rep_activity
+    try:
+        entry = log_sales_rep_activity(
+            rep_name=payload.rep_name,
+            prospect_company=payload.prospect_company,
+            activity_type=payload.activity_type,
+            province=payload.province,
+            sheet_uploaded=payload.sheet_uploaded,
+            arr_value_cad=payload.arr_value_cad,
+            notes=payload.notes or "",
+        )
+        return {
+            "status": "success",
+            "activity": entry,
+            "leaderboard": get_sales_rep_leaderboard()["leaderboard"],
+        }
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/admin/sales-leaderboard", tags=["Sales Rep CRM & Leaderboard"])
+def api_get_sales_rep_leaderboard(request: Request):
+    """Returns the real-time Sales Rep Spiff & Class B Milestone Equity Leaderboard."""
+    require_user(request)
+    from services.db_service import get_sales_rep_leaderboard
+    data = get_sales_rep_leaderboard()
+    return {"status": "success", **data}
+
+
+# ==============================================================================
+# PHASE 4: CARRIER INVOICE AUDIT, RURAL/FERRY CORRIDOR DETECTOR, RFP BID MATRIX,
+# BETA HEALTH RADAR, TMS/QUICKBOOKS EXPORT & BROKER REFERRAL LOOP
+# ==============================================================================
+
+class CarrierInvoiceAuditPayload(BaseModel):
+    carrier_name: str
+    invoice_number: str
+    origin: str
+    destination: str
+    expected_wholesale_cad: float
+    billed_amount_cad: float
+    tariff_citation: str = "Sheet 1 • Row 14, Col D"
+    expected_weight_lbs: float = 1000.0
+    billed_weight_lbs: Optional[float] = None
+    expected_fsc_cad: float = 0.0
+    billed_fsc_cad: Optional[float] = None
+
+
+class CorridorWarningPayload(BaseModel):
+    origin: str
+    destination: str
+
+
+class RfpBidMatrixPayload(BaseModel):
+    lanes: List[Dict[str, str]]
+    markup_pct: float = 15.0
+    min_margin_dollars: float = 45.0
+
+
+class TmsExportPayload(BaseModel):
+    quote_data: Dict[str, Any]
+    client_name: str = "Valued Shipper"
+    markup_pct: float = 15.0
+    min_margin_dollars: float = 45.0
+
+
+class ReferralInvitePayload(BaseModel):
+    invited_email: str
+    invited_company: Optional[str] = ""
+
+
+@app.post("/api/quotes/audit-carrier-invoice", tags=["Carrier Invoice Audit"])
+def api_audit_carrier_invoice(payload: CarrierInvoiceAuditPayload, request: Request):
+    """Audits a carrier invoice against the confirmed Quotelytics rate and generates a Dispute Notice."""
+    user = require_user(request)
+    from services.invoice_audit_service import audit_carrier_invoice_against_quote
+    res = audit_carrier_invoice_against_quote(
+        user_id=user["id"],
+        carrier_name=payload.carrier_name,
+        invoice_number=payload.invoice_number,
+        origin=payload.origin,
+        destination=payload.destination,
+        expected_wholesale_cad=payload.expected_wholesale_cad,
+        billed_amount_cad=payload.billed_amount_cad,
+        tariff_citation=payload.tariff_citation,
+        expected_weight_lbs=payload.expected_weight_lbs,
+        billed_weight_lbs=payload.billed_weight_lbs,
+        expected_fsc_cad=payload.expected_fsc_cad,
+        billed_fsc_cad=payload.billed_fsc_cad,
+    )
+    return {"status": "success", "audit": res}
+
+
+@app.get("/api/quotes/invoice-audits", tags=["Carrier Invoice Audit"])
+def api_list_carrier_invoice_audits(request: Request):
+    """Lists all carrier invoice audits and total overcharges caught ($ CAD)."""
+    user = require_user(request)
+    from services.invoice_audit_service import list_carrier_invoice_audits
+    return {"status": "success", **list_carrier_invoice_audits(user["id"])}
+
+
+@app.post("/api/quotes/corridor-surcharge-check", tags=["Quoting Engine"])
+def api_corridor_surcharge_check(payload: CorridorWarningPayload):
+    """Detects Canadian Rural '0'-digit FSAs, Vancouver Island Ferry, and Newfoundland Gulf Ferry corridors."""
+    from services.fsa_resolver_service import detect_canadian_corridor_warnings
+    return detect_canadian_corridor_warnings(payload.origin, payload.destination)
+
+
+@app.post("/api/quotes/rfp-bid-matrix", tags=["Shipper RFP Bid Matrix"])
+def api_generate_rfp_bid_matrix(payload: RfpBidMatrixPayload, request: Request):
+    """Generates a multi-lane Shipper RFP Bid Matrix across Min/L5C/M5C/M1M/M2M/M5M brackets."""
+    user = require_user(request)
+    from services.rfp_bid_matrix_service import generate_shipper_rfp_bid_matrix
+    try:
+        return generate_shipper_rfp_bid_matrix(
+            user_id=user["id"],
+            lanes=payload.lanes,
+            markup_pct=payload.markup_pct,
+            min_margin_dollars=payload.min_margin_dollars,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/admin/beta-health-radar", tags=["Sales Rep CRM & Leaderboard"])
+def api_get_beta_health_radar(request: Request):
+    """Returns the 5-Gate Beta Tester Activation & Churn-Risk Radar."""
+    require_user(request)
+    from services.db_service import get_beta_cohort_health_radar
+    return {"status": "success", **get_beta_cohort_health_radar()}
+
+
+@app.post("/api/quotes/tms-export", tags=["Dispatch Handoff"])
+def api_build_tms_export(payload: TmsExportPayload, request: Request):
+    """Generates a 1-click TMS clipboard summary and universal CSV row (Rose Rocket / Tailwind / QuickBooks)."""
+    require_user(request)
+    from services.dispatch_documents_service import build_tms_and_quickbooks_export
+    return {
+        "status": "success",
+        "export": build_tms_and_quickbooks_export(
+            quote_data=payload.quote_data,
+            client_name=payload.client_name,
+            markup_pct=payload.markup_pct,
+            min_margin_dollars=payload.min_margin_dollars,
+        ),
+    }
+
+
+@app.get("/api/user/referrals", tags=["Broker Referral Program"])
+def api_get_user_referrals(request: Request):
+    """Returns the brokerage's 'Give $79, Get $79' referral code, URL, and earned credits."""
+    user = require_user(request)
+    from services.db_service import get_broker_referral_program_info
+    return {"status": "success", **get_broker_referral_program_info(user["id"])}
+
+
+@app.post("/api/user/referrals/invite", tags=["Broker Referral Program"])
+def api_send_broker_referral_invite(payload: ReferralInvitePayload, request: Request):
+    """Logs a 'Give $79, Get $79' broker referral invitation."""
+    user = require_user(request)
+    from services.db_service import create_broker_referral_invite
+    try:
+        invite = create_broker_referral_invite(
+            user_id=user["id"],
+            invited_email=payload.invited_email,
+            invited_company=payload.invited_company or "",
+        )
+        return {"status": "success", "referral": invite}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+# ==============================================================================
+# PHASE 5: LIABILITY/TDG GUARDRAIL, SPOT RFQ LOGGER, OWNER GUARDRAILS & LANE MEMORY
+# ==============================================================================
+
+class LiabilityAndTdgPayload(BaseModel):
+    weight_lbs: float
+    declared_value_cad: float = 0.0
+    is_tdg: bool = False
+    un_number: Optional[str] = ""
+    tdg_class: Optional[str] = ""
+    packing_group: Optional[str] = ""
+    emergency_phone: Optional[str] = "1-888-CAN-UTEC (226-8832)"
+
+
+class SpotRfqBlastPayload(BaseModel):
+    origin: str
+    destination: str
+    weight_lbs: float = 1000.0
+    skid_count: int = 1
+    length_in: float = 48.0
+    width_in: float = 40.0
+    height_in: float = 48.0
+    non_stackable: bool = False
+    is_tdg: bool = False
+    un_number: Optional[str] = ""
+    accessorials: Optional[List[str]] = None
+    commodity: Optional[str] = "General Palletized Freight"
+
+
+class SpotQuoteLogPayload(BaseModel):
+    carrier_name: str
+    origin: str
+    destination: str
+    spot_wholesale_cad: float
+    weight_lbs: float = 1000.0
+    skid_count: int = 1
+    transit_days: int = 3
+    markup_pct: float = 15.0
+    min_margin_dollars: float = 45.0
+    carrier_rep_email: Optional[str] = ""
+    spot_reference: Optional[str] = ""
+    currency: str = "CAD"
+
+
+class BrokerageGuardrailsPayload(BaseModel):
+    min_allowed_markup_pct: float = 12.0
+    min_allowed_margin_dollars: float = 45.0
+    enforce_guardrails: bool = True
+    lock_master_tariffs: bool = False
+    owner_override_pin: Optional[str] = None
+
+
+class GuardrailCheckPayload(BaseModel):
+    wholesale_cost_cad: float
+    proposed_markup_pct: float
+    override_pin: Optional[str] = None
+
+
+@app.post("/api/quotes/liability-and-tdg-check", tags=["Cargo Liability & TDG"])
+def api_check_cargo_liability_and_tdg(payload: LiabilityAndTdgPayload):
+    """Evaluates Canada's $2.00/lb statutory carrier liability gap and TDG (hazmat) compliance."""
+    from services.cargo_liability_and_tdg_service import evaluate_canadian_cargo_liability_and_tdg
+    return evaluate_canadian_cargo_liability_and_tdg(
+        weight_lbs=payload.weight_lbs,
+        declared_value_cad=payload.declared_value_cad,
+        is_tdg=payload.is_tdg,
+        un_number=payload.un_number or "",
+        tdg_class=payload.tdg_class or "",
+        packing_group=payload.packing_group or "",
+        emergency_phone=payload.emergency_phone or "1-888-CAN-UTEC (226-8832)",
+    )
+
+
+@app.post("/api/quotes/spot-rfq-template", tags=["Spot Rate Fallback"])
+def api_generate_spot_rfq_template(payload: SpotRfqBlastPayload):
+    """1-Click Carrier Spot-Rate RFQ Email Blast generator for uncovered lanes."""
+    from services.spot_quote_service import generate_carrier_spot_rfq_blast
+    return generate_carrier_spot_rfq_blast(
+        origin=payload.origin,
+        destination=payload.destination,
+        weight_lbs=payload.weight_lbs,
+        skid_count=payload.skid_count,
+        length_in=payload.length_in,
+        width_in=payload.width_in,
+        height_in=payload.height_in,
+        non_stackable=payload.non_stackable,
+        is_tdg=payload.is_tdg,
+        un_number=payload.un_number or "",
+        accessorials=payload.accessorials,
+        commodity=payload.commodity or "General Palletized Freight",
+    )
+
+
+@app.post("/api/quotes/spot-quote-log", tags=["Spot Rate Fallback"])
+def api_log_adhoc_spot_quote(payload: SpotQuoteLogPayload, request: Request):
+    """Logs an ad-hoc carrier spot quote and returns a normalized quote for proposals/Rate Con/BOL."""
+    user = require_user(request)
+    from services.spot_quote_service import create_adhoc_spot_quote
+    try:
+        saved = create_adhoc_spot_quote(
+            user_id=user["id"],
+            carrier_name=payload.carrier_name,
+            origin=payload.origin,
+            destination=payload.destination,
+            spot_wholesale_cad=payload.spot_wholesale_cad,
+            weight_lbs=payload.weight_lbs,
+            skid_count=payload.skid_count,
+            transit_days=payload.transit_days,
+            markup_pct=payload.markup_pct,
+            min_margin_dollars=payload.min_margin_dollars,
+            carrier_rep_email=payload.carrier_rep_email or "",
+            spot_reference=payload.spot_reference or "",
+            currency=payload.currency,
+        )
+        return {"status": "success", "spot_quote": saved}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/quotes/spot-quotes", tags=["Spot Rate Fallback"])
+def api_list_adhoc_spot_quotes(request: Request):
+    """Lists all ad-hoc carrier spot quotes logged by the active brokerage."""
+    user = require_user(request)
+    from services.spot_quote_service import list_adhoc_spot_quotes
+    items = list_adhoc_spot_quotes(user["id"])
+    return {"status": "success", "spot_quotes": items, "total": len(items)}
+
+
+@app.get("/api/user/guardrails", tags=["Owner Guardrails & Governance"])
+def api_get_user_guardrails(request: Request):
+    """Returns organization-wide Owner Minimum Margin Guardrails & Master Tariff Lock settings."""
+    user = require_user(request)
+    from services.db_service import get_brokerage_guardrails
+    cfg = dict(get_brokerage_guardrails(user["id"]))
+    cfg.pop("owner_override_pin", None)
+    return {"status": "success", "guardrails": cfg}
+
+
+@app.post("/api/user/guardrails", tags=["Owner Guardrails & Governance"])
+def api_update_user_guardrails(payload: BrokerageGuardrailsPayload, request: Request):
+    """Updates organization-wide Owner Minimum Margin Guardrails & Master Tariff Lock settings."""
+    user = require_user(request)
+    from services.db_service import update_brokerage_guardrails
+    cfg = dict(
+        update_brokerage_guardrails(
+            user_id=user["id"],
+            min_allowed_markup_pct=payload.min_allowed_markup_pct,
+            min_allowed_margin_dollars=payload.min_allowed_margin_dollars,
+            enforce_guardrails=payload.enforce_guardrails,
+            lock_master_tariffs=payload.lock_master_tariffs,
+            owner_override_pin=payload.owner_override_pin,
+        )
+    )
+    cfg.pop("owner_override_pin", None)
+    return {"status": "success", "guardrails": cfg}
+
+
+@app.post("/api/quotes/guardrail-check", tags=["Owner Guardrails & Governance"])
+def api_evaluate_quote_guardrails(payload: GuardrailCheckPayload, request: Request):
+    """Evaluates a dispatcher's proposed markup against brokerage owner minimum margin floors."""
+    user = require_user(request)
+    from services.db_service import evaluate_quote_against_guardrails
+    return {
+        "status": "success",
+        "evaluation": evaluate_quote_against_guardrails(
+            user_id=user["id"],
+            wholesale_cost_cad=payload.wholesale_cost_cad,
+            proposed_markup_pct=payload.proposed_markup_pct,
+            override_pin=payload.override_pin,
+        ),
+    }
+
+
+@app.get("/api/quotes/lane-intelligence", tags=["Institutional Lane Memory"])
+def api_get_lane_price_intelligence(origin: str, destination: str, request: Request):
+    """Returns Live Historical Lane Price Intelligence (Win Rate, Avg Winning Markup, Sweet-Spot Recommendation)."""
+    user = require_user(request)
+    from services.db_service import get_lane_price_intelligence
+    return {
+        "status": "success",
+        "intelligence": get_lane_price_intelligence(
+            user_id=user["id"],
+            origin=origin,
+            destination=destination,
+        ),
+    }
+
+
+# ==============================================================================
+# PRIVATE BETA ACCESS REQUESTS & ADMIN-ONLY ACCOUNT PROVISIONING
+# ==============================================================================
+
+class BetaAccessRequestPayload(BaseModel):
+    name: str
+    email: str
+    company: str
+    origin_zip: str = "M5V 2T6"
+    requested_tier: str = "PRO"
+    notes: Optional[str] = ""
+    terms_accepted: bool = True
+    marketing_opt_in: bool = False
+
+
+class AdminProvisionUserPayload(BaseModel):
+    name: str
+    email: str
+    company: str
+    origin_zip: str = "M5V 2T6"
+    tier: str = "PRO"
+    password: Optional[str] = None
+    request_id: Optional[str] = None
+
+
+@app.post("/api/beta/request-access", tags=["Private Beta"])
+def api_submit_beta_access_request(payload: BetaAccessRequestPayload):
+    """Public endpoint for prospects to submit a 'Request Beta Access' inquiry."""
+    if not payload.terms_accepted:
+        raise HTTPException(
+            status_code=400,
+            detail="Please accept the Terms of Service and Privacy Policy to request beta access.",
+        )
+    from services.db_service import create_beta_access_request
+    try:
+        record = create_beta_access_request(
+            name=payload.name,
+            email=payload.email,
+            company=payload.company,
+            origin_zip=payload.origin_zip,
+            requested_tier=payload.requested_tier,
+            notes=payload.notes or "",
+            marketing_opt_in=bool(payload.marketing_opt_in),
+        )
+        return {
+            "status": "success",
+            "request": record,
+            "message": "Beta access request received! A Quotelytics administrator will review and set up your account shortly.",
+        }
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/admin/beta-requests", tags=["Private Beta"])
+def api_admin_list_beta_requests(request: Request, status: Optional[str] = None):
+    """Admin-only endpoint listing all incoming Private Beta access requests."""
+    require_admin_user(request)
+    from services.db_service import list_beta_access_requests
+    items = list_beta_access_requests(status=status)
+    return {"status": "success", "requests": items, "total": len(items)}
+
+
+@app.post("/api/admin/users/provision", tags=["Private Beta"])
+def api_admin_provision_beta_user(payload: AdminProvisionUserPayload, request: Request):
+    """Admin-only endpoint to create a beta user account with a One-Time Password (OTP) forced to change on first login."""
+    require_admin_user(request)
+    import secrets
+    from services.db_service import (
+        mark_beta_request_provisioned,
+        set_user_must_change_password,
+        update_user_tier,
+    )
+
+    temp_password = (payload.password or "").strip()
+    if not temp_password:
+        temp_password = f"OTP-{secrets.token_urlsafe(7)}!"
+    if len(temp_password) < 10:
+        raise HTTPException(status_code=400, detail="One-time password must be at least 10 characters long.")
+
+    tier_upper = (payload.tier or "PRO").strip().upper()
+    if tier_upper not in ("FREE", "PRO", "TEAM", "BUSINESS"):
+        raise HTTPException(status_code=400, detail="Invalid tier. Must be FREE, PRO, TEAM, or BUSINESS.")
+
+    try:
+        user, _ = register_and_create_session(
+            name=payload.name,
+            email=payload.email,
+            company=payload.company,
+            origin_zip=payload.origin_zip,
+            password=temp_password,
+            marketing_opt_in=False,
+        )
+    except HTTPException as exc:
+        raise exc
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    set_user_must_change_password(user["id"], True)
+    user["must_change_password"] = True
+
+    if tier_upper != "FREE":
+        update_user_tier(user["id"], tier_upper)
+        user["tier"] = tier_upper
+
+    mark_beta_request_provisioned(payload.request_id or payload.email, user["id"])
+
+    return {
+        "status": "success",
+        "user": user,
+        "tier": tier_upper,
+        "must_change_password": True,
+        "one_time_password": temp_password,
+        "temporary_password": temp_password,
+        "login_url": "https://quotelytics.ca/login",
+    }
+
+
+
+
+
+
+
+# ==============================================================================
+# PUBLIC LIVE DEMO CALENDAR BOOKING & AVAILABILITY API
+# ==============================================================================
+
+_DEMO_DAILY_SLOTS_ET = [
+    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+    "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
+]
+
+
+class DemoBookingPayload(BaseModel):
+    full_name: str
+    email: str
+    company: str
+    scheduled_date: str
+    scheduled_time: str
+    timezone: str = "America/Toronto"
+    duration_minutes: int = 15
+    phone: Optional[str] = ""
+    carrier_sheet_count: Optional[str] = ""
+    notes: Optional[str] = ""
+    roi_estimate: Optional[Dict[str, Any]] = None
+
+
+@app.get("/api/demo/availability", tags=["Public Live Demo"])
+def api_demo_availability(days: int = 14):
+    """Returns available weekday demo slots (Mon-Fri, Eastern Time) for the next N business days."""
+    from datetime import date, timedelta
+    from services.db_service import get_booked_demo_slots
+
+    today = date.today()
+    business_days: List[str] = []
+    cursor_day = today + timedelta(days=1)
+    max_business_days = max(5, min(21, int(days or 14)))
+    while len(business_days) < max_business_days:
+        if cursor_day.weekday() < 5:  # Mon-Fri
+            business_days.append(cursor_day.isoformat())
+        cursor_day += timedelta(days=1)
+
+    booked = get_booked_demo_slots(business_days[0], business_days[-1])
+    booked_set = {(b["scheduled_date"], b["scheduled_time"]) for b in booked}
+
+    availability = []
+    for d_str in business_days:
+        open_slots = [t for t in _DEMO_DAILY_SLOTS_ET if (d_str, t) not in booked_set]
+        availability.append({
+            "date": d_str,
+            "slots": open_slots,
+            "total_open": len(open_slots),
+        })
+
+    return {
+        "status": "success",
+        "base_timezone": "America/Toronto",
+        "days": availability,
+    }
+
+
+@app.post("/api/demo/book", tags=["Public Live Demo"])
+def api_demo_book(payload: DemoBookingPayload):
+    """Books a 1-on-1 live Quotelytics demo time slot and prevents double-booking."""
+    from services.db_service import create_demo_booking
+
+    try:
+        booking = create_demo_booking(
+            full_name=payload.full_name,
+            email=payload.email,
+            company=payload.company,
+            scheduled_date=payload.scheduled_date,
+            scheduled_time=payload.scheduled_time,
+            timezone=payload.timezone,
+            duration_minutes=payload.duration_minutes,
+            phone=payload.phone or "",
+            carrier_sheet_count=payload.carrier_sheet_count or "",
+            roi_estimate=payload.roi_estimate or {},
+            notes=payload.notes or "",
+        )
+    except ValueError as exc:
+        msg = str(exc)
+        status_code = 409 if "just booked" in msg.lower() else 400
+        raise HTTPException(status_code=status_code, detail=msg)
+
+    return {
+        "status": "success",
+        "booking": booking,
+        "ics_url": f"/api/demo/booking/{booking['id']}/ics",
+        "message": "Your live Quotelytics demo is confirmed.",
+    }
+
+
+@app.get("/api/demo/booking/{booking_id}/ics", tags=["Public Live Demo"])
+def api_demo_booking_ics(booking_id: str):
+    """Downloads an .ics calendar invitation for a confirmed live demo booking."""
+    from datetime import datetime, timedelta
+    from services.db_service import get_demo_booking
+
+    booking = get_demo_booking(booking_id)
+    if not booking:
+        raise HTTPException(status_code=404, detail="Demo booking not found.")
+
+    try:
+        dt_start = datetime.strptime(
+            f"{booking['scheduled_date']} {booking['scheduled_time']}",
+            "%Y-%m-%d %H:%M",
+        )
+    except ValueError:
+        dt_start = datetime.utcnow()
+
+    duration = int(booking.get("duration_minutes") or 15)
+    dt_end = dt_start + timedelta(minutes=duration)
+    dtstamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    start_str = dt_start.strftime("%Y%m%dT%H%M%S")
+    end_str = dt_end.strftime("%Y%m%dT%H%M%S")
+
+    company = str(booking.get("company") or "").replace("\n", " ").strip()
+    summary = f"Quotelytics Live Demo — {company}"
+    desc = (
+        f"Live 1-on-1 Quotelytics Freight Quoting Walkthrough for {booking['full_name']} ({company}).\\n"
+        f"Timezone: {booking.get('timezone', 'America/Toronto')}\\n"
+        "Agenda: Upload your carrier Excel/CSV tariff, review auto-mapping & keyword definitions, and generate a client quote proposal."
+    )
+
+    ics_content = "\r\n".join([
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Quotelytics Inc.//Live Demo Scheduler//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "BEGIN:VEVENT",
+        f"UID:{booking['id']}@quotelytics.ca",
+        f"DTSTAMP:{dtstamp}",
+        f"DTSTART;TZID=America/Toronto:{start_str}",
+        f"DTEND;TZID=America/Toronto:{end_str}",
+        f"SUMMARY:{summary}",
+        f"DESCRIPTION:{desc}",
+        "LOCATION:Online Video Meeting (Link sent via email)",
+        "STATUS:CONFIRMED",
+        "END:VEVENT",
+        "END:VCALENDAR",
+        "",
+    ])
+
+    return Response(
+        content=ics_content,
+        media_type="text/calendar; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="Quotelytics_Live_Demo_{booking["scheduled_date"]}.ics"'
+        },
+    )
+
+
+@app.get("/api/admin/demo-bookings", tags=["Public Live Demo"])
+def api_admin_list_demo_bookings(request: Request, limit: int = 50):
+    """Admin-only endpoint listing all scheduled live demo bookings and their ROI estimates."""
+    require_admin_user(request)
+    from services.db_service import list_demo_bookings
+
+    items = list_demo_bookings(limit=limit)
+    return {"status": "success", "bookings": items, "total": len(items)}

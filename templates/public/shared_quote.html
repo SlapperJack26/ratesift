@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freight Rate Proposal | {{ proposal.broker_company }}</title>
+  <meta property="og:locale" content="en_CA">
+  <meta name="robots" content="noindex, nofollow">
+  <script src="/static/js/tailwindcss.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col justify-between p-4 sm:p-8">
+  <main class="max-w-2xl w-full mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden my-auto">
+    <!-- Top Banner -->
+    <div class="bg-slate-900 text-white p-6 flex flex-wrap items-center justify-between gap-4 border-b-4 border-red-600">
+      <div>
+        <div class="text-[11px] font-bold uppercase tracking-wider text-red-400">Official Freight Rate Proposal</div>
+        <h1 class="text-xl font-extrabold mt-0.5">{{ proposal.broker_company }}</h1>
+        <p class="text-xs text-slate-300 mt-0.5">Prepared for: <strong>{{ proposal.client_name }}</strong> • Quote Token: <code class="font-mono text-slate-200">{{ proposal.token }}</code></p>
+      </div>
+      <div class="text-right">
+        <span id="status-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+          {% if proposal.status == 'WON' %}bg-emerald-500 text-slate-950{% elif proposal.status == 'LOST' %}bg-red-500 text-white{% else %}bg-amber-400 text-slate-950{% endif %}">
+          {{ proposal.status }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Lane & Shipment Summary -->
+    <div class="p-6 space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 border border-slate-200 rounded-xl p-4">
+        <div>
+          <div class="text-[11px] font-bold uppercase text-slate-400">Origin</div>
+          <div class="text-base font-extrabold text-slate-900 mt-0.5">{{ proposal.origin }}</div>
+        </div>
+        <div>
+          <div class="text-[11px] font-bold uppercase text-slate-400">Destination</div>
+          <div class="text-base font-extrabold text-slate-900 mt-0.5">{{ proposal.destination }}</div>
+        </div>
+        <div>
+          <div class="text-[11px] font-bold uppercase text-slate-400">Cargo Specs</div>
+          <div class="text-xs font-bold text-slate-700 mt-0.5">{{ proposal.skid_count }} Skid(s) • {{ "{:,.0f}".format(proposal.weight_lbs) }} lbs</div>
+        </div>
+        <div>
+          <div class="text-[11px] font-bold uppercase text-slate-400">Service &amp; Est. Transit</div>
+          <div class="text-xs font-bold text-slate-700 mt-0.5">{{ proposal.service_name }} ({{ proposal.transit_days }} Business Days)</div>
+        </div>
+      </div>
+
+      <!-- All-In Rate Box (Wholesale cost & broker margin are never exposed to the shipper) -->
+      <div class="border-2 border-slate-900 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4 bg-white">
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-500">All-In Quoted Freight Rate</div>
+          <div class="text-[11px] text-slate-500 mt-0.5">Includes base LTL freight, fuel surcharge &amp; selected accessorials</div>
+        </div>
+        <div class="text-right">
+          <div class="text-3xl font-extrabold text-slate-900 font-mono">${{ "{:,.2f}".format(proposal.client_total) }} <span class="text-sm font-bold text-slate-500">{{ proposal.currency }}</span></div>
+        </div>
+      </div>
+
+      <!-- 1-Click Shipper Approval Form -->
+      <div id="response-section" class="space-y-3 pt-2 border-t border-slate-200">
+        {% if proposal.status in ('WON', 'LOST') %}
+        <div class="p-4 rounded-xl {% if proposal.status == 'WON' %}bg-emerald-50 border border-emerald-200 text-emerald-900{% else %}bg-red-50 border border-red-200 text-red-900{% endif %} text-xs font-semibold">
+          This quote has been marked as <strong>{{ proposal.status }}</strong>. Thank you for your response!
+        </div>
+        {% else %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input id="shipper-name" type="text" placeholder="Your Name (e.g. Sarah Jenkins)" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs" />
+          <input id="shipper-notes" type="text" placeholder="Optional PO # or pickup dock notes" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs" />
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="button" onclick="submitShipperDecision('WON')" class="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs cursor-pointer transition-colors">
+            ✓ Approve Quote &amp; Request Pickup
+          </button>
+          <button type="button" onclick="submitShipperDecision('LOST')" class="py-3 px-4 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer transition-colors">
+            Decline Quote
+          </button>
+        </div>
+        {% endif %}
+        <div id="decision-feedback" class="hidden p-3 rounded-xl text-xs font-semibold"></div>
+      </div>
+    </div>
+
+    <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex flex-wrap items-center justify-between text-[11px] text-slate-500">
+      <a href="/demo" class="font-semibold text-slate-700 hover:text-red-600 transition-colors">⚡ Powered by Quotelytics — Instant Canadian LTL Quoting (Try Live Demo →)</a>
+      <span>Contact Broker: {{ proposal.broker_email }}</span>
+    </div>
+  </main>
+
+  <script>
+    async function submitShipperDecision(decision) {
+      const name = (document.getElementById('shipper-name')?.value || '').trim();
+      const notes = (document.getElementById('shipper-notes')?.value || '').trim();
+      const fb = document.getElementById('decision-feedback');
+      try {
+        const res = await fetch('/q/{{ proposal.token }}/respond', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ decision, shipper_contact_name: name, shipper_notes: notes })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Could not submit response.');
+        if (fb) {
+          fb.className = decision === 'WON'
+            ? 'p-3 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-900 border border-emerald-200 block'
+            : 'p-3 rounded-xl text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300 block';
+          fb.textContent = decision === 'WON'
+            ? '✓ Quote Approved! Your broker has been notified to arrange pickup.'
+            : 'Quote marked as declined. Thank you for letting your broker know.';
+        }
+        const badge = document.getElementById('status-badge');
+        if (badge) badge.textContent = data.proposal.status;
+      } catch (err) {
+        alert(err.message || 'Error submitting response.');
+      }
+    }
+  </script>
+</body>
+</html>

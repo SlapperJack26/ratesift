@@ -11,10 +11,12 @@ def build_client_proposal_data(
     client_name: str = "Client Partner",
     broker_info: Optional[Dict[str, Any]] = None,
     markup_pct: float = 15.0,
-    custom_total: Optional[float] = None
+    custom_total: Optional[float] = None,
+    min_margin_dollars: float = 0.0,
 ) -> Dict[str, Any]:
     """
-    Constructs normalized client proposal data with broker margin markups.
+    Constructs normalized client proposal data with broker margin markups
+    and optional Minimum Dollar Profit Floor (min_margin_dollars).
     Hides internal carrier wholesale net rates and presents professional all-in pricing.
     """
     broker = broker_info or {}
@@ -36,6 +38,7 @@ def build_client_proposal_data(
     surcharges = quote_data.get("surcharges", [])
     total_surcharges = float(quote_data.get("total_surcharges", 0.0))
     net_carrier_total = float(quote_data.get("final_total", base_cost + total_surcharges))
+    min_floor_applied = False
 
     # Calculate client pricing
     if custom_total is not None and custom_total > 0:
@@ -47,6 +50,17 @@ def build_client_proposal_data(
         client_base_freight = round(base_cost * markup_multiplier, 2)
         client_total = round(client_base_freight + total_surcharges, 2)
         effective_markup = round(markup_pct, 1)
+
+        floor_val = max(0.0, float(min_margin_dollars or 0.0))
+        if floor_val > 0.0 and (client_total - net_carrier_total) < floor_val:
+            client_total = round(net_carrier_total + floor_val, 2)
+            client_base_freight = round(max(0.0, client_total - total_surcharges), 2)
+            effective_markup = (
+                round(((client_total - net_carrier_total) / net_carrier_total) * 100.0, 1)
+                if net_carrier_total > 0
+                else 0.0
+            )
+            min_floor_applied = True
 
     margin_dollars = round(client_total - net_carrier_total, 2)
 
@@ -101,6 +115,7 @@ def build_client_proposal_data(
             "currency": quote_data.get("currency") or "CAD",
             "effective_markup_pct": effective_markup,
             "broker_margin_dollars": margin_dollars,
+            "min_margin_floor_applied": min_floor_applied,
             "wholesale_cost": net_carrier_total
         },
         "line_items": line_items,
@@ -519,3 +534,65 @@ def generate_proposal_excel_workbook(proposal_data: Dict[str, Any]) -> bytes:
     wb.save(buf)
     buf.seek(0)
     return buf.getvalue()
+
+
+def convert_proposal_currency(
+    proposal_data: Dict[str, Any],
+    target_currency: str = "CAD",
+    fx_rate: float = 1.3850,
+    broker_fx_buffer_pct: float = 1.5,
+) -> Dict[str, Any]:
+    """
+    Deterministically converts a Client Proposal between USD and CAD for cross-border lanes,
+    applying an optional Broker FX Buffer % (e.g. +1.5% spread protection over spot FX).
+    """
+    from decimal import Decimal, ROUND_HALF_UP
+    import copy
+
+    out = copy.deepcopy(proposal_data)
+    pricing = out.get("pricing", {})
+    src_curr = (pricing.get("currency") or "CAD").strip().upper()
+    tgt_curr = (target_currency or "CAD").strip().upper()
+
+    if src_curr == tgt_curr:
+        out["fx_conversion"] = {
+            "source_currency": src_curr,
+            "target_currency": tgt_curr,
+            "spot_fx_rate": 1.0,
+            "broker_fx_buffer_pct": 0.0,
+            "effective_fx_rate": 1.0,
+        }
+        return out
+
+    spot_dec = Decimal(str(max(0.0001, float(fx_rate or 1.3850))))
+    buf_dec = Decimal("1") + (Decimal(str(max(0.0, float(broker_fx_buffer_pct or 0.0)))) / Decimal("100"))
+    eff_fx_dec = (spot_dec * buf_dec).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+
+    def _conv(val: Any) -> float:
+        d = Decimal(str(val or 0.0)) * eff_fx_dec
+        return float(d.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    pricing["original_currency"] = src_curr
+    pricing["original_client_total"] = pricing.get("client_total")
+    pricing["currency"] = tgt_curr
+    pricing["client_base_freight"] = _conv(pricing.get("client_base_freight"))
+    pricing["total_surcharges"] = _conv(pricing.get("total_surcharges"))
+    pricing["client_total"] = round(pricing["client_base_freight"] + pricing["total_surcharges"], 2)
+    pricing["wholesale_cost"] = _conv(pricing.get("wholesale_cost"))
+    pricing["broker_margin_dollars"] = round(pricing["client_total"] - pricing["wholesale_cost"], 2)
+
+    if "shipment" in out:
+        out["shipment"]["currency"] = tgt_curr
+
+    for item in out.get("line_items", []):
+        item["amount"] = _conv(item.get("amount"))
+
+    out["fx_conversion"] = {
+        "source_currency": src_curr,
+        "target_currency": tgt_curr,
+        "spot_fx_rate": float(spot_dec),
+        "broker_fx_buffer_pct": float(broker_fx_buffer_pct),
+        "effective_fx_rate": float(eff_fx_dec),
+    }
+    out["email"] = generate_proposal_email(out)
+    return out

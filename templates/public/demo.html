@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   
   <!-- Primary SEO Meta Tags -->
-  <title>Quotelytics Demo | Interactive Freight Quoting & Carrier Rate Comparison</title>
-  <meta name="title" content="Quotelytics Demo | Interactive Freight Quoting & Carrier Rate Comparison">
-  <meta name="description" content="Try Quotelytics' interactive public demo. Test multi-carrier freight rate calculations using verified pre-loaded carrier tariffs with origin/destination routing, itemized surcharges, and cell-level audit traceability.">
-  <meta name="keywords" content="Quotelytics demo, freight rate rater demo, Canadian carrier comparison, Day and Ross, Manitoulin, Midland, Excel rate quoting, batch shipping calculation">
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <title>Quotelytics Live Demo | Book a Walkthrough & Calculate Your Freight ROI</title>
+  <meta name="title" content="Quotelytics Live Demo | Book a Walkthrough & Calculate Your Freight ROI">
+  <meta name="description" content="Book a 15-minute live Quotelytics walkthrough using your own carrier Excel rate sheets and calculate how much quoting time and margin your brokerage saves every month.">
+  <meta name="keywords" content="Quotelytics live demo, freight quoting ROI calculator, Canadian carrier rate comparison demo, LTL Excel tariff automation">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
   <meta name="author" content="Quotelytics Technologies">
   <link rel="canonical" href="https://quotelytics.ca/demo">
 
@@ -17,33 +17,33 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://quotelytics.ca/demo">
   <meta property="og:site_name" content="Quotelytics">
-  <meta property="og:title" content="Quotelytics Demo | Interactive Freight Quoting & Carrier Comparison">
-  <meta property="og:description" content="Test drive Quotelytics' deterministic freight rating engine. Compare multi-carrier LTL rates in real-time with zero booking clutter.">
+  <meta property="og:title" content="Quotelytics Live Demo | Book a Walkthrough & Freight ROI Calculator">
+  <meta property="og:description" content="Calculate your brokerage quoting ROI and book a 15-minute live walkthrough with your own carrier spreadsheets.">
   <meta property="og:image" content="https://quotelytics.ca/assets/og-demo.jpg">
   <meta property="og:locale" content="en_CA">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://quotelytics.ca/demo">
-  <meta name="twitter:title" content="Quotelytics Demo | Interactive Freight Quoting">
-  <meta name="twitter:description" content="Experience instant multi-carrier freight rate calculations with origin/destination routing and itemized surcharges.">
+  <meta name="twitter:title" content="Quotelytics Live Demo | Book a Walkthrough & ROI Calculator">
+  <meta name="twitter:description" content="Calculate your brokerage quoting ROI and schedule a live 1-on-1 walkthrough.">
   <meta name="twitter:image" content="https://quotelytics.ca/assets/twitter-demo.jpg">
 
   <!-- Tailwind CSS Framework -->
   <script src="/static/js/tailwindcss.min.js"></script>
 
-  <!-- Schema.org JSON-LD Structured Data: SoftwareApplication & BreadcrumbList -->
+  <!-- Schema.org JSON-LD Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "SoftwareApplication",
-        "name": "Quotelytics Interactive Demo",
+        "name": "Quotelytics Live Demo & ROI Calculator",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web Browser",
         "url": "https://quotelytics.ca/demo",
-        "description": "Interactive web demonstration of Quotelytics' Canadian freight rate comparison engine ingesting Excel carrier spreadsheets.",
+        "description": "Book a live 1-on-1 walkthrough of Quotelytics and estimate monthly freight quoting time and deficit savings.",
         "offers": {
           "@type": "Offer",
           "price": "0",
@@ -62,7 +62,7 @@
           {
             "@type": "ListItem",
             "position": 2,
-            "name": "Interactive Demo",
+            "name": "Live Demo",
             "item": "https://quotelytics.ca/demo"
           }
         ]
@@ -90,7 +90,7 @@
 
   <div class="w-full min-h-screen flex flex-col justify-between m-0 p-0 bg-[var(--background)] text-[var(--foreground)]">
     
-    <!-- Top Semantic Navigation Bar (Consistent with Landing Page & Console) -->
+    <!-- Top Semantic Navigation Bar (Identical to Home, Pricing & Login) -->
     <header role="banner" class="w-full px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)] relative z-20 m-0">
       <!-- Left: Brand Identity -->
       <a href="/" class="flex items-center gap-2.5 z-10 hover:opacity-90 transition-opacity" title="Quotelytics Home">
@@ -100,7 +100,7 @@
       <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
       <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
         <a href="/" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Home</a>
-        <a href="/demo" aria-current="page" class="pub-tab text-red-600 font-semibold border-b-2 border-red-600 py-1 transition-all">Demo</a>
+        <a href="/demo" aria-current="page" class="pub-tab text-red-600 font-semibold border-b-2 border-red-600 py-1 transition-all">Live Demo</a>
         <a href="/pricing" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Pricing</a>
       </nav>
 
@@ -109,8 +109,8 @@
         <a href="/login" class="text-xs font-semibold text-[var(--foreground)] hover:text-red-600 transition-colors px-2 py-1" title="Log in to your Quotelytics account">
           Log in
         </a>
-        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Create a free Quotelytics account">
-          Get Started
+        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Request Private Beta Access">
+          Request Beta Access
         </a>
         <!-- Mobile Menu Toggle Button (Phone Only) -->
         <button type="button" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" class="md:hidden p-1.5 rounded-lg border border-[var(--border)] text-slate-600 hover:bg-black/5 focus:outline-hidden transition-colors">
@@ -122,316 +122,282 @@
     <!-- Collapsible Mobile Navigation Drawer for Phones (< 768px) -->
     <nav id="mobile-nav-drawer" aria-label="Mobile Navigation" class="hidden md:hidden border-b border-[var(--border)] bg-slate-50/95 px-4 py-3 space-y-1.5 text-xs font-medium transition-all">
       <a href="/" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Home</a>
-      <a href="/demo" class="block px-3 py-2 rounded-lg text-red-600 font-bold bg-red-50/80">Demo</a>
+      <a href="/demo" class="block px-3 py-2 rounded-lg text-red-600 font-bold bg-red-50/80">Live Demo</a>
       <a href="/pricing" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Pricing</a>
       <div class="pt-2 mt-2 border-t border-[var(--border)] flex items-center justify-between">
         <a href="/login" class="text-xs font-semibold px-2 py-1 rounded text-slate-700 hover:text-red-600">Log in</a>
-        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs">Get Started</a>
+        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs">Request Beta Access</a>
       </div>
     </nav>
 
     <!-- Main Content Area: Accessible Landmark -->
-    <main id="main-content" role="main" class="flex-1 p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
+    <main id="main-content" role="main" class="flex-1 p-4 sm:p-6 md:p-8 space-y-8 max-w-7xl w-full mx-auto">
       
-      <!-- 1. Excel Ingestion Demonstration (Upload Disabled in Demo) -->
-      <section aria-labelledby="upload-preview-heading" class="space-y-2">
-        <h1 id="upload-preview-heading" class="sr-only">Quotelytics Interactive Demo — Freight Quoting & Carrier Rate Comparison</h1>
-        
-        <div class="border-2 border-dashed border-red-200 bg-red-50/30 rounded-xl p-5 text-center transition-all hover:bg-red-50/50 cursor-pointer" onclick="showDemoUploadNotice()" role="button" tabindex="0" onkeypress="if(event.key==='Enter')showDemoUploadNotice()" title="Click to view upload behavior">
-          <div class="flex flex-col items-center justify-center gap-2">
-            <!-- Excel Workbook Icon -->
-            <div class="w-11 h-11 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-xs" aria-hidden="true">
-              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm1.5 12.5l-1.5 2.5 1.5 2.5h-1.5l-.8-1.5-.8 1.5H11l1.5-2.5-1.5-2.5h1.5l.8 1.5.8-1.5h1.4zM13 9V3.5L18.5 9H13z"/>
-              </svg>
-            </div>
-            <div>
-              <p class="font-bold text-xs sm:text-sm text-[var(--foreground)]">Drag & Drop Excel Rate Sheet (.xlsx, .xls) to auto-extract tariffs</p>
-              <p class="text-[11px] text-[var(--muted-foreground)] mt-0.5">Automated column auto-detection, Canadian postal FSA mapping, and CWT breaks</p>
-            </div>
-          </div>
+      <!-- 1. Page Hero Header -->
+      <section aria-labelledby="live-demo-heading" class="text-center max-w-3xl mx-auto space-y-2.5 pt-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-[var(--border)] text-[11px] font-medium text-slate-700">
+          <span class="w-2 h-2 rounded-full bg-red-600" aria-hidden="true"></span>
+          <span>1-on-1 Live Walkthrough • Bring Your Own Carrier Rate Sheets</span>
         </div>
-
-        <!-- Demo Mode Upload Notice Banner (Pre-loaded only) -->
-        <div class="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-700">
-          <span class="flex items-center gap-2 font-medium">
-            <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse" aria-hidden="true"></span>
-            <strong>Demo Mode:</strong> Rate sheet uploads disabled. 3 sample carrier tariffs pre-loaded for live testing.
-          </span>
-          <span class="text-[11px] text-slate-500 hidden sm:inline">Upload full tariffs in live account</span>
-        </div>
-
-        <!-- Hidden Explanatory Modal/Banner when user clicks Dropzone -->
-        <div id="demo-upload-banner" class="hidden p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start justify-between gap-3 shadow-xs">
-          <div>
-            <p class="font-bold">ℹ️ Spreadsheet Ingestion Preview</p>
-            <p class="text-[11px] text-amber-800 mt-0.5">
-              Direct spreadsheet upload is disabled in this public sandbox. In full accounts, Quotelytics ingests your custom carrier rate sheets, verifies cell coordinates, and confirms accessorial rules before rating. The rater below is actively quoting against 3 verified pre-loaded Canadian tariffs.
-            </p>
-          </div>
-          <button type="button" onclick="document.getElementById('demo-upload-banner').classList.add('hidden')" class="text-amber-700 hover:text-amber-900 font-bold text-sm px-1.5 py-0.5 rounded cursor-pointer" aria-label="Close message"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-        </div>
+        <h1 id="live-demo-heading" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--foreground)]">
+          Calculate Your Freight Quoting ROI &amp; Book a Live Demo
+        </h1>
+        <p class="text-xs sm:text-sm text-[var(--muted-foreground)] leading-relaxed">
+          Estimate how many hours and margin dollars your brokerage recovers each month, then pick a 15-minute slot on our calendar to see Quotelytics parse and quote your actual Excel tariffs live.
+        </p>
       </section>
 
-      <!-- 2. Origin & Destination Routing Card (Reflecting "New Quote" Page) -->
-      <section aria-labelledby="routing-card-heading" class="border border-[var(--border)] rounded-2xl bg-[var(--card)] p-5 md:p-6 shadow-2xs space-y-5">
-        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
-          <div>
-            <h2 id="routing-card-heading" class="text-base font-bold text-[var(--foreground)] tracking-tight">
-              Get New Quote (Interactive Demo Rater)
-            </h2>
-            <p class="text-xs text-[var(--muted-foreground)]">
-              Vertical routing headers with horizontal inputs matching the Quotelytics private broker console.
-            </p>
+      <!-- 2. Two-Column Core: ROI Calculator (Left) + Live Demo Calendar (Right) -->
+      <section aria-label="ROI Calculator and Live Demo Scheduler" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- LEFT COLUMN: Interactive ROI Calculator (7 cols) -->
+        <div class="lg:col-span-7 border border-[var(--border)] rounded-2xl bg-[var(--card)] p-5 sm:p-6 shadow-2xs space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[var(--border)]">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center" aria-hidden="true">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              </div>
+              <div>
+                <h2 class="text-sm sm:text-base font-bold text-[var(--foreground)] tracking-tight">Freight Quoting ROI Calculator</h2>
+                <p class="text-[11px] text-[var(--muted-foreground)]">Adjust your team's weekly quote volume to see monthly CAD impact.</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Live Estimate (CAD)
+            </span>
           </div>
-          <div class="flex flex-wrap items-center gap-1.5 text-xs">
-            <span class="text-xs font-semibold text-slate-600 mr-1">1-Click Live Scenarios:</span>
-            <button type="button" onclick="fillLane('toronto_montreal')" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100 hover:bg-red-50 hover:text-red-700 hover:border-red-200 border border-slate-200 text-slate-700 transition-all cursor-pointer shadow-2xs">
-              Toronto → Montreal (4,200 lbs)
-            </button>
-            <button type="button" onclick="fillLane('mississauga_calgary_deficit')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-all cursor-pointer shadow-2xs">
-              Mississauga → Calgary (850 lbs Deficit Demo)
-            </button>
-            <button type="button" onclick="fillLane('vancouver_edmonton')" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100 hover:bg-red-50 hover:text-red-700 hover:border-red-200 border border-slate-200 text-slate-700 transition-all cursor-pointer shadow-2xs">
-              Vancouver → Edmonton (650 lbs)
-            </button>
-            <button type="button" onclick="fillLane('toronto_chicago')" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100 hover:bg-red-50 hover:text-red-700 hover:border-red-200 border border-slate-200 text-slate-700 transition-all cursor-pointer shadow-2xs">
-              Toronto → Chicago (1,850 lbs)
-            </button>
+
+          <!-- ROI Inputs -->
+          <div class="space-y-4">
+            <!-- Quotes per week -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between text-xs">
+                <label for="roi-quotes-week" class="font-semibold text-[var(--foreground)]">LTL / Freight Quotes per Week</label>
+                <span id="roi-quotes-week-val" class="font-mono font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">40 quotes/wk</span>
+              </div>
+              <input id="roi-quotes-week" type="range" min="5" max="400" step="5" value="40" oninput="recalcROI()" class="w-full accent-red-600 cursor-pointer">
+            </div>
+
+            <!-- Minutes per manual quote -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between text-xs">
+                <label for="roi-mins-quote" class="font-semibold text-[var(--foreground)]">Avg. Minutes Spent per Manual Quote</label>
+                <span id="roi-mins-quote-val" class="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">12 mins</span>
+              </div>
+              <input id="roi-mins-quote" type="range" min="2" max="45" step="1" value="12" oninput="recalcROI()" class="w-full accent-red-600 cursor-pointer">
+              <p class="text-[10px] text-[var(--muted-foreground)]">Includes opening carrier spreadsheets, checking FSA zones, weight breaks, fuel, and accessorial footnotes.</p>
+            </div>
+
+            <!-- Team Size & Hourly Cost & Monthly Freight Spend -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div>
+                <label for="roi-reps" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Quoting Reps / Staff</label>
+                <input id="roi-reps" type="number" min="1" max="50" value="2" oninput="recalcROI()" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs font-mono font-semibold text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="roi-hourly-rate" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Loaded Hourly Cost (CAD)</label>
+                <input id="roi-hourly-rate" type="number" min="18" max="150" value="35" oninput="recalcROI()" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs font-mono font-semibold text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+              </div>
+              <div>
+                <label for="roi-monthly-spend" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Monthly Freight Spend (CAD)</label>
+                <input id="roi-monthly-spend" type="number" min="1000" max="1000000" step="1000" value="25000" oninput="recalcROI()" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs font-mono font-semibold text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- ROI Output Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-[var(--border)]">
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-[var(--border)] space-y-1">
+              <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] tracking-wider">Time Reclaimed</span>
+              <div id="roi-hours-saved" class="text-xl font-black text-[var(--foreground)] font-mono">32.5 hrs/mo</div>
+              <p class="text-[11px] text-[var(--muted-foreground)]">Down to ~45 sec/quote</p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-[var(--border)] space-y-1">
+              <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] tracking-wider">Labour Value Saved</span>
+              <div id="roi-labour-saved" class="text-xl font-black text-[var(--foreground)] font-mono">$1,138/mo</div>
+              <p class="text-[11px] text-[var(--muted-foreground)]">Dispatcher capacity freed</p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-1">
+              <span class="text-[10px] uppercase font-semibold text-emerald-800 tracking-wider">Rate &amp; Deficit Recovery</span>
+              <div id="roi-margin-saved" class="text-xl font-black text-emerald-700 font-mono">$625/mo</div>
+              <p class="text-[11px] text-emerald-800/80">2.5% est. error &amp; deficit capture</p>
+            </div>
+          </div>
+
+          <!-- Net ROI Summary Banner -->
+          <div class="p-4 rounded-xl bg-slate-900 text-white flex flex-wrap items-center justify-between gap-4">
+            <div class="space-y-0.5">
+              <span class="text-[10px] uppercase font-semibold text-slate-300 tracking-wider">Estimated Total Monthly Value</span>
+              <div class="flex items-baseline gap-2">
+                <span id="roi-total-monthly" class="text-2xl font-black font-mono text-white">$1,763 CAD</span>
+                <span class="text-xs text-slate-300">/ month (<span id="roi-total-annual" class="font-semibold text-emerald-400">$21,150/yr</span>)</span>
+              </div>
+            </div>
+            <div class="text-left sm:text-right space-y-0.5">
+              <span class="text-[10px] uppercase font-semibold text-slate-300 tracking-wider">vs. Broker Pro ($79/mo)</span>
+              <div id="roi-multiple" class="text-lg font-extrabold text-emerald-400 font-mono">22.3x ROI</div>
+              <p id="roi-recommended-plan" class="text-[10px] text-slate-300">Recommended: Broker Pro ($79 CAD/mo)</p>
+            </div>
           </div>
         </div>
 
-        <form id="demo-quote-form" onsubmit="calculateDemoQuote(event)" class="space-y-4">
-          <!-- FROM ROW: Vertical Header with Horizontal Inputs -->
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-            <div class="md:col-span-1">
-              <span class="block text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">From:</span>
-            </div>
-            <div class="md:col-span-11 grid grid-cols-1 sm:grid-cols-4 gap-2.5">
-              <div>
-                <label for="from-city" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">City Name</label>
-                <input type="text" id="from-city" value="Toronto" required class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-medium">
+        <!-- RIGHT COLUMN: Live Demo Calendar Booking (5 cols) -->
+        <div class="lg:col-span-5 border border-[var(--border)] rounded-2xl bg-[var(--card)] p-5 sm:p-6 shadow-2xs space-y-4">
+          <div class="flex items-center justify-between gap-2 pb-3 border-b border-[var(--border)]">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center" aria-hidden="true">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               </div>
               <div>
-                <label for="from-province" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Province / State</label>
-                <input type="text" id="from-province" value="ON" required class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-medium">
-              </div>
-              <div>
-                <label for="from-zip" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Postal Code / Zip</label>
-                <input type="text" id="from-zip" value="M5V 2T6" required class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-mono font-medium">
-              </div>
-              <div>
-                <label for="from-country" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Country</label>
-                <select id="from-country" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-medium">
-                  <option value="Canada" selected>Canada</option>
-                  <option value="United States">United States</option>
-                </select>
+                <h2 class="text-sm sm:text-base font-bold text-[var(--foreground)] tracking-tight">Book Your 15-Min Live Demo</h2>
+                <p class="text-[11px] text-[var(--muted-foreground)]">Select a date and time to meet with a Quotelytics specialist.</p>
               </div>
             </div>
           </div>
 
-          <!-- TO ROW: Vertical Header with Horizontal Inputs -->
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center pt-1">
-            <div class="md:col-span-1">
-              <span class="block text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">To:</span>
-            </div>
-            <div class="md:col-span-11 grid grid-cols-1 sm:grid-cols-4 gap-2.5">
-              <div>
-                <label for="to-city" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">City Name</label>
-                <input type="text" id="to-city" value="Montreal" required class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-medium">
-              </div>
-              <div>
-                <label for="to-province" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Province / State</label>
-                <input type="text" id="to-province" value="QC" required class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-medium">
-              </div>
-              <div>
-                <label for="to-zip" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Postal Code / Zip</label>
-                <input type="text" id="to-zip" value="H3B 2Y5" required class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-mono font-medium">
-              </div>
-              <div>
-                <label for="to-country" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Country</label>
-                <select id="to-country" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-medium">
-                  <option value="Canada" selected>Canada</option>
-                  <option value="United States">United States</option>
+          <!-- Booking Form View -->
+          <form id="demo-booking-form" onsubmit="submitDemoBooking(event)" class="space-y-4">
+            <!-- Step 1: Timezone & Date Selector -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-[var(--foreground)]">1. Choose a Day</span>
+                <select id="demo-timezone" aria-label="Timezone" class="px-2 py-1 rounded-md border border-[var(--border)] bg-[var(--background)] text-[11px] text-[var(--foreground)] font-medium">
+                  <option value="America/Toronto" selected>Eastern Time (ET)</option>
+                  <option value="America/Winnipeg">Central Time (CT)</option>
+                  <option value="America/Edmonton">Mountain Time (MT)</option>
+                  <option value="America/Vancouver">Pacific Time (PT)</option>
                 </select>
               </div>
+              <div id="demo-date-grid" class="grid grid-cols-5 gap-1.5" role="listbox" aria-label="Available Demo Dates">
+                <div class="col-span-5 text-center text-xs text-[var(--muted-foreground)] py-3">Loading available dates...</div>
+              </div>
             </div>
-          </div>
 
-          <!-- FREIGHT SPECS ROW -->
-          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-3 border-t border-[var(--border)] items-end">
-            <div>
-              <label for="freight-weight" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Weight (lbs)</label>
-              <input type="number" id="freight-weight" value="1250" min="50" max="44000" step="25" required class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-mono font-medium">
+            <!-- Step 2: Time Slot Selector -->
+            <div class="space-y-2">
+              <span class="block text-[11px] font-bold uppercase tracking-wider text-[var(--foreground)]">2. Choose a Time (ET)</span>
+              <div id="demo-time-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-1.5" role="listbox" aria-label="Available Demo Time Slots">
+                <div class="col-span-4 text-center text-xs text-[var(--muted-foreground)] py-2">Select a date above</div>
+              </div>
             </div>
-            <div>
-              <label for="freight-pallets" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Pallets / Skids</label>
-              <input type="number" id="freight-pallets" value="2" min="1" max="26" step="1" required class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-medium">
+
+            <!-- Step 3: Contact Details -->
+            <div class="space-y-2.5 pt-2 border-t border-[var(--border)]">
+              <span class="block text-[11px] font-bold uppercase tracking-wider text-[var(--foreground)]">3. Your Details</span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label for="book-name" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Full Name *</label>
+                  <input id="book-name" type="text" required placeholder="Alex Mercer" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                </div>
+                <div>
+                  <label for="book-email" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Work Email *</label>
+                  <input id="book-email" type="email" required placeholder="alex@brokerage.ca" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label for="book-company" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Company *</label>
+                  <input id="book-company" type="text" required placeholder="Maple Freight Logistics" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                </div>
+                <div>
+                  <label for="book-sheets" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Carrier Rate Sheets</label>
+                  <select id="book-sheets" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                    <option value="1-5">1 – 5 spreadsheets</option>
+                    <option value="6-15" selected>6 – 15 spreadsheets</option>
+                    <option value="16-50">16 – 50 spreadsheets</option>
+                    <option value="50+">50+ spreadsheets</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label for="book-notes" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">What would you like to see? (Optional)</label>
+                <input id="book-notes" type="text" placeholder="e.g. Skid-based LTL sheets, L5C codes, deficit rating" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+              </div>
             </div>
-            <div>
-              <label for="freight-dimensions" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Dimensions (L×W×H in)</label>
-              <input type="text" id="freight-dimensions" value="48×40×60" required class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500 font-medium">
+
+            <div id="booking-error-box" class="hidden p-2.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 font-medium"></div>
+
+            <button id="book-submit-btn" type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold text-xs py-2.5 px-4 rounded-lg shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-2">
+              <span id="book-submit-text">Confirm Live Demo Slot</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </button>
+          </form>
+
+          <!-- Confirmed State View (Hidden until booked) -->
+          <div id="demo-booking-confirmed" class="hidden space-y-4 py-2">
+            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 space-y-2">
+              <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Your Live Demo Is Confirmed</span>
+              </div>
+              <p class="text-xs text-emerald-900 leading-relaxed">
+                We have reserved <strong id="conf-datetime" class="font-bold"></strong> for <strong id="conf-company" class="font-bold"></strong>. A calendar invite and meeting link will be sent to <span id="conf-email" class="font-mono underline"></span>.
+              </p>
             </div>
-            <div>
-              <button type="submit" id="btn-calculate" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold text-xs py-2 px-4 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
-                <span id="btn-calc-text">Calculate Demo Rates</span>
-                <span id="calc-spinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <a id="conf-ics-link" href="#" class="flex-1 text-center bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2 px-3 rounded-lg transition-colors inline-flex items-center justify-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span>Add to Calendar (.ics)</span>
+              </a>
+              <button type="button" onclick="resetBookingForm()" class="px-3 py-2 rounded-lg border border-[var(--border)] text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
+                Book Another Time
               </button>
             </div>
           </div>
-        </form>
-      </section>
-
-      <!-- 3. Pre-Loaded Tariffs & Sorting Toolbar -->
-      <section aria-labelledby="tariffs-toolbar-heading" class="flex flex-wrap items-center justify-between gap-3 px-1">
-        <h2 id="tariffs-toolbar-heading" class="sr-only">Pre-loaded Tariffs and Sorting Options</h2>
-        
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="text-xs font-semibold text-[var(--muted-foreground)]">Pre-Loaded Synthetic Tariffs:</span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">
-            <svg class="w-3.5 h-3.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            <span>Apex Canadian LTL (Synthetic)</span>
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
-            <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            <span>Northland Logistics (Synthetic)</span>
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
-            <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            <span>Trans-Provincial (Synthetic)</span>
-          </span>
-        </div>
-
-        <div class="flex items-center gap-2 text-xs">
-          <span class="text-[var(--muted-foreground)]">Sort by:</span>
-          <select id="sort-select" aria-label="Sort Quotes By" onchange="resortQuotes()" class="px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--foreground)] font-medium cursor-pointer">
-            <option value="price">Lowest Price (Default)</option>
-            <option value="transit">Fastest Transit</option>
-            <option value="carrier">Carrier Name</option>
-          </select>
         </div>
       </section>
 
-      <!-- Synthetic Demo Banner Notice -->
-      <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3 text-xs text-amber-900">
-        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">CA</span>
-        <div class="leading-relaxed">
-          <strong>Synthetic Benchmark Tariffs:</strong> Rates displayed below are synthetic sample matrices generated strictly for interactive evaluation. In your private account, Quotelytics rates shipments exclusively against your own uploaded carrier spreadsheets under Canadian PIPEDA tenant isolation.
-        </div>
-      </div>
-
-      <!-- Live Deficit Rating Alert Banner -->
-      <div id="deficit-rating-banner" class="hidden p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center justify-between gap-3 text-xs text-emerald-950 shadow-2xs">
-        <div class="flex items-center gap-2.5">
-          <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          <div class="leading-relaxed">
-            <strong class="text-emerald-900">Deficit Rating Applied:</strong>
-            <span class="text-emerald-800 ml-1">Actual weight is 850 lbs ($24.50/CWT = $208.25 base), but Quotelytics automatically rated as 1,000 lbs ($18.20/CWT = $182.00 base). Net shipper savings: <strong class="text-emerald-950 font-bold">$26.25 CAD</strong> before fuel.</span>
-          </div>
-        </div>
-        <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-200/90 text-emerald-950 whitespace-nowrap">Optimal Weight Break</span>
-      </div>
-
-      <!-- 4. Quoting Results Table (Strict adherence: bold headers, unbolded cells, cell coordinates) -->
-      <section aria-labelledby="results-table-heading" class="border border-[var(--border)] rounded-xl overflow-hidden bg-[var(--card)] shadow-2xs space-y-0">
-        <h2 id="results-table-heading" class="sr-only">Comparative Carrier Rates</h2>
-        
-        <div class="px-4 py-2.5 bg-slate-50 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2">
-          <div class="font-bold text-xs text-slate-800 flex items-center gap-2">
-            <span>Evaluated Carrier Quotes</span>
-            <span class="text-[10px] text-emerald-700 font-medium bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">3 Quotes Evaluated</span>
-          </div>
-          <div class="text-[11px] text-slate-500">
-            Lane: <span id="lane-summary" class="font-semibold text-slate-700">Toronto, ON (M5V 2T6) → Montreal, QC (H3B 2Y5)</span>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse" aria-label="Canadian Multi-Carrier Rate Quote Results">
-            <thead>
-              <tr class="bg-slate-50 border-b border-[var(--border)]">
-                <th scope="col" class="py-2.5 px-4 font-bold text-slate-700">Carrier ⇅</th>
-                <th scope="col" class="py-2.5 px-4 font-bold text-slate-700">Service Level ⇅</th>
-                <th scope="col" class="py-2.5 px-4 font-bold text-slate-700">Transit Time ⇅</th>
-                <th scope="col" class="py-2.5 px-4 font-bold text-slate-700">Base Rate ⇅</th>
-                <th scope="col" class="py-2.5 px-4 font-bold text-slate-700">FSC Surcharge ⇅</th>
-                <th scope="col" class="py-2.5 px-4 font-bold text-slate-700">Total Quote (CAD) ⇅</th>
-                <th scope="col" class="py-2.5 px-4 font-bold text-slate-700">Traceability ⇅</th>
-              </tr>
-            </thead>
-            <tbody id="demo-quotes-tbody" class="divide-y divide-slate-100">
-              <!-- Dynamically populated by JavaScript -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Bottom Summary Bar -->
-        <div class="px-4 py-3 bg-slate-50 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div class="text-slate-600">
-            Best Option: <strong id="best-carrier" class="text-slate-900 font-bold">Apex Canadian LTL ($421.28 CAD)</strong> 
-            <span class="text-slate-400 mx-1.5">•</span>
-            Saves <strong id="savings-amount" class="text-emerald-700 font-bold">$83.02 CAD</strong> vs Trans-Provincial
-          </div>
-          <div class="flex items-center gap-2">
-            <a href="/login" class="px-3 py-1 rounded-md border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-medium transition-colors">
-              Export Full Excel Audit →
-            </a>
-            <a href="/get-started" class="px-3 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors">
-              Create Account for Custom Tariffs →
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <!-- 5. Platform Intelligence Highlights -->
-      <section aria-labelledby="features-heading" class="space-y-4 pt-4 border-t border-[var(--border)]">
-        <h2 id="features-heading" class="text-base font-bold text-[var(--foreground)] tracking-tight text-center">
-          Engineered Strictly for Rate Intelligence
+      <!-- 3. What We'll Cover in Your 15-Minute Walkthrough -->
+      <section aria-labelledby="agenda-heading" class="space-y-4 pt-4 border-t border-[var(--border)]">
+        <h2 id="agenda-heading" class="text-base font-bold text-[var(--foreground)] tracking-tight text-center">
+          What We Cover in Your 15-Minute Live Walkthrough
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-1.5">
-            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
-              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center" aria-hidden="true">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             </div>
-            <h3 class="text-xs font-bold text-[var(--foreground)]">Direct Excel Cell Coordinates</h3>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">1. Upload Your Real Excel Tariffs</h3>
             <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
-              Every rate quote stores the exact sheet name, row index, and column identifier, allowing seamless back-referencing into your billing files.
+              Bring a carrier spreadsheet. Watch Quotelytics detect weight breaks, skid tiers, custom keyword codes, and buried accessorial footnotes live.
             </p>
           </div>
 
           <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-1.5">
-            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
-              <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center" aria-hidden="true">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
-            <h3 class="text-xs font-bold text-[var(--foreground)]">Zero Label or Booking Baggage</h3>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">2. Multi-Carrier Ranking &amp; Deficit Math</h3>
             <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
-              No tracking API limits, label printing queues, or courier credentials. Calculate rates as often as you want without operational overhead.
+              Test Canadian and cross-border lanes side-by-side with automatic deficit-weight optimization, fuel index rules, and exact Excel cell coordinates.
             </p>
           </div>
 
           <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-1.5">
-            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm" aria-hidden="true">
-              <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center" aria-hidden="true">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             </div>
-            <h3 class="text-xs font-bold text-[var(--foreground)]">Pre-Loaded Verified Tariffs</h3>
+            <h3 class="text-xs font-bold text-[var(--foreground)]">3. Branded Client Proposals &amp; Guardrails</h3>
             <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
-              Full tariff parsing engine handles multi-tier CWT weight breaks, fuel surcharges, and Canadian postal FSA zone resolution instantly.
+              Generate a client-ready quote link in one click while keeping wholesale carrier rates hidden and enforcing minimum brokerage margin floors.
             </p>
           </div>
         </div>
       </section>
 
-      <!-- 6. Conversion Call to Action -->
+      <!-- 4. Conversion Call to Action -->
       <section aria-labelledby="cta-heading" class="p-6 rounded-2xl bg-gradient-to-r from-red-600 to-rose-700 text-white text-center space-y-3 shadow-xs">
         <h2 id="cta-heading" class="text-xl sm:text-2xl font-bold tracking-tight">
-          Ready to Calculate Rates for Your Own Spreadsheets?
+          Want Private Beta Access Right Away?
         </h2>
         <p class="text-xs text-red-100 max-w-lg mx-auto leading-relaxed">
-          Create an account to upload your custom carrier rate sheets, save historical calculations with cell-level traceability, and customize your origin defaults.
+          Request an onboarding account for your brokerage with Canadian WHC data residency and strict tenant isolation.
         </p>
         <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
           <a href="/get-started" class="px-5 py-2.5 bg-white text-red-600 font-bold text-xs rounded-lg shadow-xs hover:bg-red-50 transition-colors">
-            Get Started Free →
+            Request Beta Access →
           </a>
           <a href="/pricing" class="px-4 py-2.5 bg-red-800/60 hover:bg-red-800 text-white font-semibold text-xs rounded-lg transition-colors border border-white/20">
             View Pricing Plans
@@ -441,7 +407,7 @@
 
     </main>
 
-    <!-- Semantic Footer (Identical to Landing Page & Console) -->
+    <!-- Semantic Footer (Identical to Landing Page & Pricing) -->
     <footer role="contentinfo" class="mt-12 px-6 py-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-4 bg-[var(--card)] m-0">
       <!-- Left: Logo & Crawlable Navigation Links -->
       <div class="flex flex-wrap items-center gap-6">
@@ -467,243 +433,234 @@
     </footer>
   </div>
 
-  <!-- Interactive Demo Rater Engine Script -->
   <script>
-    // In-memory quote results cache
-    let currentQuotes = [];
-
-    // Lane presets matching outreach & social scenarios
-    const lanePresets = {
-      toronto_montreal: {
-        fromCity: 'Toronto', fromProv: 'ON', fromZip: 'M5V 2T6', fromCountry: 'Canada',
-        toCity: 'Montreal', toProv: 'QC', toZip: 'H3B 2Y5', toCountry: 'Canada',
-        weight: 4200, pallets: 4, dims: '48×40×60'
-      },
-      mississauga_calgary_deficit: {
-        fromCity: 'Mississauga', fromProv: 'ON', fromZip: 'L5T 2B7', fromCountry: 'Canada',
-        toCity: 'Calgary', toProv: 'AB', toZip: 'T2P 1J9', toCountry: 'Canada',
-        weight: 850, pallets: 1, dims: '48×40×48'
-      },
-      vancouver_edmonton: {
-        fromCity: 'Vancouver', fromProv: 'BC', fromZip: 'V6B 1A1', fromCountry: 'Canada',
-        toCity: 'Edmonton', toProv: 'AB', toZip: 'T5J 2R7', toCountry: 'Canada',
-        weight: 650, pallets: 1, dims: '48×40×48'
-      },
-      toronto_chicago: {
-        fromCity: 'Toronto', fromProv: 'ON', fromZip: 'M5V 2T6', fromCountry: 'Canada',
-        toCity: 'Chicago', toProv: 'IL', toZip: '60609', toCountry: 'United States',
-        weight: 1850, pallets: 2, dims: '48×40×55'
-      }
-    };
-
-    function showDemoUploadNotice() {
-      const banner = document.getElementById('demo-upload-banner');
-      if (banner) {
-        banner.classList.remove('hidden');
-        banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }
-
-    function fillLane(key) {
-      const p = lanePresets[key];
-      if (!p) return;
-      document.getElementById('from-city').value = p.fromCity;
-      document.getElementById('from-province').value = p.fromProv;
-      document.getElementById('from-zip').value = p.fromZip;
-      document.getElementById('from-country').value = p.fromCountry;
-      document.getElementById('to-city').value = p.toCity;
-      document.getElementById('to-province').value = p.toProv;
-      document.getElementById('to-zip').value = p.toZip;
-      document.getElementById('to-country').value = p.toCountry;
-      document.getElementById('freight-weight').value = p.weight;
-      document.getElementById('freight-pallets').value = p.pallets;
-      document.getElementById('freight-dimensions').value = p.dims;
-
-      runCalculation();
-    }
-
-    function calculateDemoQuote(e) {
-      if (e) e.preventDefault();
-      runCalculation();
-    }
-
-    function runCalculation() {
-      const spinner = document.getElementById('calc-spinner');
-      const btnText = document.getElementById('btn-calc-text');
-      if (spinner && btnText) {
-        spinner.classList.remove('hidden');
-        btnText.textContent = 'Calculating...';
-      }
-
-      const fromCity = document.getElementById('from-city').value.trim() || 'Toronto';
-      const fromProv = document.getElementById('from-province').value.trim() || 'ON';
-      const fromZip = document.getElementById('from-zip').value.trim() || 'M5V 2T6';
-      const toCity = document.getElementById('to-city').value.trim() || 'Montreal';
-      const toProv = document.getElementById('to-province').value.trim() || 'QC';
-      const toZip = document.getElementById('to-zip').value.trim() || 'H3B 2Y5';
-      const weight = parseFloat(document.getElementById('freight-weight').value) || 1250;
-
-      // Update lane summary text
-      document.getElementById('lane-summary').textContent = `${fromCity}, ${fromProv} (${fromZip}) → ${toCity}, ${toProv} (${toZip})`;
-
-      // CWT rating calculation based on pre-loaded tariffs
-      const cwt = Math.max(1, weight / 100);
-      const isWestern = toProv.toUpperCase().includes('BC') || toProv.toUpperCase().includes('AB') || toProv.toUpperCase().includes('SK') || toProv.toUpperCase().includes('MB');
-      const isCrossBorder = document.getElementById('to-country').value === 'United States';
-      const isDeficit = (weight >= 800 && weight < 1000 && isWestern);
-
-      const deficitBanner = document.getElementById('deficit-rating-banner');
-      if (deficitBanner) {
-        if (isDeficit) {
-          deficitBanner.classList.remove('hidden');
-        } else {
-          deficitBanner.classList.add('hidden');
-        }
-      }
-
-      let baseMultiplier = 16.20;
-      if (isWestern) baseMultiplier = 24.50;
-      if (isCrossBorder) baseMultiplier = 28.00;
-
-      // Carrier 1: Apex Canadian LTL (Synthetic)
-      let drBase = Math.round(cwt * baseMultiplier * 1.05 * 100) / 100;
-      let drCellRef = 'Synthetic Tariff • Row 14, Col C';
-      if (isDeficit) {
-        // Rated as 1,000 lbs (10 CWT) at next discount break rate ($18.20)
-        drBase = 182.00;
-        drCellRef = 'Synthetic Tariff • Row 18, Col D (1M Deficit Break: 10 CWT @ $18.20)';
-      }
-      const drFsc = Math.round(drBase * 0.187 * 100) / 100;
-      const drTotal = Math.round((drBase + drFsc) * 100) / 100;
-
-      // Carrier 2: Northland Logistics (Synthetic)
-      let manBase = Math.round(cwt * baseMultiplier * 1.12 * 100) / 100;
-      let manCellRef = 'Synthetic Tariff • Row 14, Col C';
-      if (isDeficit) {
-        manBase = 194.50;
-        manCellRef = 'Synthetic Tariff • Row 18, Col D (1M Deficit Break)';
-      }
-      const manFsc = Math.round(manBase * 0.192 * 100) / 100;
-      const manTotal = Math.round((manBase + manFsc) * 100) / 100;
-
-      // Carrier 3: Trans-Provincial (Synthetic)
-      let midBase = Math.round(cwt * baseMultiplier * 1.25 * 100) / 100;
-      let midCellRef = 'Synthetic Tariff • Row 14, Col C';
-      if (isDeficit) {
-        midBase = 208.25; // Trans-Provincial did not break deficit, billing actual weight
-        midCellRef = 'Synthetic Tariff • Row 14, Col C (Actual Weight Billed)';
-      }
-      const midFsc = Math.round(midBase * 0.201 * 100) / 100;
-      const midTotal = Math.round((midBase + midFsc) * 100) / 100;
-
-      setTimeout(() => {
-        if (spinner && btnText) {
-          spinner.classList.add('hidden');
-          btnText.textContent = 'Calculate Demo Rates';
-        }
-
-        currentQuotes = [
-          {
-            carrier: 'Apex Canadian LTL (Synthetic)',
-            service: 'Service 1 LTL',
-            transit: isWestern ? '3 Days' : (isCrossBorder ? '2 Days' : '13 hours'),
-            transitHours: isWestern ? 72 : (isCrossBorder ? 48 : 13),
-            baseRate: drBase,
-            fsc: drFsc,
-            total: drTotal,
-            cellRef: drCellRef
-          },
-          {
-            carrier: 'Northland Logistics (Synthetic)',
-            service: 'Service 2 Standard',
-            transit: isWestern ? '2 Days' : (isCrossBorder ? '2 Days' : '10 hours'),
-            transitHours: isWestern ? 48 : (isCrossBorder ? 48 : 10),
-            baseRate: manBase,
-            fsc: manFsc,
-            total: manTotal,
-            cellRef: manCellRef
-          },
-          {
-            carrier: 'Trans-Provincial (Synthetic)',
-            service: 'Service 1 LTL',
-            transit: isWestern ? '3 Days' : (isCrossBorder ? '3 Days' : '10 hours'),
-            transitHours: isWestern ? 72 : (isCrossBorder ? 72 : 10),
-            baseRate: midBase,
-            fsc: midFsc,
-            total: midTotal,
-            cellRef: midCellRef
-          }
-        ];
-
-        resortQuotes();
-      }, 250);
-    }
-
-    function resortQuotes() {
-      const sortBy = document.getElementById('sort-select').value;
-      let sorted = [...currentQuotes];
-
-      if (sortBy === 'price') {
-        sorted.sort((a, b) => a.total - b.total);
-      } else if (sortBy === 'transit') {
-        sorted.sort((a, b) => a.transitHours - b.transitHours);
-      } else if (sortBy === 'carrier') {
-        sorted.sort((a, b) => a.carrier.localeCompare(b.carrier));
-      }
-
-      renderQuotesTable(sorted);
-    }
-
-    function renderQuotesTable(quotes) {
-      const tbody = document.getElementById('demo-quotes-tbody');
-      tbody.innerHTML = '';
-
-      if (quotes.length === 0) return;
-
-      quotes.forEach((q, idx) => {
-        const isLowest = idx === 0;
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50/70 transition-colors";
-        tr.innerHTML = `
-          <td class="py-3 px-4 font-normal text-slate-800">
-            <div class="flex items-center gap-1.5 font-bold text-slate-900">
-              ${isLowest ? '<span class="text-xs text-emerald-600 font-bold font-mono">LOWEST</span>' : ''}
-              <span>${q.carrier}</span>
-            </div>
-          </td>
-          <td class="py-3 px-4 font-normal text-slate-600">${q.service}</td>
-          <td class="py-3 px-4 font-normal text-slate-600">${q.transit}</td>
-          <td class="py-3 px-4 font-normal text-slate-700 font-mono">$${q.baseRate.toFixed(2)}</td>
-          <td class="py-3 px-4 font-normal text-slate-700 font-mono">$${q.fsc.toFixed(2)}</td>
-          <td class="py-3 px-4 font-normal text-slate-900 font-mono">
-            <span class="font-bold text-slate-900">$${q.total.toFixed(2)} CAD</span>
-          </td>
-          <td class="py-3 px-4 font-normal text-slate-500 font-mono text-[11px]">
-            <span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200/80">${q.cellRef}</span>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      // Update summary cards
-      const lowest = quotes.reduce((min, p) => p.total < min.total ? p : min, quotes[0]);
-      const highest = quotes.reduce((max, p) => p.total > max.total ? p : max, quotes[0]);
-      const diff = (highest.total - lowest.total).toFixed(2);
-
-      document.getElementById('best-carrier').textContent = `${lowest.carrier} ($${lowest.total.toFixed(2)} CAD)`;
-      document.getElementById('savings-amount').textContent = `$${diff} CAD`;
-    }
+    let availabilityDays = [];
+    let selectedDate = null;
+    let selectedTime = null;
+    let latestRoiSnapshot = {};
 
     function toggleMobileNav() {
       const drawer = document.getElementById('mobile-nav-drawer');
-      if (drawer) {
-        drawer.classList.toggle('hidden');
-      }
+      if (drawer) drawer.classList.toggle('hidden');
     }
 
-    // Initialize with default calculation on load
+    function recalcROI() {
+      const quotesPerWeek = Math.max(1, parseFloat(document.getElementById('roi-quotes-week').value) || 40);
+      const minsPerQuote = Math.max(1, parseFloat(document.getElementById('roi-mins-quote').value) || 12);
+      const reps = Math.max(1, parseFloat(document.getElementById('roi-reps').value) || 2);
+      const hourlyRate = Math.max(10, parseFloat(document.getElementById('roi-hourly-rate').value) || 35);
+      const monthlySpend = Math.max(0, parseFloat(document.getElementById('roi-monthly-spend').value) || 25000);
+
+      document.getElementById('roi-quotes-week-val').textContent = `${quotesPerWeek} quotes/wk`;
+      document.getElementById('roi-mins-quote-val').textContent = `${minsPerQuote} mins`;
+
+      const quotesPerMonth = quotesPerWeek * 4.33;
+      const manualHoursPerMonth = (quotesPerMonth * minsPerQuote) / 60;
+      const quotelyticsHoursPerMonth = (quotesPerMonth * 0.75) / 60; // ~45 seconds per quote
+      const hoursSaved = Math.max(0, manualHoursPerMonth - quotelyticsHoursPerMonth);
+
+      const labourSaved = Math.round(hoursSaved * hourlyRate);
+      const marginRecovered = Math.round(monthlySpend * 0.025); // 2.5% deficit/rate error capture
+      const totalMonthlyValue = labourSaved + marginRecovered;
+      const totalAnnualValue = totalMonthlyValue * 12;
+
+      const planCost = reps > 1 ? 199 : 79;
+      const planLabel = reps > 1 ? 'Broker Team ($199 CAD/mo)' : 'Broker Pro ($79 CAD/mo)';
+      const multiple = planCost > 0 ? (totalMonthlyValue / planCost).toFixed(1) : '0.0';
+
+      document.getElementById('roi-hours-saved').textContent = `${hoursSaved.toFixed(1)} hrs/mo`;
+      document.getElementById('roi-labour-saved').textContent = `$${labourSaved.toLocaleString()}/mo`;
+      document.getElementById('roi-margin-saved').textContent = `$${marginRecovered.toLocaleString()}/mo`;
+      document.getElementById('roi-total-monthly').textContent = `$${totalMonthlyValue.toLocaleString()} CAD`;
+      document.getElementById('roi-total-annual').textContent = `$${totalAnnualValue.toLocaleString()}/yr`;
+      document.getElementById('roi-multiple').textContent = `${multiple}x ROI`;
+      document.getElementById('roi-recommended-plan').textContent = `Recommended: ${planLabel}`;
+
+      latestRoiSnapshot = {
+        quotes_per_week: quotesPerWeek,
+        mins_per_quote: minsPerQuote,
+        reps: reps,
+        hourly_rate_cad: hourlyRate,
+        monthly_freight_spend_cad: monthlySpend,
+        hours_saved_per_month: Number(hoursSaved.toFixed(1)),
+        labour_saved_cad: labourSaved,
+        margin_recovered_cad: marginRecovered,
+        total_monthly_value_cad: totalMonthlyValue,
+      };
+    }
+
+    function formatDateChip(isoDate) {
+      const parts = isoDate.split('-');
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      const weekday = d.toLocaleDateString('en-CA', { weekday: 'short' });
+      const monthDay = d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
+      return { weekday, monthDay };
+    }
+
+    function formatTime12h(hhmm) {
+      const [hStr, mStr] = hhmm.split(':');
+      const h = parseInt(hStr, 10);
+      const suffix = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return `${h12}:${mStr} ${suffix}`;
+    }
+
+    function loadDemoAvailability() {
+      fetch('/api/demo/availability?days=10')
+        .then(r => r.json())
+        .then(data => {
+          availabilityDays = (data && data.days) ? data.days : [];
+          if (availabilityDays.length > 0) {
+            const firstOpen = availabilityDays.find(d => d.slots && d.slots.length > 0) || availabilityDays[0];
+            selectedDate = firstOpen.date;
+            selectedTime = (firstOpen.slots && firstOpen.slots.length > 0) ? firstOpen.slots[0] : null;
+          }
+          renderCalendarDates();
+          renderTimeSlots();
+        })
+        .catch(err => {
+          console.error('Error loading demo availability:', err);
+          const grid = document.getElementById('demo-date-grid');
+          if (grid) grid.innerHTML = '<div class="col-span-5 text-center text-xs text-red-600 py-2">Unable to load availability.</div>';
+        });
+    }
+
+    function renderCalendarDates() {
+      const grid = document.getElementById('demo-date-grid');
+      if (!grid) return;
+      if (!availabilityDays.length) {
+        grid.innerHTML = '<div class="col-span-5 text-center text-xs text-slate-500 py-2">No upcoming dates available.</div>';
+        return;
+      }
+
+      grid.innerHTML = availabilityDays.slice(0, 10).map(day => {
+        const { weekday, monthDay } = formatDateChip(day.date);
+        const isSelected = day.date === selectedDate;
+        const hasSlots = day.slots && day.slots.length > 0;
+        const baseCls = 'p-2 rounded-lg border text-center transition-all cursor-pointer';
+        const stateCls = !hasSlots
+          ? 'bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed'
+          : isSelected
+            ? 'bg-red-600 border-red-600 text-white shadow-xs'
+            : 'bg-white border-[var(--border)] text-slate-700 hover:border-red-300 hover:bg-red-50/40';
+        return `
+          <button type="button" ${hasSlots ? `onclick="selectDemoDate('${day.date}')"` : 'disabled'} class="${baseCls} ${stateCls}">
+            <div class="text-[10px] uppercase font-semibold opacity-80">${weekday}</div>
+            <div class="text-[11px] font-bold mt-0.5">${monthDay}</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectDemoDate(dateStr) {
+      selectedDate = dateStr;
+      const dayObj = availabilityDays.find(d => d.date === dateStr);
+      selectedTime = (dayObj && dayObj.slots && dayObj.slots.length > 0) ? dayObj.slots[0] : null;
+      renderCalendarDates();
+      renderTimeSlots();
+    }
+
+    function renderTimeSlots() {
+      const grid = document.getElementById('demo-time-grid');
+      if (!grid) return;
+      const dayObj = availabilityDays.find(d => d.date === selectedDate);
+      if (!dayObj || !dayObj.slots || dayObj.slots.length === 0) {
+        grid.innerHTML = '<div class="col-span-4 text-center text-xs text-slate-500 py-2">No open slots on this date.</div>';
+        return;
+      }
+
+      grid.innerHTML = dayObj.slots.slice(0, 12).map(slot => {
+        const isSelected = slot === selectedTime;
+        const cls = isSelected
+          ? 'bg-slate-900 text-white border-slate-900 font-bold'
+          : 'bg-white text-slate-700 border-[var(--border)] hover:border-red-300 hover:bg-red-50/40 font-medium';
+        return `
+          <button type="button" onclick="selectDemoTime('${slot}')" class="px-2 py-1.5 rounded-lg border text-[11px] transition-all cursor-pointer ${cls}">
+            ${formatTime12h(slot)}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectDemoTime(timeStr) {
+      selectedTime = timeStr;
+      renderTimeSlots();
+    }
+
+    function submitDemoBooking(e) {
+      e.preventDefault();
+      const errBox = document.getElementById('booking-error-box');
+      if (errBox) errBox.classList.add('hidden');
+
+      if (!selectedDate || !selectedTime) {
+        if (errBox) {
+          errBox.textContent = 'Please select an available date and time slot.';
+          errBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const btn = document.getElementById('book-submit-btn');
+      const btnText = document.getElementById('book-submit-text');
+      if (btn) btn.disabled = true;
+      if (btnText) btnText.textContent = 'Reserving Slot...';
+
+      const payload = {
+        full_name: document.getElementById('book-name').value.trim(),
+        email: document.getElementById('book-email').value.trim(),
+        company: document.getElementById('book-company').value.trim(),
+        carrier_sheet_count: document.getElementById('book-sheets').value,
+        notes: document.getElementById('book-notes').value.trim(),
+        scheduled_date: selectedDate,
+        scheduled_time: selectedTime,
+        timezone: document.getElementById('demo-timezone').value,
+        duration_minutes: 15,
+        roi_estimate: latestRoiSnapshot,
+      };
+
+      fetch('/api/demo/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      .then(async r => {
+        const res = await r.json();
+        if (!r.ok) throw new Error(res.detail || 'Unable to book demo slot.');
+        return res;
+      })
+      .then(res => {
+        const b = res.booking;
+        const { weekday, monthDay } = formatDateChip(b.scheduled_date);
+        document.getElementById('conf-datetime').textContent = `${weekday}, ${monthDay} at ${formatTime12h(b.scheduled_time)} ET`;
+        document.getElementById('conf-company').textContent = b.company;
+        document.getElementById('conf-email').textContent = b.email;
+        document.getElementById('conf-ics-link').setAttribute('href', res.ics_url);
+
+        document.getElementById('demo-booking-form').classList.add('hidden');
+        document.getElementById('demo-booking-confirmed').classList.remove('hidden');
+        loadDemoAvailability();
+      })
+      .catch(err => {
+        if (errBox) {
+          errBox.textContent = err.message || 'Failed to reserve slot. Please try again.';
+          errBox.classList.remove('hidden');
+        }
+      })
+      .finally(() => {
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.textContent = 'Confirm Live Demo Slot';
+      });
+    }
+
+    function resetBookingForm() {
+      document.getElementById('demo-booking-confirmed').classList.add('hidden');
+      document.getElementById('demo-booking-form').classList.remove('hidden');
+      loadDemoAvailability();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      runCalculation();
+      recalcROI();
+      loadDemoAvailability();
     });
   </script>
   <script src="/static/js/global-chrome.js"></script>

@@ -56,10 +56,22 @@ def get_current_user_from_request(request: Request) -> Optional[dict]:
 
 
 def require_user(request: Request) -> dict:
-    """Requires a valid authenticated user session; raises 401 if unauthenticated."""
+    """Requires a valid authenticated user session; enforces first-login OTP password change if pending."""
     user = get_current_user_from_request(request)
     if not user:
         raise HTTPException(status_code=401, detail="Authentication required.")
+    if user.get("must_change_password"):
+        allowed_paths = {
+            "/api/user/password",
+            "/api/user/profile",
+            "/api/auth/status",
+            "/api/auth/logout",
+        }
+        if request.url.path not in allowed_paths:
+            raise HTTPException(
+                status_code=403,
+                detail="Password change required before accessing workspace. Please replace your one-time password at /console/change-password.",
+            )
     return user
 
 

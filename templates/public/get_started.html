@@ -93,7 +93,7 @@
       <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
       <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
         <a href="/" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Home</a>
-        <a href="/demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Demo</a>
+        <a href="/demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Live Demo</a>
         <a href="/pricing" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Pricing</a>
       </nav>
 
@@ -102,8 +102,8 @@
         <a href="/login" class="text-xs font-semibold text-[var(--foreground)] hover:text-red-600 transition-colors px-2 py-1" title="Log in to your Quotelytics account">
           Log in
         </a>
-        <a href="/get-started" aria-current="page" class="bg-red-600 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg shadow-xs ring-2 ring-red-600 ring-offset-2" title="Currently on Get Started page">
-          Get Started
+        <a href="/get-started" aria-current="page" class="bg-red-600 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg shadow-xs ring-2 ring-red-600 ring-offset-2" title="Request Private Beta Access">
+          Request Beta Access
         </a>
         <!-- Mobile Menu Toggle Button (Phone Only) -->
         <button type="button" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" class="md:hidden p-1.5 rounded-lg border border-[var(--border)] text-slate-600 hover:bg-black/5 focus:outline-hidden transition-colors">
@@ -115,15 +115,15 @@
     <!-- Collapsible Mobile Navigation Drawer for Phones (< 768px) -->
     <nav id="mobile-nav-drawer" aria-label="Mobile Navigation" class="hidden md:hidden border-b border-[var(--border)] bg-slate-50/95 px-4 py-3 space-y-1.5 text-xs font-medium transition-all">
       <a href="/" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Home</a>
-      <a href="/demo" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Demo</a>
+      <a href="/demo" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Live Demo</a>
       <a href="/pricing" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Pricing</a>
       <div class="pt-2 mt-2 border-t border-[var(--border)] flex items-center justify-between">
         <a href="/login" class="text-xs font-semibold px-2 py-1 rounded text-slate-700 hover:text-red-600">Log in</a>
-        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs ring-2 ring-red-600">Get Started</a>
+        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs ring-2 ring-red-600">Request Beta Access</a>
       </div>
     </nav>
 
-    <!-- Main Content Area: Centered Create Account Box (Single element on page) -->
+    <!-- Main Content Area: Centered Request Beta Access Box -->
     <main id="main-content" role="main" class="flex-1 flex items-center justify-center p-6 md:p-10">
       
       <div class="w-full max-w-md space-y-6">
@@ -133,11 +133,14 @@
           <div class="flex items-center justify-center mx-auto mb-2">
             <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-10 md:h-11 w-auto object-contain" />
           </div>
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200">
+            Invite-Only Private Beta
+          </span>
           <h1 class="text-2xl font-extrabold tracking-tight text-[var(--foreground)]">
-            Create your account
+            Request Beta Access
           </h1>
           <p class="text-xs text-[var(--muted-foreground)] max-w-sm mx-auto leading-relaxed">
-            Free Starter Tier • 50 batch quotes/month • No credit card required.
+            During Private Beta, all accounts are set up personally by a Quotelytics administrator — no payment or credit card required.
           </p>
         </div>
 
@@ -213,32 +216,25 @@
               </div>
             </div>
 
-            <!-- Create Password Field with Show/Hide Toggle -->
-            <div class="space-y-1">
-              <label for="reg-password" class="block text-xs font-bold text-[var(--foreground)]">
-                Create Password
-              </label>
-              <div class="relative">
-                <input 
-                  type="password" 
-                  id="reg-password" 
-                  name="password" 
-                  required 
-                  autocomplete="new-password" 
-                  placeholder="At least 10 characters" 
-                  class="w-full pl-3 pr-10 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 transition-all font-mono"
-                >
-                <button 
-                  type="button" 
-                  onclick="togglePasswordVisibility()" 
-                  id="toggle-pwd-btn" 
-                  aria-label="Toggle password visibility" 
-                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 text-xs focus:outline-hidden"
-                >
-                  <span id="pwd-icon-show"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></span>
-                </button>
+            <!-- Plan Interest & Notes -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <label for="reg-tier" class="block text-xs font-bold text-[var(--foreground)]">
+                  Plan Interest
+                </label>
+                <select id="reg-tier" name="requested_tier" class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 transition-all font-medium">
+                  <option value="FREE">Free Starter (Beta)</option>
+                  <option value="PRO" selected>Broker Pro (Beta)</option>
+                  <option value="TEAM">Broker Team (Multi-Seat Beta)</option>
+                  <option value="BUSINESS">Business / Embedded API (Beta)</option>
+                </select>
               </div>
-              <div id="password-error" class="hidden text-[10px] text-red-600 font-medium">Password must be at least 10 characters.</div>
+              <div class="space-y-1">
+                <label for="reg-notes" class="block text-xs font-bold text-[var(--foreground)]">
+                  Carriers / Notes (Optional)
+                </label>
+                <input type="text" id="reg-notes" name="notes" placeholder="e.g. Manitoulin, Day & Ross" class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 transition-all font-medium">
+              </div>
             </div>
 
             <!-- Terms & PIPEDA Privacy Consent Checkbox (Explicit, Unticked by Default) -->
@@ -284,9 +280,9 @@
             <button 
               type="submit" 
               id="submit-reg-btn" 
-              class="w-full py-2.5 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition-all shadow-xs flex items-center justify-center gap-2 mt-2"
+              class="w-full py-2.5 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition-all shadow-xs flex items-center justify-center gap-2 mt-2 cursor-pointer"
             >
-              <span id="submit-reg-text">Create Free Account & Open Console →</span>
+              <span id="submit-reg-text">Request Beta Access →</span>
               <span id="reg-spinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
             </button>
 
@@ -338,26 +334,21 @@
     </footer>
   </div>
 
-  <!-- Interactive Registration Logic -->
+  <!-- Interactive Beta Access Request Logic -->
   <script>
-    function togglePasswordVisibility() {
-      const pwd = document.getElementById('reg-password');
-      const icon = document.getElementById('pwd-icon-show');
-      if (pwd.type === 'password') {
-        pwd.type = 'text';
-        icon.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>';
-      } else {
-        pwd.type = 'password';
-        icon.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>';
+    (function prefillTierFromUrl() {
+      const tierParam = (new URLSearchParams(window.location.search).get('tier') || '').toUpperCase();
+      const sel = document.getElementById('reg-tier');
+      if (sel && ['FREE', 'PRO', 'TEAM', 'BUSINESS'].includes(tierParam)) {
+        sel.value = tierParam;
       }
-    }
+    })();
 
     function handleRegistration(e) {
       e.preventDefault();
       const name = document.getElementById('reg-name').value.trim();
       const email = document.getElementById('reg-email').value.trim();
       const company = document.getElementById('reg-company').value.trim();
-      const password = document.getElementById('reg-password').value;
       const terms = document.getElementById('terms-check').checked;
 
       let hasError = false;
@@ -383,13 +374,6 @@
         document.getElementById('company-error').classList.add('hidden');
       }
 
-      if (!password || password.length < 10) {
-        document.getElementById('password-error').classList.remove('hidden');
-        hasError = true;
-      } else {
-        document.getElementById('password-error').classList.add('hidden');
-      }
-
       const termsError = document.getElementById('terms-error');
       if (!terms) {
         termsError.classList.remove('hidden');
@@ -408,46 +392,48 @@
       const status = document.getElementById('reg-status');
 
       spinner.classList.remove('hidden');
-      text.textContent = "Creating Account...";
+      text.textContent = "Submitting Request...";
       btn.disabled = true;
 
       status.className = "text-center text-xs text-slate-500 font-medium";
-      status.textContent = "Provisioning Free Starter tier and rate calculation workspace...";
+      status.textContent = "Sending your Private Beta access request to our onboarding desk...";
 
       const marketingOptIn = document.getElementById('marketing-check') ? document.getElementById('marketing-check').checked : false;
-      const formData = new FormData();
-      formData.append('name', name);
-      formData.append('email', email);
-      formData.append('company', company);
-      formData.append('origin_zip', document.getElementById('reg-origin').value || 'TORONTO, ON');
-      formData.append('password', password);
-      formData.append('terms_accepted', terms ? 'true' : 'false');
-      formData.append('marketing_opt_in', marketingOptIn ? 'true' : 'false');
-      formData.append('form_version', 'v2026.10');
+      const payload = {
+        name: name,
+        email: email,
+        company: company,
+        origin_zip: document.getElementById('reg-origin').value || 'M5V 2T6',
+        requested_tier: document.getElementById('reg-tier') ? document.getElementById('reg-tier').value : 'PRO',
+        notes: document.getElementById('reg-notes') ? document.getElementById('reg-notes').value : '',
+        terms_accepted: Boolean(terms),
+        marketing_opt_in: Boolean(marketingOptIn)
+      };
 
-      fetch('/api/auth/register', {
+      fetch('/api/beta/request-access', {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       })
-      .then(res => {
+      .then(async res => {
+        const data = await res.json();
         if (!res.ok) {
-          throw new Error("Registration failed. Please check your information.");
+          throw new Error(data.detail || "Could not submit beta request.");
         }
-        return res.json();
+        return data;
       })
       .then(data => {
-        status.className = "text-center text-xs text-emerald-600 font-semibold";
-        status.textContent = "Account created! Redirecting to New Rate Sheet Console...";
-        setTimeout(() => {
-          window.location.href = data.redirect || "/console/new-quote";
-        }, 400);
+        spinner.classList.add('hidden');
+        text.textContent = "Request Submitted ✓";
+        status.className = "text-center text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-3 font-semibold";
+        status.textContent = data.message || "Beta access request received! An administrator will set up your account shortly.";
       })
       .catch(err => {
         spinner.classList.add('hidden');
-        text.textContent = "Create Free Account & Open Console →";
+        text.textContent = "Request Beta Access →";
         btn.disabled = false;
         status.className = "text-center text-xs text-red-600 font-semibold";
-        status.textContent = err.message || "Registration failed. Please try again.";
+        status.textContent = err.message || "Request failed. Please try again.";
       });
     }
   

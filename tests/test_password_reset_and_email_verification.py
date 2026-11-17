@@ -32,7 +32,7 @@ def test_01_public_forgot_and_reset_password_pages():
     r_signup = client.get("/get-started")
     assert r_signup.status_code == 200
     assert 'value="M5V 2T6"' in r_signup.text
-    assert "At least 10 characters" in r_signup.text
+    assert "Request Beta Access" in r_signup.text
 
 
 def test_02_signup_email_verification_and_resend_flow():

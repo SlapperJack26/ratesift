@@ -1392,6 +1392,384 @@ def delete_tenant_failsafe_attributions(tenant_id: str) -> int:
     return deleted
 
 
+def get_expiring_or_expired_sheets(user_id: str, within_days: int = 14) -> List[Dict[str, Any]]:
+    """
+    Returns carrier rate sheets owned by `user_id` that are already expired or expiring
+    within `within_days` calendar days, preventing silent margin bleed from outdated tariffs.
+    """
+    from datetime import timedelta
+
+    sheets = list_rate_sheets(user_id=user_id)
+    today = datetime.utcnow().date()
+    horizon = today + timedelta(days=int(within_days))
+    alerts: List[Dict[str, Any]] = []
+
+    for s in sheets:
+        exp_raw = (s.get("expiry_date") or "").strip()
+        if not exp_raw:
+            continue
+        try:
+            exp_date = datetime.strptime(exp_raw[:10], "%Y-%m-%d").date()
+        except Exception:
+            continue
+
+        days_left = (exp_date - today).days
+        if days_left <= within_days:
+            alerts.append({
+                "sheet_id": s["id"],
+                "carrier_name": s.get("carrier_name"),
+                "service_name": s.get("service_name"),
+                "expiry_date": exp_raw[:10],
+                "days_remaining": days_left,
+                "expiry_status": "EXPIRED" if days_left < 0 else "EXPIRING_SOON",
+                "confirmation_status": s.get("confirmation_status"),
+            })
+
+    alerts.sort(key=lambda x: x["days_remaining"])
+    return alerts
+
+
+def apply_gri_percentage_to_sheet(
+    sheet_id: str,
+    user_id: str,
+    gri_percent: float,
+    new_effective_date: Optional[str] = None,
+    new_expiry_date: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    1-Click General Rate Increase (GRI) Bumper:
+    Applies a uniform percentage adjustment (e.g. +5.5%) across all CWT/Skid weight breaks
+    and minimum charges on a carrier rate sheet using exact Decimal rounding, and bumps version.
+    """
+    from decimal import Decimal, ROUND_HALF_UP
+
+    sheet = get_rate_sheet(sheet_id, user_id)
+    if not sheet:
+        raise ValueError(f"Rate sheet '{sheet_id}' not found or unauthorized.")
+
+    pct_dec = Decimal(str(float(gri_percent)))
+    mult_dec = Decimal("1") + (pct_dec / Decimal("100"))
+    if mult_dec <= Decimal("0"):
+        raise ValueError("GRI percentage must leave rates positive.")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # 1. Update all weight breaks
+    cursor.execute(
+        "SELECT id, base_rate FROM ql_weight_breaks WHERE sheet_id = ? AND user_id = ?",
+        (sheet_id, user_id),
+    )
+    breaks = cursor.fetchall()
+    for b in breaks:
+        old_r = Decimal(str(b["base_rate"] or 0.0))
+        new_r = float((old_r * mult_dec).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+        cursor.execute(
+            "UPDATE ql_weight_breaks SET base_rate = ? WHERE id = ? AND user_id = ?",
+            (new_r, b["id"], user_id),
+        )
+
+    # 2. Update all carrier minimum charges
+    cursor.execute(
+        "SELECT id, min_charge FROM ql_carrier_minimums WHERE sheet_id = ? AND user_id = ?",
+        (sheet_id, user_id),
+    )
+    mins = cursor.fetchall()
+    for m in mins:
+        old_m = Decimal(str(m["min_charge"] or 0.0))
+        new_m = float((old_m * mult_dec).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+        cursor.execute(
+            "UPDATE ql_carrier_minimums SET min_charge = ? WHERE id = ? AND user_id = ?",
+            (new_m, m["id"], user_id),
+        )
+
+    # 3. Bump sheet version and optional dates
+    new_ver = int(sheet.get("version") or 1) + 1
+    eff_dt = new_effective_date or sheet.get("effective_date")
+    exp_dt = new_expiry_date or sheet.get("expiry_date")
+    cursor.execute(
+        """
+        UPDATE ql_rate_sheets
+        SET version = ?, effective_date = ?, expiry_date = ?
+        WHERE id = ? AND user_id = ?
+        """,
+        (new_ver, eff_dt, exp_dt, sheet_id, user_id),
+    )
+
+    conn.commit()
+    conn.close()
+    return {
+        "sheet_id": sheet_id,
+        "carrier_name": sheet.get("carrier_name"),
+        "gri_percent_applied": float(gri_percent),
+        "updated_breaks_count": len(breaks),
+        "updated_minimums_count": len(mins),
+        "new_version": new_ver,
+        "effective_date": eff_dt,
+        "expiry_date": exp_dt,
+    }
+
+
+SAMPLE_SANDBOX_TARIFF_REF = "SAMPLE-SANDBOX-2026"
+
+
+def seed_sample_canadian_ltl_tariffs(user_id: str) -> Dict[str, Any]:
+    """
+    1-Click Sandbox Mode: Seeds 3 realistic, immediately CONFIRMED Canadian LTL sample tariffs
+    ('[SAMPLE] Manitoulin Transport', '[SAMPLE] Day & Ross Freight', '[SAMPLE] Overland West Freight Lines')
+    with tariff_ref = 'SAMPLE-SANDBOX-2026' across major Canadian corridors so new brokers can test
+    the entire console workflow within 3 seconds without consuming uploaded-sheet quotas.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT id, carrier_name, service_name
+        FROM ql_rate_sheets
+        WHERE user_id = ? AND tariff_ref = ?
+        ORDER BY created_at ASC
+        """,
+        (str(user_id), SAMPLE_SANDBOX_TARIFF_REF),
+    )
+    existing = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+
+    if existing:
+        return {
+            "seeded_count": len(existing),
+            "sheet_ids": [r["id"] for r in existing],
+            "carriers": [r["carrier_name"] for r in existing],
+            "tariff_ref": SAMPLE_SANDBOX_TARIFF_REF,
+            "already_seeded": True,
+        }
+
+    carrier_specs = [
+        {
+            "carrier_name": "[SAMPLE] Manitoulin Transport",
+            "service_name": "Standard Road LTL",
+            "filename": "SAMPLE_SANDBOX_Manitoulin_LTL_2026.xlsx",
+            "cell_prefix": "Sample_Manitoulin!",
+            "fsc_pct": 31.5,
+            "tailgate": 75.0,
+            "residential": 85.0,
+            "appointment": 35.0,
+            "heated_pct": 15.0,
+            "lanes": [
+                ("TORONTO, ON", "CALGARY, AB", "ON-AB", 4, 145.0, [42.50, 36.80, 31.20, 26.40, 21.90], "D14"),
+                ("TORONTO, ON", "MONTREAL, QC", "ON-QC", 1, 98.0, [21.50, 18.40, 15.20, 12.80, 10.50], "D18"),
+                ("TORONTO, ON", "VANCOUVER, BC", "ON-BC", 5, 165.0, [48.90, 42.10, 35.80, 29.50, 24.80], "D22"),
+                ("TORONTO, ON", "WINNIPEG, MB", "ON-MB", 3, 128.0, [32.40, 27.90, 23.10, 19.40, 16.20], "D26"),
+                ("CALGARY, AB", "LINDSAY, ON", "AB-ON", 4, 148.0, [41.20, 35.50, 30.10, 25.60, 21.10], "D30"),
+            ],
+        },
+        {
+            "carrier_name": "[SAMPLE] Day & Ross Freight",
+            "service_name": "Domestic LTL CWT",
+            "filename": "SAMPLE_SANDBOX_DayAndRoss_LTL_2026.xlsx",
+            "cell_prefix": "Sample_DayRoss!",
+            "fsc_pct": 32.0,
+            "tailgate": 80.0,
+            "residential": 90.0,
+            "appointment": 40.0,
+            "heated_pct": 16.0,
+            "lanes": [
+                ("TORONTO, ON", "CALGARY, AB", "ON-AB", 4, 140.0, [40.90, 35.20, 29.90, 25.10, 20.80], "E12"),
+                ("TORONTO, ON", "MONTREAL, QC", "ON-QC", 1, 95.0, [20.80, 17.90, 14.80, 12.30, 10.10], "E16"),
+                ("TORONTO, ON", "VANCOUVER, BC", "ON-BC", 5, 160.0, [47.20, 40.80, 34.60, 28.90, 24.10], "E20"),
+                ("TORONTO, ON", "WINNIPEG, MB", "ON-MB", 3, 125.0, [31.50, 27.10, 22.60, 18.90, 15.80], "E24"),
+                ("CALGARY, AB", "LINDSAY, ON", "AB-ON", 4, 142.0, [39.90, 34.40, 29.20, 24.70, 20.40], "E28"),
+            ],
+        },
+        {
+            "carrier_name": "[SAMPLE] Overland West Freight Lines",
+            "service_name": "Western Express LTL",
+            "filename": "SAMPLE_SANDBOX_OverlandWest_LTL_2026.xlsx",
+            "cell_prefix": "Sample_OverlandWest!",
+            "fsc_pct": 30.5,
+            "tailgate": 70.0,
+            "residential": 80.0,
+            "appointment": 30.0,
+            "heated_pct": 14.0,
+            "lanes": [
+                ("TORONTO, ON", "CALGARY, AB", "ON-AB", 3, 150.0, [43.80, 38.10, 32.50, 27.20, 22.70], "C9"),
+                ("TORONTO, ON", "MONTREAL, QC", "ON-QC", 2, 102.0, [22.40, 19.20, 16.00, 13.50, 11.20], "C13"),
+                ("TORONTO, ON", "VANCOUVER, BC", "ON-BC", 4, 158.0, [46.50, 39.90, 33.90, 28.40, 23.60], "C17"),
+                ("TORONTO, ON", "WINNIPEG, MB", "ON-MB", 3, 130.0, [33.10, 28.50, 23.80, 19.90, 16.70], "C21"),
+                ("CALGARY, AB", "LINDSAY, ON", "AB-ON", 3, 149.0, [42.60, 37.00, 31.40, 26.50, 22.00], "C25"),
+            ],
+        },
+    ]
+
+    weight_tiers = [
+        (0.0, 500.0, "L5C", False),
+        (500.0, 1000.0, "5C", False),
+        (1000.0, 2000.0, "1M", False),
+        (2000.0, 5000.0, "2M", False),
+        (5000.0, None, "5M", True),
+    ]
+
+    seeded_ids: List[str] = []
+    seeded_carriers: List[str] = []
+
+    for spec in carrier_specs:
+        sid = create_rate_sheet(
+            user_id=str(user_id),
+            carrier_name=spec["carrier_name"],
+            service_name=spec["service_name"],
+            tariff_ref=SAMPLE_SANDBOX_TARIFF_REF,
+            mode="LTL",
+            currency="CAD",
+            weight_unit="lb",
+            dim_unit="in",
+            dim_divisor=139.0,
+            dim_min_rule="10 lbs/cu.ft",
+            effective_date="2026-01-01",
+            expiry_date="2027-12-31",
+            source_filename=spec["filename"],
+            confirmation_status="CONFIRMED",
+            is_benchmark=0,
+            rating_basis="WEIGHT_CWT",
+            max_skid_capacity=12,
+            weight_rounding_rule="CEIL_1LB",
+            allow_deficit_rating=1,
+            failsafe_status="ready",
+        )
+        confirm_rate_sheet(
+            sheet_id=sid,
+            user_id=str(user_id),
+            confirmed_by="Sandbox Sample Seeder",
+            currency="CAD",
+            weight_unit="lb",
+            dim_divisor=139.0,
+            effective_date="2026-01-01",
+            expiry_date="2027-12-31",
+            markup_mode="PERCENTAGE",
+            markup_value=15.0,
+            fsc_passthrough=True,
+            resolve_flags=True,
+            allow_deficit_rating=True,
+            failsafe_status="ready",
+        )
+
+        zones_payload = []
+        breaks_payload = []
+        minimums_payload = []
+
+        for orig, dest, zcode, tdays, min_chg, rates, base_cell in spec["lanes"]:
+            cell_ref = f"{spec['cell_prefix']}{base_cell}"
+            zones_payload.append({
+                "origin_spec": orig,
+                "dest_spec": dest,
+                "zone_code": zcode,
+                "transit_days": tdays,
+                "source_cell": cell_ref,
+            })
+            minimums_payload.append({
+                "zone_code": zcode,
+                "origin_spec": orig,
+                "dest_spec": dest,
+                "min_charge": min_chg,
+                "source_cell": cell_ref,
+            })
+            for idx, (wmin, wmax, bname, is_open) in enumerate(weight_tiers):
+                breaks_payload.append({
+                    "zone_code": zcode,
+                    "origin_spec": orig,
+                    "dest_spec": dest,
+                    "min_weight": wmin,
+                    "max_weight": wmax,
+                    "break_name": bname,
+                    "base_rate": rates[idx],
+                    "rate_type": "CWT",
+                    "source_cell": cell_ref,
+                    "is_open_ended": is_open,
+                })
+
+        insert_carrier_zones(sid, str(user_id), zones_payload)
+        insert_carrier_minimums(sid, str(user_id), minimums_payload)
+        insert_weight_breaks(sid, str(user_id), breaks_payload)
+        insert_carrier_surcharges(sid, str(user_id), [
+            {
+                "surcharge_code": "FSC",
+                "name": "Canadian LTL Fuel Surcharge",
+                "condition_type": "always",
+                "fee_type": "PERCENTAGE",
+                "amount": spec["fsc_pct"],
+                "source_cell": f"{spec['cell_prefix']}FSC",
+            },
+            {
+                "surcharge_code": "LIFTGATE",
+                "name": "Power Tailgate / Liftgate",
+                "condition_type": "accessorial",
+                "fee_type": "FLAT",
+                "amount": spec["tailgate"],
+                "source_cell": f"{spec['cell_prefix']}ACC_TG",
+            },
+            {
+                "surcharge_code": "TAILGATE",
+                "name": "Power Tailgate Service",
+                "condition_type": "accessorial",
+                "fee_type": "FLAT",
+                "amount": spec["tailgate"],
+                "source_cell": f"{spec['cell_prefix']}ACC_TG2",
+            },
+            {
+                "surcharge_code": "RESIDENTIAL",
+                "name": "Residential Delivery",
+                "condition_type": "accessorial",
+                "fee_type": "FLAT",
+                "amount": spec["residential"],
+                "source_cell": f"{spec['cell_prefix']}ACC_RES",
+            },
+            {
+                "surcharge_code": "APPOINTMENT",
+                "name": "Delivery Appointment",
+                "condition_type": "accessorial",
+                "fee_type": "FLAT",
+                "amount": spec["appointment"],
+                "source_cell": f"{spec['cell_prefix']}ACC_APPT",
+            },
+            {
+                "surcharge_code": "HEATED",
+                "name": "Protect From Freeze / Heated",
+                "condition_type": "accessorial",
+                "fee_type": "PERCENTAGE",
+                "amount": spec["heated_pct"],
+                "min_fee": 35.0,
+                "source_cell": f"{spec['cell_prefix']}ACC_HEAT",
+            },
+        ])
+
+        seeded_ids.append(sid)
+        seeded_carriers.append(spec["carrier_name"])
+
+    return {
+        "seeded_count": len(seeded_ids),
+        "sheet_ids": seeded_ids,
+        "carriers": seeded_carriers,
+        "tariff_ref": SAMPLE_SANDBOX_TARIFF_REF,
+        "already_seeded": False,
+    }
+
+
+def purge_sample_canadian_ltl_tariffs(user_id: str) -> Dict[str, Any]:
+    """Deletes all '[SAMPLE]' Sandbox Canadian LTL tariffs owned by `user_id`."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
+    cursor.execute(
+        "DELETE FROM ql_rate_sheets WHERE user_id = ? AND tariff_ref = ?",
+        (str(user_id), SAMPLE_SANDBOX_TARIFF_REF),
+    )
+    purged_count = cursor.rowcount
+    conn.commit()
+    conn.close()
+    return {
+        "purged_count": int(purged_count),
+        "tariff_ref": SAMPLE_SANDBOX_TARIFF_REF,
+    }
+
+
 if __name__ == "__main__":
     init_quotelytics_db()
     print("Quotelytics Normalized Database initialized successfully.")

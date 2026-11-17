@@ -128,9 +128,14 @@
             <p class="text-blue-700 text-[11px] mt-0.5">Quotelytics only rates against contracts you upload. To ensure confidentiality, no sample or external sheets are shared. Upload your contract to begin quoting.</p>
           </div>
         </div>
-        <a href="/console/rate-sheets" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-2xs whitespace-nowrap transition-colors">
-          Upload Carrier Tariff →
-        </a>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" onclick="seedSampleCanadianTariffs()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-2xs whitespace-nowrap transition-colors cursor-pointer">
+            ⚡ 1-Click Load 3 Sample Canadian Tariffs (Practice Mode)
+          </button>
+          <a href="/console/rate-sheets" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-2xs whitespace-nowrap transition-colors">
+            Upload Carrier Tariff →
+          </a>
+        </div>
       </div>
 
       <!-- Top Title Header & Fuel Surcharge Index Card -->
@@ -173,6 +178,26 @@
         <button type="button" onclick="loadPresetLane('TORONTO, ON', 'MONTREAL, QC', 1, null, null, null, ['appointment'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
           Toronto, ON → Montreal, QC • 1 Skid
         </button>
+      </div>
+
+      <!-- 1-Second Smart Paste Shipper Email / RFQ Bar -->
+      <div id="smart-email-paste-card" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 shadow-sm border border-slate-700 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-600 text-white">⚡ 1-Second Smart Paste</span>
+            <span class="text-xs font-bold">Paste Shipper Email / RFQ Text to Auto-Fill Quote Fields</span>
+          </div>
+          <button type="button" onclick="fillSampleShipperEmail()" class="text-[11px] font-semibold text-red-300 hover:text-white underline cursor-pointer">
+            Try Sample Shipper Email →
+          </button>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input id="smart-email-input" type="text" placeholder="e.g. 'Need a rate for 4 skids, 2,450 lbs, 48x40x60 from Mississauga L5T 1A1 to Calgary T2P 2M5 with tailgate and heated service'" class="flex-1 bg-slate-950/70 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-red-500" />
+          <button type="button" onclick="parsePastedShipperEmail()" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs whitespace-nowrap cursor-pointer transition-colors">
+            Auto-Fill Form
+          </button>
+        </div>
+        <div id="smart-email-status" class="hidden text-[11px] text-emerald-300 font-medium"></div>
       </div>
 
 
@@ -272,6 +297,27 @@
               </div>
             </div>
 
+            <!-- Canadian 10 lb/cu.ft Cube-Out, Non-Stackable (84" Rule) & Over-Length Guard Badge -->
+            <div id="cube-density-guard-badge" class="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-amber-50/90 border border-amber-200 text-xs text-amber-900">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-200 text-amber-950">10 lb/cu.ft Cube-Out Guard</span>
+                <span id="cube-density-text" class="font-medium">Canadian LTL Density Check: Standard 48×40×50 skids (~55.6 cu.ft/skid → 556 lbs min density weight/skid)</span>
+              </div>
+              <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-[11px] font-semibold text-amber-950 cursor-pointer">
+                <input id="input-non-stackable" type="checkbox" onchange="checkCubeDensityLive()" class="rounded text-red-600 focus:ring-red-500" />
+                <span>Non-Stackable (84&quot; Vertical Cube Rule)</span>
+              </label>
+            </div>
+
+            <!-- Live Institutional Lane Win/Loss Price Memory Card -->
+            <div id="lane-intelligence-card" class="hidden flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-indigo-50/90 border border-indigo-200 text-xs text-indigo-950">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-600 text-white">Institutional Lane Memory</span>
+                <span id="lane-intelligence-text" class="font-medium">Analyzing past lane Win/Loss outcomes...</span>
+              </div>
+              <span id="lane-intelligence-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white border border-indigo-200 text-indigo-700"></span>
+            </div>
+
             <!-- Accessorials / Surcharges Selection with Mode Filter (Land, Sea, Air) -->
             <div class="space-y-3 pt-3 border-t border-slate-100">
               <div class="flex flex-wrap items-center justify-between gap-3">
@@ -323,6 +369,10 @@
                 <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
                   <input type="checkbox" name="accessorial" value="inside_delivery" aria-label="Accessorial: Inside Delivery" class="rounded text-red-600 focus:ring-red-500">
                   <span class="text-[11px] font-medium text-slate-700">Inside Delivery</span>
+                </label>
+                <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
+                  <input type="checkbox" name="accessorial" value="limited_access" aria-label="Accessorial: Limited Access / Construction" class="rounded text-red-600 focus:ring-red-500">
+                  <span class="text-[11px] font-medium text-slate-700">Limited Access / Job Site</span>
                 </label>
 
                 <!-- 2. SEA FREIGHT -->
@@ -2660,7 +2710,132 @@
         })
         .catch(err => console.debug("Quota header load:", err));
     }
+    function fillSampleShipperEmail() {
+      const inp = document.getElementById('smart-email-input');
+      if (!inp) return;
+      inp.value = "Hi dispatch, need a quick LTL quote for 4 skids, 2,450 lbs, 48x40x60 from Mississauga L5T 1A1 to Calgary T2P 2M5, needs tailgate and heated service.";
+      parsePastedShipperEmail();
+    }
+
+    async function parsePastedShipperEmail() {
+      const inp = document.getElementById('smart-email-input');
+      const statusEl = document.getElementById('smart-email-status');
+      if (!inp || !inp.value.trim()) {
+        showToast("Please paste a shipper email or quote snippet first.", "error");
+        return;
+      }
+      try {
+        const res = await fetch('/api/quotes/parse-email-text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: inp.value })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Could not parse email.');
+
+        if (data.origin) {
+          document.getElementById('input-origin').value = data.origin;
+          resolveFsaLive('origin', data.origin);
+        }
+        if (data.destination) {
+          document.getElementById('input-destination').value = data.destination;
+          resolveFsaLive('dest', data.destination);
+        }
+        if (data.skid_count) {
+          document.getElementById('input-skids').value = data.skid_count;
+        }
+        if (data.weight_lbs) {
+          document.getElementById('input-weight').value = data.weight_lbs;
+        }
+        if (data.dimensions_detected) {
+          document.getElementById('input-length').value = data.length;
+          document.getElementById('input-width').value = data.width;
+          document.getElementById('input-height').value = data.height;
+        }
+        if (Array.isArray(data.accessorials)) {
+          const reqSet = new Set(data.accessorials.map(a => a === 'tailgate' ? 'liftgate' : a));
+          document.querySelectorAll('input[name="accessorial"]').forEach(cb => {
+            cb.checked = reqSet.has(cb.value) || (cb.value === 'liftgate' && data.accessorials.includes('tailgate'));
+          });
+        }
+        if (statusEl) {
+          statusEl.textContent = `✓ Extracted ${data.fields_detected} fields: ${data.origin_label || data.origin} → ${data.dest_label || data.destination} • ${data.skid_count} skids (${data.weight_lbs || 1000} lbs) • Accessorials: ${(data.accessorials || []).join(', ') || 'None'}`;
+          statusEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        showToast(err.message || "Error parsing email.", "error");
+      }
+    }
+
+    async function seedSampleCanadianTariffs() {
+      try {
+        const res = await fetch('/api/quotelytics/sheets/seed-sample-tariffs', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Could not seed sample tariffs.');
+        showToast(`Loaded ${data.seeded_count} sample Canadian LTL tariffs. Run a quote immediately!`, 'success');
+        const banner = document.getElementById('no-sheets-banner');
+        if (banner) banner.classList.add('hidden');
+        if (typeof loadActiveSheetsCounter === 'function') loadActiveSheetsCounter();
+        updateHeaderQuota();
+      } catch (err) {
+        showToast(err.message || 'Error seeding sample tariffs.', 'error');
+      }
+    }
+
+    async function checkCubeDensityLive() {
+      const wt = parseFloat(document.getElementById('input-weight')?.value || '1000') || 1000;
+      const len = parseFloat(document.getElementById('input-length')?.value || '48') || 48;
+      const wid = parseFloat(document.getElementById('input-width')?.value || '40') || 40;
+      const hgt = parseFloat(document.getElementById('input-height')?.value || '50') || 50;
+      const skids = parseInt(document.getElementById('input-skids')?.value || '1', 10) || 1;
+      const nonStack = Boolean(document.getElementById('input-non-stackable')?.checked);
+      try {
+        const res = await fetch('/api/quotes/cube-density-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            actual_weight_lbs: wt,
+            length_in: len,
+            width_in: wid,
+            height_in: hgt,
+            skid_count: skids,
+            non_stackable: nonStack
+          })
+        });
+        const data = await res.json();
+        const txt = document.getElementById('cube-density-text');
+        if (txt && data) {
+          txt.textContent = data.warning_message || `Canadian LTL Density Check: ${data.cubic_feet} cu.ft → ${data.effective_billable_weight_lbs} lbs billable`;
+        }
+      } catch (err) {
+        console.debug('Cube density check error:', err);
+      }
+    }
+
+    async function refreshLaneIntelligence() {
+      const origin = document.getElementById('input-origin')?.value || '';
+      const dest = document.getElementById('input-destination')?.value || '';
+      if (!origin.trim() || !dest.trim()) return;
+      try {
+        const res = await fetch(`/api/quotes/lane-intelligence?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const intel = data.intelligence;
+        const card = document.getElementById('lane-intelligence-card');
+        const txt = document.getElementById('lane-intelligence-text');
+        const badge = document.getElementById('lane-intelligence-badge');
+        if (card && txt && intel) {
+          card.classList.remove('hidden');
+          txt.textContent = intel.guidance_banner;
+          if (badge) badge.textContent = `Sweet Spot: ${intel.recommended_sweet_spot_markup_pct}% Markup`;
+        }
+      } catch (err) {
+        console.debug('Lane intelligence check:', err);
+      }
+    }
+
     updateHeaderQuota();
+    refreshLaneIntelligence();
   </script>
   <script src="/static/js/global-chrome.js?v=20261113b"></script>
 </body>

@@ -93,7 +93,7 @@
       <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
       <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
         <a href="/" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Home</a>
-        <a href="/demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Demo</a>
+        <a href="/demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Live Demo</a>
         <a href="/pricing" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Pricing</a>
       </nav>
 
@@ -102,8 +102,8 @@
         <a href="/login" aria-current="page" class="text-xs font-semibold text-red-600 border-b-2 border-red-600 transition-colors px-2 py-1" title="Currently on Login page">
           Log in
         </a>
-        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Create a free Quotelytics account">
-          Get Started
+        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Request Private Beta Access">
+          Request Beta Access
         </a>
         <!-- Mobile Menu Toggle Button (Phone Only) -->
         <button type="button" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" class="md:hidden p-1.5 rounded-lg border border-[var(--border)] text-slate-600 hover:bg-black/5 focus:outline-hidden transition-colors">
@@ -115,11 +115,11 @@
     <!-- Collapsible Mobile Navigation Drawer for Phones (< 768px) -->
     <nav id="mobile-nav-drawer" aria-label="Mobile Navigation" class="hidden md:hidden border-b border-[var(--border)] bg-slate-50/95 px-4 py-3 space-y-1.5 text-xs font-medium transition-all">
       <a href="/" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Home</a>
-      <a href="/demo" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Demo</a>
+      <a href="/demo" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Live Demo</a>
       <a href="/pricing" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Pricing</a>
       <div class="pt-2 mt-2 border-t border-[var(--border)] flex items-center justify-between">
         <a href="/login" class="text-xs font-semibold px-2 py-1 rounded text-red-600 font-bold bg-red-50/80">Log in</a>
-        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs ">Get Started</a>
+        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs ">Request Beta Access</a>
       </div>
     </nav>
 
@@ -256,8 +256,8 @@
         <div class="text-center space-y-3">
           <p class="text-xs text-[var(--muted-foreground)]">
             Don't have an account yet? 
-            <a href="/pricing" class="text-red-600 hover:underline font-bold">
-              Start Free on Starter Tier →
+            <a href="/get-started" class="text-red-600 hover:underline font-bold">
+              Request Beta Access →
             </a>
           </p>
 

@@ -131,3 +131,19 @@ This Agreement shall be governed by and construed in accordance with the laws of
 | **Title:** President & Sole Director | **Address:** _________________________________ |
 | **Email:** `dylan@quotelytics.ca` | **Email:** ___________________________________ |
 | **Date:** ___________________________________ | **Date:** ___________________________________ |
+
+---
+---
+
+## SCHEDULE "A" — GRANT-FUNDED QUALIFIED LIVE DEMO SPIFF (EARLY MOMENTUM BONUS)
+
+To reward early outbound prospecting momentum while 30-day Beta Cohort accounts are completing their free evaluation period, the Company establishes the following supplemental **Qualified Live Demo Spiff**, subject to the Company's receipt of its **$5,000.00 CAD Ontario Starter Company Plus Grant** disbursement:
+
+1. **$25.00 CAD Per Qualified Live Demo:** In addition to the 30% Year-1 recurring cash commissions and Class B Non-Voting Milestone Shares set forth in Sections 2 and 3 of the Agreement, the Company shall pay the Representative a cash bonus of **$25.00 CAD** for each **Qualified Live Demo** originated and completed by the Representative.
+2. **Definition of a "Qualified Live Demo":** A demo qualifies for the $25.00 CAD spiff when all four (4) of the following criteria are met:
+   (a) The prospect is a verified Canadian freight brokerage, 3PL, or dispatch operation logged in the Company's CRM (`Canadian_Freight_Brokerage_Target_Prospects.xlsx`);
+   (b) A decision-maker or lead dispatcher (Owner, VP Operations, Dispatch Manager, or Pricing Lead) attends a live 15-minute screen-share demonstration;
+   (c) The prospect either uploads at least one (1) real carrier rate sheet during the call or submits 1–5 carrier rate sheets into the Company's **24-Hour Concierge Drop-Box**; and
+   (d) The demo outcome and prospect notes are logged in the CRM within 24 hours of call completion.
+3. **Maximum Cap Per Representative:** Capped at **twenty (20) Qualified Live Demos per Representative** (**$500.00 CAD maximum demo spiff pool per Representative**; $1,000.00 CAD total across two Representatives) unless extended in writing by the Company.
+

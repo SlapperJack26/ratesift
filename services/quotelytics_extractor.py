@@ -33,11 +33,17 @@ class QuotelyticsExtractor:
         filename: str,
         user_id: str,
         column_overrides: Optional[Dict[str, Any]] = None,
+        carrier_preset: Optional[str] = None,
     ):
         self.file_bytes = file_bytes
         self.filename = filename
         self.user_id = user_id
         self.column_overrides = column_overrides or {}
+        self.carrier_preset = (
+            carrier_preset
+            or self.column_overrides.get("carrier_preset")
+            or "AUTO_DETECT"
+        ).strip().upper()
         try:
             from services.db_service import get_user_keyword_map
             self.custom_keywords = get_user_keyword_map(self.user_id)
@@ -78,12 +84,18 @@ class QuotelyticsExtractor:
 
     def process(self) -> Dict[str, Any]:
         """Runs the complete extraction pipeline and persists to SQLite."""
-        if self.filename.endswith(".csv"):
+        lower_fname = self.filename.lower()
+        if lower_fname.endswith(".csv"):
             self._extract_csv()
-        elif self.filename.endswith(".xlsx") or self.filename.endswith(".xls"):
+        elif lower_fname.endswith(".xlsx") or lower_fname.endswith(".xls"):
             self._extract_excel()
+        elif lower_fname.endswith(".pdf"):
+            from services.pdf_tariff_extractor_service import convert_pdf_tariff_bytes_to_csv_text
+            csv_text = convert_pdf_tariff_bytes_to_csv_text(self.file_bytes)
+            self.file_bytes = csv_text.encode("utf-8")
+            self._extract_csv()
         else:
-            raise ValueError(f"Unsupported file format for {self.filename}. Only .xlsx, .xls, and .csv are supported.")
+            raise ValueError(f"Unsupported file format for {self.filename}. Only .xlsx, .xls, .csv, and .pdf are supported.")
 
         # Validate mandatory units (Rule 5)
         self._validate_units_and_currency()
@@ -129,6 +141,14 @@ class QuotelyticsExtractor:
         insert_carrier_minimums(sheet_id, self.user_id, self.minimums)
         if self.zones:
             insert_carrier_zones(sheet_id, self.user_id, self.zones)
+
+        if self.carrier_preset and self.carrier_preset != "AUTO_DETECT":
+            try:
+                from services.carrier_presets_service import apply_preset_to_sheet
+                preset_res = apply_preset_to_sheet(sheet_id, self.user_id, self.carrier_preset)
+                self.metadata["carrier_preset_applied"] = preset_res["preset_id"]
+            except Exception:
+                pass
 
         return {
             "sheet_id": sheet_id,

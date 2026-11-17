@@ -55,7 +55,7 @@ Once you receive your **Federal Corporation Number**, **Ontario Extra-Provincial
 | **04** | `04_Director_Consent_to_Act.md` (`.docx`) | Statutory consent under CBCA s. 106(9) & Resident Canadian declaration | Sole Director (Dylan) |
 | **05** | `05_Share_Subscription_Agreement.md` (`.docx`) | Subscribes for 10,000,000 Class A Voting Common Shares for $1,000.00 CAD | Subscriber & Corporation |
 | **06** | `06_Corporate_Registers_and_Ledgers.md` (`.docx`) | Directors, Officers, Class A & Class B Share Ledgers, and CBCA s. 21.1 ISC Register | Secretary (Dylan) |
-| **07** | `07_Certified_Banking_Resolution.md` (`.docx`) | Take this document + your Certificate of Incorporation to your bank (RBC / TD / Venn) and Stripe Canada | President & Secretary (Dylan) |
+| **07** | `07_Certified_Banking_Resolution.md` (`.docx`) | Take this document + your Certificate of Incorporation to **Royal Bank of Canada (RBC)**, **Wealthsimple Corporate**, **Venn**, and **Stripe Canada** | President & Secretary (Dylan) |
 | **08** | `08_Share_Certificate_Template.md` (`.docx`) | Issues Share Certificate **No. A-1** (10,000,000 Class A Voting Common Shares) to Dylan | President & Secretary (Dylan) |
 | **09** | `09_Technology_and_IP_Assignment_Agreement.md` (`.docx`) | Transfers 100% of Quotelytics software, code, and `quotelytics.ca` to Quotelytics Inc. + waives Moral Rights | Dylan (Assignor) & Quotelytics Inc. |
 | **10** | `10_Independent_Sales_Rep_and_Milestone_Equity_Agreement.md` (`.docx`) | Ready-to-use contractor agreement (30% Year-1 commission + Class B Non-Voting milestone shares) | Quotelytics Inc. & Sales Rep |

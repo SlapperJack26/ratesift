@@ -121,7 +121,7 @@
       <!-- Center: Crawlable Navigation Menu with ARIA Landmarks -->
       <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex absolute inset-x-0 mx-auto items-center justify-center gap-6 lg:gap-8 text-sm font-medium">
         <a href="/" id="nav-home" aria-current="page" class="pub-tab text-red-600 font-semibold border-b-2 border-red-600 py-1 transition-all">Home</a>
-        <a href="/demo" id="nav-demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Demo</a>
+        <a href="/demo" id="nav-demo" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Live Demo</a>
         <a href="/pricing" id="nav-pricing" class="pub-tab text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors py-1">Pricing</a>
       </nav>
 
@@ -130,8 +130,8 @@
         <a href="/login" class="text-xs font-semibold text-[var(--foreground)] hover:text-red-600 transition-colors px-2 py-1" title="Log in to your Quotelytics account">
           Log in
         </a>
-        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Create a free Quotelytics account">
-          Get Started
+        <a href="/get-started" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-xs" title="Request Private Beta Access">
+          Request Beta Access
         </a>
         <!-- Mobile Menu Toggle Button (Phone Only) -->
         <button type="button" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" class="md:hidden p-1.5 rounded-lg border border-[var(--border)] text-slate-600 hover:bg-black/5 focus:outline-hidden transition-colors">
@@ -143,11 +143,11 @@
     <!-- Collapsible Mobile Navigation Drawer for Phones (< 768px) -->
     <nav id="mobile-nav-drawer" aria-label="Mobile Navigation" class="hidden md:hidden border-b border-[var(--border)] bg-slate-50/95 px-4 py-3 space-y-1.5 text-xs font-medium transition-all">
       <a href="/" class="block px-3 py-2 rounded-lg text-red-600 font-bold bg-red-50/80">Home</a>
-      <a href="/demo" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Demo</a>
+      <a href="/demo" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Live Demo</a>
       <a href="/pricing" class="block px-3 py-2 rounded-lg text-slate-700 hover:text-red-600">Pricing</a>
       <div class="pt-2 mt-2 border-t border-[var(--border)] flex items-center justify-between">
         <a href="/login" class="text-xs font-semibold text-slate-700 hover:text-red-600 px-1 py-1">Log in</a>
-        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs">Get Started</a>
+        <a href="/get-started" class="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md shadow-2xs">Request Beta Access</a>
       </div>
     </nav>
 
@@ -176,7 +176,7 @@
         <!-- Call to Actions -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
           <a href="/demo" class="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-5 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5">
-            <span>View Live Demo</span>
+            <span>Book a Live Demo</span>
             <span aria-hidden="true">→</span>
           </a>
           <a href="/pricing" class="border border-[var(--border)] hover:bg-black/5 text-[var(--foreground)] font-medium text-xs px-4 py-2.5 rounded-xl transition-colors inline-flex items-center justify-center">
@@ -320,8 +320,8 @@
                 <li><span class="inline-block mr-1.5"><svg class="w-3.5 h-3.5 text-emerald-600 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></span>7-day history storage</li>
               </ul>
             </div>
-            <a href="/console/new-quote" class="w-full text-center border border-[var(--border)] py-1.5 rounded-lg text-xs font-medium hover:bg-black/5 transition-colors">
-              Get Started Free
+            <a href="/get-started?tier=FREE" class="w-full text-center border border-[var(--border)] py-1.5 rounded-lg text-xs font-medium hover:bg-black/5 transition-colors">
+              Request Beta Access
             </a>
           </section>
 
@@ -339,8 +339,8 @@
                 <li><span class="inline-block mr-1.5"><svg class="w-3.5 h-3.5 text-emerald-600 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></span>Priority support</li>
               </ul>
             </div>
-            <a href="/console/new-quote" class="w-full text-center bg-red-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-red-700 transition-colors shadow-xs">
-              Start 14-Day Pro Trial
+            <a href="/get-started?tier=PRO" class="w-full text-center bg-red-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-red-700 transition-colors shadow-xs">
+              Request Beta Access
             </a>
           </section>
 

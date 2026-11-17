@@ -112,12 +112,10 @@
           <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Manage your organization profile, track usage limits, control dispatcher seats, and audit operational bottlenecks.</p>
         </div>
         <div class="flex items-center gap-2">
-          <a id="admin-onboarding-desk-link" href="/console/admin" class="hidden items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold text-xs transition-colors">
-            <span>Sales &amp; API Onboarding</span>
-          </a>
+          <div id="admin-onboarding-desk-container"></div>
           <button type="button" onclick="openUpgradeModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            <span>Change Subscription Plan</span>
+            <span>Request Beta Access</span>
           </button>
         </div>
       </header>
@@ -979,7 +977,34 @@
         return;
       }
 
-      // Initiate Stripe Subscription Checkout Session
+      // During Private Beta, non-admin tier requests go to Admin Beta Queue (no Stripe checkout)
+      const isPrivateBeta = true;
+      if (isPrivateBeta && (!currentUserProfile || currentUserProfile.role !== 'ADMIN')) {
+        try {
+          const betaRes = await fetch('/api/beta/request-access', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: (currentUserProfile && currentUserProfile.name) || 'Beta User',
+              email: (currentUserProfile && currentUserProfile.email) || '',
+              company: (currentUserProfile && currentUserProfile.company) || 'Brokerage',
+              origin_zip: (currentUserProfile && currentUserProfile.origin_zip) || 'M5V 2T6',
+              requested_tier: plan,
+              notes: 'In-app Request Beta Access / Tier Upgrade',
+              terms_accepted: true
+            })
+          });
+          if (!betaRes.ok) throw new Error('Could not submit beta access request.');
+          closeUpgradeModal();
+          showToast(`Request Beta Access submitted for ${plan}! An administrator will update your account shortly.`, 'success');
+          return;
+        } catch (err) {
+          showToast(err.message || 'Could not submit beta access request.', 'error');
+          return;
+        }
+      }
+
+      // Initiate Stripe Subscription Checkout Session (Post-Beta)
       try {
         const res = await fetch('/api/billing/checkout', {
           method: 'POST',
@@ -1212,10 +1237,14 @@
 
             document.getElementById('profile-display-name').textContent = rawName || "";
             document.getElementById('profile-display-company').textContent = data.company || "";
-            const adminDeskLink = document.getElementById('admin-onboarding-desk-link');
-            if (adminDeskLink && data.role === 'ADMIN') {
-              adminDeskLink.classList.remove('hidden');
-              adminDeskLink.classList.add('inline-flex');
+            const adminContainer = document.getElementById('admin-onboarding-desk-container');
+            if (adminContainer && data.role === 'ADMIN' && !adminContainer.hasChildNodes()) {
+              const adminLink = document.createElement('a');
+              adminLink.id = 'admin-onboarding-desk-link';
+              adminLink.href = '/console/admin';
+              adminLink.className = 'inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold text-xs transition-colors';
+              adminLink.innerHTML = '<span>Sales &amp; API Onboarding</span>';
+              adminContainer.appendChild(adminLink);
             }
             
             const initials = parts.map(p => p[0] || "").join("").substring(0, 2).toUpperCase() || "--";

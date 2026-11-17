@@ -79,6 +79,70 @@
         </div>
       </section>
 
+      <!-- Private Beta Access Queue & Admin Account Provisioner -->
+      <section id="beta-provisioning-section" class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-sm font-bold text-slate-900">Private Beta Account Provisioner &amp; Access Requests</h2>
+            <p class="text-[11px] text-slate-500">Public self-signup and online payments are disabled during Private Beta. Provision beta accounts here or approve incoming requests in 1 click.</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">ADMIN-ONLY PROVISIONING</span>
+        </div>
+
+        <form id="admin-provision-form" onsubmit="event.preventDefault(); provisionBetaUser();" class="grid grid-cols-1 sm:grid-cols-6 gap-2.5 items-end bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+          <input type="hidden" id="prov-request-id" value="" />
+          <div>
+            <label for="prov-name" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Contact Name</label>
+            <input id="prov-name" type="text" required placeholder="Jane Doe" class="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs bg-white" />
+          </div>
+          <div>
+            <label for="prov-email" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Work Email</label>
+            <input id="prov-email" type="email" required placeholder="jane@brokerage.ca" class="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs bg-white font-mono" />
+          </div>
+          <div>
+            <label for="prov-company" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Brokerage Name</label>
+            <input id="prov-company" type="text" required placeholder="Maple Freight Inc." class="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs bg-white" />
+          </div>
+          <div>
+            <label for="prov-origin" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Origin FSA</label>
+            <input id="prov-origin" type="text" value="M5V 2T6" class="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs bg-white font-mono" />
+          </div>
+          <div>
+            <label for="prov-tier" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Beta Tier</label>
+            <select id="prov-tier" class="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs bg-white font-semibold">
+              <option value="FREE">FREE</option>
+              <option value="PRO" selected>PRO</option>
+              <option value="TEAM">TEAM</option>
+              <option value="BUSINESS">BUSINESS</option>
+            </select>
+          </div>
+          <div>
+            <button type="submit" class="w-full px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs cursor-pointer transition-colors">
+              Provision Account
+            </button>
+          </div>
+        </form>
+
+        <div id="prov-result-banner" class="hidden p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 font-mono"></div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-lg">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-50 border-b border-slate-200 text-[11px] text-slate-600">
+              <tr>
+                <th class="py-2 px-3 font-bold">Prospect &amp; Brokerage</th>
+                <th class="py-2 px-3 font-bold">Requested Tier</th>
+                <th class="py-2 px-3 font-bold">Origin / Notes</th>
+                <th class="py-2 px-3 font-bold">Status</th>
+                <th class="py-2 px-3 font-bold text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="beta-requests-tbody" class="divide-y divide-slate-100">
+              <tr><td colspan="5" class="py-4 text-center text-slate-400">Loading beta access requests...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- Search Bar & Customer Table -->
       <section class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-4">
         <form onsubmit="event.preventDefault(); searchCustomers();" class="flex flex-wrap items-center gap-2">
@@ -108,6 +172,17 @@
             </thead>
             <tbody id="admin-customers-tbody" class="divide-y divide-slate-100"></tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- Sales Rep CRM Pipeline, Call Logger & $25 Spiff / Class B Equity Leaderboard -->
+      <section id="sales-rep-leaderboard-section" class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-sm font-bold text-slate-900">Sales Rep Activity Logger &amp; Spiff / Equity Leaderboard</h2>
+            <p class="text-[11px] text-slate-500">Tracks daily calls, 60-sec Loom videos sent, $25 CAD Qualified Live Demo Spiffs (capped at 20 demos = $500/rep), and Class B Milestone 1 progress (5 accounts or $5,000 ARR).</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">105 Canadian Brokerages Pipeline</span>
         </div>
       </section>
     </main>
@@ -300,6 +375,83 @@
       }
     }
 
+    async function loadBetaRequests() {
+      const tbody = document.getElementById('beta-requests-tbody');
+      if (!tbody) return;
+      try {
+        const res = await fetch('/api/admin/beta-requests');
+        if (!res.ok) return;
+        const data = await res.json();
+        const items = data.requests || [];
+        if (items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">No beta access requests submitted yet.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = '';
+        items.forEach(req => {
+          const tr = document.createElement('tr');
+          const isPending = req.status === 'PENDING';
+          tr.innerHTML = `
+            <td class="py-2.5 px-3"><div class="font-bold text-slate-900">${req.company}</div><div class="text-[11px] text-slate-600">${req.name} • <span class="font-mono">${req.email}</span></div></td>
+            <td class="py-2.5 px-3 font-bold">${req.requested_tier}</td>
+            <td class="py-2.5 px-3 text-[11px] text-slate-600">${req.origin_zip}${req.notes ? ' • ' + req.notes : ''}</td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPending ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">${req.status}</span></td>
+            <td class="py-2.5 px-3 text-right"></td>
+          `;
+          if (isPending) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'px-2.5 py-1 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] cursor-pointer';
+            btn.textContent = '1-Click Fill & Provision';
+            btn.onclick = () => {
+              document.getElementById('prov-request-id').value = req.id;
+              document.getElementById('prov-name').value = req.name;
+              document.getElementById('prov-email').value = req.email;
+              document.getElementById('prov-company').value = req.company;
+              document.getElementById('prov-origin').value = req.origin_zip || 'M5V 2T6';
+              document.getElementById('prov-tier').value = req.requested_tier || 'PRO';
+              provisionBetaUser();
+            };
+            tr.lastElementChild.appendChild(btn);
+          }
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.debug('Beta requests load error:', err);
+      }
+    }
+
+    async function provisionBetaUser() {
+      const payload = {
+        request_id: document.getElementById('prov-request-id').value || null,
+        name: document.getElementById('prov-name').value.trim(),
+        email: document.getElementById('prov-email').value.trim(),
+        company: document.getElementById('prov-company').value.trim(),
+        origin_zip: document.getElementById('prov-origin').value.trim() || 'M5V 2T6',
+        tier: document.getElementById('prov-tier').value || 'PRO'
+      };
+      try {
+        const res = await fetch('/api/admin/users/provision', {
+          method: 'POST',
+          headers: _getAdminCsrfHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Could not provision user.');
+        const banner = document.getElementById('prov-result-banner');
+        if (banner) {
+          banner.classList.remove('hidden');
+          banner.textContent = `✓ Provisioned ${data.user.email} on ${data.tier} tier! One-Time Password (OTP): ${data.one_time_password} (user will be forced to change on first login) • Login: ${data.login_url}`;
+        }
+        document.getElementById('prov-request-id').value = '';
+        await loadBetaRequests();
+        await searchCustomers();
+      } catch (err) {
+        _notify(err.message || 'Provisioning failed.', 'error');
+      }
+    }
+
+    loadBetaRequests();
     searchCustomers();
   </script>
   <script src="/static/js/global-chrome.js?v=20261113b"></script>

@@ -213,12 +213,25 @@ def get_reset_password_page():
 # PRIVATE CONSOLE PAGES (Route Guarded)
 # ==========================================
 
+@router.get("/console/change-password", response_class=HTMLResponse, tags=["Console Pages"])
+def get_change_password_page(request: Request):
+    """First-login forced One-Time Password replacement screen."""
+    user = get_current_user_from_request(request)
+    if not user:
+        return RedirectResponse(url="/login?next=/console/change-password", status_code=303)
+    if not user.get("must_change_password"):
+        return RedirectResponse(url="/console/new-quote", status_code=303)
+    return serve_template("console/change_password.html")
+
+
 @router.get("/console/new-quote", response_class=HTMLResponse, tags=["Console Pages"])
 def get_new_quote_page(request: Request):
     """Default Console View: 'New rate sheet' with 'Process ->'. Requires Authentication."""
     user = get_current_user_from_request(request)
     if not user:
         return RedirectResponse(url="/login?next=/console/new-quote", status_code=303)
+    if user.get("must_change_password"):
+        return RedirectResponse(url="/console/change-password", status_code=303)
     return serve_template("console/new_quote.html")
 
 
@@ -228,6 +241,8 @@ def get_history_page(request: Request):
     user = get_current_user_from_request(request)
     if not user:
         return RedirectResponse(url="/login?next=/console/history", status_code=303)
+    if user.get("must_change_password"):
+        return RedirectResponse(url="/console/change-password", status_code=303)
     return serve_template("console/history.html")
 
 
@@ -237,6 +252,8 @@ def get_rate_sheets_page(request: Request):
     user = get_current_user_from_request(request)
     if not user:
         return RedirectResponse(url="/login?next=/console/rate-sheets", status_code=303)
+    if user.get("must_change_password"):
+        return RedirectResponse(url="/console/change-password", status_code=303)
     return serve_template("console/rate_sheets.html")
 
 
@@ -246,6 +263,8 @@ def get_account_page(request: Request):
     user = get_current_user_from_request(request)
     if not user:
         return RedirectResponse(url="/login?next=/console/account", status_code=303)
+    if user.get("must_change_password"):
+        return RedirectResponse(url="/console/change-password", status_code=303)
     return serve_template("console/account.html")
 
 
@@ -255,6 +274,8 @@ def get_settings_page(request: Request):
     user = get_current_user_from_request(request)
     if not user:
         return RedirectResponse(url="/login?next=/console/settings", status_code=303)
+    if user.get("must_change_password"):
+        return RedirectResponse(url="/console/change-password", status_code=303)
     return serve_template("console/settings.html")
 
 
@@ -264,8 +285,10 @@ def get_admin_onboarding_page(request: Request):
     user = get_current_user_from_request(request)
     if not user:
         return RedirectResponse(url="/login?next=/console/admin", status_code=303)
+    if user.get("must_change_password"):
+        return RedirectResponse(url="/console/change-password", status_code=303)
     if (user.get("role") or "").upper() != "ADMIN":
-        raise HTTPException(status_code=403, detail="Administrator privileges required.")
+        return RedirectResponse(url="/console/account?notice=admin_required", status_code=303)
     return serve_template("console/admin_onboarding.html")
 
 

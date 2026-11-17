@@ -126,7 +126,7 @@ def validate_session_token(token: Optional[str]) -> Optional[Dict[str, Any]]:
     now = datetime.utcnow().isoformat()
 
     cursor.execute("""
-    SELECT u.id, u.name, u.email, u.company, u.origin_zip, u.tier, u.role, u.closed_at, u.email_verified
+    SELECT u.id, u.name, u.email, u.company, u.origin_zip, u.tier, u.role, u.closed_at, u.email_verified, u.must_change_password
     FROM sessions s
     JOIN users u ON s.user_id = u.id
     WHERE s.token = ? AND s.expires_at > ?
@@ -141,6 +141,7 @@ def validate_session_token(token: Optional[str]) -> Optional[Dict[str, Any]]:
         data.pop("closed_at", None)
         data["role"] = data.get("role") or "USER"
         data["email_verified"] = bool(data.get("email_verified", 0))
+        data["must_change_password"] = bool(data.get("must_change_password", 0))
         return data
     return None
 
@@ -189,6 +190,7 @@ def authenticate_and_create_session(email: str, password: str) -> Tuple[Optional
                     logger.warning("Password rehash upgrade failed for user %s: %s", user_dict["id"], exc)
             conn.close()
             user_dict["role"] = user_dict.get("role") or "USER"
+            user_dict["must_change_password"] = bool(user_dict.get("must_change_password", 0))
             token = create_session(user_dict["id"])
             return user_dict, token
 

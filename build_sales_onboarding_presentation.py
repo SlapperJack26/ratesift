@@ -383,15 +383,15 @@ tb3.margin_left = Inches(0.3)
 tb3.margin_right = Inches(0.3)
 tb3.margin_top = Inches(0.22)
 p3_1 = tb3.paragraphs[0]
-p3_1.text = "Paperwork Ready to Sign Today (Doc 13):"
+p3_1.text = "Paperwork Ready to Sign Today (Doc 13 + Schedule 'A' $25 Demo Spiff):"
 p3_1.font.size = Pt(13)
 p3_1.font.bold = True
 p3_1.font.color.rgb = COLOR_SLATE_DARK
 p3_1.space_after = Pt(6)
 p3_2 = tb3.add_paragraph()
 p3_2.text = (
-    "Our Independent Sales Representative & Milestone Equity Agreement (outreach/13_Independent_Sales_Rep_and_Milestone_Equity_Agreement.docx) "
-    "counts BOTH total accounts AND total ARR toward your milestones—so a single Growing 3PL Business Tier deal ($8,390/yr ARR) immediately unlocks Milestone 1!"
+    "Doc 13 counts BOTH total accounts AND total ARR toward your equity milestones—and includes Schedule 'A': a $25 CAD cash spiff per Qualified Live Demo "
+    "(up to 20 demos = $500 CAD/rep, funded from our $5,000 Ontario Starter Company Plus grant) when a prospect brings/uploads a real carrier sheet!"
 )
 p3_2.font.size = Pt(11)
 p3_2.font.color.rgb = COLOR_SLATE_MUTED
@@ -801,19 +801,17 @@ apply_background(s6)
 add_header(s6, "How to Quote in Quotelytics (5-Step Live Walkthrough)", "How to Quote", "09/17")
 
 steps = [
-    ("1. Upload Sheet", COLOR_INDIGO, [
+    ("1. Upload / Concierge", COLOR_INDIGO, [
         "Go to /console/rate-sheets.",
-        "Drag & drop the broker's .xlsx, .xls, or .csv carrier tariff.",
-        "Original file stays 100% untouched.",
+        "Pick a Canadian Carrier Preset (Manitoulin, Day & Ross, etc.) OR drop up to 10 sheets into the 24-Hr Concierge Drop-Box!",
     ]),
-    ("2. Confirm Gate", COLOR_EMERALD, [
-        "System auto-detects Origin/Dest FSA, Min Floor & weight breaks (L5C, M5C, M1M).",
-        "Broker visually checks & clicks Confirm & Ingest.",
+    ("2. Confirm & Accessorials", COLOR_EMERALD, [
+        "Auto-maps 150+ Canadian cities to FSAs (Mississauga -> L5T).",
+        "Set Big 6 Accessorials (Tailgate, Winter Heated +15% / $45 min, Residential, Appt).",
     ]),
-    ("3. Enter Lane", COLOR_RED_PRIMARY, [
+    ("3. Smart Email Paste", COLOR_RED_PRIMARY, [
         "Go to /console/new-quote.",
-        "Type Origin (e.g. M5V 2T6), Dest (T2P 1J9), Weight (1,850 lbs) or skids.",
-        "Click Calculate Rates.",
+        "Paste raw shipper email into ⚡ 1-Second Smart Paste—auto-fills Lane, Weight, Skids & Tailgate/Heated checkboxes!",
     ]),
     ("4. Audit Math", COLOR_SLATE_DARK, [
         "View carriers ranked lowest to highest (<500ms).",

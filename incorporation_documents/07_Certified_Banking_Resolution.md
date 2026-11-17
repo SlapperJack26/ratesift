@@ -15,18 +15,19 @@
 
 **BE IT RESOLVED THAT:**
 
-1. **Appointment of Financial Institutions and Payment Processors:**
-   That **[INSERT BANK NAME, e.g., Royal Bank of Canada (RBC) / TD Commercial Banking / Venn (Vault) / BMO]** (the "Bank") and **Stripe Canada (Stripe Payments Canada, Ltd.)** be and are hereby appointed bankers and payment processors of the Corporation, and that the President of the Corporation is hereby authorized to open and maintain one or more CAD and USD business chequing, savings, merchant settlement, and corporate credit card accounts in the name of **QUOTELYTICS INC.**
+1. **Appointment of Financial Institutions, Corporate Treasury, and Payment Processors:**
+   That **Royal Bank of Canada (RBC)** (as primary chartered bank), **Wealthsimple Inc. / Wealthsimple Investments Inc.** (as corporate treasury, savings, and self-directed investment custodian), **Venn (Vault)** (as multi-currency operating and corporate card provider), and **Stripe Canada (Stripe Payments Canada, Ltd.)** (as merchant payment processor) (collectively, the "Financial Institutions") be and are hereby appointed bankers, investment custodians, and payment processors of the Corporation, and that the President of the Corporation is hereby authorized to open and maintain one or more CAD and USD business chequing, high-interest corporate savings, corporate self-directed investment, merchant settlement, and corporate credit/spend card accounts in the name of **QUOTELYTICS INC.**
 
-2. **Standard Bank Forms and Account Agreements:**
-   That the Corporation is hereby authorized to execute and deliver the Bank's standard form of Business Account Operation Agreement, Financial Services Agreement, Electronic Banking Agreement, and any ancillary banking resolutions required by the Bank, and to the extent of any inconsistency between this Resolution and the Bank's standard form of resolution, the Bank's standard form of resolution shall be deemed to have been passed and enacted by the Board of Directors of the Corporation.
+2. **Standard Bank, Brokerage, and Account Agreements:**
+   That the Corporation is hereby authorized to execute and deliver each Financial Institution's standard form of Business Account Operation Agreement, Corporate Investment & Custodial Account Agreement, Financial Services Agreement, Electronic Banking Agreement, and any ancillary banking or brokerage resolutions required by the Financial Institutions, and to the extent of any inconsistency between this Resolution and a Financial Institution's standard form of resolution, the Financial Institution's standard form of resolution shall be deemed to have been passed and enacted by the Board of Directors of the Corporation.
 
 3. **Authorized Signing Officer(s):**
    That **`[DYLAN'S FULL LEGAL NAME]`**, holding the offices of **President, Chief Executive Officer, Secretary, and Treasurer** (and being the Sole Director and 100% Voting Shareholder of the Corporation), is hereby authorized **alone (1 signature required)** on behalf of the Corporation to:
    (a) sign, make, draw, accept, endorse, and execute all cheques, promissory notes, bills of exchange, drafts, orders for payment of money, wire transfers, Interac e-Transfers, and electronic funds transfers (EFT / ACH / PAD);
-   (b) receive all statements of account, cancelled vouchers, and notices from the Bank and settle and certify all balances;
-   (c) apply for, receive, and utilize corporate Visa/Mastercard credit cards, debit cards, and online commercial banking credentials; and
-   (d) connect the Corporation's business bank account to **Stripe Canada**, the **Canada Revenue Agency (CRA My Business Account)**, and accounting software for automated settlement and tax remittance.
+   (b) open, fund, manage, and direct corporate cash, high-interest savings, and self-directed securities/ETF accounts with **Wealthsimple Inc. / Wealthsimple Investments Inc.** and transfer funds between **Royal Bank of Canada (RBC)**, **Wealthsimple**, and **Venn**;
+   (c) receive all statements of account, trade confirmations, tax slips, cancelled vouchers, and notices from the Financial Institutions and settle and certify all balances;
+   (d) apply for, receive, and utilize corporate Visa/Mastercard credit cards (including the **RBC Business Cash Back Mastercard** and **Venn Multi-Currency Corporate Cards**), debit cards, and online commercial banking credentials; and
+   (e) connect the Corporation's **Royal Bank of Canada (RBC)** and **Venn** business accounts to **Stripe Canada**, **Wealthsimple Corporate**, the **Canada Revenue Agency (CRA My Business Account)**, and accounting software for automated settlement, treasury sweeps, and tax remittance.
 
 4. **Continuing Force and Effect:**
    That this resolution be communicated to the Bank and remain in full force and effect until written notice to the contrary has been given to the Bank branch or institution where the account of the Corporation is maintained.

@@ -283,3 +283,35 @@ def resolve_effective_fuel_surcharge(
         "effective_date": eff_date_used,
     }
 
+
+def calculate_fsc_from_diesel_price(
+    diesel_price_cad_litre: float,
+    mode: str = "LTL",
+) -> Dict[str, Any]:
+    """
+    Calculates the standard Canadian FCA / OTA LTL and TL Fuel Surcharge % directly from
+    the current weekly Canadian retail diesel price ($ CAD / litre).
+    Formula (Canadian LTL Benchmark Scale):
+      - Base threshold: $1.050 CAD/litre -> 15.625% LTL base
+      - Every $0.01/L above $1.050/L adds +0.25% to LTL FSC (and +0.42% to TL FSC).
+      (At $1.685/L -> 31.50% LTL FSC, matching OTA_LTL_STANDARD).
+    """
+    from decimal import Decimal, ROUND_HALF_UP
+
+    price = max(0.50, float(diesel_price_cad_litre or 1.685))
+    delta_cents = max(0.0, (price - 1.050) * 100.0)
+
+    ltl_pct = round(15.625 + (delta_cents * 0.25), 2)
+    tl_pct = round(21.53 + (delta_cents * 0.42), 2)
+    selected_mode = (mode or "LTL").strip().upper()
+    effective_pct = tl_pct if selected_mode in ("TL", "FTL", "TRUCKLOAD") else ltl_pct
+
+    return {
+        "diesel_price_cad_litre": round(price, 3),
+        "mode": selected_mode,
+        "ltl_surcharge_percent": ltl_pct,
+        "tl_surcharge_percent": tl_pct,
+        "effective_surcharge_percent": effective_pct,
+        "formula_note": f"Canadian FCA/OTA Diesel Bracket Scale at ${price:.3f} CAD/L -> {effective_pct:.2f}% {selected_mode} FSC",
+    }
+
