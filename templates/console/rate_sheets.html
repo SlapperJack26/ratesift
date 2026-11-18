@@ -48,7 +48,7 @@
             </a>
             <a href="/console/rate-sheets" aria-current="page" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs relative after:content-[''] after:absolute after:-bottom-3.5 after:left-3 after:right-3 after:h-0.5 after:bg-red-600">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <span>Carrier Tariffs</span>
+              <span>Rate Sheets</span>
             </a>
             <a href="/console/settings" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -85,7 +85,7 @@
       <nav class="flex sm:hidden overflow-x-auto gap-2 pt-2.5 mt-2 border-t border-slate-100 text-xs font-medium px-1">
         <a href="/console/new-quote" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">New Quote</a>
         <a href="/console/history" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Quotes History</a>
-        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full bg-red-50 text-red-600 font-bold whitespace-nowrap">Carrier Tariffs</a>
+        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full bg-red-50 text-red-600 font-bold whitespace-nowrap">Rate Sheets</a>
         <a href="/console/settings" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Settings</a>
       </nav>
     </header>
@@ -108,24 +108,9 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
-          <select id="carrier-preset-select" aria-label="Canadian Carrier Format Preset" class="px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-800 text-xs font-semibold shadow-2xs focus:outline-none focus:border-red-500">
-            <option value="AUTO_DETECT">Format: Auto-Detect (Default)</option>
-            <option value="MANITOULIN_CWT">Manitoulin Transport — Standard CWT</option>
-            <option value="DAY_AND_ROSS_CWT">Day &amp; Ross Freight — Canadian LTL CWT</option>
-            <option value="MIDLAND_ATLANTIC">Midland Transport — Atlantic &amp; Central LTL</option>
-            <option value="OVERLAND_WEST">Overland West / Western Canada LTL</option>
-            <option value="KINDERSLEY_PRAIRIE">Kindersley Transport — Prairie LTL</option>
-            <option value="GENERIC_SKID_SPOT">Canadian Skid / Pallet Spot Matrix (1–10 Skids)</option>
-          </select>
-          <button type="button" onclick="seedSampleTariffsFromSheetsPage()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Load 3 sample confirmed Canadian LTL tariffs for instant testing">
-            <span>⚡ Load 3 Sample Tariffs</span>
-          </button>
-          <button type="button" onclick="purgeSampleTariffsFromSheetsPage()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Remove [SAMPLE] sandbox tariffs">
-            <span>Clear Samples</span>
-          </button>
-          <button onclick="openRedactionModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Scrub proprietary accounts and customer names before upload">
-            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-            <span>Scrub & Redact Tariff</span>
+          <button type="button" onclick="document.getElementById('sheet-tools-bar').classList.toggle('hidden')" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold shadow-2xs transition-colors cursor-pointer">
+            <span>Sheet Tools &amp; Samples</span>
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </button>
           <button onclick="document.getElementById('sheet-upload-input').click()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -135,21 +120,39 @@
         </div>
       </div>
 
-      <!-- 24-Hour Concierge "Done-For-You" Tariff Calibration Drop-Box -->
-      <div id="concierge-dropbox-card" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div class="space-y-1 max-w-2xl">
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500 text-slate-950">24-Hr White-Glove Concierge</span>
-            <span class="text-xs font-bold">Too Busy to Map Complex Multi-Tab Spreadsheets? Let Us Do It For You.</span>
-          </div>
-          <p class="text-[11px] text-slate-300 leading-relaxed">
-            Drop up to 10 messy Canadian carrier Excel/CSV files here. Our engineering team will calibrate all CWT breaks, deficit rules, fuel tables, and winter heated/tailgate accessorials inside your private tenant within 24 hours.
-          </p>
+      <!-- Collapsible Secondary Tools Bar (Format Preset, Samples, Redaction) -->
+      <div id="sheet-tools-bar" class="hidden bg-white border border-[var(--border)] rounded-2xl p-3.5 shadow-2xs flex flex-wrap items-center gap-2.5">
+        <select id="carrier-preset-select" aria-label="Canadian Carrier Format Preset" class="px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-800 text-xs font-semibold shadow-2xs focus:outline-none">
+          <option value="AUTO_DETECT">Format: Auto-Detect (Default)</option>
+          <option value="MANITOULIN_CWT">Manitoulin Transport — Standard CWT</option>
+          <option value="DAY_AND_ROSS_CWT">Day &amp; Ross Freight — Canadian LTL CWT</option>
+          <option value="MIDLAND_ATLANTIC">Midland Transport — Atlantic &amp; Central LTL</option>
+          <option value="OVERLAND_WEST">Overland West / Western Canada LTL</option>
+          <option value="KINDERSLEY_PRAIRIE">Kindersley Transport — Prairie LTL</option>
+          <option value="GENERIC_SKID_SPOT">Canadian Skid / Pallet Spot Matrix (1–10 Skids)</option>
+        </select>
+        <button type="button" onclick="seedSampleTariffsFromSheetsPage()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Load 3 sample confirmed Canadian LTL tariffs for instant testing">
+          <span>Load 3 Sample Tariffs</span>
+        </button>
+        <button type="button" onclick="purgeSampleTariffsFromSheetsPage()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Remove [SAMPLE] sandbox tariffs">
+          <span>Clear Samples</span>
+        </button>
+        <button onclick="openRedactionModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Scrub proprietary accounts and customer names before upload">
+          <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <span>Scrub &amp; Redact Tariff</span>
+        </button>
+      </div>
+
+      <!-- 24-Hour Concierge "Done-For-You" Tariff Calibration Drop-Box (Compact Bar) -->
+      <div id="concierge-dropbox-card" class="bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] rounded-2xl px-4 py-3 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200">24-Hr White-Glove Concierge</span>
+          <span class="text-xs font-semibold text-[var(--foreground)]">Too busy to map complex spreadsheets? Let our engineering team calibrate them within 24 hours.</span>
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <input id="concierge-files-input" type="file" multiple accept=".xlsx,.xls,.csv" class="hidden" aria-label="Upload carrier rate sheets for concierge setup" onchange="submitConciergeUpload(event)" />
-          <button type="button" onclick="document.getElementById('concierge-files-input').click()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-xs cursor-pointer transition-colors whitespace-nowrap">
-            Drop Sheets for 24-Hr Concierge Setup →
+          <button type="button" onclick="document.getElementById('concierge-files-input').click()" class="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-xs cursor-pointer transition-colors whitespace-nowrap">
+            Drop Sheets for 24-Hr Concierge Setup &rarr;
           </button>
         </div>
       </div>
@@ -290,7 +293,7 @@
                 DIM Divisor
               </label>
               <div class="flex items-center gap-1.5">
-                <select id="select-dim-preset" aria-label="Dimensional Weight Factor Preset" onchange="onDimPresetChange(this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
+                <select id="select-dim-preset" aria-label="Dimensional Weight Factor Preset" onchange="onDimPresetChange(this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none shadow-2xs">
                   <option value="139.0">139.0 (Domestic Express / Air)</option>
                   <option value="166.0">166.0 (Standard Domestic LTL)</option>
                   <option value="250.0">250.0 (Metric / Heavy)</option>
@@ -305,7 +308,7 @@
               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                 Rounding Logic
               </label>
-              <select id="select-rounding-rule" aria-label="Weight Rounding Methodology" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
+              <select id="select-rounding-rule" aria-label="Weight Rounding Methodology" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none shadow-2xs">
                 <option value="standard_2dp">Standard (2 Decimal Places)</option>
                 <option value="ceil_whole_dollar">Ceil to Next Whole Dollar ($)</option>
               </select>
@@ -320,11 +323,11 @@
             </div>
             <div>
               <label for="input-effective-date" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Effective Date</label>
-              <input id="input-effective-date" type="date" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-mono font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
+              <input id="input-effective-date" type="date" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-mono font-medium text-slate-800 focus:outline-none shadow-2xs">
             </div>
             <div>
               <label for="input-expiry-date" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Expiry Date</label>
-              <input id="input-expiry-date" type="date" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-mono font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-2xs">
+              <input id="input-expiry-date" type="date" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-mono font-medium text-slate-800 focus:outline-none shadow-2xs">
             </div>
           </div>
         </div>
@@ -383,7 +386,7 @@
               <!-- Search Bar for Extraction Table -->
               <div class="flex items-center gap-2">
                 <div class="relative flex-1">
-                  <input id="extraction-search-input" type="text" placeholder="Search lane, city, zone, bracket, or coordinate..." oninput="onSearchExtractionDebounced(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-red-500 focus:bg-white shadow-2xs">
+                  <input id="extraction-search-input" type="text" placeholder="Search lane, city, zone, bracket, or coordinate..." oninput="onSearchExtractionDebounced(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:bg-white shadow-2xs">
                 </div>
                 <button type="button" onclick="clearExtractionSearch()" class="px-2 py-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 text-xs cursor-pointer">
                   Clear
@@ -480,7 +483,7 @@
               <div class="space-y-1">
                 <label for="input-markup-val" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Markup Margin Value</label>
                 <div class="relative flex items-center">
-                  <input id="input-markup-val" type="number" step="0.1" min="0" value="15.0" oninput="updateMarkupPreview()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+                  <input id="input-markup-val" type="number" step="0.1" min="0" value="15.0" oninput="updateMarkupPreview()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none shadow-2xs">
                   <span id="markup-unit-badge" class="absolute right-3 text-xs font-bold text-slate-500">% margin</span>
                 </div>
               </div>
@@ -488,11 +491,11 @@
               <!-- Checkbox Toggles -->
               <div class="space-y-2 pt-1 border-t border-slate-100">
                 <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                  <input type="checkbox" id="check-fsc-passthrough" checked aria-label="Pass-Through Fuel Surcharge without markup" onchange="updateMarkupPreview()" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" id="check-fsc-passthrough" checked aria-label="Pass-Through Fuel Surcharge without markup" onchange="updateMarkupPreview()" class="rounded text-red-600 focus:outline-none">
                   <span class="font-medium">Pass-Through Fuel FSC (Do not markup carrier fuel surcharge)</span>
                 </label>
                 <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                  <input type="checkbox" id="check-accessorial-markup" aria-label="Markup Accessorials and Surcharges by 15 percent" onchange="updateMarkupPreview()" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" id="check-accessorial-markup" aria-label="Markup Accessorials and Surcharges by 15 percent" onchange="updateMarkupPreview()" class="rounded text-red-600 focus:outline-none">
                   <span class="font-medium">Markup Accessorials & Surcharges (+15%)</span>
                 </label>
               </div>
@@ -596,7 +599,7 @@
           <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-sm shadow-xs"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-slate-900" id="fsm-carrier-title">Formatted Carrier Tariff Matrix</h3>
+              <h3 class="text-sm font-bold text-slate-900" id="fsm-carrier-title">Formatted Rate Sheet Matrix</h3>
               <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                 In-Browser Inspection Only
               </span>
@@ -625,7 +628,7 @@
       <div class="px-5 py-2.5 bg-red-50/60 border-b border-red-100 flex items-center justify-between text-xs text-red-900">
         <div class="flex items-center gap-2">
           <span class="text-red-600 font-bold">Platform Security Policy:</span>
-          <span>Reformatted carrier tariffs are restricted to in-browser inspection only. Downloading, scraping, or exporting spreadsheet files is strictly blocked.</span>
+          <span>Reformatted rate sheets are restricted to in-browser inspection only. Downloading, scraping, or exporting spreadsheet files is strictly blocked.</span>
         </div>
         <span class="font-mono text-[10px] text-red-700 shrink-0">Tenant Quarantine & Cell Security</span>
       </div>
@@ -633,7 +636,7 @@
       <!-- Search & Filter Controls -->
       <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
         <div class="flex-1 min-w-[240px]">
-          <input id="fsm-search-input" type="text" placeholder="Search lane, city, zone, bracket, or coordinate..." oninput="onSearchFsmDebounced(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-red-500 focus:bg-white shadow-2xs">
+          <input id="fsm-search-input" type="text" placeholder="Search lane, city, zone, bracket, or coordinate..." oninput="onSearchFsmDebounced(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white shadow-2xs">
         </div>
         <div class="flex items-center gap-3 text-xs text-slate-500 font-mono">
           <div>Total Rates: <strong id="fsm-rows-count" class="text-slate-800">0</strong></div>
@@ -1091,7 +1094,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                   </div>
                   <div>
-                    <h4 class="text-sm font-bold text-slate-800">No Carrier Tariffs Uploaded Yet</h4>
+                    <h4 class="text-sm font-bold text-slate-800">No Rate Sheets Uploaded Yet</h4>
                     <p class="text-xs text-slate-500 mt-1">To ensure total confidentiality, your account only has access to rate sheets you upload. No sample or public tariffs are shared across accounts.</p>
                   </div>
                   <button type="button" onclick="document.getElementById('sheet-upload-input').click()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer">
@@ -1557,40 +1560,29 @@
         return;
       }
       const sheet = currentSheetData.sheet;
-      const breaks = currentSheetData.breaks || [];
-
-      // Construct a JobState representation from currentSheetData
-      const previewRows = [];
-      previewRows.push(["Origin", "Destination", "Carrier Zone", "Weight Bracket", "Base Rate"]);
-      for (const b of breaks.slice(0, 11)) {
-        previewRows.push([
-          b.origin_spec || "ALL",
-          b.dest_spec || "ALL",
-          b.carrier_zone || "-",
-          b.break_name || "-",
-          String(b.base_rate !== null && b.base_rate !== undefined ? b.base_rate : "0.00")
-        ]);
+      const sheetId = sheet.id || activeSheetId;
+      if (!sheetId) {
+        showToast("Could not identify the selected rate sheet.", "error");
+        return;
       }
 
-      const failsafeJob = {
-        job_id: sheet.id || `sheet_${activeSheetId}`,
-        status: "needs_mapping",
-        header_row: 0,
-        column_count: 5,
-        mode: sheet.weight_unit ? "weight" : "skid",
-        weight_unit: sheet.weight_unit || "lb",
-        sheet_name: sheet.carrier_name || "Rate Sheet",
-        issues: breaks.length === 0 ? ["No rate breaks extracted from sheet. Please map columns manually."] : [],
-        conflicts: [],
-        suggestions: { origin: 0, destination: 1 },
-        preview: previewRows
-      };
+      try {
+        const res = await fetch(`/jobs/from-sheet/${encodeURIComponent(sheetId)}`, {
+          method: 'POST'
+        });
+        const failsafeJob = await res.json();
+        if (!res.ok) {
+          throw new Error(failsafeJob.detail || "Failed to open failsafe mapping job.");
+        }
 
-      const controller = window.FailsafeModal || (typeof FailsafeModal !== 'undefined' ? FailsafeModal : null);
-      if (controller) {
-        controller.open(failsafeJob);
-      } else {
-        showToast("Failsafe mapping modal is not available on this page.", "warning");
+        const controller = window.FailsafeModal || (typeof FailsafeModal !== 'undefined' ? FailsafeModal : null);
+        if (controller) {
+          controller.open(failsafeJob);
+        } else {
+          showToast("Failsafe mapping modal is not available on this page.", "warning");
+        }
+      } catch (err) {
+        showToast("Error initializing manual failsafe mapping: " + err.message, "error");
       }
     }
 
@@ -1786,7 +1778,7 @@
 
     function preventDownloadAction(e) {
       e.preventDefault();
-      showToast("Platform Security Notice: Reformatted carrier tariffs are restricted to in-browser inspection only. Downloads, exports, and file extractions are permanently disabled.", "info");
+      showToast("Platform Security Notice: Reformatted rate sheets are restricted to in-browser inspection only. Downloads, exports, and file extractions are permanently disabled.", "info");
     }
 
     function testPreflightLane() {
@@ -1814,7 +1806,7 @@
       const statusBox = document.getElementById('upload-status');
       if (statusBox) {
         statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 block";
-        statusBox.innerHTML = `Sheet successfully confirmed and added to your quotable carrier tariffs!`;
+        statusBox.innerHTML = `Sheet successfully confirmed and added to your quotable rate sheets!`;
       }
       loadRateSheets();
     };
@@ -1842,7 +1834,7 @@
         if (!res.ok) throw new Error(data.detail || 'Concierge upload failed.');
         if (statusBox) {
           statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 block";
-          statusBox.textContent = `✓ ${data.message} Request ID: ${data.concierge_request.id}`;
+          statusBox.textContent = `${data.message} Request ID: ${data.concierge_request.id}`;
         }
         await loadRateSheets();
       } catch (err) {
@@ -1897,7 +1889,7 @@
         if (!res.ok) throw new Error(data.detail || 'Could not load sample tariffs.');
         if (statusBox) {
           statusBox.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 block";
-          statusBox.textContent = `✓ Loaded ${data.seeded_count} confirmed [SAMPLE] Canadian LTL tariffs (${(data.carriers || []).join(', ')}).`;
+          statusBox.textContent = `Loaded ${data.seeded_count} confirmed [SAMPLE] Canadian LTL tariffs (${(data.carriers || []).join(', ')}).`;
         }
         await loadRateSheets();
       } catch (err) {
@@ -1916,7 +1908,7 @@
         if (!res.ok) throw new Error(data.detail || 'Could not clear sample tariffs.');
         if (statusBox) {
           statusBox.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 text-slate-700 border border-slate-300 block";
-          statusBox.textContent = `✓ Purged ${data.purged_count} [SAMPLE] sandbox tariff(s).`;
+          statusBox.textContent = `Purged ${data.purged_count} [SAMPLE] sandbox tariff(s).`;
         }
         await loadRateSheets();
       } catch (err) {

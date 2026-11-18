@@ -7,3 +7,5 @@ pydantic==2.13.5
 argon2-cffi==25.1.0
 stripe>=7.0.0
 gunicorn>=21.2.0
+pdfplumber>=0.11.0
+pypdf>=4.0.0

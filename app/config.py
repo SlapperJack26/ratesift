@@ -6,15 +6,15 @@ HIGH: float = 0.85   # auto-map silently
 LOW: float = 0.50    # below this -> must ask the user
 
 # File & scan limits
-MAX_BYTES: int = 10 * 1024 * 1024  # 10 MB compressed limit
-ALLOWED_EXT: Set[str] = {".xlsx", ".csv"}
+MAX_BYTES: int = 25 * 1024 * 1024  # 25 MB limit (aligned with nginx client_max_body_size)
+ALLOWED_EXT: Set[str] = {".xlsx", ".csv", ".pdf"}
 PREVIEW_ROWS: int = 12
 MAX_SCAN_ROWS: int = 500
-MAX_SCAN_COLS: int = 100
+MAX_SCAN_COLS: int = 200
 
 # Full load limits (post-confirmation quoting)
 MAX_DATA_ROWS: int = 25000
-MAX_DATA_COLS: int = 100
+MAX_DATA_COLS: int = 200
 MAX_TOTAL_CELLS: int = 1000000
 
 
@@ -28,12 +28,14 @@ SYNONYMS: Dict[str, List[str]] = {
     "origin": [
         "origin", "orig", "from", "ship from", "pickup", "pick up",
         "pol", "origin city", "origin zip", "origin postal", "port of loading",
-        "origin state", "origin st", "orig city", "orig zip", "orig state"
+        "origin state", "origin st", "orig city", "orig zip", "orig state",
+        "origin zone", "orig zone",
     ],
     "destination": [
         "destination", "dest", "to", "ship to", "consignee", "delivery",
         "pod", "dest city", "dest zip", "destination postal", "port of discharge",
-        "dest state", "dest st", "destination city", "destination zip"
+        "dest state", "dest st", "destination city", "destination zip",
+        "destination zone", "dest zone", "rate zone", "zone",
     ],
     "min_charge": ["min", "minimum", "min charge", "minimum charge", "mc"],
     "currency": ["currency", "cur", "ccy"],

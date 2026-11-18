@@ -192,15 +192,15 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
               <div>
                 <label for="roi-reps" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Quoting Reps / Staff</label>
-                <input id="roi-reps" type="number" min="1" max="50" value="2" oninput="recalcROI()" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs font-mono font-semibold text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                <input id="roi-reps" type="number" min="1" max="50" value="2" oninput="recalcROI()" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs font-mono font-semibold text-[var(--foreground)] focus:outline-none">
               </div>
               <div>
                 <label for="roi-hourly-rate" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Loaded Hourly Cost (CAD)</label>
-                <input id="roi-hourly-rate" type="number" min="18" max="150" value="35" oninput="recalcROI()" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs font-mono font-semibold text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                <input id="roi-hourly-rate" type="number" min="18" max="150" value="35" oninput="recalcROI()" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs font-mono font-semibold text-[var(--foreground)] focus:outline-none">
               </div>
               <div>
                 <label for="roi-monthly-spend" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Monthly Freight Spend (CAD)</label>
-                <input id="roi-monthly-spend" type="number" min="1000" max="1000000" step="1000" value="25000" oninput="recalcROI()" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs font-mono font-semibold text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                <input id="roi-monthly-spend" type="number" min="1000" max="1000000" step="1000" value="25000" oninput="recalcROI()" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs font-mono font-semibold text-[var(--foreground)] focus:outline-none">
               </div>
             </div>
           </div>
@@ -289,21 +289,21 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
                   <label for="book-name" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Full Name *</label>
-                  <input id="book-name" type="text" required placeholder="Alex Mercer" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                  <input id="book-name" type="text" required placeholder="Alex Mercer" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-none">
                 </div>
                 <div>
                   <label for="book-email" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Work Email *</label>
-                  <input id="book-email" type="email" required placeholder="alex@brokerage.ca" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                  <input id="book-email" type="email" required placeholder="alex@brokerage.ca" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-none">
                 </div>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
                   <label for="book-company" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Company *</label>
-                  <input id="book-company" type="text" required placeholder="Maple Freight Logistics" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                  <input id="book-company" type="text" required placeholder="Maple Freight Logistics" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-none">
                 </div>
                 <div>
                   <label for="book-sheets" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">Carrier Rate Sheets</label>
-                  <select id="book-sheets" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                  <select id="book-sheets" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-none">
                     <option value="1-5">1 – 5 spreadsheets</option>
                     <option value="6-15" selected>6 – 15 spreadsheets</option>
                     <option value="16-50">16 – 50 spreadsheets</option>
@@ -313,7 +313,7 @@
               </div>
               <div>
                 <label for="book-notes" class="block text-[10px] uppercase font-semibold text-[var(--muted-foreground)] mb-1">What would you like to see? (Optional)</label>
-                <input id="book-notes" type="text" placeholder="e.g. Skid-based LTL sheets, L5C codes, deficit rating" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                <input id="book-notes" type="text" placeholder="e.g. Skid-based LTL sheets, L5C codes, deficit rating" class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-none">
               </div>
             </div>
 

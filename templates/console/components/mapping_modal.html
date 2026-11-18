@@ -128,7 +128,7 @@
         <div id="failsafe-warnings-checklist" class="space-y-1.5 pl-1"></div>
         <div id="failsafe-override-note-container" class="hidden pt-2 border-t border-amber-200">
           <label class="block font-bold text-[11px] text-amber-900 mb-1">Override Reason Note (Required for Outliers / Parcel):</label>
-          <input type="text" id="failsafe-override-note-input" placeholder="e.g. Verified specialized flatbed tariff with carrier broker dispatch" class="w-full bg-white border border-amber-300 rounded px-2 py-1 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500">
+          <input type="text" id="failsafe-override-note-input" placeholder="e.g. Verified specialized flatbed tariff with carrier broker dispatch" class="w-full bg-white border border-amber-300 rounded px-2 py-1 text-xs text-slate-800 focus:outline-none">
         </div>
       </div>
 
@@ -152,11 +152,11 @@
             <span class="cursor-pointer text-slate-400 hover:text-slate-600" title="The spreadsheet row containing column titles (Origin, Dest, Break weights).">ⓘ</span>
           </div>
           <div class="flex items-center gap-2">
-            <input type="number" id="failsafe-header-row-input" min="1" max="50" aria-label="Tariff Header Row Index" class="w-24 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.onHeaderRowChange(this.value)">
+            <input type="number" id="failsafe-header-row-input" min="1" max="50" aria-label="Tariff Header Row Index" class="w-24 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none" onchange="FailsafeModal.onHeaderRowChange(this.value)">
             <span class="text-[11px] text-slate-500">(1-indexed)</span>
           </div>
           <label class="inline-flex items-center gap-1.5 text-[11px] text-slate-600 pt-1">
-            <input type="checkbox" id="failsafe-header-confirmed-cb" aria-label="Confirm Header Row Selection" class="rounded text-red-600 focus:ring-red-500" onchange="FailsafeModal.validate()">
+            <input type="checkbox" id="failsafe-header-confirmed-cb" aria-label="Confirm Header Row Selection" class="rounded text-red-600 focus:outline-none" onchange="FailsafeModal.validate()">
             <span>I explicitly verify this is the header row</span>
           </label>
         </div>
@@ -169,11 +169,11 @@
           </div>
           <div class="flex items-center gap-4 pt-1">
             <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-slate-800">
-              <input type="radio" name="failsafe-currency" value="CAD" checked aria-label="Canadian Dollar (CAD)" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.triggerDryRun()">
+              <input type="radio" name="failsafe-currency" value="CAD" checked aria-label="Canadian Dollar (CAD)" class="text-red-600 focus:outline-none" onchange="FailsafeModal.triggerDryRun()">
               <span>CAD ($)</span>
             </label>
             <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-slate-800">
-              <input type="radio" name="failsafe-currency" value="USD" aria-label="United States Dollar (USD)" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.triggerDryRun()">
+              <input type="radio" name="failsafe-currency" value="USD" aria-label="United States Dollar (USD)" class="text-red-600 focus:outline-none" onchange="FailsafeModal.triggerDryRun()">
               <span>USD ($)</span>
             </label>
           </div>
@@ -182,7 +182,7 @@
         <!-- Tariff Reference / Carrier Note -->
         <div class="md:col-span-4 space-y-1.5">
           <label class="block font-bold text-slate-800 text-xs">Tariff Code / Reference</label>
-          <input type="text" id="failsafe-tariff-ref-input" placeholder="e.g. 2026-Q1-LTL" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500">
+          <input type="text" id="failsafe-tariff-ref-input" placeholder="e.g. 2026-Q1-LTL" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none">
         </div>
       </div>
 
@@ -193,11 +193,11 @@
           <label class="block font-bold text-slate-800 text-xs">Rating Method <span class="text-red-500">*</span></label>
           <div class="flex items-center gap-4 pt-1">
             <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-800">
-              <input type="radio" name="failsafe-mode" value="weight" checked aria-label="Weight-Break Rating Mode" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.onModeChange('weight')">
+              <input type="radio" name="failsafe-mode" value="weight" checked aria-label="Weight-Break Rating Mode" class="text-red-600 focus:outline-none" onchange="FailsafeModal.onModeChange('weight')">
               <span>Weight-Break Mode</span>
             </label>
             <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-800">
-              <input type="radio" name="failsafe-mode" value="skid" aria-label="Skid Pallet Rating Mode" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.onModeChange('skid')">
+              <input type="radio" name="failsafe-mode" value="skid" aria-label="Skid Pallet Rating Mode" class="text-red-600 focus:outline-none" onchange="FailsafeModal.onModeChange('skid')">
               <span>Skid / Pallet Mode</span>
             </label>
           </div>
@@ -209,7 +209,7 @@
             <label class="block font-bold text-slate-800 text-xs">Rate Basis <span class="text-red-500">*</span></label>
             <span class="cursor-pointer text-slate-400 hover:text-slate-600" title="PER_CWT: Rate is $/hundredweight. FLAT_BREAK: Rate is a flat dollar charge for that tier.">ⓘ</span>
           </div>
-          <select id="failsafe-rate-basis-select" aria-label="Rating Basis Specification" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.onRateBasisChange()">
+          <select id="failsafe-rate-basis-select" aria-label="Rating Basis Specification" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none" onchange="FailsafeModal.onRateBasisChange()">
             <option value="PER_CWT">PER_CWT (Price per hundredweight $/cwt)</option>
             <option value="FLAT_BREAK">FLAT_BREAK (Flat total charge per tier $)</option>
           </select>
@@ -220,11 +220,11 @@
           <label class="block font-bold text-slate-800 text-xs">Weight Unit <span class="text-red-500">*</span></label>
           <div class="flex items-center gap-3 pt-1">
             <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-slate-800">
-              <input type="radio" name="failsafe-weight-unit" value="lb" checked aria-label="Weight Unit Pounds" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.validate()">
+              <input type="radio" name="failsafe-weight-unit" value="lb" checked aria-label="Weight Unit Pounds" class="text-red-600 focus:outline-none" onchange="FailsafeModal.validate()">
               <span>Pounds (lb)</span>
             </label>
             <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-slate-800">
-              <input type="radio" name="failsafe-weight-unit" value="kg" aria-label="Weight Unit Kilograms" class="text-red-600 focus:ring-red-500" onchange="FailsafeModal.validate()">
+              <input type="radio" name="failsafe-weight-unit" value="kg" aria-label="Weight Unit Kilograms" class="text-red-600 focus:outline-none" onchange="FailsafeModal.validate()">
               <span>Kilograms (kg)</span>
             </label>
           </div>
@@ -263,13 +263,13 @@
             <div id="failsafe-origin-col-fields" class="space-y-2">
               <div>
                 <label class="block text-[11px] font-semibold text-slate-700">Origin City / Postal Column <span class="text-red-500">*</span></label>
-                <select id="failsafe-col-origin" aria-label="Origin City or Postal Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+                <select id="failsafe-col-origin" aria-label="Origin City or Postal Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none" onchange="FailsafeModal.validate()">
                   <option value="">-- Select Origin Column --</option>
                 </select>
               </div>
               <div>
                 <label class="block text-[11px] font-medium text-slate-600">Origin Province / State Column (Optional)</label>
-                <select id="failsafe-col-origin-region" aria-label="Origin Province or State Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+                <select id="failsafe-col-origin-region" aria-label="Origin Province or State Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none" onchange="FailsafeModal.validate()">
                   <option value="">-- None (Single Column Location) --</option>
                 </select>
               </div>
@@ -278,7 +278,7 @@
             <!-- Fixed Origin Value Input -->
             <div id="failsafe-origin-fixed-fields" class="hidden space-y-2">
               <label class="block text-[11px] font-semibold text-slate-700">Fixed Origin Location <span class="text-red-500">*</span></label>
-              <input type="text" id="failsafe-fixed-origin-input" placeholder="e.g. Toronto, ON or V5K 0A1" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" oninput="FailsafeModal.validate()">
+              <input type="text" id="failsafe-fixed-origin-input" placeholder="e.g. Toronto, ON or V5K 0A1" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none" oninput="FailsafeModal.validate()">
               <div id="failsafe-origin-preamble-suggestion" class="hidden text-[11px] text-blue-700">
                 Preamble detected: <button type="button" id="failsafe-origin-preamble-btn" onclick="FailsafeModal.applyFixedOriginPreamble()" class="underline font-bold hover:text-blue-900 cursor-pointer"></button>
               </div>
@@ -294,13 +294,13 @@
             <div class="space-y-2">
               <div>
                 <label class="block text-[11px] font-semibold text-slate-700">Destination City / Postal Column <span class="text-red-500">*</span></label>
-                <select id="failsafe-col-destination" aria-label="Destination City or Postal Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+                <select id="failsafe-col-destination" aria-label="Destination City or Postal Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none" onchange="FailsafeModal.validate()">
                   <option value="">-- Select Destination Column --</option>
                 </select>
               </div>
               <div>
                 <label class="block text-[11px] font-medium text-slate-600">Destination Province / State Column (Optional)</label>
-                <select id="failsafe-col-destination-region" aria-label="Destination Province or State Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+                <select id="failsafe-col-destination-region" aria-label="Destination Province or State Column" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none" onchange="FailsafeModal.validate()">
                   <option value="">-- None (Single Column Location) --</option>
                 </select>
               </div>
@@ -316,7 +316,7 @@
           <span>Rate Columns & Minimum Charges</span>
           <div class="flex items-center gap-3">
             <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] font-semibold text-slate-800">
-              <input type="checkbox" id="failsafe-allow-deficit-cb" checked aria-label="Allow Deficit Weight Rating Calculation" class="rounded text-red-600 focus:ring-red-500" onchange="FailsafeModal.triggerDryRun()">
+              <input type="checkbox" id="failsafe-allow-deficit-cb" checked aria-label="Allow Deficit Weight Rating Calculation" class="rounded text-red-600 focus:outline-none" onchange="FailsafeModal.triggerDryRun()">
               <span>Allow Deficit Rating</span>
               <span class="cursor-pointer text-slate-400 hover:text-slate-600" title="Deficit Rating: Rates shipment at the next higher break weight if the total cost is lower.">ⓘ</span>
             </label>
@@ -331,14 +331,14 @@
               <label class="font-bold text-slate-800 text-xs">Minimum Charge Column (Optional)</label>
               <span class="cursor-pointer text-slate-400 hover:text-slate-600" title="The absolute minimum floor price for a lane.">ⓘ</span>
             </div>
-            <select id="failsafe-col-base-cost" aria-label="Minimum Charge Column" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.validate()">
+            <select id="failsafe-col-base-cost" aria-label="Minimum Charge Column" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none" onchange="FailsafeModal.validate()">
               <option value="">-- Optional (No Base Charge / MC) --</option>
             </select>
           </div>
           <div class="space-y-1">
             <label id="failsafe-carrier-max-cap-label" class="block font-bold text-slate-800 text-xs">Carrier Legal Maximum Weight (Optional)</label>
             <div class="flex items-center gap-2">
-              <input type="number" id="failsafe-carrier-max-weight" placeholder="e.g. 45000" class="w-32 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-800 focus:ring-1 focus:ring-red-500" onchange="FailsafeModal.triggerDryRun()">
+              <input type="number" id="failsafe-carrier-max-weight" placeholder="e.g. 45000" class="w-32 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-800 focus:outline-none" onchange="FailsafeModal.triggerDryRun()">
               <span id="failsafe-carrier-max-cap-unit" class="text-[11px] text-slate-500">lbs (flags breaks exceeding capacity)</span>
             </div>
           </div>
@@ -464,7 +464,7 @@
       <!-- Remember this layout -->
       <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
         <label class="inline-flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-800">
-          <input type="checkbox" id="failsafe-remember-mapping" aria-label="Remember column layout for future carrier sheets" class="rounded text-red-600 focus:ring-red-500 w-4 h-4">
+          <input type="checkbox" id="failsafe-remember-mapping" aria-label="Remember column layout for future carrier sheets" class="rounded text-red-600 w-4 h-4 focus:outline-none">
           <span>Remember this column layout for future sheets from this carrier</span>
         </label>
         <span class="text-[11px] text-slate-500">Saves SHA-256 layout fingerprint to bypass prompts on future uploads</span>
@@ -892,7 +892,7 @@ const FailsafeModal = {
       const div = document.createElement('div');
       div.className = "flex items-center gap-1.5 p-1.5 bg-white rounded-lg border border-slate-200 text-xs hover:border-slate-300";
       div.innerHTML = `
-        <input type="checkbox" id="failsafe-rate-cb-${c.index}" value="${c.index}" class="failsafe-rate-cb rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5" onchange="FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
+        <input type="checkbox" id="failsafe-rate-cb-${c.index}" value="${c.index}" class="failsafe-rate-cb rounded text-red-600 w-3.5 h-3.5 focus:outline-none" onchange="FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
         <label for="failsafe-rate-cb-${c.index}" class="truncate font-mono text-[11px] text-slate-700 cursor-pointer" title="Col ${c.letter}: ${c.name}">
           <strong class="text-slate-900">${c.letter}:</strong> ${c.name}
         </label>
@@ -919,7 +919,7 @@ const FailsafeModal = {
         tr.className = "hover:bg-slate-50 transition-colors";
         tr.innerHTML = `
           <td class="py-2 px-3 text-center">
-            <input type="checkbox" id="failsafe-skid-cb-${c.index}" value="${c.index}" class="failsafe-skid-tier-cb rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer" onchange="FailsafeModal.onSkidCbChange(${c.index}); FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
+            <input type="checkbox" id="failsafe-skid-cb-${c.index}" value="${c.index}" class="failsafe-skid-tier-cb rounded text-amber-600 w-4 h-4 cursor-pointer focus:outline-none" onchange="FailsafeModal.onSkidCbChange(${c.index}); FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
           </td>
           <td class="py-2 px-3">
             <label for="failsafe-skid-cb-${c.index}" class="font-mono font-bold text-slate-900 cursor-pointer text-xs" title="${c.name}">
@@ -927,10 +927,10 @@ const FailsafeModal = {
             </label>
           </td>
           <td class="py-2 px-3">
-            <input type="text" id="failsafe-skid-range-${c.index}" value="${initialRange}" placeholder="e.g. 1 or 1-2" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-800 focus:ring-1 focus:ring-amber-500" oninput="FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
+            <input type="text" id="failsafe-skid-range-${c.index}" value="${initialRange}" placeholder="e.g. 1 or 1-2" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-800 focus:outline-none" oninput="FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
           </td>
           <td class="py-2 px-3">
-            <select id="failsafe-skid-basis-${c.index}" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 focus:ring-1 focus:ring-amber-500" onchange="FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
+            <select id="failsafe-skid-basis-${c.index}" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 focus:outline-none" onchange="FailsafeModal.validate(); FailsafeModal.triggerDryRun();">
               <option value="PER_SKID">Per Skid ($/skid)</option>
               <option value="FLAT">Flat Total ($)</option>
             </select>
@@ -1423,7 +1423,7 @@ const FailsafeModal = {
         item.className = "flex items-start gap-2 p-1.5 rounded bg-amber-100/60 border border-amber-200 text-xs text-amber-950 cursor-pointer";
         const isChecked = this.acknowledgedFindings.has(f.finding_id);
         item.innerHTML = `
-          <input type="checkbox" value="${f.finding_id}" ${isChecked ? 'checked' : ''} class="failsafe-ack-cb rounded text-amber-600 focus:ring-amber-500 mt-0.5" onchange="FailsafeModal.onFindingAckChange(this)">
+          <input type="checkbox" value="${f.finding_id}" ${isChecked ? 'checked' : ''} class="failsafe-ack-cb rounded text-amber-600 mt-0.5 focus:outline-none" onchange="FailsafeModal.onFindingAckChange(this)">
           <div>
             <strong class="text-amber-900">${f.code}:</strong> <span>${f.message}</span>
           </div>
@@ -1458,10 +1458,10 @@ const FailsafeModal = {
     const btn = document.getElementById('failsafe-toggle-drawer-btn');
     if (drawer.classList.contains('hidden')) {
       drawer.classList.remove('hidden');
-      btn.innerText = "Hide Calculation Trace ▲";
+      btn.innerText = "Hide Calculation Trace";
     } else {
       drawer.classList.add('hidden');
-      btn.innerText = "View Calculation Trace & Invariants ▼";
+      btn.innerText = "View Calculation Trace & Invariants";
     }
   },
 

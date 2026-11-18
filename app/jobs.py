@@ -248,6 +248,11 @@ class RelationalJobStore(JobStore):
                         os.remove(file_path)
                     except OSError:
                         pass
+                if file_path and os.path.exists(f"{file_path}.tables.json"):
+                    try:
+                        os.remove(f"{file_path}.tables.json")
+                    except OSError:
+                        pass
                 out_path = row["output_path"]
                 if out_path and os.path.exists(out_path):
                     try:
@@ -337,6 +342,11 @@ class RelationalJobStore(JobStore):
                             os.remove(file_path)
                         except OSError:
                             pass
+                    if file_path and os.path.exists(f"{file_path}.tables.json"):
+                        try:
+                            os.remove(f"{file_path}.tables.json")
+                        except OSError:
+                            pass
                     out_path = r["output_path"]
                     if out_path and os.path.exists(out_path):
                         try:
@@ -366,10 +376,11 @@ class RelationalJobStore(JobStore):
             finally:
                 conn.close()
 
-        # Find .xlsx and .csv files created in temp
-        for ext in (".xlsx", ".csv"):
+        # Find .xlsx, .csv, .pdf, and cached .tables.json files created in temp
+        for ext in (".xlsx", ".csv", ".pdf", ".pdf.tables.json"):
             for f in glob.glob(os.path.join(target_dir, f"tmp*{ext}")):
-                if f not in active_paths:
+                base_f = f[:-len(".tables.json")] if f.endswith(".tables.json") else f
+                if base_f not in active_paths:
                     try:
                         # If file was modified more than 10 minutes ago, delete
                         if time.time() - os.path.getmtime(f) > 600:

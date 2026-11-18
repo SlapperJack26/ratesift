@@ -115,13 +115,13 @@
           <form id="rs-support-form" onsubmit="handleSupportSubmit(event)" class="p-5 space-y-3.5 text-xs overflow-y-auto flex-1">
             <div>
               <label for="rs-support-email" class="block font-semibold text-slate-700 mb-1">Your Work Email</label>
-              <input id="rs-support-email" type="email" required placeholder="dispatcher@logistics.ca" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none">
+              <input id="rs-support-email" type="email" required placeholder="dispatcher@logistics.ca" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="rs-support-cat" class="block font-semibold text-slate-700 mb-1">Category</label>
-                <select id="rs-support-cat" aria-label="Support Category" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none">
+                <select id="rs-support-cat" aria-label="Support Category" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-xs focus:outline-none">
                   <option value="QUOTING">Quoting Engine / Rating</option>
                   <option value="TARIFF_INGESTION">Spreadsheet Parsing / Ingestion</option>
                   <option value="ACCOUNT_SEATS">Account Limits & Seats</option>
@@ -131,7 +131,7 @@
               </div>
               <div>
                 <label for="rs-support-sev" class="block font-semibold text-slate-700 mb-1">Severity</label>
-                <select id="rs-support-sev" aria-label="Support Severity" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none">
+                <select id="rs-support-sev" aria-label="Support Severity" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-xs focus:outline-none">
                   <option value="NORMAL">Normal (Within 4 hours)</option>
                   <option value="URGENT">Urgent Dispatch Halt</option>
                 </select>
@@ -140,16 +140,16 @@
 
             <div>
               <label for="rs-support-subj" class="block font-semibold text-slate-700 mb-1">Subject</label>
-              <input id="rs-support-subj" type="text" required placeholder="Issue with deficit rate on Toronto-Montreal lane" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none">
+              <input id="rs-support-subj" type="text" required placeholder="Issue with deficit rate on Toronto-Montreal lane" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none">
             </div>
 
             <div>
               <label for="rs-support-msg" class="block font-semibold text-slate-700 mb-1">Message Details</label>
-              <textarea id="rs-support-msg" rows="3" required placeholder="Describe the lane, shipment weight, or sheet row coordinate..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none"></textarea>
+              <textarea id="rs-support-msg" rows="3" required placeholder="Describe the lane, shipment weight, or sheet row coordinate..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none"></textarea>
             </div>
 
             <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-[11px] text-slate-500">
-              ℹ️ Your browser diagnostics and tenant ID will be automatically attached to help resolve this quickly.
+              Your browser diagnostics and tenant ID will be automatically attached to help resolve this quickly.
             </div>
 
             <div class="pt-2 flex justify-end gap-2">
@@ -676,17 +676,17 @@ print(response.json())</pre>
     const toast = document.createElement('div');
     toast.className = 'pointer-events-auto transform transition-all duration-200 ease-out translate-y-2 opacity-0 flex items-start gap-3 p-3.5 rounded-xl shadow-lg border text-xs leading-relaxed backdrop-blur-md';
 
-    let icon = 'ℹ️';
+    let icon = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
     let typeClasses = 'bg-slate-900/95 text-white border-slate-700/80';
 
     if (type === 'success') {
-      icon = '✓';
+      icon = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
       typeClasses = 'bg-emerald-900/95 text-emerald-50 border-emerald-700/80';
     } else if (type === 'error') {
-      icon = '✕';
+      icon = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>';
       typeClasses = 'bg-red-900/95 text-red-50 border-red-700/80';
     } else if (type === 'warning') {
-      icon = '⚠️';
+      icon = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>';
       typeClasses = 'bg-amber-900/95 text-amber-50 border-amber-700/80';
     }
 
@@ -694,7 +694,7 @@ print(response.json())</pre>
     toast.innerHTML = `
       <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 bg-white/20">${icon}</span>
       <div class="flex-1 font-medium pt-0.5">${message}</div>
-      <button type="button" class="text-white/60 hover:text-white transition-colors cursor-pointer text-sm leading-none pl-1" onclick="this.parentElement.remove()">✕</button>
+      <button type="button" aria-label="Close notification" class="text-white/60 hover:text-white transition-colors cursor-pointer leading-none pl-1" onclick="this.parentElement.remove()"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
     `;
 
     container.appendChild(toast);

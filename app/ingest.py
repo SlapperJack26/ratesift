@@ -9,6 +9,7 @@ Safe file ingestion module:
 """
 import csv
 import io
+import json
 import os
 import re
 import unicodedata
@@ -174,6 +175,86 @@ def check_full_load_limits(path: str, ext: str, sheet_name: Optional[str] = None
                 "Please reduce sheet size and upload again."
             )
 
+    elif ext == ".pdf":
+        tables = _load_pdf_tables_cached(path)
+        selected = next((t for t in tables if sheet_name and t.get("sheet_name") == sheet_name), tables[0] if tables else None)
+        if selected:
+            grid = selected.get("grid") or []
+            row_count = len(grid)
+            max_col_count = max((len(r) for r in grid), default=0)
+            total_cells = row_count * max_col_count
+            if row_count > MAX_DATA_ROWS:
+                raise IngestionError(
+                    f"This PDF table has {row_count:,} rows; the limit is {MAX_DATA_ROWS:,}. "
+                    "Split it by region or service and upload again."
+                )
+            if max_col_count > MAX_DATA_COLS:
+                raise IngestionError(
+                    f"This PDF table has {max_col_count} columns; the limit is {MAX_DATA_COLS}."
+                )
+            if total_cells > MAX_TOTAL_CELLS:
+                raise IngestionError(
+                    f"This PDF table has {total_cells:,} cells; the limit is {MAX_TOTAL_CELLS:,} cells."
+                )
+
+
+def _load_pdf_tables_cached(path: str) -> List[Dict[str, Any]]:
+    """
+    Loads parsed multi-table PDF structures using a sidecar cache ({path}.tables.json)
+    so dry-runs, tab switches, and confirmations avoid re-parsing multi-page PDFs.
+    """
+    cache_path = f"{path}.tables.json"
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, "r", encoding="utf-8") as cf:
+                cached = json.load(cf)
+            if isinstance(cached, list) and cached:
+                return cached
+        except Exception:
+            pass
+
+    if not os.path.exists(path):
+        raise IngestionError("Uploaded PDF file is no longer available.")
+
+    file_size = os.path.getsize(path)
+    if file_size > MAX_BYTES:
+        raise IngestionError(f"File size exceeds maximum allowed ({MAX_BYTES // (1024 * 1024)} MB).")
+
+    with open(path, "rb") as pf:
+        pdf_bytes = pf.read()
+
+    from services.pdf_tariff_extractor_service import extract_pdf_tariff_tables
+    try:
+        tables = extract_pdf_tariff_tables(pdf_bytes)
+    except ValueError as ve:
+        raise IngestionError(str(ve)) from ve
+
+    try:
+        with open(cache_path, "w", encoding="utf-8") as cf:
+            json.dump(tables, cf)
+    except Exception:
+        pass
+
+    return tables
+
+
+def list_sheet_names(path: str, ext: str) -> List[str]:
+    """Returns ordered tab/section names for .xlsx, .csv, or .pdf uploads."""
+    ext = ext.lower()
+    if ext == ".csv":
+        return ["Sheet1"]
+    if ext == ".xlsx":
+        check_zip_bomb(path)
+        wb = load_workbook(path, read_only=True, data_only=True)
+        try:
+            return list(wb.sheetnames) or ["Sheet1"]
+        finally:
+            wb.close()
+    if ext == ".pdf":
+        tables = _load_pdf_tables_cached(path)
+        names = [t.get("sheet_name") or f"Section {i + 1}" for i, t in enumerate(tables)]
+        return names or ["PDF Rate Sheet"]
+    return ["Sheet1"]
 
 
 def load_sheet_grid(
@@ -189,7 +270,7 @@ def load_sheet_grid(
     """
     ext = ext.lower()
     if ext not in ALLOWED_EXT:
-        raise IngestionError(f"Unsupported file type '{ext}'. Allowed types: {', '.join(ALLOWED_EXT)}")
+        raise IngestionError(f"Unsupported file type '{ext}'. Allowed types: {', '.join(sorted(ALLOWED_EXT))}")
 
     if ext == ".csv":
         return _load_csv(path, max_rows=max_rows, max_cols=max_cols), "Sheet1"
@@ -197,6 +278,17 @@ def load_sheet_grid(
     if ext == ".xlsx":
         check_zip_bomb(path)
         return _load_xlsx(path, sheet_name=sheet_name, max_rows=max_rows, max_cols=max_cols)
+
+    if ext == ".pdf":
+        tables = _load_pdf_tables_cached(path)
+        selected = None
+        if sheet_name:
+            selected = next((t for t in tables if t.get("sheet_name") == sheet_name), None)
+        if selected is None:
+            selected = tables[0]
+        raw_grid = selected.get("grid") or []
+        capped = [list(r[:max_cols]) for r in raw_grid[:max_rows]]
+        return capped, (selected.get("sheet_name") or "PDF Rate Sheet")
 
     raise IngestionError(f"Unsupported file type '{ext}'")
 

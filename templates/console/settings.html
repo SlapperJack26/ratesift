@@ -84,7 +84,7 @@
             </a>
             <a href="/console/rate-sheets" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <span>Carrier Tariffs</span>
+              <span>Rate Sheets</span>
             </a>
             <a href="/console/settings" aria-current="page" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs relative after:content-[''] after:absolute after:-bottom-3.5 after:left-3 after:right-3 after:h-0.5 after:bg-red-600">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -121,7 +121,7 @@
       <nav class="flex sm:hidden overflow-x-auto gap-2 pt-2.5 mt-2 border-t border-slate-100 text-xs font-medium px-1">
         <a href="/console/new-quote" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">New Quote</a>
         <a href="/console/history" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Quotes History</a>
-        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Carrier Tariffs</a>
+        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Rate Sheets</a>
         <a href="/console/settings" class="px-3 py-1 rounded-full bg-red-50 text-red-600 font-bold whitespace-nowrap">Settings</a>
       </nav>
     </header>
@@ -146,7 +146,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
               <label for="currency-select" class="block text-xs font-bold text-[var(--foreground)] mb-1">Currency</label>
-              <select id="currency-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+              <select id="currency-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden font-normal">
                 <option value="CAD" selected>CAD ($) - Canadian Dollar</option>
                 <option value="USD">USD ($) - United States Dollar</option>
                 <option value="EUR">EUR (€) - Euro</option>
@@ -156,7 +156,7 @@
 
             <div>
               <label for="unit-select" class="block text-xs font-bold text-[var(--foreground)] mb-1">Measurement System</label>
-              <select id="unit-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+              <select id="unit-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden font-normal">
                 <option value="lbs" selected>Imperial (lbs, inches)</option>
                 <option value="kg">Metric (kg, cm)</option>
               </select>
@@ -164,7 +164,7 @@
 
             <div>
               <label for="markup-mode-select" class="block text-xs font-bold text-[var(--foreground)] mb-1">Markup Mode</label>
-              <select id="markup-mode-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+              <select id="markup-mode-select" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden font-normal">
                 <option value="percent" selected>Percentage Markup (+X%)</option>
                 <option value="flat">Flat Dollar Add-on (+$)</option>
               </select>
@@ -173,7 +173,7 @@
             <div>
               <label for="markup-input" class="block text-xs font-bold text-[var(--foreground)] mb-1">Standard Markup / Margin</label>
               <div class="relative">
-                <input id="markup-input" type="text" value="+ 10.0%" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+                <input id="markup-input" type="text" value="+ 10.0%" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden font-normal">
               </div>
             </div>
           </div>
@@ -183,7 +183,7 @@
               <label for="fsc-passthrough" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Fuel Surcharge (FSC) Passthrough</label>
               <p class="text-[11px] text-[var(--muted-foreground)]">Pass carrier fuel surcharge directly into client proposals and calculations.</p>
             </div>
-            <input id="fsc-passthrough" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
+            <input id="fsc-passthrough" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 border-[var(--border)] cursor-pointer focus:outline-none">
           </div>
         </section>
 
@@ -200,7 +200,7 @@
                 <label for="auto-header" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Auto-Detect Header Row</label>
                 <p class="text-[11px] text-[var(--muted-foreground)]">Automatically match columns labeled "Address", "ZIP", "Area Code", and "Recipient".</p>
               </div>
-              <input id="auto-header" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
+              <input id="auto-header" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 border-[var(--border)] cursor-pointer focus:outline-none">
             </div>
 
             <div class="flex items-center justify-between py-1.5 border-t border-[var(--border)]">
@@ -208,7 +208,7 @@
                 <label for="skip-empty" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Skip Empty / Malformed Rows</label>
                 <p class="text-[11px] text-[var(--muted-foreground)]">Ignore empty spreadsheet rows without interrupting batch quote generation.</p>
               </div>
-              <input id="skip-empty" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
+              <input id="skip-empty" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 border-[var(--border)] cursor-pointer focus:outline-none">
             </div>
 
             <div class="flex items-center justify-between py-1.5 border-t border-[var(--border)]">
@@ -216,7 +216,7 @@
                 <label for="strict-zip" class="text-xs font-bold text-[var(--foreground)] cursor-pointer">Strict Area Code Validation</label>
                 <p class="text-[11px] text-[var(--muted-foreground)]">Flag quotes that contain invalid or missing postal codes before finalizing rates.</p>
               </div>
-              <input id="strict-zip" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 focus:ring-red-500 border-[var(--border)] cursor-pointer">
+              <input id="strict-zip" type="checkbox" checked class="w-4 h-4 rounded-sm text-red-600 border-[var(--border)] cursor-pointer focus:outline-none">
             </div>
           </div>
         </section>
@@ -241,11 +241,11 @@
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end bg-slate-50/70 border border-slate-200/80 rounded-lg p-3 mb-4">
             <div class="sm:col-span-3">
               <label for="kw-code-input" class="block text-[11px] font-bold text-[var(--foreground)] mb-1">Keyword / Header Code</label>
-              <input id="kw-code-input" type="text" placeholder="e.g. L5C" class="w-full bg-white border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs font-mono text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addKeywordDefinition();}">
+              <input id="kw-code-input" type="text" placeholder="e.g. L5C" class="w-full bg-white border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs font-mono text-[var(--foreground)] focus:outline-hidden" onkeydown="if(event.key==='Enter'){event.preventDefault(); addKeywordDefinition();}">
             </div>
             <div class="sm:col-span-6">
               <label for="kw-meaning-input" class="block text-[11px] font-bold text-[var(--foreground)] mb-1">Definition / Meaning</label>
-              <input id="kw-meaning-input" type="text" placeholder='e.g. less than 5 skids' class="w-full bg-white border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addKeywordDefinition();}">
+              <input id="kw-meaning-input" type="text" placeholder='e.g. less than 5 skids' class="w-full bg-white border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground)] focus:outline-hidden" onkeydown="if(event.key==='Enter'){event.preventDefault(); addKeywordDefinition();}">
             </div>
             <div class="sm:col-span-3">
               <button id="add-keyword-btn" type="button" onclick="addKeywordDefinition()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5">
@@ -266,7 +266,7 @@
           <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[var(--border)]">
             <div>
               <h2 class="text-sm font-bold text-[var(--foreground)]">Brokerage Owner Margin Guardrails &amp; Master Tariff Lock</h2>
-              <p class="text-[11px] text-[var(--muted-foreground)] mt-0.5">Prevent junior dispatchers from quoting below your hard margin floor or deleting/altering confirmed carrier tariffs.</p>
+              <p class="text-[11px] text-[var(--muted-foreground)] mt-0.5">Prevent junior dispatchers from quoting below your hard margin floor or deleting/altering confirmed rate sheets.</p>
             </div>
             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200">Broker Team Governance</span>
           </div>
@@ -287,12 +287,12 @@
           <div class="flex flex-wrap items-center justify-between gap-4 pt-1">
             <div class="flex flex-wrap items-center gap-5">
               <label class="inline-flex items-center gap-2 text-xs font-medium text-[var(--foreground)] cursor-pointer">
-                <input id="guardrail-enforce" type="checkbox" class="rounded text-red-600 focus:ring-red-500" />
+                <input id="guardrail-enforce" type="checkbox" class="rounded text-red-600 focus:outline-none" />
                 <span>Enforce Minimum Margin Floor on Dispatcher Quotes</span>
               </label>
               <label class="inline-flex items-center gap-2 text-xs font-medium text-[var(--foreground)] cursor-pointer">
-                <input id="guardrail-lock-tariffs" type="checkbox" class="rounded text-red-600 focus:ring-red-500" />
-                <span>Lock Master Carrier Tariffs (Block Delete / GRI Edits)</span>
+                <input id="guardrail-lock-tariffs" type="checkbox" class="rounded text-red-600 focus:outline-none" />
+                <span>Lock Master Rate Sheets (Block Delete / GRI Edits)</span>
               </label>
             </div>
             <button type="button" onclick="saveOwnerGuardrails()" class="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold cursor-pointer transition-colors">
@@ -321,7 +321,7 @@
         <nav aria-label="Footer Navigation" class="flex flex-wrap items-center gap-4 text-xs font-medium">
           <a href="/console/new-quote" class="hover:text-[var(--foreground)] transition-colors">New Quote</a>
           <a href="/console/history" class="hover:text-[var(--foreground)] transition-colors">Audit History</a>
-          <a href="/console/rate-sheets" class="hover:text-[var(--foreground)] transition-colors">Carrier Tariffs</a>
+          <a href="/console/rate-sheets" class="hover:text-[var(--foreground)] transition-colors">Rate Sheets</a>
           <a href="#docs" onclick="openDocsModal(event)" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
           <a href="#support" onclick="openSupportModal(event)" class="hover:text-[var(--foreground)] transition-colors">Support</a>
           <a href="#api" onclick="openApiModal(event)" class="hover:text-[var(--foreground)] transition-colors">API</a>

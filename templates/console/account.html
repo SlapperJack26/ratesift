@@ -54,7 +54,7 @@
             </a>
             <a href="/console/rate-sheets" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <span>Carrier Tariffs</span>
+              <span>Rate Sheets</span>
             </a>
             <a href="/console/settings" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -99,7 +99,7 @@
       <nav class="flex sm:hidden overflow-x-auto gap-2 pt-2.5 mt-2 border-t border-slate-100 text-xs font-medium px-1">
         <a href="/console/new-quote" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">New Quote</a>
         <a href="/console/history" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Quotes History</a>
-        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Carrier Tariffs</a>
+        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Rate Sheets</a>
         <a href="/console/account" class="px-3 py-1 rounded-full bg-red-50 text-red-600 font-bold whitespace-nowrap">Account</a>
       </nav>
     </header>
@@ -194,11 +194,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
                     <label for="first-name" class="block text-xs font-bold text-[var(--foreground)] mb-1">First Name</label>
-                    <input id="first-name" type="text" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                    <input id="first-name" type="text" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-none">
                   </div>
                   <div>
                     <label for="last-name" class="block text-xs font-bold text-[var(--foreground)] mb-1">Last Name</label>
-                    <input id="last-name" type="text" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                    <input id="last-name" type="text" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-none">
                   </div>
                   <div>
                     <div class="flex items-center justify-between mb-1">
@@ -212,11 +212,11 @@
                   </div>
                   <div>
                     <label for="company-name" class="block text-xs font-bold text-[var(--foreground)] mb-1">Company / Organization</label>
-                    <input id="company-name" type="text" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                    <input id="company-name" type="text" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-none">
                   </div>
                   <div class="sm:col-span-2">
                     <label for="phone-number" class="block text-xs font-bold text-[var(--foreground)] mb-1">Direct Phone / Dispatch Hotline</label>
-                    <input id="phone-number" type="tel" placeholder="+1 (416) 555-0199" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                    <input id="phone-number" type="tel" placeholder="+1 (416) 555-0199" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-none">
                   </div>
                 </div>
               </section>
@@ -357,11 +357,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label class="block text-[11px] font-semibold text-slate-600 mb-1">Email Address</label>
-                    <input id="invite-email" type="email" placeholder="dispatcher@brokerage.ca" required class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:ring-1 focus:ring-red-500">
+                    <input id="invite-email" type="email" placeholder="dispatcher@brokerage.ca" required class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none">
                   </div>
                   <div>
                     <label class="block text-[11px] font-semibold text-slate-600 mb-1">Full Name</label>
-                    <input id="invite-name" type="text" placeholder="Sarah Connor" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:ring-1 focus:ring-red-500">
+                    <input id="invite-name" type="text" placeholder="Sarah Connor" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none">
                   </div>
                   <div>
                     <label class="block text-[11px] font-semibold text-slate-600 mb-1">Role</label>
@@ -441,11 +441,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                   <div class="sm:col-span-2">
                     <label for="origin-address" class="block text-xs font-bold text-[var(--foreground)] mb-1">Default Origin Street Address</label>
-                    <input id="origin-address" type="text" value="5500 Logistics Way, Bay 12" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                    <input id="origin-address" type="text" value="5500 Logistics Way, Bay 12" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-none">
                   </div>
                   <div>
                     <label for="origin-zip" class="block text-xs font-bold text-[var(--foreground)] mb-1">Origin City / Postal FSA</label>
-                    <input id="origin-zip" type="text" value="TORONTO, ON" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500">
+                    <input id="origin-zip" type="text" value="TORONTO, ON" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-none">
                   </div>
                 </div>
               </section>
@@ -465,15 +465,15 @@
               <div class="space-y-3 max-w-md">
                 <div>
                   <label for="pwd-current" class="block text-xs font-bold text-[var(--foreground)] mb-1">Current Password</label>
-                  <input id="pwd-current" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500" placeholder="••••••••">
+                  <input id="pwd-current" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-none" placeholder="••••••••">
                 </div>
                 <div>
                   <label for="pwd-new" class="block text-xs font-bold text-[var(--foreground)] mb-1">New Password (min. 10 characters)</label>
-                  <input id="pwd-new" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500" placeholder="••••••••">
+                  <input id="pwd-new" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-none" placeholder="••••••••">
                 </div>
                 <div>
                   <label for="pwd-confirm" class="block text-xs font-bold text-[var(--foreground)] mb-1">Confirm New Password</label>
-                  <input id="pwd-confirm" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:ring-1 focus:ring-red-500" placeholder="••••••••">
+                  <input id="pwd-confirm" type="password" required class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-none" placeholder="••••••••">
                 </div>
               </div>
               <div class="pt-4 border-t border-[var(--border)] flex items-center justify-end">
@@ -488,7 +488,7 @@
               <h3 class="text-xs font-bold text-[var(--foreground)]">Marketing Communications (CASL)</h3>
               <label class="flex items-center justify-between gap-4 text-xs text-slate-600 cursor-pointer">
                 <span>Receive optional product updates, freight rating tips, and commercial offers from Quotelytics Inc.</span>
-                <input id="account-marketing-opt-in" aria-label="Receive marketing communications and product updates" type="checkbox" onchange="updateMarketingConsent(this.checked)" class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500">
+                <input id="account-marketing-opt-in" aria-label="Receive marketing communications and product updates" type="checkbox" onchange="updateMarketingConsent(this.checked)" class="w-4 h-4 rounded border-slate-300 text-red-600 focus:outline-none">
               </label>
             </div>
 
@@ -524,7 +524,7 @@
               </div>
               <h2 class="text-base font-bold text-slate-900">Embedded REST Quoting API &amp; Signed Batch Webhooks</h2>
               <p class="text-xs text-slate-600 leading-relaxed max-w-2xl">
-                Connect your TMS, WMS, ERP, or customer portal directly to your confirmed LTL carrier tariffs via <code class="px-1.5 py-0.5 bg-white rounded border border-indigo-100 font-mono text-[11px]">POST /api/quotelytics/quotes/calculate</code> and <code class="px-1.5 py-0.5 bg-white rounded border border-indigo-100 font-mono text-[11px]">POST /api/v1/quotes/batch</code>, complete with SHA-256 hashed API keys and HMAC-SHA256 signed webhook callbacks.
+                Connect your TMS, WMS, ERP, or customer portal directly to your confirmed LTL rate sheets via <code class="px-1.5 py-0.5 bg-white rounded border border-indigo-100 font-mono text-[11px]">POST /api/quotelytics/quotes/calculate</code> and <code class="px-1.5 py-0.5 bg-white rounded border border-indigo-100 font-mono text-[11px]">POST /api/v1/quotes/batch</code>, complete with SHA-256 hashed API keys and HMAC-SHA256 signed webhook callbacks.
               </p>
               <div class="pt-1 flex flex-wrap items-center gap-3">
                 <button type="button" onclick="openSupportModal(event)" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer">
@@ -557,7 +557,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div class="bg-white border border-emerald-200 rounded-lg p-3 space-y-1">
-                    <div class="font-bold text-emerald-700">✓ Step 1: Business Plan Active</div>
+                    <div class="font-bold text-emerald-700">Step 1: Business Plan Active</div>
                     <div class="text-[11px] text-slate-500">Embedded REST Quoting &amp; Webhooks unlocked.</div>
                   </div>
                   <div id="checklist-step-tariffs" class="bg-white border border-slate-200 rounded-lg p-3 space-y-1">
@@ -590,7 +590,7 @@
                 <form onsubmit="event.preventDefault(); generateApiKey();" class="flex flex-wrap items-end gap-2">
                   <div class="flex-1 min-w-[200px]">
                     <label for="api-key-name-input" class="block text-[11px] font-semibold text-slate-700 mb-1">Key Label</label>
-                    <input id="api-key-name-input" type="text" maxlength="80" placeholder="e.g. Production TMS Integration" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    <input id="api-key-name-input" type="text" maxlength="80" placeholder="e.g. Production TMS Integration" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none" />
                   </div>
                   <button type="submit" id="btn-generate-api-key" class="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white font-bold text-xs transition-colors cursor-pointer">
                     Generate API Key
@@ -636,11 +636,11 @@
                 <form onsubmit="event.preventDefault(); registerWebhookEndpoint();" class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
                   <div class="sm:col-span-6">
                     <label for="webhook-url-input" class="block text-[11px] font-semibold text-slate-700 mb-1">HTTPS Endpoint URL</label>
-                    <input id="webhook-url-input" type="url" required placeholder="https://tms.yourcompany.ca/webhooks/quotelytics" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    <input id="webhook-url-input" type="url" required placeholder="https://tms.yourcompany.ca/webhooks/quotelytics" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none" />
                   </div>
                   <div class="sm:col-span-4">
                     <label for="webhook-desc-input" class="block text-[11px] font-semibold text-slate-700 mb-1">Description (Optional)</label>
-                    <input id="webhook-desc-input" type="text" maxlength="120" placeholder="ERP Batch Listener" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    <input id="webhook-desc-input" type="text" maxlength="120" placeholder="ERP Batch Listener" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none" />
                   </div>
                   <div class="sm:col-span-2">
                     <button type="submit" class="w-full px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors cursor-pointer">
@@ -787,7 +787,7 @@
         <nav aria-label="Footer Navigation" class="flex flex-wrap items-center gap-4 text-xs font-medium">
           <a href="/console/new-quote" class="hover:text-[var(--foreground)] transition-colors">New Quote</a>
           <a href="/console/history" class="hover:text-[var(--foreground)] transition-colors">Audit History</a>
-          <a href="/console/rate-sheets" class="hover:text-[var(--foreground)] transition-colors">Carrier Tariffs</a>
+          <a href="/console/rate-sheets" class="hover:text-[var(--foreground)] transition-colors">Rate Sheets</a>
           <a href="/console/settings" class="hover:text-[var(--foreground)] transition-colors">Settings</a>
           <a href="#docs" onclick="openDocsModal(event)" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
           <a href="#support" onclick="openSupportModal(event)" class="hover:text-[var(--foreground)] transition-colors">Support</a>
@@ -872,13 +872,13 @@
         document.getElementById('plan-subline').textContent = "Validating deterministic rate calculations and FSA resolution.";
       } else if (q.tier === 'PRO') {
         document.getElementById('plan-headline').textContent = "Broker Pro Active ($79 CAD / mo)";
-        document.getElementById('plan-subline').textContent = "Up to 10 carrier tariffs, 2,500 monthly quotes, and branded client proposals.";
+        document.getElementById('plan-subline').textContent = "Up to 10 rate sheets, 2,500 monthly quotes, and branded client proposals.";
       } else if (q.tier === 'TEAM') {
         document.getElementById('plan-headline').textContent = "Broker Team Active ($199 CAD / mo)";
-        document.getElementById('plan-subline').textContent = "Unlimited carrier tariffs, 15,000 monthly quotes, and 5 dispatcher seats included.";
+        document.getElementById('plan-subline').textContent = "Unlimited rate sheets, 15,000 monthly quotes, and 5 dispatcher seats included.";
       } else if (q.tier === 'BUSINESS') {
         document.getElementById('plan-headline').textContent = "Business Embedded API Active";
-        document.getElementById('plan-subline').textContent = "Unlimited carrier tariffs, unlimited quotes, 15 seats, REST Quoting API, and signed batch webhooks.";
+        document.getElementById('plan-subline').textContent = "Unlimited rate sheets, unlimited quotes, 15 seats, REST Quoting API, and signed batch webhooks.";
       }
 
       // Counter 1: Monthly Quotes
@@ -1063,7 +1063,7 @@
                 </div>
               </td>
               <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">Account Owner</span></td>
-              <td class="py-2.5 px-3"><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">● Active</span></td>
+              <td class="py-2.5 px-3"><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active</span></td>
               <td class="py-2.5 px-3 text-slate-500">Primary Seat</td>
               <td class="py-2.5 px-3 text-right text-slate-400 text-[11px]">Default</td>
             `;
@@ -1085,7 +1085,7 @@
                   </div>
                 </td>
                 <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700">${m.role}</span></td>
-                <td class="py-2.5 px-3"><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">● Active</span></td>
+                <td class="py-2.5 px-3"><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active</span></td>
                 <td class="py-2.5 px-3 text-slate-500">${new Date(m.created_at).toLocaleDateString()}</td>
                 <td class="py-2.5 px-3 text-right">
                   <button type="button" onclick="revokeTeamMember('${m.id}')" class="text-red-600 hover:text-red-800 font-semibold text-[11px] cursor-pointer">Revoke</button>
@@ -1412,15 +1412,15 @@
       if (sheetsCount > 0) {
         sheetCard.className = 'bg-white border border-emerald-200 rounded-lg p-3 space-y-1';
         sheetTitle.className = 'font-bold text-emerald-700';
-        sheetTitle.textContent = `✓ Step 2: ${sheetsCount} Confirmed Tariff${sheetsCount === 1 ? '' : 's'} Ready`;
+        sheetTitle.textContent = `Step 2: ${sheetsCount} Confirmed Rate Sheet${sheetsCount === 1 ? '' : 's'} Ready`;
         sheetSub.textContent = ob.sample_lane
           ? `Ready to quote (e.g. ${ob.sample_lane.carrier}: ${ob.sample_lane.origin} → ${ob.sample_lane.destination}).`
-          : 'Carrier tariff confirmed for deterministic rating.';
+          : 'Rate sheet confirmed for deterministic rating.';
         sheetLink.classList.add('hidden');
       } else {
         sheetCard.className = 'bg-amber-50 border border-amber-300 rounded-lg p-3 space-y-1';
         sheetTitle.className = 'font-bold text-amber-900';
-        sheetTitle.textContent = '⚠ Step 2: Upload a Carrier Tariff';
+        sheetTitle.textContent = 'Step 2: Upload a Rate Sheet';
         sheetSub.textContent = 'No confirmed LTL rate sheet yet. Upload and confirm at least 1 sheet so the API can return rates.';
         sheetLink.classList.remove('hidden');
       }
@@ -1432,7 +1432,7 @@
       if (keysCount > 0) {
         keyCard.className = 'bg-white border border-emerald-200 rounded-lg p-3 space-y-1';
         keyTitle.className = 'font-bold text-emerald-700';
-        keyTitle.textContent = `✓ Step 3: ${keysCount} Active API Key${keysCount === 1 ? '' : 's'}`;
+        keyTitle.textContent = `Step 3: ${keysCount} Active API Key${keysCount === 1 ? '' : 's'}`;
         keySub.textContent = `Active prefix: ${ob.active_key_prefix || 'ql_live_...'}`;
       } else {
         keyCard.className = 'bg-white border border-indigo-200 rounded-lg p-3 space-y-1';
@@ -1468,7 +1468,7 @@
           box.className = 'rounded-lg p-3.5 text-xs border bg-emerald-50 border-emerald-300 text-emerald-950 space-y-1';
           const titleDiv = document.createElement('div');
           titleDiv.className = 'font-bold text-emerald-900';
-          titleDiv.textContent = `✓ API Setup Verified in ${res.elapsed_ms} ms — Ready for Your IT / TMS Team`;
+          titleDiv.textContent = `API Setup Verified in ${res.elapsed_ms} ms — Ready for Your IT / TMS Team`;
           const detailDiv = document.createElement('div');
           detailDiv.textContent = `Sample Quote (${sq.origin} → ${sq.destination}, 1,000 lbs / 2 skids): $${Number(sq.final_rate || 0).toFixed(2)} ${sq.currency || 'CAD'} via ${sq.carrier} (${sq.service}) [Cell ${sq.coordinate || 'Verified'}].`;
           box.appendChild(titleDiv);
@@ -1489,7 +1489,7 @@
         ``,
         `Hi Team,`,
         ``,
-        `Our Quotelytics Business Embedded Quoting API is active and verified against our confirmed LTL carrier tariffs.`,
+        `Our Quotelytics Business Embedded Quoting API is active and verified against our confirmed LTL rate sheets.`,
         ``,
         `Connection Summary:`,
         `- Active API Key Reference: ${prefix} (we will share the full secret key separately via password manager / secure chat)`,

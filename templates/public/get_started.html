@@ -160,7 +160,7 @@
                 name="name" 
                 required 
                 placeholder="Jane Doe" 
-                class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 transition-all font-medium"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden transition-all font-medium"
               >
               <div id="name-error" class="hidden text-[10px] text-red-600 font-medium">Please enter your full name.</div>
             </div>
@@ -177,7 +177,7 @@
                 required 
                 autocomplete="email" 
                 placeholder="name@brokerage.ca" 
-                class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 transition-all font-mono"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden transition-all font-mono"
               >
               <div id="email-error" class="hidden text-[10px] text-red-600 font-medium">Please enter a valid work email.</div>
             </div>
@@ -194,7 +194,7 @@
                   name="company" 
                   required 
                   placeholder="Maple Freight Logistics" 
-                  class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 transition-all font-medium"
+                  class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden transition-all font-medium"
                 >
                 <div id="company-error" class="hidden text-[10px] text-red-600 font-medium">Company is required.</div>
               </div>
@@ -211,7 +211,7 @@
                   maxlength="32" 
                   placeholder="M5V 2T6 or TORONTO, ON"
                   required 
-                  class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 transition-all font-mono"
+                  class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden transition-all font-mono"
                 >
               </div>
             </div>
@@ -222,7 +222,7 @@
                 <label for="reg-tier" class="block text-xs font-bold text-[var(--foreground)]">
                   Plan Interest
                 </label>
-                <select id="reg-tier" name="requested_tier" class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 transition-all font-medium">
+                <select id="reg-tier" name="requested_tier" class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden transition-all font-medium">
                   <option value="FREE">Free Starter (Beta)</option>
                   <option value="PRO" selected>Broker Pro (Beta)</option>
                   <option value="TEAM">Broker Team (Multi-Seat Beta)</option>
@@ -233,7 +233,7 @@
                 <label for="reg-notes" class="block text-xs font-bold text-[var(--foreground)]">
                   Carriers / Notes (Optional)
                 </label>
-                <input type="text" id="reg-notes" name="notes" placeholder="e.g. Manitoulin, Day & Ross" class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden focus:ring-2 focus:ring-red-600 transition-all font-medium">
+                <input type="text" id="reg-notes" name="notes" placeholder="e.g. Manitoulin, Day & Ross" class="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-hidden transition-all font-medium">
               </div>
             </div>
 
@@ -247,7 +247,7 @@
                   required 
                   aria-required="true"
                   aria-label="I agree to Quotelytics Terms of Service and Privacy Policy"
-                  class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 mt-0.5"
+                  class="w-4 h-4 rounded border-slate-300 text-red-600 mt-0.5 focus:outline-none"
                 >
                 <span class="text-[11px] text-[var(--muted-foreground)] leading-tight">
                   I agree to Quotelytics' <a href="/terms" class="underline hover:text-[var(--foreground)]">Terms of Service</a> and <a href="/privacy" class="underline hover:text-[var(--foreground)]">Privacy Policy</a> <span class="text-red-500 font-bold" title="Required">*</span>
@@ -263,7 +263,7 @@
                   name="marketing_opt_in" 
                   value="true"
                   aria-label="Send me product updates and commercial freight offers from Quotelytics"
-                  class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 mt-0.5"
+                  class="w-4 h-4 rounded border-slate-300 text-red-600 mt-0.5 focus:outline-none"
                 >
                 <span class="text-[11px] text-[var(--muted-foreground)] leading-tight">
                   Send me product updates, freight rating tips, and commercial offers from Quotelytics Inc. (optional; unsubscribe anytime).
@@ -424,7 +424,7 @@
       })
       .then(data => {
         spinner.classList.add('hidden');
-        text.textContent = "Request Submitted ✓";
+        text.textContent = "Request Submitted";
         status.className = "text-center text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-3 font-semibold";
         status.textContent = data.message || "Beta access request received! An administrator will set up your account shortly.";
       })

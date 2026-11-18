@@ -38,6 +38,7 @@ class JobState(BaseModel):
     status: JobStatus
     header_row: Optional[int] = None
     sheet_name: Optional[str] = None
+    sheets: List[str] = []
     mode: Optional[Mode] = None
     weight_unit: Optional[str] = None
     guesses: List[FieldGuess] = []

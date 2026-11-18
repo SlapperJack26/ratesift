@@ -33,7 +33,7 @@ class TestLTLShippingOptionAndClientProposal(unittest.TestCase):
         self.assertIn("/static/images/quotelytics-logo.png", html)
         self.assertIn("New Quote", html)
         self.assertIn("Quotes History", html)
-        self.assertIn("Carrier Tariffs", html)
+        self.assertIn("Rate Sheets", html)
         self.assertIn("Settings", html)
         self.assertIn("Hosted in Canada (WHC)", html)
         self.assertIn("Free Starter", html)

@@ -211,6 +211,40 @@ def require_admin_user(request: Request) -> dict:
     return user
 
 
+def require_tier(request: Request, allowed_tiers: Tuple[str, ...], feature_name: str) -> dict:
+    """
+    Enforces subscription tier access control on gated features matching templates/public/pricing.html.
+    Raises HTTP 403 and logs a bottleneck event if the user's tier is not in allowed_tiers.
+    """
+    user = require_user(request)
+    user_tier = (user.get("tier") or "FREE").strip().upper()
+    if user_tier not in allowed_tiers:
+        quota = get_user_quota_info(user["id"])
+        if quota and quota.get("tier"):
+            user_tier = str(quota["tier"]).strip().upper()
+    if user_tier not in allowed_tiers:
+        from services.db_service import log_bottleneck_event
+        log_bottleneck_event(
+            user_id=user["id"],
+            bottleneck_type="LIMIT_BLOCKED_TIER",
+            attempted_action=feature_name,
+            current_usage=0,
+            max_limit=0,
+            details={"user_tier": user_tier, "allowed_tiers": list(allowed_tiers), "feature": feature_name},
+        )
+        if "PRO" in allowed_tiers:
+            min_tier_label = "Broker Pro"
+        elif "TEAM" in allowed_tiers:
+            min_tier_label = "Broker Team"
+        else:
+            min_tier_label = "Business"
+        raise HTTPException(
+            status_code=403,
+            detail=f"Plan upgrade required: '{feature_name}' is not available on the {user_tier} plan. Please upgrade to {min_tier_label} or higher.",
+        )
+    return user
+
+
 _LOGIN_WINDOW_SECONDS = 900
 _LOGIN_MAX_ATTEMPTS = 5
 _LOGIN_FAILED_BY_EMAIL: Dict[str, List[float]] = {}

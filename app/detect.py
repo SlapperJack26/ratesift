@@ -384,8 +384,10 @@ def analyze(
             "suggestions": suggestions,
         }
 
-    # Flatten two-row headers if present
+    # Flatten two-row headers if present and persist flattened labels into grid row
     headers, hdr = detect_and_flatten_headers(rows, raw_hdr, custom_keywords=custom_keywords)
+    if hdr != raw_hdr and 0 <= hdr < len(rows):
+        rows[hdr] = [h if h else "" for h in headers]
 
     # Score origin and destination
     candidates_by_field: Dict[str, List[Tuple[int, float]]] = {}
@@ -531,6 +533,7 @@ def analyze(
         "status": status,
         "header_row": hdr,
         "sheet_name": sheet_name,
+        "flattened_headers": headers,
         "mode": mode,
         "weight_unit": weight_unit,
         "guesses": guesses,

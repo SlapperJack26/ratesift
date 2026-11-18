@@ -149,6 +149,15 @@ def parse_break_label(label: str, user_weight_fallback: Optional[float] = None) 
             return val * 1000.0
         return val
 
+    # Delegate composite labels ("151 to 299 lbs", "100+ lbs", "Weight Breaks 500") to shared parser
+    try:
+        from services.break_header_parser import parse_break_header
+        pb = parse_break_header(label, mode_hint="weight")
+        if pb is not None:
+            return float(pb.break_value)
+    except Exception:
+        pass
+
     return None
 
 

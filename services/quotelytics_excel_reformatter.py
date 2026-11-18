@@ -1,6 +1,7 @@
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+import csv
 import io
 import re
 import os
@@ -142,6 +143,52 @@ def parse_dimensions_string(raw_val: Any) -> Tuple[Optional[float], Optional[flo
             return None, None, None
     return None, None, None
 
+def _coerce_to_openpyxl_workbook(file_bytes: bytes, filename: str) -> openpyxl.Workbook:
+    """
+    Coerces .pdf, .csv, or .xlsx bytes into an in-memory openpyxl.Workbook
+    with labeled multi-tab sheets so analyze_excel_sheet works uniformly across formats.
+    """
+    lower_name = (filename or "").lower()
+    is_pdf = lower_name.endswith(".pdf") or file_bytes.lstrip().startswith(b"%PDF-")
+    if is_pdf:
+        from services.pdf_tariff_extractor_service import extract_pdf_tariff_tables
+        tables = extract_pdf_tariff_tables(file_bytes)
+        wb = openpyxl.Workbook()
+        # Remove default empty sheet once populated
+        default_ws = wb.active
+        used_titles = set()
+        created = 0
+        for idx, tbl in enumerate(tables):
+            raw_title = tbl.get("sheet_name") or f"PDF Sheet {idx + 1}"
+            cleaned = re.sub(r"[\[\]:*?/\\]+", " ", raw_title).strip() or f"Sheet {idx + 1}"
+            base = cleaned[:27].strip()
+            candidate = base[:31]
+            suffix = 2
+            while candidate.lower() in used_titles:
+                tag = f" ({suffix})"
+                candidate = f"{base[:31 - len(tag)]}{tag}"
+                suffix += 1
+            used_titles.add(candidate.lower())
+            ws = wb.create_sheet(title=candidate)
+            for row in (tbl.get("grid") or []):
+                ws.append(row)
+            created += 1
+        if created > 0 and default_ws in wb.worksheets:
+            wb.remove(default_ws)
+        return wb
+
+    if lower_name.endswith(".csv"):
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Sheet1"
+        text = file_bytes.decode("utf-8-sig", errors="replace")
+        for row in csv.reader(io.StringIO(text)):
+            ws.append(row)
+        return wb
+
+    return openpyxl.load_workbook(io.BytesIO(file_bytes), data_only=True)
+
+
 def analyze_excel_sheet(
     file_bytes: bytes,
     filename: str,
@@ -158,7 +205,7 @@ def analyze_excel_sheet(
     if user_confirmed_header_row is None and column_overrides and "header_row" in column_overrides:
         user_confirmed_header_row = column_overrides["header_row"] + 1
 
-    wb = openpyxl.load_workbook(io.BytesIO(file_bytes), data_only=True)
+    wb = _coerce_to_openpyxl_workbook(file_bytes, filename)
     if not wb.sheetnames:
         raise ValueError("The uploaded workbook contains no worksheets.")
 

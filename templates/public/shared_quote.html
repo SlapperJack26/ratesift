@@ -70,7 +70,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <button type="button" onclick="submitShipperDecision('WON')" class="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs cursor-pointer transition-colors">
-            ✓ Approve Quote &amp; Request Pickup
+            Approve Quote &amp; Request Pickup
           </button>
           <button type="button" onclick="submitShipperDecision('LOST')" class="py-3 px-4 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer transition-colors">
             Decline Quote
@@ -82,7 +82,7 @@
     </div>
 
     <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex flex-wrap items-center justify-between text-[11px] text-slate-500">
-      <a href="/demo" class="font-semibold text-slate-700 hover:text-red-600 transition-colors">⚡ Powered by Quotelytics — Instant Canadian LTL Quoting (Try Live Demo →)</a>
+      <a href="/demo" class="font-semibold text-slate-700 hover:text-red-600 transition-colors">Powered by Quotelytics — Instant Canadian LTL Quoting (Try Live Demo →)</a>
       <span>Contact Broker: {{ proposal.broker_email }}</span>
     </div>
   </main>
@@ -105,7 +105,7 @@
             ? 'p-3 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-900 border border-emerald-200 block'
             : 'p-3 rounded-xl text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300 block';
           fb.textContent = decision === 'WON'
-            ? '✓ Quote Approved! Your broker has been notified to arrange pickup.'
+            ? 'Quote Approved! Your broker has been notified to arrange pickup.'
             : 'Quote marked as declined. Thank you for letting your broker know.';
         }
         const badge = document.getElementById('status-badge');

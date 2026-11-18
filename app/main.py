@@ -27,7 +27,7 @@ logger = logging.getLogger("quotelytics.failsafe")
 
 from app.config import ALLOWED_EXT, MAX_BYTES, PREVIEW_ROWS, MAX_DATA_COLS, MAX_DATA_ROWS
 from app.detect import analyze, validate_mapping
-from app.ingest import IngestionError, check_uncached_formulas, load_sheet_grid
+from app.ingest import IngestionError, check_uncached_formulas, list_sheet_names, load_sheet_grid
 from app.jobs import job_store
 from app.mappings import (
     compute_fingerprint,
@@ -287,11 +287,18 @@ def _state(job_id: str, job_dict: Optional[Dict[str, Any]] = None) -> JobState:
     mode_val = a.get("mode")
     mode_enum = Mode(mode_val) if mode_val in ("weight", "skid") else None
 
+    sheets_list = (
+        j.get("sheets")
+        or a.get("sheets")
+        or ([a.get("sheet_name") or j.get("sheet_name")] if (a.get("sheet_name") or j.get("sheet_name")) else ["Sheet1"])
+    )
+
     return JobState(
         job_id=job_id,
         status=status_enum,
         header_row=a.get("header_row"),
         sheet_name=a.get("sheet_name") or j.get("sheet_name"),
+        sheets=sheets_list,
         mode=mode_enum,
         weight_unit=a.get("weight_unit") or (j.get("mapping") or {}).get("weight_unit"),
         guesses=guesses,
@@ -337,11 +344,11 @@ async def upload(request: Request, file: UploadFile = File(...)):
 
     ext = os.path.splitext(file.filename or "")[1].lower()
     if ext not in ALLOWED_EXT:
-        raise HTTPException(400, f"Unsupported file type '{ext}'. Upload .xlsx or .csv.")
+        raise HTTPException(400, f"Unsupported file type '{ext}'. Upload .xlsx, .csv, or .pdf.")
 
     data = await file.read(MAX_BYTES + 1)
     if len(data) > MAX_BYTES:
-        raise HTTPException(413, "File too large (10 MB max).")
+        raise HTTPException(413, f"File too large ({MAX_BYTES // (1024 * 1024)} MB max).")
 
     job_id = uuid.uuid4().hex
     fd, path = tempfile.mkstemp(suffix=ext)
@@ -349,6 +356,7 @@ async def upload(request: Request, file: UploadFile = File(...)):
         f.write(data)
 
     try:
+        sheets_list = list_sheet_names(path, ext)
         rows, sheet_name = load_sheet_grid(path, ext)
         if ext == ".xlsx" and check_uncached_formulas(path, sheet_name):
             sample_data = [v for r in rows[1:10] for v in r if v is not None]
@@ -361,14 +369,20 @@ async def upload(request: Request, file: UploadFile = File(...)):
         from services.db_service import get_user_keyword_map
         custom_keywords = get_user_keyword_map(user_id)
         analysis = analyze(rows, sheet_name=sheet_name, custom_keywords=custom_keywords)
+        analysis["sheets"] = sheets_list
+        analysis["preview"] = rows[:PREVIEW_ROWS]
     except IngestionError as ie:
         if os.path.exists(path):
             os.remove(path)
+        if os.path.exists(f"{path}.tables.json"):
+            os.remove(f"{path}.tables.json")
         raise HTTPException(422, str(ie))
     except Exception as e:
         if os.path.exists(path):
             os.remove(path)
-        raise HTTPException(422, f"Couldn't read that file. Is it a valid, unprotected .xlsx or .csv? Details: {e}")
+        if os.path.exists(f"{path}.tables.json"):
+            os.remove(f"{path}.tables.json")
+        raise HTTPException(422, f"Couldn't read that file. Is it a valid, unprotected .xlsx, .csv, or .pdf? Details: {e}")
 
     column_count = max((len(r) for r in rows), default=0)
     mapping = None
@@ -445,7 +459,9 @@ async def upload(request: Request, file: UploadFile = File(...)):
         "tenant_id": tenant_id,
         "path": path,
         "ext": ext,
+        "filename": file.filename or os.path.basename(path),
         "sheet_name": sheet_name,
+        "sheets": sheets_list,
         "column_count": column_count,
         "rows": rows[:PREVIEW_ROWS],
         "analysis": analysis,
@@ -458,13 +474,175 @@ async def upload(request: Request, file: UploadFile = File(...)):
     return _state(job_id, job_data)
 
 
+@router.post("/jobs/from-sheet/{sheet_id}", response_model=JobState)
+def create_job_from_sheet(sheet_id: str, request: Request):
+    """Hydrates a real backed Failsafe job from an existing ql_rate_sheets record."""
+    verify_csrf(request)
+    user_id, tenant_id = get_current_user_and_tenant(request)
+    if not user_id:
+        raise HTTPException(401, "Authentication required.")
+
+    from services.quotelytics_db_service import (
+        get_rate_sheet,
+        get_rate_sheet_cells,
+        get_sheet_full_rules,
+    )
+    sheet = get_rate_sheet(sheet_id, user_id)
+    if not sheet:
+        raise HTTPException(404, "Rate sheet not found.")
+
+    rules = get_sheet_full_rules(sheet_id, user_id) or {}
+    breaks = rules.get("breaks") or []
+    minimums = rules.get("minimums") or []
+
+    weight_unit = (sheet.get("weight_unit") or "lb").lower()
+    unit_suffix = "kgs" if weight_unit == "kg" else "lbs"
+    rating_basis = (sheet.get("rating_basis") or "WEIGHT_CWT").upper()
+    is_skid = rating_basis in ("PALLET_TIER", "PER_SKID", "SKID")
+
+    rows: List[List[str]] = []
+    extra_issues: List[str] = []
+
+    if breaks:
+        min_by_lane: Dict[Tuple[str, str], str] = {}
+        for m in minimums:
+            k = ((m.get("origin_spec") or "ALL").strip(), (m.get("dest_spec") or m.get("zone_code") or "ALL").strip())
+            if m.get("min_charge") is not None:
+                min_by_lane[k] = str(m["min_charge"])
+
+        col_order: List[Tuple[float, str]] = []
+        seen_cols: set = set()
+        lanes_map: Dict[Tuple[str, str], Dict[str, str]] = {}
+
+        for b in breaks:
+            lane_key = (
+                (b.get("origin_spec") or "ALL").strip(),
+                (b.get("dest_spec") or b.get("zone_code") or "ALL").strip(),
+            )
+            raw_name = (b.get("break_name") or "").strip()
+            if not raw_name or raw_name.upper() == "DEFAULT":
+                w_min = b.get("min_weight")
+                if w_min is not None:
+                    w_lbl = int(w_min) if float(w_min) == int(float(w_min)) else w_min
+                    raw_name = f"{w_lbl} {unit_suffix}"
+                else:
+                    raw_name = "Rate"
+            elif raw_name.replace(".", "", 1).isdigit():
+                raw_name = f"{raw_name} {'Skids' if is_skid else unit_suffix}"
+            sort_key = float(b.get("min_units") if is_skid else b.get("min_weight") or 0.0)
+            if raw_name not in seen_cols:
+                seen_cols.add(raw_name)
+                col_order.append((sort_key, raw_name))
+            lanes_map.setdefault(lane_key, {})[raw_name] = str(b.get("base_rate") if b.get("base_rate") is not None else "")
+
+        col_order.sort(key=lambda item: item[0])
+        break_headers = [item[1] for item in col_order]
+        has_mins = bool(min_by_lane)
+        headers = ["Origin", "Destination"] + (["Minimum Charge"] if has_mins else []) + break_headers
+        rows.append(headers)
+        for (orig, dest), cell_map in lanes_map.items():
+            row_vals = [orig, dest]
+            if has_mins:
+                row_vals.append(min_by_lane.get((orig, dest), ""))
+            row_vals.extend(cell_map.get(bh, "") for bh in break_headers)
+            rows.append(row_vals)
+    else:
+        raw_cells = get_rate_sheet_cells(sheet_id, user_id) or []
+        by_row: Dict[int, List[str]] = {}
+        for c in raw_cells:
+            m_row = re.search(r"(?:Row\s*|![A-Z]+)(\d+)", str(c.get("cell_coord") or ""), re.I)
+            if m_row:
+                rn = int(m_row.group(1))
+                by_row.setdefault(rn, []).append(str(c.get("extracted_value") or c.get("raw_value") or "").strip())
+        rebuilt = [vals for _, vals in sorted(by_row.items()) if len([v for v in vals if v]) >= 3]
+        if len(rebuilt) >= 2:
+            max_w = max(len(r) for r in rebuilt)
+            rows = [r + [""] * (max_w - len(r)) for r in rebuilt]
+        else:
+            if is_skid:
+                rows = [["Origin", "Destination", "Minimum Charge", "1 Skid", "2 Skids", "3 Skids", "4 Skids"]]
+            else:
+                rows = [["Origin", "Destination", "Minimum Charge", f"500 {unit_suffix}", f"1000 {unit_suffix}", f"2000 {unit_suffix}", f"5000 {unit_suffix}"]]
+            rows.append([""] * len(rows[0]))
+            extra_issues.append("No rate breaks extracted from sheet. Please map columns manually.")
+
+    import csv
+    job_id = uuid.uuid4().hex
+    fd, path = tempfile.mkstemp(suffix=".csv")
+    with os.fdopen(fd, "w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        for r in rows:
+            writer.writerow(r)
+
+    sheet_title = (sheet.get("carrier_name") or sheet.get("service_name") or "Rate Sheet").strip() or "Rate Sheet"
+    from services.db_service import get_user_keyword_map
+    custom_keywords = get_user_keyword_map(user_id)
+    analysis = analyze(rows, sheet_name=sheet_title, custom_keywords=custom_keywords)
+    analysis["status"] = "needs_mapping"
+    analysis["sheets"] = [sheet_title]
+    analysis["preview"] = rows[:PREVIEW_ROWS]
+    if extra_issues:
+        analysis["issues"] = list(dict.fromkeys((analysis.get("issues") or []) + extra_issues))
+
+    column_count = max((len(r) for r in rows), default=0)
+    job_data = {
+        "job_id": job_id,
+        "user_id": user_id,
+        "tenant_id": tenant_id,
+        "path": path,
+        "ext": ".csv",
+        "filename": sheet.get("source_filename") or f"{sheet_title}.csv",
+        "sheet_name": sheet_title,
+        "sheets": [sheet_title],
+        "column_count": column_count,
+        "rows": rows[:PREVIEW_ROWS],
+        "analysis": analysis,
+        "mapping": None,
+        "mapping_source": "from_sheet",
+        "saved_mapping_suggestion": None,
+        "status": "needs_mapping",
+    }
+    job_store.create(job_id, job_data)
+    return _state(job_id, job_data)
+
+
 @router.get("/jobs/{job_id}", response_model=JobState)
-def get_job(job_id: str, request: Request):
+def get_job(job_id: str, request: Request, sheet_name: Optional[str] = None):
     user_id, tenant_id = get_current_user_and_tenant(request)
     job = job_store.get(job_id)
     if not job:
         raise HTTPException(404, "Unknown job.")
     _check_job_access(job, user_id, tenant_id)
+
+    if sheet_name and sheet_name != job.get("sheet_name") and os.path.exists(job.get("path", "")):
+        try:
+            rows, resolved_sheet = load_sheet_grid(job["path"], job["ext"], sheet_name=sheet_name)
+            custom_keywords = None
+            if user_id:
+                from services.db_service import get_user_keyword_map
+                custom_keywords = get_user_keyword_map(user_id)
+            analysis = analyze(rows, sheet_name=resolved_sheet, custom_keywords=custom_keywords)
+            sheets_list = (
+                (job.get("analysis") or {}).get("sheets")
+                or list_sheet_names(job["path"], job["ext"])
+            )
+            analysis["sheets"] = sheets_list
+            analysis["preview"] = rows[:PREVIEW_ROWS]
+            column_count = max((len(r) for r in rows), default=0)
+            job["sheet_name"] = resolved_sheet
+            job["sheets"] = sheets_list
+            job["rows"] = rows[:PREVIEW_ROWS]
+            job["column_count"] = column_count
+            job["analysis"] = analysis
+            job["status"] = analysis.get("status", "needs_mapping")
+            job_store.update(job_id, {
+                "sheet_name": resolved_sheet,
+                "status": job["status"],
+                "analysis": analysis,
+            })
+        except IngestionError as ie:
+            raise HTTPException(422, str(ie))
+
     return _state(job_id, job)
 
 
@@ -1276,10 +1454,16 @@ def ingest_job_to_quotelytics(job: Dict[str, Any], user_id: str) -> Optional[str
         max_cols=MAX_DATA_COLS,
     )
     header_row_idx = int(mapping.get("header_row", 0))
+    origin_type = (mapping.get("origin_type") or "column").strip().lower()
+    fixed_origin_val = mapping.get("fixed_origin_value")
     origin_col = mapping.get("origin")
     dest_col = mapping.get("destination")
     rate_cols = mapping.get("rate_columns") or []
     mode = mapping.get("mode", "weight")
+    rate_basis = (mapping.get("rate_basis") or "PER_CWT").strip().upper()
+    currency = (mapping.get("currency") or "CAD").strip().upper()
+    if currency not in ("CAD", "USD"):
+        currency = "CAD"
     weight_unit = mapping.get("weight_unit") or "lb"
     skid_col = mapping.get("skid_count_column")
     base_cost_col = mapping.get("base_cost_column")
@@ -1305,7 +1489,7 @@ def ingest_job_to_quotelytics(job: Dict[str, Any], user_id: str) -> Optional[str
         service_name=service_name,
         tariff_ref="Failsafe Mapped Tariff",
         mode="LTL",
-        currency="CAD",
+        currency=currency,
         weight_unit=weight_unit,
         dim_unit="in",
         dim_divisor=None,
@@ -1384,11 +1568,14 @@ def ingest_job_to_quotelytics(job: Dict[str, Any], user_id: str) -> Optional[str
         # Origin
         origin_val = ""
         origin_cell = ""
-        if isinstance(origin_col, dict):
+        if origin_type == "fixed" and fixed_origin_val:
+            origin_val = normalize_location_field(fixed_origin_val)
+            origin_cell = "FIXED_ORIGIN"
+        elif isinstance(origin_col, dict):
             c_idx = origin_col.get("city_column")
-            r_idx = origin_col.get("region_column")
+            reg_idx = origin_col.get("region_column")
             c_val = str(row[c_idx]).strip() if c_idx is not None and c_idx < len(row) and row[c_idx] is not None else ""
-            r_val = str(row[r_idx]).strip() if r_idx is not None and r_idx < len(row) and row[r_idx] is not None else ""
+            r_val = str(row[reg_idx]).strip() if reg_idx is not None and reg_idx < len(row) and row[reg_idx] is not None else ""
             origin_val = f"{c_val}, {r_val}".strip(", ") if r_val else c_val
             origin_cell = f"{get_column_letter(c_idx + 1)}{excel_row_num}" if c_idx is not None else ""
         elif origin_col is not None and isinstance(origin_col, int) and origin_col < len(row) and row[origin_col] is not None:
@@ -1400,9 +1587,9 @@ def ingest_job_to_quotelytics(job: Dict[str, Any], user_id: str) -> Optional[str
         dest_cell = ""
         if isinstance(dest_col, dict):
             c_idx = dest_col.get("city_column")
-            r_idx = dest_col.get("region_column")
+            reg_idx = dest_col.get("region_column")
             c_val = str(row[c_idx]).strip() if c_idx is not None and c_idx < len(row) and row[c_idx] is not None else ""
-            r_val = str(row[r_idx]).strip() if r_idx is not None and r_idx < len(row) and row[r_idx] is not None else ""
+            r_val = str(row[reg_idx]).strip() if reg_idx is not None and reg_idx < len(row) and row[reg_idx] is not None else ""
             dest_val = f"{c_val}, {r_val}".strip(", ") if r_val else c_val
             dest_cell = f"{get_column_letter(c_idx + 1)}{excel_row_num}" if c_idx is not None else ""
         elif dest_col is not None and isinstance(dest_col, int) and dest_col < len(row) and row[dest_col] is not None:
@@ -1493,8 +1680,8 @@ def ingest_job_to_quotelytics(job: Dict[str, Any], user_id: str) -> Optional[str
             is_open_ended = 1
             min_units = 0.0
             max_units = 999999.0
-            rate_type = "CWT" if mode == "weight" else "PER_SKID"
-            break_unit = "CWT" if mode == "weight" else "SKID"
+            rate_type = ("FLAT" if rate_basis == "FLAT_BREAK" else "CWT") if mode == "weight" else "PER_SKID"
+            break_unit = ("FLAT" if rate_basis == "FLAT_BREAK" else "CWT") if mode == "weight" else "SKID"
 
             if mode == "skid":
                 max_weight = 999999.0

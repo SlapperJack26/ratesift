@@ -106,7 +106,7 @@
             </a>
             <a href="/console/rate-sheets" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <span>Carrier Tariffs</span>
+              <span>Rate Sheets</span>
             </a>
             <a href="/console/settings" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -143,7 +143,7 @@
       <nav class="flex sm:hidden overflow-x-auto gap-2 pt-2.5 mt-2 border-t border-slate-100 text-xs font-medium px-1">
         <a href="/console/new-quote" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">New Quote</a>
         <a href="/console/history" class="px-3 py-1 rounded-full bg-red-50 text-red-600 font-bold whitespace-nowrap">Quotes History</a>
-        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Carrier Tariffs</a>
+        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Rate Sheets</a>
         <a href="/console/settings" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Settings</a>
       </nav>
     </header>
@@ -166,7 +166,7 @@
             <svg class="w-3.5 h-3.5 absolute left-3 top-2.5 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <input id="search-input" oninput="filterQuotes()" type="text" aria-label="Search quote ID" placeholder="Search quote ID" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-hidden focus:ring-1 focus:ring-red-500 font-normal">
+            <input id="search-input" oninput="filterQuotes()" type="text" aria-label="Search quote ID" placeholder="Search quote ID" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-hidden font-normal">
           </div>
 
           <!-- Centered Options & Dropboxes -->
@@ -318,11 +318,11 @@
                 <div class="space-y-2">
                   <div>
                     <label for="prop-client-name" class="block text-[11px] font-semibold text-slate-600 mb-1">Client Company Name</label>
-                    <input id="prop-client-name" type="text" value="Acme Industrial Logistics" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-red-500">
+                    <input id="prop-client-name" type="text" value="Acme Industrial Logistics" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none">
                   </div>
                   <div>
                     <label for="prop-client-attn" class="block text-[11px] font-semibold text-slate-600 mb-1">Attention / Contact Dept</label>
-                    <input id="prop-client-attn" type="text" value="Freight Dispatch & Shipping" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:ring-1 focus:ring-red-500">
+                    <input id="prop-client-attn" type="text" value="Freight Dispatch & Shipping" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none">
                   </div>
                 </div>
               </div>
@@ -366,7 +366,7 @@
                     <label for="prop-client-total-input" class="block text-[11px] font-semibold text-slate-600 mb-1">Total Client Price (CAD)</label>
                     <div class="relative">
                       <span class="absolute left-3 top-2 text-xs font-bold text-slate-400">$</span>
-                      <input id="prop-client-total-input" type="number" step="0.01" min="0" oninput="handleProposalTotalChange(this.value)" class="w-full pl-7 pr-12 bg-white border border-slate-200 rounded-lg py-1.5 text-sm font-bold text-slate-900 focus:ring-1 focus:ring-red-500">
+                      <input id="prop-client-total-input" type="number" step="0.01" min="0" oninput="handleProposalTotalChange(this.value)" class="w-full pl-7 pr-12 bg-white border border-slate-200 rounded-lg py-1.5 text-sm font-bold text-slate-900 focus:outline-none">
                       <span class="absolute right-3 top-2 text-[10px] font-bold text-slate-400">CAD</span>
                     </div>
                   </div>
@@ -514,7 +514,7 @@
               <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-sm shadow-xs"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h3 class="text-sm font-bold text-slate-900" id="fsm-carrier-title">Formatted Carrier Tariff Matrix</h3>
+                  <h3 class="text-sm font-bold text-slate-900" id="fsm-carrier-title">Formatted Rate Sheet Matrix</h3>
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                     In-Browser Inspection Only
                   </span>
@@ -549,7 +549,7 @@
           <div class="px-5 py-2.5 bg-red-50/60 border-b border-red-100 flex items-center justify-between text-xs text-red-900">
             <div class="flex items-center gap-2">
               <span class="text-red-600 font-bold">Platform Security Policy:</span>
-              <span>Reformatted carrier tariffs are restricted to in-browser inspection only. Downloading, scraping, or exporting spreadsheet files is strictly blocked.</span>
+              <span>Reformatted rate sheets are restricted to in-browser inspection only. Downloading, scraping, or exporting spreadsheet files is strictly blocked.</span>
             </div>
             <span class="font-mono text-[10px] text-red-700 shrink-0">Tenant Quarantine & Cell Security</span>
           </div>
@@ -557,7 +557,7 @@
           <!-- Search & Filter Controls -->
           <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
             <div class="flex-1 min-w-[240px]">
-              <input id="fsm-search-input" type="text" placeholder="Search lane, city, zone, bracket, or coordinate..." oninput="onSearchFsmDebounced(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-red-500 focus:bg-white shadow-2xs">
+              <input id="fsm-search-input" type="text" placeholder="Search lane, city, zone, bracket, or coordinate..." oninput="onSearchFsmDebounced(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white shadow-2xs">
             </div>
             <div class="flex items-center gap-3 text-xs text-slate-500 font-mono">
               <div>Total Rates: <strong id="fsm-rows-count" class="text-slate-800">0</strong></div>
@@ -617,7 +617,7 @@
 
         <nav aria-label="Footer Navigation" class="flex flex-wrap items-center gap-4 text-xs font-medium">
           <a href="/console/new-quote" class="hover:text-[var(--foreground)] transition-colors">New Quote</a>
-          <a href="/console/rate-sheets" class="hover:text-[var(--foreground)] transition-colors">Carrier Tariffs</a>
+          <a href="/console/rate-sheets" class="hover:text-[var(--foreground)] transition-colors">Rate Sheets</a>
           <a href="/console/settings" class="hover:text-[var(--foreground)] transition-colors">Settings</a>
           <a href="#docs" onclick="openDocsModal(event)" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
           <a href="#support" onclick="openSupportModal(event)" class="hover:text-[var(--foreground)] transition-colors">Support</a>
@@ -1139,7 +1139,7 @@
 
     function preventDownloadAction(e) {
       e.preventDefault();
-      showToast("Platform Security Notice: Reformatted carrier tariffs are restricted to in-browser inspection only. Downloads, exports, and file extractions are permanently disabled.", "info");
+      showToast("Platform Security Notice: Reformatted rate sheets are restricted to in-browser inspection only. Downloads, exports, and file extractions are permanently disabled.", "info");
     }
 
     function openHistoryProposal(quoteId) {
@@ -1385,7 +1385,7 @@
         const el = document.getElementById(`sort-icon-${f}`);
         if (el) {
           if (f === currentSortField) {
-            el.textContent = currentSortAsc ? '▲' : '▼';
+            el.textContent = currentSortAsc ? 'ASC' : 'DESC';
             el.className = 'inline-block text-[10px] text-red-600 font-bold opacity-100';
           } else {
             el.textContent = '⇅';

@@ -72,7 +72,7 @@
             </a>
             <a href="/console/rate-sheets" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <span>Carrier Tariffs</span>
+              <span>Rate Sheets</span>
             </a>
             <a href="/console/settings" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -109,7 +109,7 @@
       <nav class="flex sm:hidden overflow-x-auto gap-2 pt-2.5 mt-2 border-t border-slate-100 text-xs font-medium px-1">
         <a href="/console/new-quote" class="px-3 py-1 rounded-full bg-red-50 text-red-600 font-bold whitespace-nowrap">New Quote</a>
         <a href="/console/history" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Quotes History</a>
-        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Carrier Tariffs</a>
+        <a href="/console/rate-sheets" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Rate Sheets</a>
         <a href="/console/settings" class="px-3 py-1 rounded-full text-slate-600 whitespace-nowrap">Settings</a>
       </nav>
     </header>
@@ -124,16 +124,16 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
           <div>
-            <span class="font-bold">No Carrier Tariffs Uploaded Yet</span>
+            <span class="font-bold">No Rate Sheets Uploaded Yet</span>
             <p class="text-blue-700 text-[11px] mt-0.5">Quotelytics only rates against contracts you upload. To ensure confidentiality, no sample or external sheets are shared. Upload your contract to begin quoting.</p>
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <button type="button" onclick="seedSampleCanadianTariffs()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-2xs whitespace-nowrap transition-colors cursor-pointer">
-            ⚡ 1-Click Load 3 Sample Canadian Tariffs (Practice Mode)
+            1-Click Load 3 Sample Canadian Tariffs (Practice Mode)
           </button>
           <a href="/console/rate-sheets" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-2xs whitespace-nowrap transition-colors">
-            Upload Carrier Tariff →
+            Upload Rate Sheet &rarr;
           </a>
         </div>
       </div>
@@ -142,32 +142,49 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
         <div>
           <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Freight Rating Engine</h1>
-          <p class="text-sm text-slate-500 mt-0.5">100% Deterministic (Rule 8) • WHC Canada • Rule 29 • A Canadian freight rate comparison UI design</p>
+          <p class="text-sm text-slate-500 mt-0.5">Instant multi-carrier LTL quoting from your confirmed rate sheets</p>
         </div>
 
-        <!-- Weekly Canadian Fuel Surcharge (FSC) Index Card (Matches Mockup) -->
-        <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs min-w-[320px] max-w-md">
-          <div class="text-xs font-semibold text-slate-600">Weekly Canadian Fuel Surcharge (FSC) Index</div>
-          <div class="flex items-center justify-between gap-3 mt-1.5">
-            <div class="flex-1">
-              <select id="select-fuel-index" aria-label="Weekly Canadian Fuel Surcharge Index" onchange="handleFuelIndexChange(this.value)" class="w-full bg-transparent border-0 text-sm font-bold text-slate-900 focus:outline-none cursor-pointer p-0">
-                <option value="OTA_LTL_STANDARD" selected>Ontario Trucking Association (OTA) LTL — 31.5%</option>
-                <option value="FCA_NATIONAL_LTL">Freight Carriers Association (FCA) National — 33.0%</option>
-                <option value="WESTERN_CDN_LTL">Western Canada Diesel Index — 30.5%</option>
-                <option value="ATLANTIC_CDN_LTL">Atlantic Canada (APTA) Index — 34.2%</option>
-                <option value="CUSTOM">Custom Surcharge Override...</option>
-              </select>
-            </div>
-            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs shrink-0">
-              <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-              <span>Auto-sync</span>
-            </span>
-          </div>
+        <!-- Compact Weekly Canadian Fuel Surcharge (FSC) Index -->
+        <div class="flex items-center gap-2.5 bg-white border border-slate-200/90 rounded-xl px-3.5 py-2 shadow-2xs">
+          <span class="text-[11px] font-semibold text-slate-500 whitespace-nowrap">Fuel Index:</span>
+          <select id="select-fuel-index" aria-label="Weekly Canadian Fuel Surcharge Index" onchange="handleFuelIndexChange(this.value)" class="bg-transparent border-0 text-xs font-bold text-slate-900 focus:outline-none cursor-pointer p-0">
+            <option value="OTA_LTL_STANDARD" selected>OTA LTL — 31.5%</option>
+            <option value="FCA_NATIONAL_LTL">FCA National — 33.0%</option>
+            <option value="WESTERN_CDN_LTL">Western Canada — 30.5%</option>
+            <option value="ATLANTIC_CDN_LTL">Atlantic (APTA) — 34.2%</option>
+            <option value="CUSTOM">Custom Override...</option>
+          </select>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+            <span>Auto-sync</span>
+          </span>
         </div>
       </div>
 
-      <!-- Quick Preset Lanes Chip Bar -->
-      <div id="quick-presets" class="flex flex-wrap items-center gap-2 text-xs">
+      <!-- Compact Quick Tools Toolbar -->
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" onclick="document.getElementById('quick-presets').classList.toggle('hidden')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors cursor-pointer">
+            <span>Quick Presets</span>
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <button type="button" onclick="document.getElementById('smart-email-paste-card').classList.toggle('hidden')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors cursor-pointer">
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>Paste Shipper Email</span>
+          </button>
+          <button type="button" onclick="openRedactionModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors cursor-pointer" title="Scrub proprietary accounts, client names, and margins before upload">
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span>Upload Rate Sheet</span>
+          </button>
+        </div>
+        <div id="service-mode-status" class="text-xs text-slate-500 flex items-center gap-1.5">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span id="service-mode-status-text">LTL Freight (by Skids)</span>
+        </div>
+      </div>
+
+      <!-- Quick Preset Lanes Chip Bar (Collapsed by default) -->
+      <div id="quick-presets" class="hidden flex flex-wrap items-center gap-2 text-xs bg-white border border-slate-200 rounded-xl p-3">
         <span class="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">Quick Presets:</span>
         <button type="button" onclick="loadPresetLane('M5V 2T6', 'T2P 1J9', 2, 48, 40, 50, ['liftgate'])" class="px-2.5 py-1 rounded-full border border-[var(--border)] bg-slate-50 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-colors text-[11px] font-medium cursor-pointer">
           Toronto (M5V) → Calgary (T2P) • 2 Skids
@@ -180,45 +197,30 @@
         </button>
       </div>
 
-      <!-- 1-Second Smart Paste Shipper Email / RFQ Bar -->
-      <div id="smart-email-paste-card" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 shadow-sm border border-slate-700 space-y-2.5">
+      <!-- 1-Second Smart Paste Shipper Email / RFQ Bar (Collapsed by default) -->
+      <div id="smart-email-paste-card" class="hidden bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] rounded-2xl p-4 shadow-sm space-y-2.5">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-600 text-white">⚡ 1-Second Smart Paste</span>
-            <span class="text-xs font-bold">Paste Shipper Email / RFQ Text to Auto-Fill Quote Fields</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200">1-Second Smart Paste</span>
+            <span class="text-xs font-bold text-[var(--foreground)]">Paste Shipper Email / RFQ Text to Auto-Fill Quote Fields</span>
           </div>
-          <button type="button" onclick="fillSampleShipperEmail()" class="text-[11px] font-semibold text-red-300 hover:text-white underline cursor-pointer">
-            Try Sample Shipper Email →
+          <button type="button" onclick="fillSampleShipperEmail()" class="text-[11px] font-semibold text-red-600 hover:text-red-700 underline cursor-pointer">
+            Try Sample Shipper Email &rarr;
           </button>
         </div>
         <div class="flex flex-col sm:flex-row gap-2">
-          <input id="smart-email-input" type="text" placeholder="e.g. 'Need a rate for 4 skids, 2,450 lbs, 48x40x60 from Mississauga L5T 1A1 to Calgary T2P 2M5 with tailgate and heated service'" class="flex-1 bg-slate-950/70 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-red-500" />
-          <button type="button" onclick="parsePastedShipperEmail()" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs whitespace-nowrap cursor-pointer transition-colors">
+          <input id="smart-email-input" type="text" placeholder="e.g. 'Need a rate for 4 skids, 2,450 lbs, 48x40x60 from Mississauga L5T 1A1 to Calgary T2P 2M5 with tailgate and heated service'" class="flex-1 bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2 text-xs text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none" />
+          <button type="button" onclick="parsePastedShipperEmail()" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs whitespace-nowrap cursor-pointer transition-colors shadow-xs">
             Auto-Fill Form
           </button>
         </div>
-        <div id="smart-email-status" class="hidden text-[11px] text-emerald-300 font-medium"></div>
+        <div id="smart-email-status" class="hidden text-[11px] text-emerald-700 font-medium"></div>
       </div>
 
 
       <!-- MODE 1: INSTANT FREIGHT RATER FORM -->
       <section id="section-instant" class="space-y-4">
         <form id="freight-quote-form" onsubmit="event.preventDefault(); calculateFreightQuote();" class="space-y-4">
-          
-          <!-- Shipping Service Mode Header (Dedicated Skid-Based LTL Rating) -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Shipping Service:</span>
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-red-50 text-red-700 border border-red-200 text-xs font-bold shadow-2xs">
-                <span>LTL Freight (by Skids)</span>
-              </span>
-            </div>
-
-            <div id="service-mode-status" class="text-xs text-slate-500 flex items-center gap-1.5">
-              <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span id="service-mode-status-text">Rating by <strong>Origin</strong>, <strong>Destination</strong>, and <strong>Number of Skids</strong></span>
-            </div>
-          </div>
 
           <!-- 3 Primary Rating Cards: Origin, Destination, Number of Skids -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
@@ -229,7 +231,7 @@
                 <label for="input-origin" class="block font-bold text-sm text-slate-900">Origin (Lane Origin)</label>
                 <div class="text-xs text-slate-500">Canadian Postal FSA Resolver</div>
               </div>
-              <input id="input-origin" type="text" required placeholder="e.g. M5V 2T6 or Toronto, ON" value="M5V 2T6" oninput="resolveFsaLive('origin', this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+              <input id="input-origin" type="text" required placeholder="e.g. M5V 2T6 or Toronto, ON" value="M5V 2T6" oninput="resolveFsaLive('origin', this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none shadow-2xs">
               <div id="origin-fsa-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 mt-1">
                 <svg class="w-3.5 h-3.5 text-emerald-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span id="origin-fsa-text">Toronto, ON (FSA: M5V • Zone ON-TOR)</span>
@@ -242,7 +244,7 @@
                 <label for="input-destination" class="block font-bold text-sm text-slate-900">Destination (Lane Dest)</label>
                 <div class="text-xs text-slate-500">Canadian Postal FSA Resolver</div>
               </div>
-              <input id="input-destination" type="text" required placeholder="e.g. T2P 1J9 or Calgary, AB" value="T2P 1J9" oninput="resolveFsaLive('dest', this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+              <input id="input-destination" type="text" required placeholder="e.g. T2P 1J9 or Calgary, AB" value="T2P 1J9" oninput="resolveFsaLive('dest', this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none shadow-2xs">
               <div id="dest-fsa-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 mt-1">
                 <svg class="w-3.5 h-3.5 text-emerald-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span id="dest-fsa-text">Calgary, AB (FSA: T2P • Zone AB-CAL)</span>
@@ -261,42 +263,54 @@
                 <span class="text-[10px] font-mono text-slate-400 uppercase">Standard Pallets</span>
               </div>
               <div class="relative">
-                <input id="input-skids" type="number" step="1" min="1" max="50" placeholder="e.g. 2" value="2" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 shadow-2xs">
+                <input id="input-skids" type="number" step="1" min="1" max="50" placeholder="e.g. 2" value="2" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:outline-none shadow-2xs">
                 <input id="input-weight" type="hidden" value="1000">
                 <span class="absolute right-3.5 top-2.5 text-xs font-bold text-slate-400">Skids</span>
               </div>
-              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-50 text-red-800 border border-red-200 mt-1">
-                
-                <span>Rating by Skid Tier • 48×40 in Pallets</span>
-              </div>
+              <p class="text-[11px] text-slate-500 mt-1">Rated by skid tier (48×40 in standard pallets)</p>
             </div>
           </div>
 
           <!-- Optional Cargo Specifications & Rating Bar -->
           <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-700">Optional Dimensions & Shipment Date</span>
-              <span class="text-[11px] text-slate-400">Standard pallet height: 48×40×50 in</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div>
-                <label for="input-length" class="block text-xs font-bold text-slate-700 mb-1">Length (in)</label>
-                <input id="input-length" type="number" step="0.1" min="0" placeholder="e.g. 48" value="48" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
+            <details class="group">
+              <summary class="flex items-center justify-between cursor-pointer select-none list-none text-xs font-bold text-slate-700">
+                <span>Optional Dimensions &amp; Shipment Date</span>
+                <span class="flex items-center gap-2 text-[11px] font-medium text-slate-400">
+                  <span>48×40×50 in default</span>
+                  <svg class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </span>
+              </summary>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
+                <div>
+                  <label for="input-length" class="block text-xs font-bold text-slate-700 mb-1">Length (in)</label>
+                  <input id="input-length" type="number" step="0.1" min="0" placeholder="e.g. 48" value="48" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none">
+                </div>
+                <div>
+                  <label for="input-width" class="block text-xs font-bold text-slate-700 mb-1">Width (in)</label>
+                  <input id="input-width" type="number" step="0.1" min="0" placeholder="e.g. 40" value="40" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none">
+                </div>
+                <div>
+                  <label for="input-height" class="block text-xs font-bold text-slate-700 mb-1">Height (in)</label>
+                  <input id="input-height" type="number" step="0.1" min="0" placeholder="e.g. 50" value="50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none">
+                </div>
+                <div>
+                  <label for="input-date" class="block text-xs font-bold text-slate-700 mb-1">Shipment Date</label>
+                  <input id="input-date" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none">
+                </div>
               </div>
-              <div>
-                <label for="input-width" class="block text-xs font-bold text-slate-700 mb-1">Width (in)</label>
-                <input id="input-width" type="number" step="0.1" min="0" placeholder="e.g. 40" value="40" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
-              </div>
-              <div>
-                <label for="input-height" class="block text-xs font-bold text-slate-700 mb-1">Height (in)</label>
-                <input id="input-height" type="number" step="0.1" min="0" placeholder="e.g. 50" value="50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
-              </div>
-              <div>
-                <label for="input-date" class="block text-xs font-bold text-slate-700 mb-1">Shipment Date</label>
-                <input id="input-date" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
-              </div>
-            </div>
+            </details>
 
+            <!-- Accessorials, Density Guard & Lane Memory (Collapsed by default) -->
+            <details class="group pt-3 border-t border-slate-100">
+              <summary class="flex items-center justify-between cursor-pointer select-none list-none text-xs font-bold text-slate-700">
+                <span>Accessorials &amp; Density Options</span>
+                <span class="flex items-center gap-2 text-[11px] font-medium text-slate-500">
+                  <span id="acc-selected-summary">1 selected</span>
+                  <svg class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </span>
+              </summary>
+              <div class="space-y-3 pt-3">
             <!-- Canadian 10 lb/cu.ft Cube-Out, Non-Stackable (84" Rule) & Over-Length Guard Badge -->
             <div id="cube-density-guard-badge" class="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-amber-50/90 border border-amber-200 text-xs text-amber-900">
               <div class="flex items-center gap-2">
@@ -304,7 +318,7 @@
                 <span id="cube-density-text" class="font-medium">Canadian LTL Density Check: Standard 48×40×50 skids (~55.6 cu.ft/skid → 556 lbs min density weight/skid)</span>
               </div>
               <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-[11px] font-semibold text-amber-950 cursor-pointer">
-                <input id="input-non-stackable" type="checkbox" onchange="checkCubeDensityLive()" class="rounded text-red-600 focus:ring-red-500" />
+                <input id="input-non-stackable" type="checkbox" onchange="checkCubeDensityLive()" class="rounded text-red-600 focus:outline-none" />
                 <span>Non-Stackable (84&quot; Vertical Cube Rule)</span>
               </label>
             </div>
@@ -322,7 +336,7 @@
             <div class="space-y-3 pt-3 border-t border-slate-100">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 class="text-xs font-bold text-slate-900">Requested Accessorials & Surcharges (Rule 11)</h3>
+                  <h3 class="text-xs font-bold text-slate-900">Requested Accessorials &amp; Surcharges</h3>
                   <p class="text-[11px] text-slate-500">Deterministic line-item charges • Filter options by shipping mode</p>
                 </div>
 
@@ -347,129 +361,118 @@
               <div id="accessorials-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-xs">
                 <!-- 1. LAND SHIPPING -->
                 <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="liftgate" checked aria-label="Accessorial: Power Tailgate / Liftgate" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="liftgate" checked aria-label="Accessorial: Power Tailgate / Liftgate" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-semibold text-slate-800">Power Tailgate / Liftgate</span>
                 </label>
                 <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="appointment" aria-label="Accessorial: Delivery Appointment" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="appointment" aria-label="Accessorial: Delivery Appointment" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Delivery Appointment</span>
                 </label>
                 <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="heated" aria-label="Accessorial: Protect From Freeze" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="heated" aria-label="Accessorial: Protect From Freeze" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Protect From Freeze</span>
                 </label>
                 <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="dangerous_goods" aria-label="Accessorial: Dangerous Goods" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="dangerous_goods" aria-label="Accessorial: Dangerous Goods" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Dangerous Goods</span>
                 </label>
                 <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="residential" aria-label="Accessorial: Residential Delivery" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="residential" aria-label="Accessorial: Residential Delivery" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Residential Delivery</span>
                 </label>
                 <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="inside_delivery" aria-label="Accessorial: Inside Delivery" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="inside_delivery" aria-label="Accessorial: Inside Delivery" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Inside Delivery</span>
                 </label>
                 <label data-mode="land" class="acc-option-card flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="limited_access" aria-label="Accessorial: Limited Access / Construction" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="limited_access" aria-label="Accessorial: Limited Access / Construction" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Limited Access / Job Site</span>
                 </label>
 
                 <!-- 2. SEA FREIGHT -->
                 <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="pier_pass" aria-label="Accessorial: Pier Pass and Clean Truck" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="pier_pass" aria-label="Accessorial: Pier Pass and Clean Truck" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-semibold text-slate-800">Pier Pass & Clean Truck</span>
                 </label>
                 <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="chassis_split" aria-label="Accessorial: Chassis Split or Tri-Axle" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="chassis_split" aria-label="Accessorial: Chassis Split or Tri-Axle" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Chassis Split / Tri-Axle</span>
                 </label>
                 <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="port_demurrage" aria-label="Accessorial: Port Demurrage Guard" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="port_demurrage" aria-label="Accessorial: Port Demurrage Guard" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Port Demurrage Guard</span>
                 </label>
                 <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="cfs_destuffing" aria-label="Accessorial: CFS Destuffing Bonded" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="cfs_destuffing" aria-label="Accessorial: CFS Destuffing Bonded" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">CFS Destuffing / Bonded</span>
                 </label>
                 <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="fumigation" aria-label="Accessorial: Fumigation and Phyto" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="fumigation" aria-label="Accessorial: Fumigation and Phyto" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Fumigation & Phyto</span>
                 </label>
                 <label data-mode="sea" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="reefer_monitoring" aria-label="Accessorial: Reefer Genset Monitoring" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="reefer_monitoring" aria-label="Accessorial: Reefer Genset Monitoring" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Reefer Genset Monitoring</span>
                 </label>
 
                 <!-- 3. AIR CARGO -->
                 <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="tsa_screening" aria-label="Accessorial: TSA Known Shipper" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="tsa_screening" aria-label="Accessorial: TSA Known Shipper" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-semibold text-slate-800">TSA / Known Shipper</span>
                 </label>
                 <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="ramp_transfer" aria-label="Accessorial: Express Tarmac Transfer" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="ramp_transfer" aria-label="Accessorial: Express Tarmac Transfer" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Express Tarmac Transfer</span>
                 </label>
                 <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="dry_ice_cold_chain" aria-label="Accessorial: Dry Ice and Cold Chain" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="dry_ice_cold_chain" aria-label="Accessorial: Dry Ice and Cold Chain" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Dry Ice & Cold Chain</span>
                 </label>
                 <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="high_value_vault" aria-label="Accessorial: High-Value Escort or Vault" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="high_value_vault" aria-label="Accessorial: High-Value Escort or Vault" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">High-Value Escort / Vault</span>
                 </label>
                 <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="awb_clearance" aria-label="Accessorial: AWB Customs Clearance" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="awb_clearance" aria-label="Accessorial: AWB Customs Clearance" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">AWB Customs Clearance</span>
                 </label>
                 <label data-mode="air" class="acc-option-card hidden flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all">
-                  <input type="checkbox" name="accessorial" value="oversized_tie_down" aria-label="Accessorial: Aircraft Rigging and Tie-Down" class="rounded text-red-600 focus:ring-red-500">
+                  <input type="checkbox" name="accessorial" value="oversized_tie_down" aria-label="Accessorial: Aircraft Rigging and Tie-Down" class="rounded text-red-600 focus:outline-none">
                   <span class="text-[11px] font-medium text-slate-700">Aircraft Rigging & Tie-Down</span>
                 </label>
               </div>
-            </div>
+              </div>
+            </details>
 
-            <!-- Action Row & Redaction Scrubber Badge Button -->
+            <!-- Action Row & Rate Sheet Counters -->
             <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
-              <div class="flex items-center gap-3">
-                <button type="submit" id="btn-calc-rates" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer">
-                  <span id="btn-calc-text">Calculate Rates</span>
-                  <span id="btn-calc-arrow">→</span>
-                  <span id="btn-calc-spinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                </button>
+              <button type="submit" id="btn-calc-rates" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer">
+                <span id="btn-calc-text">Calculate Rates</span>
+                <span id="btn-calc-arrow">&rarr;</span>
+                <span id="btn-calc-spinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              </button>
 
-                <!-- Active & Pending Review Rate Sheet Counters (No Sheet Names, Numbers Only) -->
-                <div id="rate-sheets-counters" class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
-                  <div class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white shadow-2xs text-slate-800">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span>Active Rate Sheets:</span>
-                    <span id="active-sheets-count" class="font-bold text-slate-900 ml-0.5">0</span>
-                  </div>
-                  <div class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white shadow-2xs text-slate-800">
-                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                    <span>Pending Review:</span>
-                    <span id="pending-sheets-count" class="font-bold text-slate-900 ml-0.5">0</span>
-                  </div>
-                </div>
-
-                <div id="calc-status-indicator" class="text-xs text-slate-500 font-mono flex items-center gap-1.5 hidden sm:flex">
+              <!-- Active & Pending Review Rate Sheet Counters (No Sheet Names, Numbers Only) -->
+              <div id="rate-sheets-counters" class="flex items-center gap-3 text-xs text-slate-600 font-medium">
+                <div class="flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span>Live Rating Engine</span>
+                  <span>Active Rate Sheets:</span>
+                  <span id="active-sheets-count" class="font-bold text-slate-900">0</span>
+                </div>
+                <span class="text-slate-300">&bull;</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                  <span>Pending Review:</span>
+                  <span id="pending-sheets-count" class="font-bold text-slate-900">0</span>
                 </div>
               </div>
-
-              <!-- Client-Side Tariff Redaction Scrubber Badge Button (Matches Mockup) -->
-              <button type="button" onclick="openRedactionModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 bg-white shadow-2xs hover:bg-slate-50 text-slate-800 text-xs font-semibold cursor-pointer transition-colors" title="Scrub proprietary accounts, client names, and margins before upload">
-                <div class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs"><svg class="w-4 h-4 text-indigo-600 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
-                <span>Client-Side Tariff Redaction Scrubber Active</span>
-              </button>
             </div>
           </div>
         </form>
       </section>
 
-      <!-- RESULTS SECTION: CONCISE CARDS & IN-MEMORY SORTING (Matches Mockup Grid) -->
-      <section id="section-results" class="space-y-4">
+      <!-- RESULTS SECTION: CONCISE CARDS & IN-MEMORY SORTING (Hidden until calculated) -->
+      <section id="section-results" class="hidden space-y-4">
         
         <!-- Results Controls Header -->
         <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
@@ -512,13 +515,13 @@
               <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               Excluded Rate Sheets & Carriers (<span id="excluded-count">0</span>)
             </span>
-            <span class="text-[10px] text-slate-400 font-normal">Carrier Tariff Compliance</span>
+            <span class="text-[10px] text-slate-400 font-normal">Rate Sheet Compliance</span>
           </div>
 
           <!-- Selection & Deletion Actions Bar at top of excluded list -->
           <div class="flex items-center justify-between pt-2 pb-2 border-y border-slate-200/80 text-xs">
             <label class="flex items-center gap-2 cursor-pointer select-none text-slate-700 font-medium hover:text-slate-900">
-              <input type="checkbox" id="excluded-select-all" aria-label="Select All Excluded Rate Sheets" class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer" onchange="toggleSelectAllExcluded(this.checked)">
+              <input type="checkbox" id="excluded-select-all" aria-label="Select All Excluded Rate Sheets" class="w-4 h-4 rounded border-slate-300 text-red-600 cursor-pointer focus:outline-none" onchange="toggleSelectAllExcluded(this.checked)">
               <span>Select All</span>
             </label>
             <button type="button" id="btn-delete-excluded" onclick="deleteSelectedExcludedSheets()" disabled class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-2xs">
@@ -536,8 +539,8 @@
         <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 text-[11px] text-slate-500 flex items-start gap-2">
           <svg class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           <div>
-            <span class="font-semibold text-slate-700">Rule 26 Legal Notice (Non-Binding Estimate):</span>
-            <span>All calculations are derived deterministically from customer-uploaded rate sheets. This quote is non-binding and subject to final carrier tariff verification, operational conditions, and accessorial validation upon booking.</span>
+            <span class="font-semibold text-slate-700">Legal Notice (Non-Binding Estimate):</span>
+            <span>All calculations are derived deterministically from customer-uploaded rate sheets. This quote is non-binding and subject to final rate sheet verification, operational conditions, and accessorial validation upon booking.</span>
           </div>
         </div>
       </section>
@@ -606,23 +609,23 @@
               <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
                 <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
                   <label class="block text-[10px] font-bold text-slate-500 uppercase">Origin Lane</label>
-                  <select id="map-select-origin" aria-label="Map Origin Lane Column" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500"></select>
+                  <select id="map-select-origin" aria-label="Map Origin Lane Column" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:outline-none"></select>
                 </div>
                 <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
                   <label class="block text-[10px] font-bold text-slate-500 uppercase">Destination Lane</label>
-                  <select id="map-select-dest" aria-label="Map Destination Lane Column" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500"></select>
+                  <select id="map-select-dest" aria-label="Map Destination Lane Column" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:outline-none"></select>
                 </div>
                 <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
                   <label class="block text-[10px] font-bold text-slate-500 uppercase">Shipment Weight</label>
-                  <select id="map-select-weight" aria-label="Map Shipment Weight Column" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500"></select>
+                  <select id="map-select-weight" aria-label="Map Shipment Weight Column" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:outline-none"></select>
                 </div>
                 <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
                   <label class="block text-[10px] font-bold text-slate-500 uppercase">Cargo Dims</label>
-                  <select id="map-select-dims" aria-label="Map Cargo Dimensions Column" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500"></select>
+                  <select id="map-select-dims" aria-label="Map Cargo Dimensions Column" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:outline-none"></select>
                 </div>
                 <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
                   <label class="block text-[10px] font-bold text-slate-500 uppercase">Accessorials</label>
-                  <select id="map-select-acc" aria-label="Map Accessorials Column" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-red-500"></select>
+                  <select id="map-select-acc" aria-label="Map Accessorials Column" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-800 focus:outline-none"></select>
                 </div>
               </div>
             </div>
@@ -824,11 +827,11 @@
                 <div class="space-y-2">
                   <div>
                     <label for="prop-client-name" class="block text-[11px] font-semibold text-slate-600 mb-1">Client Company Name</label>
-                    <input id="prop-client-name" type="text" value="Acme Industrial Logistics" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-red-500">
+                    <input id="prop-client-name" type="text" value="Acme Industrial Logistics" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none">
                   </div>
                   <div>
                     <label for="prop-client-attn" class="block text-[11px] font-semibold text-slate-600 mb-1">Attention / Contact Dept</label>
-                    <input id="prop-client-attn" type="text" value="Freight Dispatch & Shipping" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:ring-1 focus:ring-red-500">
+                    <input id="prop-client-attn" type="text" value="Freight Dispatch & Shipping" oninput="refreshProposalPreview()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none">
                   </div>
                 </div>
               </div>
@@ -872,7 +875,7 @@
                     <label for="prop-client-total-input" class="block text-[11px] font-semibold text-slate-600 mb-1">Total Client Price (CAD)</label>
                     <div class="relative">
                       <span class="absolute left-3 top-2 text-xs font-bold text-slate-400">$</span>
-                      <input id="prop-client-total-input" type="number" step="0.01" min="0" oninput="handleProposalTotalChange(this.value)" class="w-full pl-7 pr-12 bg-white border border-slate-200 rounded-lg py-1.5 text-sm font-bold text-slate-900 focus:ring-1 focus:ring-red-500">
+                      <input id="prop-client-total-input" type="number" step="0.01" min="0" oninput="handleProposalTotalChange(this.value)" class="w-full pl-7 pr-12 bg-white border border-slate-200 rounded-lg py-1.5 text-sm font-bold text-slate-900 focus:outline-none">
                       <span class="absolute right-3 top-2 text-[10px] font-bold text-slate-400">CAD</span>
                     </div>
                   </div>
@@ -1111,7 +1114,7 @@
       <div class="flex flex-wrap items-center gap-6">
         <img src="/static/images/quotelytics-logo.png" onerror="this.onerror=null; this.src='/static/images/quotelytics-logo.png';" alt="Quotelytics" class="h-6 md:h-7 w-auto object-contain" />
         <nav aria-label="Footer Navigation" class="flex flex-wrap items-center gap-4 text-xs font-medium">
-          <a href="/console/rate-sheets" class="hover:text-[var(--foreground)] transition-colors">Carrier Tariffs</a>
+          <a href="/console/rate-sheets" class="hover:text-[var(--foreground)] transition-colors">Rate Sheets</a>
           <a href="/console/history" class="hover:text-[var(--foreground)] transition-colors">Audit History</a>
           <a href="/console/settings" class="hover:text-[var(--foreground)] transition-colors">Settings</a>
           <a href="#docs" onclick="openDocsModal(event)" class="hover:text-[var(--foreground)] transition-colors">Documentation</a>
@@ -1445,7 +1448,7 @@
       }
 
       if (userUploadedSheetsLoaded && userUploadedSheets.length === 0) {
-        showToast("No carrier rate sheets found. Please upload your carrier rate sheets in Carrier Tariffs to begin quoting.", "info");
+        showToast("No carrier rate sheets found. Please upload your carrier rate sheets in Rate Sheets to begin quoting.", "info");
         return;
       }
 
@@ -1550,7 +1553,7 @@
       if (currentQuotes.length === 0) {
         container.innerHTML = `
           <div class="col-span-full bg-white border border-slate-200 rounded-2xl p-8 text-center text-xs text-slate-500 space-y-2">
-            <p class="font-bold text-slate-700 text-sm">No qualifying carrier tariffs available for this lane and weight.</p>
+            <p class="font-bold text-slate-700 text-sm">No qualifying rate sheets available for this lane and weight.</p>
             <p>Please check the Excluded Sheets panel below for specific compliance and lane service details.</p>
           </div>
         `;
@@ -2153,7 +2156,7 @@
           <div class="py-2.5 flex items-start sm:items-center justify-between gap-3 group" id="excluded-row-${sheetId || idx}">
             <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
               ${sheetId ? `
-                <input type="checkbox" class="excluded-sheet-item-cb mt-0.5 sm:mt-0 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer shrink-0" data-sheet-id="${sheetId}" data-carrier="${carrierEscaped}" onchange="updateExcludedSelectionState()">
+                <input type="checkbox" class="excluded-sheet-item-cb mt-0.5 sm:mt-0 w-4 h-4 rounded border-slate-300 text-red-600 cursor-pointer shrink-0 focus:outline-none" data-sheet-id="${sheetId}" data-carrier="${carrierEscaped}" onchange="updateExcludedSelectionState()">
               ` : `
                 <span class="w-4 h-4 shrink-0"></span>
               `}
@@ -2544,7 +2547,7 @@
         if (isNonCrit) {
           statusHtml = `
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800" title="Flagged as non-critical info - strict input bypassed">
-              ℹ️ Non-Critical (Ignored)
+              Non-Critical (Ignored)
             </span>
           `;
         } else if (isOk) {
@@ -2759,7 +2762,7 @@
           });
         }
         if (statusEl) {
-          statusEl.textContent = `✓ Extracted ${data.fields_detected} fields: ${data.origin_label || data.origin} → ${data.dest_label || data.destination} • ${data.skid_count} skids (${data.weight_lbs || 1000} lbs) • Accessorials: ${(data.accessorials || []).join(', ') || 'None'}`;
+          statusEl.textContent = `Extracted ${data.fields_detected} fields: ${data.origin_label || data.origin} → ${data.dest_label || data.destination} • ${data.skid_count} skids (${data.weight_lbs || 1000} lbs) • Accessorials: ${(data.accessorials || []).join(', ') || 'None'}`;
           statusEl.classList.remove('hidden');
         }
       } catch (err) {
@@ -2776,7 +2779,18 @@
         const banner = document.getElementById('no-sheets-banner');
         if (banner) banner.classList.add('hidden');
         if (typeof loadActiveSheetsCounter === 'function') loadActiveSheetsCounter();
-        updateHeaderQuota();
+        function updateAccessorialSummary() {
+      const el = document.getElementById('acc-selected-summary');
+      if (!el) return;
+      const count = document.querySelectorAll('#accessorials-grid input[name="accessorial"]:checked').length;
+      el.textContent = `${count} selected`;
+    }
+    document.querySelectorAll('#accessorials-grid input[name="accessorial"]').forEach(cb => {
+      cb.addEventListener('change', updateAccessorialSummary);
+    });
+    updateAccessorialSummary();
+
+    updateHeaderQuota();
       } catch (err) {
         showToast(err.message || 'Error seeding sample tariffs.', 'error');
       }
@@ -2833,6 +2847,17 @@
         console.debug('Lane intelligence check:', err);
       }
     }
+
+    function updateAccessorialSummary() {
+      const el = document.getElementById('acc-selected-summary');
+      if (!el) return;
+      const count = document.querySelectorAll('#accessorials-grid input[name="accessorial"]:checked').length;
+      el.textContent = `${count} selected`;
+    }
+    document.querySelectorAll('#accessorials-grid input[name="accessorial"]').forEach(cb => {
+      cb.addEventListener('change', updateAccessorialSummary);
+    });
+    updateAccessorialSummary();
 
     updateHeaderQuota();
     refreshLaneIntelligence();

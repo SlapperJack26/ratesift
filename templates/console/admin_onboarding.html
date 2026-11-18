@@ -30,7 +30,7 @@
           <nav role="navigation" aria-label="Main Navigation" class="hidden sm:flex items-center gap-1.5 sm:gap-2 text-xs font-medium">
             <a href="/console/new-quote" class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">New Quote</a>
             <a href="/console/history" class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">Quotes History</a>
-            <a href="/console/rate-sheets" class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">Carrier Tariffs</a>
+            <a href="/console/rate-sheets" class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">Rate Sheets</a>
             <a href="/console/account" class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">Account</a>
             <a href="/console/admin" aria-current="page" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200/80 shadow-2xs relative after:content-[''] after:absolute after:-bottom-3.5 after:left-3 after:right-3 after:h-0.5 after:bg-red-600 whitespace-nowrap">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -146,7 +146,7 @@
       <!-- Search Bar & Customer Table -->
       <section class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-4">
         <form onsubmit="event.preventDefault(); searchCustomers();" class="flex flex-wrap items-center gap-2">
-          <input id="admin-customer-search" type="search" placeholder="Search by customer email, name, or brokerage company..." class="flex-1 min-w-[240px] px-3.5 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <input id="admin-customer-search" type="search" placeholder="Search by customer email, name, or brokerage company..." class="flex-1 min-w-[240px] px-3.5 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none" />
           <button type="submit" class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-black text-white font-bold text-xs transition-colors cursor-pointer">
             Search Customers
           </button>
@@ -156,7 +156,7 @@
         </form>
 
         <div class="text-[11px] text-slate-500">
-          Privacy Notice: This view displays onboarding status counts only. Carrier tariff rates and API secrets are never visible to staff.
+          Privacy Notice: This view displays onboarding status counts only. Rate sheet rates and API secrets are never visible to staff.
         </div>
 
         <div class="overflow-x-auto border border-slate-200 rounded-lg">
@@ -266,7 +266,7 @@
         planPill.className = isBiz
           ? 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200'
           : 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200';
-        planPill.textContent = isBiz ? '✓ BUSINESS (API Unlocked)' : c.tier;
+        planPill.textContent = isBiz ? 'BUSINESS (API Unlocked)' : c.tier;
         tdPlan.appendChild(planPill);
         tr.appendChild(tdPlan);
 
@@ -279,7 +279,7 @@
           ? 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200'
           : 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200';
         shPill.textContent = hasSheets
-          ? `✓ ${c.confirmed_sheets_count} Confirmed`
+          ? `${c.confirmed_sheets_count} Confirmed`
           : 'Needs Tariff Upload';
         tdSheets.appendChild(shPill);
         tr.appendChild(tdSheets);
@@ -293,7 +293,7 @@
           ? 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200'
           : 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500';
         keyPill.textContent = hasKeys
-          ? `✓ ${c.active_api_keys_count} Active Key(s)`
+          ? `${c.active_api_keys_count} Active Key(s)`
           : 'No Key Yet';
         tdKeys.appendChild(keyPill);
         tr.appendChild(tdKeys);
@@ -441,7 +441,7 @@
         const banner = document.getElementById('prov-result-banner');
         if (banner) {
           banner.classList.remove('hidden');
-          banner.textContent = `✓ Provisioned ${data.user.email} on ${data.tier} tier! One-Time Password (OTP): ${data.one_time_password} (user will be forced to change on first login) • Login: ${data.login_url}`;
+          banner.textContent = `Provisioned ${data.user.email} on ${data.tier} tier! One-Time Password (OTP): ${data.one_time_password} (user will be forced to change on first login) • Login: ${data.login_url}`;
         }
         document.getElementById('prov-request-id').value = '';
         await loadBetaRequests();
